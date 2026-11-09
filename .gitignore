@@ -1,0 +1,19 @@
+# Local inputs, outputs, tools, and build artifacts.
+**/build/
+**/runs/
+**/inputs/
+**/outputs/
+**/in/
+**/out/
+**/tools/
+**/target/
+**/solver
+**/a.out
+*.exe
+*.o
+*.out
+*.log
+__pycache__/
+.venv/
+.env
+.DS_Store
