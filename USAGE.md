@@ -2,6 +2,7 @@
 
 `library/` の各ヘッダについて、使いどころと呼び出し例をまとめています。
 探索手法を選ぶところから始める場合は [探索の基本ガイド](SEARCH_GUIDE.md) を参照してください。
+実際の問題で入力から出力までつなぐ例は [examples/search](examples/search/README.md) にあります。
 
 ローカルでは必要なヘッダを `#include "library/timer.hpp"` のように読み込み、
 リポジトリのルートで `-I .` を付けてコンパイルします。
