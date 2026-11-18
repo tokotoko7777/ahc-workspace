@@ -6,9 +6,22 @@
 
 汎用の探索処理は [`library/`](../../library/)、問題固有の処理は各 `.cpp` にあります。
 探索手法の選び方は [SEARCH_GUIDE.md](../../SEARCH_GUIDE.md)、
-部品ごとの短い使用例は [USAGE.md](../../USAGE.md) を参照してください。
+部品ごとの短い使用例は [APIリファレンス](../../docs/LIBRARY_REFERENCE.md) を参照してください。
+実問題の処理を読み解く前に型だけ使いたい場合は [編集用の雛形](../../template/README.md) を使えます。
 
 ## 使い方と1ファイルでの提出
+
+手動で必要なヘッダを貼るほか、リポジトリのルートから次のように展開できます。
+
+```sh
+python3 scripts/bundle.py examples/search/intro_heuristics_action_beam.cpp -o /tmp/submit.cpp
+g++ -O2 -std=c++17 /tmp/submit.cpp -o /tmp/submit_check
+```
+
+自分の問題へコピーする時は、`../../library/` のincludeを `library/` 形式にすると
+コピー先の階層に依存せず `-I .` でコンパイルできます。
+コマンドの仕様は [USAGE.md](../../USAGE.md#コマンドで展開する任意) を参照してください。
+手動の場合は次の手順です。
 
 1. 使いたい `.cpp` を開き、問題固有の状態・評価・更新の書き方を確認する。
 2. 新しい問題へ使う場合は、必要な部分を自分の `main.cpp` へコピーして書き換える。
