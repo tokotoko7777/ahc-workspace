@@ -1,7 +1,60 @@
-# 使い方: 雛形を選ぶ → 問題部分を書く → 1ファイルで提出
+# 使い方: 作業フォルダを作る → 雛形を編集する → 1ファイルで提出
 
-コマンドはリポジトリのルートで実行します。C++17と、コマンド展開を使う場合だけPython 3.9以上が必要です。
+GitとC++17を使える環境を用意します。コマンド展開を使う場合だけPython 3.9以上も必要です。
 ヘッダの個別APIは [リファレンス](docs/LIBRARY_REFERENCE.md)、探索手法の判断は [SEARCH_GUIDE.md](SEARCH_GUIDE.md) に分けています。
+
+## コンテスト開始時の準備
+
+コンテストごとに `AHCXXX` フォルダを作り、その中へリポジトリ全体を取得して始められます。
+初めて取得するコマンドが **`git clone`**、取得済みのリポジトリを更新するコマンドが **`git pull`** です。
+以下はAHC004の例です。`AHC004` と `problems/ahc004` の番号を参加する回に合わせて置き換えます。
+
+### 新しく取得する場合
+
+```sh
+# AHC004フォルダの作成と、リポジトリ全体の取得をまとめて行う。
+git clone https://github.com/tokotoko7777/ahc-workspace.git AHC004
+cd AHC004
+
+# まだproblems/にない回でも、このコマンドで作業フォルダを用意できる。
+mkdir -p problems/ahc004 inputs outputs build
+```
+
+`AHC004/` 自体がリポジトリのルートになります。以降のコマンドはすべてここで実行します。
+`library/`、`template/`、`scripts/` も一緒に取得されるので、別途コピーする必要はありません。
+
+雛形のコピー・入力の用意・ビルド後は次の配置になります。
+
+```text
+AHC004/                        ← コマンドを実行する場所
+├── main.cpp                   ← コピー元の雛形
+├── library/                   ← 再利用するヘッダ
+├── template/                  ← 手法別の雛形
+├── scripts/bundle.py          ← 提出用の1ファイル化
+├── problems/ahc004/main.cpp    ← 今回編集する解法
+├── inputs/0000.txt             ← 公式のテスト入力
+├── outputs/                   ← 手元で実行した結果
+└── build/                     ← 実行ファイルと提出用submit.cpp
+```
+
+`inputs/`、`outputs/`、`build/` は既存の `.gitignore` の対象です。
+公式ツールは `problems/ahc004/tools/` などへ置けます。
+このあと [雛形を選び](#まず開くファイル)、[問題用のmain.cppへコピー](#問題ごとに書く部分) して実装します。
+
+### 既に取得済みの場合
+
+編集を始める前に、取得済みのフォルダで更新します。`cd` のパスは保存場所に合わせてください。
+
+```sh
+cd AHC004
+git status
+git pull --ff-only
+mkdir -p problems/ahc004 inputs outputs build
+```
+
+手元に未保存の変更がある場合は、コミットやstashで保存してから更新します。
+`--ff-only` は履歴が分岐している場合に停止するので、その場合は自分の変更との統合を別途行います。
+自分の `problems/ahc004/main.cpp` がある場合は、次の雛形コピーを省略して続きから編集します。
 
 ## まず開くファイル
 
@@ -51,11 +104,12 @@ cp main.cpp problems/ahc004/main.cpp
 
 ## 手元で実行する
 
-TODOを実装した後、ルートをインクルードパスに追加してコンパイルします。
+TODOを実装し、公式のテスト入力を `inputs/0000.txt` に用意します。
+`AHC004/` で、ルートをインクルードパスに追加してコンパイルします。
 
 ```sh
-g++ -O2 -std=c++17 -Wall -Wextra -I . problems/ahc004/main.cpp -o /tmp/solver
-/tmp/solver < input.txt > output.txt
+g++ -O2 -std=c++17 -Wall -Wextra -I . problems/ahc004/main.cpp -o build/solver
+./build/solver < inputs/0000.txt > outputs/0000.txt
 ```
 
 `#include "library/xxx.hpp"` はコピー先に依存せず、`-I .` で見つかります。
@@ -72,7 +126,7 @@ AHCに提出するのは、ローカルヘッダに依存しない **1つのC++�
 
 ### 手動で貼る
 
-1. 自分のソースを別の `submit.cpp` へコピーする。
+1. 自分のソースを別の `build/submit.cpp` へコピーする。
 2. `#include "library/xxx.hpp"` を、そのヘッダの全文へ置き換える。ローカルヘッダ内のローカルincludeも展開する。
 3. 同じヘッダを二重に貼らない。標準の `#include <...>` は残す。
 4. ヘッダ内の出典コメントを残し、[LICENSE](LICENSE) の著作権・許諾表示をコメントとして先頭に含める。
@@ -86,13 +140,13 @@ AHCに提出するのは、ローカルヘッダに依存しない **1つのC++�
 [`scripts/bundle.py`](scripts/bundle.py) はPython標準ライブラリだけで動きます。追加インストールは不要です。
 
 ```sh
-python3 scripts/bundle.py problems/ahc004/main.cpp -o /tmp/submit.cpp
+python3 scripts/bundle.py problems/ahc004/main.cpp -o build/submit.cpp
 ```
 
 別のヘッダ置き場を使う場合は `-I` を追加できます。探索順は「include元のディレクトリ → 指定した `-I` → このリポジトリのルート」です。
 
 ```sh
-python3 scripts/bundle.py problems/ahc004/main.cpp -I my_headers -o /tmp/submit.cpp
+python3 scripts/bundle.py problems/ahc004/main.cpp -I my_headers -o build/submit.cpp
 ```
 
 - `#include "..."` を再帰展開し、`#include <...>` はそのまま残します。第三者ヘッダを山括弧で読み込む場合は、提出環境で提供されている必要があります。
@@ -105,11 +159,11 @@ python3 scripts/bundle.py problems/ahc004/main.cpp -I my_headers -o /tmp/submit.
 
 ```sh
 # -I . を付けず、生成したファイルだけをコンパイルする。
-g++ -O2 -std=c++17 -Wall -Wextra /tmp/submit.cpp -o /tmp/submit_solver
-/tmp/submit_solver < input.txt > /tmp/submit_output.txt
+g++ -O2 -std=c++17 -Wall -Wextra build/submit.cpp -o build/submit_solver
+./build/submit_solver < inputs/0000.txt > outputs/submit_0000.txt
 ```
 
-この `/tmp/submit.cpp` を提出します。時間制限で終わる探索では反復数が変わるため、
+この `build/submit.cpp` を提出します。時間制限で終わる探索では反復数が変わるため、
 ローカル版と出力が一致するとは限りません。合法性と得点をテスタで確認します。
 生成後の修正は元の `main.cpp` に行い、再度展開します。
 

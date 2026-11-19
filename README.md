@@ -10,25 +10,36 @@ AtCoder Heuristic Contest（AHC）の練習と事前準備用のC++コードで�
 
 ## 使い始める
 
-コマンドはリポジトリのルートで実行します。
+コンテストごとに `AHCXXX` フォルダへリポジトリ全体を取得して使えます。
+初回は `git clone` でフォルダごと作成します。以下はAHC004の例なので、参加する回の番号に置き換えてください。
 
 ```sh
+git clone https://github.com/tokotoko7777/ahc-workspace.git AHC004
+cd AHC004
+mkdir -p problems/ahc004 inputs outputs build
 cp main.cpp problems/ahc004/main.cpp
 # コピー先のTODO（型・入力・初期解・評価・近傍・出力）を実装する。
-g++ -O2 -std=c++17 -I . problems/ahc004/main.cpp -o /tmp/solver
-/tmp/solver < input.txt > output.txt
+# 公式のテスト入力を inputs/0000.txt に用意してから実行する。
+g++ -O2 -std=c++17 -I . problems/ahc004/main.cpp -o build/solver
+./build/solver < inputs/0000.txt > outputs/0000.txt
 ```
+
+以降のコマンドも `AHC004/`（リポジトリのルート）で実行します。
+取得済みのフォルダを更新する時は、編集を始める前にその中で `git pull --ff-only` を使います。
+作業フォルダの配置と取得済みの場合の手順は [コンテスト開始時の準備](USAGE.md#コンテスト開始時の準備) を参照してください。
 
 AHCの提出は1ファイルにまとめます。必要なヘッダを手で貼っても、次のコマンドで展開しても構いません。
 
 ```sh
 # Python 3.9以上。追加パッケージは不要。
-python3 scripts/bundle.py problems/ahc004/main.cpp -o /tmp/submit.cpp
+python3 scripts/bundle.py problems/ahc004/main.cpp -o build/submit.cpp
 # ローカルincludeパスなしでコンパイルし、テスタで確認してからsubmit.cppを提出。
-g++ -O2 -std=c++17 /tmp/submit.cpp -o /tmp/submit_solver
+g++ -O2 -std=c++17 build/submit.cpp -o build/submit_solver
+./build/submit_solver < inputs/0000.txt > outputs/submit_0000.txt
 ```
 
-[使い方](USAGE.md) に、実装箇所、評価値の契約、手動結合とコマンド展開の詳細をまとめています。
+提出するファイルは `build/submit.cpp` です。
+[使い方](USAGE.md) に、初回の準備、実装箇所、評価値の契約、手動結合とコマンド展開の詳細をまとめています。
 
 ## 目的別の入口
 

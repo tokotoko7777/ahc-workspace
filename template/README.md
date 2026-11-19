@@ -5,7 +5,8 @@
 TODOの関数は宣言だけなので、未編集ではリンクできません。
 入出力込みの完成例は [examples/search](../examples/search/README.md) にあります。
 
-コマンドはリポジトリのルートで実行します。使いたい1本をコピーして編集します。
+未取得の場合は [コンテスト開始時の準備](../USAGE.md#コンテスト開始時の準備) から始めます。
+コマンドはリポジトリのルート（`AHCXXX/`）で実行します。使いたい1本をコピーして編集します。
 
 ```sh
 cp template/search/local-search/basic.cpp problems/ahc004/main.cpp
