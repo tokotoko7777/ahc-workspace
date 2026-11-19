@@ -1,11 +1,13 @@
 # 探索の基本ガイド
 
 まず状態・評価・合法手を小さく実装し、その形に合う探索を選びます。
-部品ごとの呼び出し例は [USAGE.md](USAGE.md) にあります。
+編集を始める時は [main.cpp](main.cpp) または [手法別の雛形](template/README.md) をコピーします。
+部品ごとの呼び出し例は [APIリファレンス](docs/LIBRARY_REFERENCE.md) にあります。
 ここでは、新しい問題でどのヘッダを使い、どの処理を自分で書くかを整理します。
 
 入力から出力までを含む21本の [問題別の使用例](examples/search/README.md) もあります。
-ヘッダと問題固有のコードを分けて読める形で、提出時にヘッダを1ファイルへ貼り付けます。
+ヘッダと問題固有のコードを分けて読める形です。
+提出時の手動結合・コマンド展開は [USAGE.md](USAGE.md#提出用の1ファイルを作る) を参照してください。
 
 ## 最初に選ぶ
 
@@ -29,7 +31,7 @@
 5. 提出時は必要なヘッダを展開し、単独の `main.cpp` をもう一度コンパイルする。
 
 ローカルでは `#include "library/simple-beam-search.hpp"` のように読み込みます。
-コンパイル方法は [README](README.md#コンパイル)、そのまま実行できる小さな例は
+コンパイル方法は [USAGE.md](USAGE.md#手元で実行する)、そのまま実行できる小さな例は
 [basic_usage.cpp](examples/basic_usage.cpp) を参照してください。
 
 ## 焼きなましと山登り
@@ -38,8 +40,8 @@
 最大化の改善量は `新得点 - 旧得点`、最小化では `旧コスト - 新コスト` です。
 温度は改善量と同じ尺度なので、実際の近傍でどの程度の悪化が出るかを見て調整します。
 
-- [TimeBasedSimulatedAnnealing](USAGE.md#タイマー内蔵の焼きなまし): 時計と採用判定をまとめたい時。
-- [SimulatedAnnealing](USAGE.md#進捗率を外から渡す焼きなまし): 複数フェーズで時計を共有し、進捗率を外から渡したい時。
+- [TimeBasedSimulatedAnnealing](docs/LIBRARY_REFERENCE.md#タイマー内蔵の焼きなまし): 時計と採用判定をまとめたい時。
+- [SimulatedAnnealing](docs/LIBRARY_REFERENCE.md#進捗率を外から渡す焼きなまし): 複数フェーズで時計を共有し、進捗率を外から渡したい時。
 - 同じヘッダの `TimeBasedAnnealingRunner`: `Problem` に近傍・評価・更新をまとめ、最良解や反復数も管理したい時。
 
 `TimeBasedAnnealingRunner::run_hill_climbing()` は改善量が正の変更だけを採用します。
@@ -48,7 +50,7 @@
 
 近傍の評価が重い場合は、まず変わった部分だけを再計算します。
 行動列を先頭からシミュレーションする評価なら
-[PrefixReplay](USAGE.md#行動列を途中からだけ再生する) で共通の前半を再利用できます。
+[PrefixReplay](docs/LIBRARY_REFERENCE.md#行動列を途中からだけ再生する) で共通の前半を再利用できます。
 閾値による途中打ち切りは、残りを計算しても採用されないことを保証できる場合に使います。
 
 ## 大きく変更してから直す
@@ -59,7 +61,7 @@
 |---|---|---|
 | [IteratedLocalSearch](library/iterated-local-search.hpp) | 摂動を加え、局所探索で再び改善する | `local_search` は合法な完成解を残し、その絶対スコアを返す |
 | [LargeNeighborhoodSearch](library/large-neighborhood-search.hpp) | 一部を壊し、修復した完成解を採用する | `repair` は修復後の絶対スコア、修復不能なら `nullopt` |
-| [MultiStart](USAGE.md#multistart) | 異なる初期解やseedから短い探索を繰り返す | 各試行で得られた最良解と得点を呼び出し側で比較する |
+| [MultiStart](docs/LIBRARY_REFERENCE.md#multistart) | 異なる初期解やseedから短い探索を繰り返す | 各試行で得られた最良解と得点を呼び出し側で比較する |
 
 修復中は一時的に不正な状態になり得ます。失敗や時間切れの時に、前の合法解が残るようにします。
 ILSの局所探索など重いコールバックの内側でも、渡された残り時間を確認してください。
@@ -69,10 +71,10 @@ LNSの返り値は改善量ではなく絶対スコアで、焼きなましの `
 
 | 部品 | 選ぶ目安 |
 |---|---|
-| [SimpleBeamSearch](USAGE.md#simplebeamsearch) | 状態が小さく、子状態をコピーして作れる。最初の実装に使いやすい |
+| [SimpleBeamSearch](docs/LIBRARY_REFERENCE.md#simplebeamsearch) | 状態が小さく、子状態をコピーして作れる。最初の実装に使いやすい |
 | [ActionBeamSearch](library/action-beam-search.hpp) | 状態コピーが重い。軽い行動と次状態の順位値で先に候補を絞りたい |
-| [TreeBeamSearch](USAGE.md#treebeamsearch) | 状態コピーを減らすため、1手進める `apply` と正確な `revert` を書ける |
-| [CostTreeBeamSearch](USAGE.md#costtreebeamsearch) | 行動ごとに消費手数が異なり、同じ到着世代の候補を比較したい |
+| [TreeBeamSearch](docs/LIBRARY_REFERENCE.md#treebeamsearch) | 状態コピーを減らすため、1手進める `apply` と正確な `revert` を書ける |
+| [CostTreeBeamSearch](docs/LIBRARY_REFERENCE.md#costtreebeamsearch) | 行動ごとに消費手数が異なり、同じ到着世代の候補を比較したい |
 | [ChokudaiSearch](library/chokudai-search.hpp) | 深さごとの候補を残し、時間内に浅い層から繰り返し展開したい |
 
 評価関数は「その候補の順位値」を返します。親からの得点差だけではありません。
@@ -81,7 +83,7 @@ LNSの返り値は改善量ではなく絶対スコアで、焼きなましの `
 
 木上版の `revert` は、盤面だけでなく、得点・hash・cache・候補集合も戻します。
 同じ盤面へ複数の手順で到達する場合は、対応する `step_with_key` と
-[ZobristHash](USAGE.md#zobristhash) などで重複を減らせます。
+[ZobristHash](docs/LIBRARY_REFERENCE.md#zobristhash) などで重複を減らせます。
 64bit hashにも衝突はあり、鍵が同じ状態をまとめてよいかは問題側で判断します。
 
 ## モンテカルロ木探索

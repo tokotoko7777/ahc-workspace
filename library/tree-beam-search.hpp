@@ -565,7 +565,7 @@ struct TreeBeamSearch {
 //
 // 【使う人がmain.cpp側へ書く場所】
 // 次のTODOだけを自分の問題に合わせる。Runner本体は通常変更しない。
-// 空関数を配置済みの雛形: template/search/beam/tree.cpp
+// 問題固有の型・関数宣言を埋める雛形: template/search/beam/tree.cpp
 //
 //   TODO: 【問題ごと】State、軽いMove、候補順位Scoreを書く。
 //   using State, Move, Score

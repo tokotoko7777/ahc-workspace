@@ -24,7 +24,7 @@
 //
 // 問題ごとのコードを1か所にまとめる使い方。
 // 下のコメントは、その項目に「何を入れ、何を返すか」を示している。
-// 空関数を配置済みの雛形: template/search/beam/action.cpp
+// 問題固有の型・関数宣言を埋める雛形: template/search/beam/action.cpp
 // struct Problem {
 //   // TODO: 【問題ごと】探索途中の解1個を表すStateを書く。
 //   // State = 探索途中の解を1個だけ表す型。

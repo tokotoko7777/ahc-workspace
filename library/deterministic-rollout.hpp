@@ -9,7 +9,7 @@
 // 未来が現在状態とActionから全て決まる問題にはこちらを使う。
 //
 // 【使う人がmain.cpp側へ書く場所】
-// 空関数を配置済みの雛形: template/advanced/deterministic-rollout.cpp
+// 問題固有の型・関数宣言を埋める雛形: template/advanced/deterministic-rollout.cpp
 //
 //   struct Problem {
 //     using State = ...;   // TODO: 現在の実状態。

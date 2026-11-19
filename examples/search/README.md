@@ -6,9 +6,22 @@
 
 汎用の探索処理は [`library/`](../../library/)、問題固有の処理は各 `.cpp` にあります。
 探索手法の選び方は [SEARCH_GUIDE.md](../../SEARCH_GUIDE.md)、
-部品ごとの短い使用例は [USAGE.md](../../USAGE.md) を参照してください。
+部品ごとの短い使用例は [APIリファレンス](../../docs/LIBRARY_REFERENCE.md) を参照してください。
+実問題の処理を読み解く前に型だけ使いたい場合は [編集用の雛形](../../template/README.md) を使えます。
 
 ## 使い方と1ファイルでの提出
+
+手動で必要なヘッダを貼るほか、リポジトリのルートから次のように展開できます。
+
+```sh
+python3 scripts/bundle.py examples/search/intro_heuristics_action_beam.cpp -o /tmp/submit.cpp
+g++ -O2 -std=c++17 /tmp/submit.cpp -o /tmp/submit_check
+```
+
+自分の問題へコピーする時は、`../../library/` のincludeを `library/` 形式にすると
+コピー先の階層に依存せず `-I .` でコンパイルできます。
+コマンドの仕様は [USAGE.md](../../USAGE.md#コマンドで展開する任意) を参照してください。
+手動の場合は次の手順です。
 
 1. 使いたい `.cpp` を開き、問題固有の状態・評価・更新の書き方を確認する。
 2. 新しい問題へ使う場合は、必要な部分を自分の `main.cpp` へコピーして書き換える。
@@ -66,7 +79,7 @@ AHC003の例は対話形式なので、対応するローカルテスタで実�
 | [`ahc002_destroy_repair_sa.cpp`](ahc002_destroy_repair_sa.cpp) | `TimeBasedAnnealingRunner` | AHC002 | 経路の末尾再構築と区間DFS修復。採用時の更新と最良解からの再開 |
 | [`ahc002_destroy_repair_lns.cpp`](ahc002_destroy_repair_lns.cpp) | `LargeNeighborhoodSearch` | AHC002 | 経路の変更をdestroy/repairへ分け、採用前のcache再構築を省く |
 | [`ahc003_online_fit.cpp`](ahc003_online_fit.cpp) | `TimeBasedAnnealingRunner`（山登り） | AHC003 | 観測履歴から未知の辺コストを推定。関係する観測の予測値を差分更新 |
-| [`ahc004_genome_sa.cpp`](ahc004_genome_sa.cpp) | `TimeBasedAnnealingRunner` + `AhoCorasick` | AHC004 | 変更した行・列だけ文字列の出現を再計算し、採用時にcacheを反映 |
+| [`ahc004_genome_sa.cpp`](ahc004_genome_sa.cpp) | `TimeBasedAnnealingRunner` + `AhoCorasick` + `CoverageCounter` | AHC004 | 行・列の重複ヒットを差し替え、出現数が0をまたぐ時だけ被覆得点を更新 |
 | [`ahc005_patrol_sa.cpp`](ahc005_patrol_sa.cpp) | `TimeBasedAnnealingRunner` | AHC005 | 道路の代表点と巡回順を探索。移動料金の扱いと境界辺の差分評価 |
 | [`ahc006_sa.cpp`](ahc006_sa.cpp) | `TimeBasedAnnealingRunner` | AHC006 | 経路の辺差分、逆引き位置cache、2点挿入、距離の前計算 |
 | [`ahc058_prefix_sa.cpp`](ahc058_prefix_sa.cpp) | `TimeBasedAnnealingRunner` + `PrefixReplay` | AHC058 | 先読みで作った購入順序を改善。共通する前半の再利用と待機の一括更新 |
