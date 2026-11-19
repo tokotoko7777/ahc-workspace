@@ -1,6 +1,8 @@
 # 使い方: 作業フォルダを作る → 雛形を編集する → 1ファイルで提出
 
 GitとC++17を使える環境を用意します。コマンド展開を使う場合だけPython 3.9以上も必要です。
+コマンドはBash（WindowsではGit Bashなど）を想定しています。
+Pythonのコマンド名が `python` の環境では、以下の `python3` を読み替えてください。
 ヘッダの個別APIは [リファレンス](docs/LIBRARY_REFERENCE.md)、探索手法の判断は [SEARCH_GUIDE.md](SEARCH_GUIDE.md) に分けています。
 
 ## コンテスト開始時の準備
@@ -27,9 +29,12 @@ mkdir -p problems/ahc004 inputs outputs build
 
 ```text
 AHC004/                        ← コマンドを実行する場所
-├── main.cpp                   ← コピー元の雛形
 ├── library/                   ← 再利用するヘッダ
 ├── template/                  ← 手法別の雛形
+│   ├── sa/                    ← 焼きなまし・山登り
+│   ├── beam/                  ← ビームサーチ
+│   ├── lns/                   ← 破壊・修復
+│   └── rollout/               ← 先読み
 ├── scripts/bundle.py          ← 提出用の1ファイル化
 ├── problems/ahc004/main.cpp    ← 今回編集する解法
 ├── inputs/0000.txt             ← 公式のテスト入力
@@ -59,18 +64,42 @@ mkdir -p problems/ahc004 inputs outputs build
 Human Only向けに事前公開版の出典を残す場合は、開始前に
 [公開したコミットIDを記録](docs/SOURCE_PROVENANCE.md#開始前に版を決める) しておきます。
 
+```sh
+# 公開済みの版を取得した後、大会開始前に一度記録する。
+git rev-parse HEAD > build/source-ref.txt
+```
+
+### Windowsの改行
+
+[.gitattributes](.gitattributes) で `*.cpp` と `*.hpp` を `text eol=lf` に固定しています。
+新規クローンでは `core.autocrlf=true` でもC++ファイルはLFでチェックアウトされ、
+`--source-ref` のバイト単位の比較を通せます。
+
+この設定を追加する前にクローンしたファイルや、エディタでCRLFに保存したファイルは、
+CRLFのまま残る場合があります。次のコマンドで確認できます。
+
+```sh
+git ls-files --eol -- library template
+```
+
+`i/lf w/lf` が期待する状態です。`w/crlf` や `w/mixed` のファイルは、
+エディタで改行をLFに変更して保存してください。コードの編集内容はそのまま残せます。
+改行を直しても `differs from source-ref` が出る場合は、記録した版とのコード差分を確認します。
+
 ## まず開くファイル
 
-最初は [`main.cpp`](main.cpp) を開いてください。完成解をコピーして変更する焼きなましの雛形です。
+[手法別の雛形](template/README.md) から、解の作り方に合うファイルを選びます。
+完成解をコピーして改善するなら [全評価型の焼きなまし](template/sa/full-score.cpp)、
+候補を残しながら構築するなら [状態コピー型のビーム](template/beam/simple.cpp) から始められます。
 問題固有の型・関数はTODO付きの宣言、探索ループは接続済みです。
 **未編集の雛形は実行用サンプルではありません。TODOの型と関数を実装して使います。**
 
 | 状況 | コピーするファイル |
 |---|---|
-| まず合法解から局所探索を始めたい | [main.cpp](main.cpp) |
-| 差分評価で焼きなまし / 山登りしたい | [basic.cpp](template/search/local-search/basic.cpp) |
-| 小さい状態でビームを組みたい | [simple.cpp](template/search/beam/simple.cpp) |
-| 一部を壊して修復したい | [destroy-repair.cpp](template/search/local-search/destroy-repair.cpp) |
+| 完成解をコピーして全評価しながら焼きなまししたい | [sa/full-score.cpp](template/sa/full-score.cpp) |
+| 差分評価で焼きなまし / 山登りしたい | [sa/delta.cpp](template/sa/delta.cpp) |
+| 小さい状態でビームを組みたい | [simple.cpp](template/beam/simple.cpp) |
+| 一部を壊して修復したい | [destroy-repair.cpp](template/lns/destroy-repair.cpp) |
 | 状態コピー削減、巻き戻し、可変手数、行動列評価、先読み | [雛形一覧](template/README.md) |
 | 実問題の入力から出力まで読みたい | [問題別の完成例](examples/search/README.md) |
 | 編集せず小さなコードを動かしたい | [basic_usage.cpp](examples/basic_usage.cpp)（入力不要） |
@@ -78,7 +107,8 @@ Human Only向けに事前公開版の出典を残す場合は、開始前に
 ## 問題ごとに書く部分
 
 ```sh
-cp main.cpp problems/ahc004/main.cpp
+# 使いたい手法の雛形を選ぶ。ここでは全評価の焼きなまし。
+cp template/sa/full-score.cpp problems/ahc004/main.cpp
 ```
 
 コピーしたファイルで、次を実装します。既に自分の解法がある場合は、必要なincludeと呼び出しだけ取り込めます。
@@ -96,7 +126,7 @@ cp main.cpp problems/ahc004/main.cpp
 
 | 接続先 | 渡す値 / 返す値 | 状態の変更 |
 |---|---|---|
-| `main.cpp` の `evaluate` | 完成解の絶対スコア | 変更しない |
+| `sa/full-score.cpp` の `evaluate` | 完成解の絶対スコア | 変更しない |
 | SAの `accept` / Runnerの `evaluate_move` | **改善量**。最大化: 新−旧、最小化: 旧−新 | 評価中は変更しない。採用時だけ反映 |
 | LNSの `repair` | 修復後の**絶対スコア**。失敗は `nullopt` | 候補だけを修復する |
 | ビームの評価 | 子状態の**順位値そのもの** | Action型は評価中に変更しない。Tree型はapply / revert |

@@ -1,4 +1,4 @@
-// AHC_SOURCE: template/search/local-search/forward-backward.cpp
+// AHC_SOURCE: template/sa/forward-backward.cpp
 // Source repository: https://github.com/tokotoko7777/ahc-workspace
 // 有限状態の確率遷移: 固定長の操作列を1か所ずつ変えて期待値を改善する。
 // TODOの型・関数宣言を実装する。列の挿入・削除はcache.buildからやり直す。

@@ -9,10 +9,11 @@ TODOの関数は宣言だけなので、未編集ではリンクできません�
 コマンドはリポジトリのルート（`AHCXXX/`）で実行します。使いたい1本をコピーして編集します。
 
 ```sh
-cp template/search/local-search/basic.cpp problems/ahc004/main.cpp
+# 例: 全評価の焼きなまし。下のジャンルから別の雛形も選べる。
+cp template/sa/full-score.cpp problems/ahc004/main.cpp
 # 型・関数・定数のTODOを実装した後:
-g++ -O2 -std=c++17 -I . problems/ahc004/main.cpp -o /tmp/solver
-/tmp/solver < input.txt > output.txt
+g++ -O2 -std=c++17 -I . problems/ahc004/main.cpp -o build/solver
+./build/solver < inputs/0000.txt > outputs/0000.txt
 ```
 
 固定入力は `Problem`、探索で変化する情報は `State` に置きます。
@@ -20,20 +21,56 @@ g++ -O2 -std=c++17 -I . problems/ahc004/main.cpp -o /tmp/solver
 先頭の `AHC_SOURCE` コメントはコピー元の記録として残します。
 [出典付き結合](../docs/SOURCE_PROVENANCE.md) では、指定した公開版の雛形URLになります。
 
-## どれをコピーするか
+## ジャンルとフォルダ
+
+| ジャンル | フォルダ | 選ぶ目安 |
+|---|---|---|
+| [焼きなまし・山登り](#焼きなまし山登り) | `sa/` | 完成した解を変更して改善する |
+| [ビームサーチ](#ビームサーチ) | `beam/` | 有望な候補を複数残して解を構築する |
+| [破壊・修復（LNS）](#破壊修復lns) | `lns/` | 完成解の一部を壊して作り直す |
+| [先読み（Rollout）](#先読みrollout) | `rollout/` | 候補の先を仮実行して次の1手を選ぶ |
+
+以前ルートにあった `main.cpp` は、`sa/full-score.cpp` へ移しました。
+どの雛形も、コピー先を `problems/ahcXXX/main.cpp` にして使います。
+
+## 焼きなまし・山登り
+
+`sa/` に、全評価・差分評価と、特定の評価処理を速くする型をまとめています。
 
 | やりたいこと | 雛形 | 自分で書く中心部分 |
 |---|---|---|
-| 完成解をコピーして少し変更する | [ルートのmain.cpp](../main.cpp) | 合法な候補の生成、全スコア評価 |
-| コピー・全評価を減らして焼きなまし / 山登り | [local-search/basic.cpp](search/local-search/basic.cpp) | Move生成、改善量、採用時の更新 |
-| 一部を壊して作り直す | [local-search/destroy-repair.cpp](search/local-search/destroy-repair.cpp) | 破壊、修復、修復後の絶対スコア |
-| 行動列の共通する前半を再利用する | [local-search/prefix-replay.cpp](search/local-search/prefix-replay.cpp) | 1手の決定的遷移、行動の等値比較、行動列の変更 |
-| 確率遷移の期待値を1操作変更で改善する | [local-search/forward-backward.cpp](search/local-search/forward-backward.cpp) | 遷移確率・報酬、初期分布、操作変更 |
-| 小さい状態をコピーしてビームを始める | [beam/simple.cpp](search/beam/simple.cpp) | 子状態の列挙、順位値 |
-| 重い状態のコピーを選抜後だけにする | [beam/action.cpp](search/beam/action.cpp) | 軽いAction、子の順位値、適用 |
-| 状態を進めて戻しながらビーム探索する | [beam/tree.cpp](search/beam/tree.cpp) | apply / revert、順位値 |
-| 1行動で進む手数が異なるビーム | [beam/variable-cost-tree.cpp](search/beam/variable-cost-tree.cpp) | apply / revert、正の消費手数 |
-| 各候補の先を仮実行して1手選ぶ | [advanced/deterministic-rollout.cpp](advanced/deterministic-rollout.cpp) | 合法手、先読み評価、実状態の更新 |
+| 完成解をコピーして少し変更する | [full-score.cpp](sa/full-score.cpp) | 合法な候補の生成、全スコア評価 |
+| コピー・全評価を減らす | [delta.cpp](sa/delta.cpp) | Move生成、改善量、採用時の更新 |
+| 行動列の共通する前半を再利用する | [prefix-replay.cpp](sa/prefix-replay.cpp) | 1手の決定的遷移、行動の等値比較、行動列の変更 |
+| 確率遷移の期待値を1操作変更で改善する | [forward-backward.cpp](sa/forward-backward.cpp) | 遷移確率・報酬、初期分布、操作変更 |
+
+## ビームサーチ
+
+`beam/` から、状態の重さと1行動の進め方に合う型を選びます。
+
+| やりたいこと | 雛形 | 自分で書く中心部分 |
+|---|---|---|
+| 小さい状態をコピーしてビームを始める | [simple.cpp](beam/simple.cpp) | 子状態の列挙、順位値 |
+| 重い状態のコピーを選抜後だけにする | [action.cpp](beam/action.cpp) | 軽いAction、子の順位値、適用 |
+| 状態を進めて戻しながらビーム探索する | [tree.cpp](beam/tree.cpp) | apply / revert、順位値 |
+| 1行動で進む手数が異なるビーム | [variable-cost-tree.cpp](beam/variable-cost-tree.cpp) | apply / revert、正の消費手数 |
+
+## 破壊・修復（LNS）
+
+`lns/` は、解の一部を取り除いて修復する探索です。修復の中で貪欲法・DP・ビームなどを使えます。
+
+| やりたいこと | 雛形 | 自分で書く中心部分 |
+|---|---|---|
+| 一部を壊して作り直す | [destroy-repair.cpp](lns/destroy-repair.cpp) | 破壊、修復、修復後の絶対スコア |
+
+## 先読み（Rollout）
+
+`rollout/` は、候補ごとに先を仮実行して、実際に採用する最初の1手を選ぶ型です。
+現在の雛形は、同じ状態・行動から同じ結果になる決定的な先読みを扱います。
+
+| やりたいこと | 雛形 | 自分で書く中心部分 |
+|---|---|---|
+| 各候補の先を仮実行して1手選ぶ | [deterministic.cpp](rollout/deterministic.cpp) | 合法手、先読み評価、実状態の更新 |
 
 ## 実装時に合わせる契約
 

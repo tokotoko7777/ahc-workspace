@@ -170,11 +170,14 @@ class SourceReferenceTests(unittest.TestCase):
         (self.repo / 'library').mkdir()
         shutil.copy2(SCRIPT, self.repo / 'scripts/bundle.py')
         shutil.copy2(ROOT / 'LICENSE', self.repo / 'LICENSE')
-        (self.repo / 'library/value.hpp').write_text('inline int value() { return 7; }\n')
-        (self.repo / 'main.cpp').write_text(
-            '// AHC_SOURCE: main.cpp\n#include "library/value.hpp"\n'
-            'int main() { return value() == 7 ? 0 : 1; }\n')
+        shutil.copy2(ROOT / '.gitattributes', self.repo / '.gitattributes')
+        (self.repo / 'library/value.hpp').write_bytes(b'inline int value() { return 7; }\n')
+        (self.repo / 'main.cpp').write_bytes(
+            b'// AHC_SOURCE: main.cpp\n#include "library/value.hpp"\n'
+            b'int main() { return value() == 7 ? 0 : 1; }\n')
+        (self.repo / 'checkout-control.txt').write_bytes(b'not a C++ file\n')
         self.git('init', '-q')
+        self.git('config', 'core.autocrlf', 'false')
         self.git('add', '.')
         self.git('-c', 'user.name=Source reference test', '-c', 'user.email=test@example.invalid',
                  '-c', 'commit.gpgsign=false', 'commit', '-qm', 'fixture')
@@ -199,6 +202,30 @@ class SourceReferenceTests(unittest.TestCase):
         prefix = 'https://github.com/tokotoko7777/ahc-workspace/blob/' + self.ref + '/'
         self.assertIn('// Source: ' + prefix + 'library/value.hpp', result.stdout)
         self.assertIn('// Source basis (before problem-specific edits): ' + prefix + 'main.cpp', result.stdout)
+        self.check_runs(result.stdout, '')
+
+    def test_autocrlf_clone_can_bundle_with_source_ref(self):
+        checkout = self.work / 'windows-checkout'
+        cloned = subprocess.run(
+            ['git', 'clone', '-q', '-c', 'core.autocrlf=true', str(self.repo), str(checkout)],
+            capture_output=True, text=True,
+        )
+        self.assertEqual(cloned.returncode, 0, cloned.stderr)
+        # Prove CRLF conversion is active, while the real repository attributes
+        # keep both nested headers and C++ source byte-identical to Git blobs.
+        self.assertEqual((checkout / 'checkout-control.txt').read_bytes(), b'not a C++ file\r\n')
+        for name in ('main.cpp', 'library/value.hpp'):
+            original = subprocess.check_output(
+                ['git', '-C', str(checkout), 'cat-file', 'blob', self.ref + ':' + name])
+            self.assertEqual((checkout / name).read_bytes(), original)
+            self.assertNotIn(b'\r\n', original)
+        self.repo = checkout
+        (self.repo / 'problems').mkdir()
+        shutil.copy2(self.repo / 'main.cpp', self.repo / 'problems/main.cpp')
+        result = self.with_ref()
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertIn('/blob/' + self.ref + '/library/value.hpp', result.stdout)
+        self.assertIn('/blob/' + self.ref + '/main.cpp', result.stdout)
         self.check_runs(result.stdout, '')
 
     def test_problem_specific_edits_keep_the_basis_url(self):

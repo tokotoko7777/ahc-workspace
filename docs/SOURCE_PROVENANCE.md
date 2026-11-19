@@ -28,17 +28,17 @@ GitHubで `https://github.com/tokotoko7777/ahc-workspace/tree/<記録したコ�
 
 ```sh
 mkdir -p problems/ahc004
-cp main.cpp problems/ahc004/main.cpp
+cp template/sa/full-score.cpp problems/ahc004/main.cpp
 ```
 
 雛形先頭には次のようなコピー元の記録があります。問題用に編集するときも残します。
 
 ```cpp
-// AHC_SOURCE: main.cpp
+// AHC_SOURCE: template/sa/full-score.cpp
 // Source repository: https://github.com/tokotoko7777/ahc-workspace
 ```
 
-手法別の雛形には `template/search/beam/simple.cpp` など、そのファイルのパスが入っています。
+各雛形には `template/beam/simple.cpp` など、そのファイルのパスが入っています。
 `AHC_SOURCE` はコピー元の指定です。編集後の全コードが事前公開版と同一だと主張するものではありません。
 
 ## 出典付きで結合する
@@ -52,12 +52,18 @@ g++ -O2 -std=c++17 build/submit.cpp -o build/submit_solver
 生成結果には次のURLがコメントとして付きます。
 
 - 展開した `library/` の各ヘッダ: `.../blob/<コミットID>/library/xxx.hpp`
-- `AHC_SOURCE` で指定したコピー元: `.../blob/<コミットID>/main.cpp` など。問題固有の編集前の元コードとして記載します。
+- `AHC_SOURCE` で指定したコピー元: `.../blob/<コミットID>/template/sa/full-score.cpp` など。問題固有の編集前の元コードとして記載します。
 
 `--source-ref` はコミットID・タグ等を受け取り、ローカルGitから完全なコミットIDへ解決します。
 各ライブラリヘッダがその版に存在し、手元と同じバイト列か検査します。違えば生成を止め、
 既存の出力ファイルを維持します。雛形は問題用に編集するため、コピー元の存在を確認します。
 公開の事実や公開時刻の検証、コンテスト参加資格の判定を行う機能ではありません。
+
+`*.cpp` と `*.hpp` は [.gitattributes](../.gitattributes) でLFに固定しているため、
+`core.autocrlf=true` の新規クローンでもヘッダのバイト列が一致します。
+以前のクローンやエディタの保存設定による改行差分は [Windowsの改行](../USAGE.md#windowsの改行) を参照してください。
+旧版の雛形からコピー済みの解法は、元の `AHC_SOURCE` と記録したコミットIDを残します。
+雛形の移動に合わせてコピー元だけを現在のパスに書き換える必要はありません。
 
 URLはこの `tokotoko7777/ahc-workspace` を参照します。別のリポジトリのコードや
 `-I` で追加した外部ヘッダは、その出典を手動で残してください。

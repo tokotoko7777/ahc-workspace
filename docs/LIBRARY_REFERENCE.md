@@ -83,17 +83,17 @@ if (sa.accept(candidate - cache.score())) {
 
 状態数N、列長L、1時刻の全状態の遷移数Eに対し、メモリはO(LN)、仮評価はO(N+E)、
 初期構築・採用時更新は最悪O(L(N+E))です。浮動小数点の期待値で比較し、丸めは最終得点の計算側で行います。
-[編集用のmain.cpp](../template/search/local-search/forward-backward.cpp) に入力から出力までの接続があります。
+[編集用のmain.cpp](../template/sa/forward-backward.cpp) に入力から出力までの接続があります。
 
 ## 追加の探索・補助部品
 
 | ヘッダ | 主な呼び出しと契約 | 接続例 |
 |---|---|---|
-| [`action-beam-search.hpp`](../library/action-beam-search.hpp) | `ActionBeamRunner`。行動列挙・子の絶対順位値・採用後の適用。選抜後にStateをコピー | [雛形](../template/search/beam/action.cpp)、[AHC071](../examples/search/ahc071_action_beam.cpp) |
+| [`action-beam-search.hpp`](../library/action-beam-search.hpp) | `ActionBeamRunner`。行動列挙・子の絶対順位値・採用後の適用。選抜後にStateをコピー | [雛形](../template/beam/action.cpp)、[AHC071](../examples/search/ahc071_action_beam.cpp) |
 | [`chokudai-search.hpp`](../library/chokudai-search.hpp) | `ChokudaiSearch`。ActionBeamと同じ3関数＋`is_terminal` / `final_score`。深さ別の容量・締切を指定 | [AHC032](../examples/search/ahc032_chokudai.cpp) |
-| [`large-neighborhood-search.hpp`](../library/large-neighborhood-search.hpp) | `LargeNeighborhoodSearch`。`destroy`→`repair`。修復後の絶対スコア、失敗は`nullopt` | [雛形](../template/search/local-search/destroy-repair.cpp)、[AHC059](../examples/search/ahc059_lns.cpp) |
+| [`large-neighborhood-search.hpp`](../library/large-neighborhood-search.hpp) | `LargeNeighborhoodSearch`。`destroy`→`repair`。修復後の絶対スコア、失敗は`nullopt` | [雛形](../template/lns/destroy-repair.cpp)、[AHC059](../examples/search/ahc059_lns.cpp) |
 | [`iterated-local-search.hpp`](../library/iterated-local-search.hpp) | `IteratedLocalSearch`。`perturb`→`local_search`。合法な完成候補を残して絶対スコアを返す。内側でも`IlsBudget`を見る | [AHC059](../examples/search/ahc059_ils.cpp) |
-| [`deterministic-rollout.hpp`](../library/deterministic-rollout.hpp) | `choose_action`。全合法手の先読み評価を比較し1手返す。非終端の候補は空にしない。時間は問題側で管理 | [雛形](../template/advanced/deterministic-rollout.cpp)、[AHC026](../examples/search/ahc026_deterministic_rollout.cpp) |
+| [`deterministic-rollout.hpp`](../library/deterministic-rollout.hpp) | `choose_action`。全合法手の先読み評価を比較し1手返す。非終端の候補は空にしない。時間は問題側で管理 | [雛形](../template/rollout/deterministic.cpp)、[AHC026](../examples/search/ahc026_deterministic_rollout.cpp) |
 | [`monte-carlo-tree-search.hpp`](../library/monte-carlo-tree-search.hpp) | `choose_action`は`optional<Action>`。`sample_transition`は結果ID、`rollout`は[0,1]の評価値。異なる確率的結果を同じIDにしない | [Problemの契約](../SEARCH_GUIDE.md#モンテカルロ木探索) |
 | [`adaptive-operator-selector.hpp`](../library/adaptive-operator-selector.hpp) | `select(rng)`で近傍ID、`record(id, reward)`で[0,1]の成果を記録。失敗も0で記録 | [AHC059](../examples/search/ahc059_lns.cpp) |
 | [`aho-corasick.hpp`](../library/aho-corasick.hpp) | `add`→`build`→`advance` / `matches`。複数語の同時照合で出現IDを得る | [AHC004](../examples/search/ahc004_genome_sa.cpp) |
