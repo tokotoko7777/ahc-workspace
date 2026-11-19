@@ -1,3 +1,5 @@
+// AHC_SOURCE: template/search/beam/simple.cpp
+// Source repository: https://github.com/tokotoko7777/ahc-workspace
 // 子状態をコピーして作るビーム。TODOの型・宣言を実装して使う。
 #include <iostream>
 #include <vector>

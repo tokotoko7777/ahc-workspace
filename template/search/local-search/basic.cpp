@@ -1,3 +1,5 @@
+// AHC_SOURCE: template/search/local-search/basic.cpp
+// Source repository: https://github.com/tokotoko7777/ahc-workspace
 // 差分評価型の焼きなまし / 山登り。TODOを実装して自分のmain.cppにする。
 // 関数の宣言は意図的に未定義。手順・他の雛形: template/README.md
 #include <cstdint>

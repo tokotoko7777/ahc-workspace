@@ -1,3 +1,5 @@
+// AHC_SOURCE: template/search/local-search/destroy-repair.cpp
+// Source repository: https://github.com/tokotoko7777/ahc-workspace
 // 部分破壊→修復（LNS）。TODOを実装して使う、未完成のmain.cpp雛形。
 #include <iostream>
 #include <optional>

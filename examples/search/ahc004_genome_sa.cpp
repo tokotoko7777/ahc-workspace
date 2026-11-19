@@ -1,3 +1,5 @@
+// AHC_SOURCE: examples/search/ahc004_genome_sa.cpp
+// Source repository: https://github.com/tokotoko7777/ahc-workspace
 // GCC提出用の最適化。診断時は -DAHC_DISABLE_GCC_OPTIMIZE で無効化。
 #if defined(__GNUC__) && !defined(__clang__) && !defined(AHC_DISABLE_GCC_OPTIMIZE)
 #pragma GCC optimize("O3")
@@ -6,6 +8,7 @@
 #include <bits/stdc++.h>
 #include "../../library/time-based-simulated-annealing.hpp"
 #include "../../library/aho-corasick.hpp"
+#include "../../library/coverage-counter.hpp"
 // Pre-contest public source (created with generative AI):
 // https://github.com/tokotoko7777/ahc-precontest-kit/blob/main/examples/search/ahc004_genome_sa.cpp
 // Problem / scoring: https://atcoder.jp/contests/ahc004/tasks/ahc004_a
@@ -78,28 +81,33 @@ struct GenomeProblem {
   struct State {
     Board board;
     vector<vector<int>> line_hits;
-    vector<int> count;
+    CoverageCounter<int>::State coverage;
     vector<uint64_t> line_code, line_empty;
-    int covered = 0, empty = 0;
+    int empty = 0;
   };
   // TODO: 1近傍で変更する場所と変更後の値を書く（評価時にはStateを触らない）。
   struct Move { vector<pair<int, char>> changes; };
   int n, m;
   vector<Target> targets;
+  CoverageCounter<int> coverage;
   AhoCorasick<8> matcher;
   int max_length = 0;
   vector<vector<int>> line_cells;
   // 採用判定前の一時領域。最良Stateにコピーする必要はないのでProblemに置く。
   Board scratch;
-  vector<int> delta, touched;
-  vector<unsigned char> touched_flag;
   vector<int> changed_lines;
   vector<vector<int>> next_hits;
   int next_covered = 0, next_empty = 0;
 
+  static vector<int> coverage_weights(const vector<Target>& targets) {
+    vector<int> weights;
+    for (const auto& target : targets) weights.push_back(target.frequency);
+    return weights;
+  }
+
   GenomeProblem(int n_, int m_, const vector<Target>& targets_)
-      : n(n_), m(m_), targets(targets_), line_cells(2*n),
-        delta(targets.size()), touched_flag(targets.size()), next_hits(2*n) {
+      : n(n_), m(m_), targets(targets_), coverage(coverage_weights(targets_)),
+        line_cells(2*n), next_hits(2*n) {
     for (int id = 0; id < (int)targets.size(); ++id) {
       vector<int> symbols;
       for (char c : targets[id].text) symbols.push_back(c - 'A');
@@ -163,14 +171,12 @@ struct GenomeProblem {
     state.line_hits.resize(2*n);
     state.line_code.resize(2*n);
     state.line_empty.resize(2*n);
-    state.count.assign(targets.size(), 0);
+    state.coverage = coverage.make_state();
     for (int line = 0; line < 2*n; ++line) {
       encode_line(state, line);
       scan_line(state.board, line, state.line_hits[line]);
-      for (int id : state.line_hits[line]) ++state.count[id];
+      for (int id : state.line_hits[line]) coverage.add(state.coverage, id);
     }
-    for (int id = 0; id < (int)targets.size(); ++id)
-      if (state.count[id]) state.covered += targets[id].frequency;
     for (const string& row : state.board) state.empty += count(row.begin(), row.end(), '.');
     return state;
   }
@@ -179,7 +185,7 @@ struct GenomeProblem {
     // 全語を含む時だけ空白bonus。公式点の丸め前をm/1e8倍した尺度。
     return covered < m ? covered : double(m) * (2*n*n) / (2*n*n-empty);
   }
-  Score score(const State& state) const { return score(state.covered, state.empty); }
+  Score score(const State& state) const { return score(state.coverage.covered_weight, state.empty); }
 
   // TODO: 問題に合う近傍を1つ生成する。nulloptなら今回の試行はスキップ。
   // ここでは未収録語を重なりのよい場所へ上書きする。
@@ -187,7 +193,7 @@ struct GenomeProblem {
     auto random_int = [&](int upper) {
       return uniform_int_distribution<int>(0, upper-1)(rng);
     };
-    if (state.covered == m) {
+    if (state.coverage.covered_weight == m) {
       const int cell = random_int(n*n);
       if (state.board[cell/n][cell%n] == '.') return nullopt;
       return Move{{{cell, '.'}}};
@@ -195,13 +201,13 @@ struct GenomeProblem {
     int chosen = -1;
     for (int trial = 0; trial < 32; ++trial) {
       int id = random_int((int)targets.size());
-      if (!state.count[id]) { chosen = id; break; }
+      if (!state.coverage.counts[id]) { chosen = id; break; }
     }
     if (chosen < 0) {
       const int first = random_int((int)targets.size());
       for (int k = 0; k < (int)targets.size(); ++k) {
         int id = (first+k) % targets.size();
-        if (!state.count[id]) { chosen = id; break; }
+        if (!state.coverage.counts[id]) { chosen = id; break; }
       }
     }
     if (chosen < 0) return nullopt;
@@ -234,8 +240,7 @@ struct GenomeProblem {
   // この版では上限判定を入れず、正確な差分を最後まで求める。
   optional<Score> evaluate_move(const State& state, const Move& move, double threshold) {
     (void)threshold;
-    for (int id : touched) { delta[id] = 0; touched_flag[id] = 0; }
-    touched.clear();
+    coverage.clear_delta();
     scratch = state.board;
     next_empty = state.empty;
     uint64_t line_mask = 0;
@@ -245,37 +250,27 @@ struct GenomeProblem {
       line_mask |= (1ULL << (cell/n)) | (1ULL << (n+cell%n));
     }
     changed_lines.clear();
-    auto add = [&](int id, int change) {
-      if (!touched_flag[id]) { touched_flag[id] = 1; touched.push_back(id); }
-      delta[id] += change;
-    };
     while (line_mask) {
       int line = __builtin_ctzll(line_mask);
       line_mask &= line_mask - 1;
       changed_lines.push_back(line);
-      for (int id : state.line_hits[line]) add(id, -1);
+      for (int id : state.line_hits[line]) coverage.add_delta(id, -1);
       scan_line(scratch, line, next_hits[line]);
-      for (int id : next_hits[line]) add(id, 1);
+      for (int id : next_hits[line]) coverage.add_delta(id, 1);
     }
-    next_covered = state.covered;
-    for (int id : touched) {
-      assert(state.count[id] + delta[id] >= 0);
-      next_covered += targets[id].frequency *
-          ((state.count[id] + delta[id] > 0) - (state.count[id] > 0));
-    }
+    next_covered = state.coverage.covered_weight + coverage.score_delta(state.coverage);
     return score(next_covered, next_empty) - score(state);
   }
 
   // TODO: 採用した手だけ反映する。直前のevaluate_moveのcacheを使う。
   // 不採用なら呼ばれないので、rollbackは不要。
   void apply_move(State& state, Move&) {
+    coverage.apply_delta(state.coverage);
     state.board.swap(scratch);
     for (int line : changed_lines) {
       state.line_hits[line].swap(next_hits[line]);
       encode_line(state, line);
     }
-    for (int id : touched) state.count[id] += delta[id];
-    state.covered = next_covered;
     state.empty = next_empty;
   }
 };
@@ -512,7 +507,7 @@ int main() {
     runner.run();
     best_board = runner.best_state().board;
     cerr << "iterations=" << runner.iterations()
-         << " covered=" << runner.best_state().covered << "/" << m << '\n';
+         << " covered=" << runner.best_state().coverage.covered_weight << "/" << m << '\n';
   }
   for (const string& row : best_board) cout << row << '\n';
 }

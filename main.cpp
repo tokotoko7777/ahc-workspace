@@ -1,3 +1,5 @@
+// AHC_SOURCE: main.cpp
+// Source repository: https://github.com/tokotoko7777/ahc-workspace
 // 最初にコピーする雛形: 完成解をコピーして変更する焼きなまし。
 // TODO の型・関数を問題に合わせて実装する。宣言だけの関数は意図的に未定義。
 // このまま実行するサンプルではない。完成例は examples/、別の型は template/。

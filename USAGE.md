@@ -56,6 +56,9 @@ mkdir -p problems/ahc004 inputs outputs build
 `--ff-only` は履歴が分岐している場合に停止するので、その場合は自分の変更との統合を別途行います。
 自分の `problems/ahc004/main.cpp` がある場合は、次の雛形コピーを省略して続きから編集します。
 
+Human Only向けに事前公開版の出典を残す場合は、開始前に
+[公開したコミットIDを記録](docs/SOURCE_PROVENANCE.md#開始前に版を決める) しておきます。
+
 ## まず開くファイル
 
 最初は [`main.cpp`](main.cpp) を開いてください。完成解をコピーして変更する焼きなましの雛形です。
@@ -154,6 +157,21 @@ python3 scripts/bundle.py problems/ahc004/main.cpp -I my_headers -o build/submit
 - このリポジトリのMIT表示を先頭に追加します。元ソースとヘッダは変更しません。
 - 存在しないinclude・循環includeはエラーにします。マクロによるinclude、複数行のinclude、X-macroなど同じファイルを繰り返し評価する用途には対応しません。
 - `-o` を省略すると標準出力へ書きます。入力ファイル自身へのリダイレクトはせず、別ファイルを指定してください。`-o` では入力・依存ヘッダへの上書きを検出します。
+
+### 公開した版のURLを残す
+
+大会開始前に公開したコミットを記録済みなら、Gitも使って次のように結合できます。
+
+```sh
+python3 scripts/bundle.py problems/ahc004/main.cpp \
+  --source-ref "$(cat build/source-ref.txt)" -o build/submit.cpp
+```
+
+各ヘッダとコピー元の雛形へ、そのコミットのURLを付けます。
+ヘッダが指定版に存在しない・手元と内容が違う場合はエラーです。
+公開日時を自動で保証するものではありません。
+版の記録方法、`AHC_SOURCE` コメント、手動で出典を付ける方法は
+[出典付きで提出用ファイルを作る](docs/SOURCE_PROVENANCE.md) にまとめています。
 
 ### 展開後の確認
 

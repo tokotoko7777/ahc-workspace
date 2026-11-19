@@ -5,10 +5,13 @@ import argparse
 import hashlib
 from pathlib import Path
 import re
+import subprocess
 import sys
+from urllib.parse import quote
 
 
 ROOT = Path(__file__).resolve().parents[1]
+PROJECT_URL = 'https://github.com/tokotoko7777/ahc-workspace'
 # Mask comments and literals before looking for directives. In particular, a line
 # resembling #include inside a raw string or block comment is ordinary text.
 TOKENS = re.compile(
@@ -25,9 +28,66 @@ class BundleError(Exception):
     pass
 
 
+class SourceReference:
+    """Link to a local Git revision; this does NOT verify when it became public."""
+
+    def __init__(self, ref):
+        result = self.git('rev-parse', '--verify', '--end-of-options', ref + '^{commit}')
+        self.commit = result.stdout.decode().strip()
+        if result.returncode or not re.fullmatch(r'[0-9a-f]{40}', self.commit):
+            raise BundleError('source-ref must resolve to a commit in this checkout')
+        self.blobs = {}
+
+    @staticmethod
+    def git(*args):
+        return subprocess.run(['git', '-C', str(ROOT), *args], capture_output=True)
+
+    def blob(self, relative):
+        name = relative.as_posix()
+        if name not in self.blobs:
+            result = self.git('cat-file', 'blob', self.commit + ':' + name)
+            self.blobs[name] = result.stdout if result.returncode == 0 else None
+        return self.blobs[name]
+
+    def url(self, relative):
+        return PROJECT_URL + '/blob/' + self.commit + '/' + quote(relative.as_posix(), safe='/')
+
+    def comment(self, path, source, header):
+        relative = path.relative_to(ROOT) if path.is_relative_to(ROOT) else None
+        if header:
+            # Only this repository's library headers get automatic source claims.
+            if relative is None or relative.parts[0] != 'library':
+                return ''
+            original = self.blob(relative)
+            if original is None:
+                raise BundleError(f'{relative}: not present at source-ref {self.commit}')
+            if original != path.read_bytes():
+                raise BundleError(f'{relative}: differs from source-ref; publish/select the matching version')
+            return '// Source: ' + self.url(relative) + '\n'
+
+        # Copying a template keeps this marker. The final problem-specific source
+        # is expected to differ from the template: label it as a basis, not a match.
+        for line in source.split('\n'):
+            if line.startswith('// AHC_SOURCE: '):
+                basis = (ROOT / line.removeprefix('// AHC_SOURCE: ').strip()).resolve()
+                if not basis.is_relative_to(ROOT):
+                    raise BundleError('AHC_SOURCE must name a file inside this repository')
+                basis = basis.relative_to(ROOT)
+                if self.blob(basis) is None:
+                    raise BundleError(f'{basis}: source basis not present at source-ref {self.commit}')
+                return '// Source basis (before problem-specific edits): ' + self.url(basis) + '\n'
+            if line.strip() and not line.lstrip().startswith('//'):
+                break
+        # A complete, unchanged example can be identified without a copy marker.
+        if relative is not None and self.blob(relative) == path.read_bytes():
+            return '// Source: ' + self.url(relative) + '\n'
+        return ''
+
+
 class Bundler:
-    def __init__(self, include_dirs=()):
+    def __init__(self, include_dirs=(), source_reference=None):
         self.include_dirs = [Path(p).resolve() for p in include_dirs] + [ROOT]
+        self.source_reference = source_reference
         self.dependencies = set()
         self.stack = []
 
@@ -52,6 +112,7 @@ class Bundler:
             raise BundleError(f'cyclic include: {chain}')
         self.dependencies.add(path)
         source = path.read_text(encoding='utf-8-sig')
+        reference = self.source_reference.comment(path, source, header) if self.source_reference else ''
         masked = TOKENS.sub(lambda m: re.sub(r'[^\n]', ' ', m[0]), source)
         source_lines = source.split('\n')
         lines = []
@@ -94,15 +155,17 @@ class Bundler:
         if body and not body.endswith('\n'):
             body += '\n'
         if not header:
-            return body
+            return reference + body
         # Expand every occurrence under the SAME guard: a header first included
         # inside #if 0 must still be available at a later active include site.
         # Repeated textual bodies are intentional; definitions compile only once.
         identity = str(path.relative_to(ROOT)) if path.is_relative_to(ROOT) else str(path)
         guard = 'AHC_BUNDLE_' + hashlib.sha256(identity.encode()).hexdigest().upper()
         label = self.label(path)
+        if not reference and path.is_relative_to(ROOT / 'library'):
+            reference = '// Source repository: ' + PROJECT_URL + '\n'
         return (f'// begin: {label}\n#ifndef {guard}\n#define {guard}\n'
-                f'{body}#endif  // {guard}\n// end: {label}\n')
+                f'{reference}{body}#endif  // {guard}\n// end: {label}\n')
 
 
 def main():
@@ -111,13 +174,17 @@ def main():
     parser.add_argument('-I', dest='include_dirs', action='append', default=[], metavar='DIR',
                         help='additional quoted-include directory (repeatable)')
     parser.add_argument('-o', '--output', type=Path, help='output file (default: stdout)')
+    parser.add_argument('--source-ref', metavar='REF',
+                        help='Git commit/tag for immutable source URLs; library headers must match')
     args = parser.parse_args()
     try:
-        bundler = Bundler(args.include_dirs)
+        reference = SourceReference(args.source_ref) if args.source_ref else None
+        bundler = Bundler(args.include_dirs, reference)
         body = bundler.expand(args.source)
         # Keep this repository's MIT notice in copies submitted as a single file.
         license_text = (ROOT / 'LICENSE').read_text(encoding='utf-8')
         result = '// Generated by scripts/bundle.py; edit the original source.\n'
+        result += '// Library repository: ' + PROJECT_URL + '\n'
         result += ''.join('// ' + line + '\n' for line in license_text.splitlines())
         result += '\n' + body
         if args.output:

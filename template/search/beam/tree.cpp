@@ -1,3 +1,5 @@
+// AHC_SOURCE: template/search/beam/tree.cpp
+// Source repository: https://github.com/tokotoko7777/ahc-workspace
 // 1個のStateをapply/revertで使い回すビーム。TODOの型・宣言を実装する。
 #include <iostream>
 #include <vector>

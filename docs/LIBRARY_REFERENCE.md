@@ -16,6 +16,89 @@
 | 数学・文字列・列 | [StaticModInt](#staticmodint)、[Matrix](#matrix)、[Rolling Hash](#rolling-hash)、[最長増加部分列](#longest-increasing-subsequence) |
 | 差分更新・巻き戻し・ビーム | [RollbackArray](#rollbackarray)、[更新の検査](#差分更新とapplyrevertの検査)、[PrefixReplay](#行動列を途中からだけ再生する)、[SimpleBeamSearch](#simplebeamsearch)、[TreeBeamSearch](#treebeamsearch) |
 | 幾何・配置 | [Point2D](#point2d)、[AxisAlignedRectangle](#axisalignedrectangle)、[最大の空き長方形](#指定セルを含む最大の空き長方形)、[Convex Hull](#convex-hull) |
+| 重複を含む被覆・確率的な行動列評価 | [CoverageCounter](#coveragecounter)、[ForwardBackwardDP](#forwardbackwarddp) |
+| 追加の探索・補助部品 | [ActionBeam・LNS・ILS・Chokudai・MCTS・照合・計測](#追加の探索補助部品) |
+
+## CoverageCounter
+
+ヘッダ: [`coverage-counter.hpp`](../library/coverage-counter.hpp)
+
+重み付きの対象を「1回以上覆われていれば1回だけ加点」します。重複を含むヒット一覧を扱い、
+`2→1` では得点を維持、`1→0` で失点、`0→1` で加点します。
+行の文字列出現、視界内の道路、アンテナの範囲内の住民など、ヒットIDの列を問題側で用意します。
+
+```cpp
+CoverageCounter<long long> coverage({10, 20, 30});
+auto state = coverage.make_state();
+coverage.add(state, 0, 2);  // 対象0を2回覆う。covered_weightは10。
+
+coverage.clear_delta();
+coverage.add_delta(0, -1);  // 2→1なので加点維持。
+coverage.add_delta(1, +1);  // 0→1なので+20。
+long long improvement = coverage.score_delta(state);
+if (sa.accept(improvement)) coverage.apply_delta(state);
+```
+
+| API | 契約 |
+|---|---|
+| `make_state()` | 全件数0のStateを返す。Stateは同じ重み定義で扱う |
+| `add(state, id, occurrences=1)` / `remove(...)` | 件数と被覆重みを即時更新。初期化にも使える |
+| `clear_delta()` | 前試行の差分を消す。各試行の先頭で呼ぶ |
+| `add_delta(id, signed_count)` | 試行の増減をIDごとに集計。現在解は変更しない |
+| `score_delta(state)` | 全増減を適用した場合の得点差。現在解は変更しない |
+| `apply_delta(state)` | 検証済みの増減を反映して差分bufferを空にする |
+| `State::counts` / `covered_weight` | 読み取り用の件数と被覆重み。直接変更しない |
+
+複数の行等を変更する場合は、旧ヒットを全て `-1`、新ヒットを全て `+1` で積みます。
+同じIDの重複を消す必要はありません。全増減の集計後の件数が負なら例外になり、現在解は変わりません。
+`score_delta`、`apply_delta`、`clear_delta` は触れたID数に比例し、全対象の走査は不要です。
+固定の重みと試行bufferはcounterに、現在解に必要な件数だけをStateに持ちます。
+Scoreは符号付き型を使い、重み・合計・差分がその型に収まるようにします。
+
+[入力不要の接続例](../examples/coverage_usage.cpp) と
+[AHC004での行・列の差し替え](../examples/search/ahc004_genome_sa.cpp) を参照してください。
+
+## ForwardBackwardDP
+
+ヘッダ: [`forward-backward-dp.hpp`](../library/forward-backward-dp.hpp)
+
+有限状態の確率遷移と加算報酬を持つ、**固定長の操作列**の1操作変更を評価します。
+`transitions(turn, from, action, emit)` に、各遷移の
+`emit(to, probability, immediate_reward)` を書きます。確率の和は1、報酬は確率を掛ける前の値です。
+`to=-1` は終了を表し、即時報酬だけを加えます。
+
+```cpp
+ForwardBackwardDP<Action> cache(state_count);
+cache.build(initial_distribution, actions, transitions, terminal_rewards);
+double candidate = cache.score_if_changed(position, new_action, transitions);
+if (sa.accept(candidate - cache.score())) {
+    cache.commit_change(position, new_action, transitions);
+}
+```
+
+`score_if_changed` は候補の絶対期待値を返し、現在のcacheを変更しません。
+`commit_change` は採用した操作を反映し、前向き・後ろ向き表を部分再構築します。
+遷移はその時刻・状態・操作と固定入力だけから決まる必要があり、列の他の操作へ直接依存させません。
+操作の挿入・削除や遷移条件の変更時は `build` し直します。
+
+状態数N、列長L、1時刻の全状態の遷移数Eに対し、メモリはO(LN)、仮評価はO(N+E)、
+初期構築・採用時更新は最悪O(L(N+E))です。浮動小数点の期待値で比較し、丸めは最終得点の計算側で行います。
+[編集用のmain.cpp](../template/search/local-search/forward-backward.cpp) に入力から出力までの接続があります。
+
+## 追加の探索・補助部品
+
+| ヘッダ | 主な呼び出しと契約 | 接続例 |
+|---|---|---|
+| [`action-beam-search.hpp`](../library/action-beam-search.hpp) | `ActionBeamRunner`。行動列挙・子の絶対順位値・採用後の適用。選抜後にStateをコピー | [雛形](../template/search/beam/action.cpp)、[AHC071](../examples/search/ahc071_action_beam.cpp) |
+| [`chokudai-search.hpp`](../library/chokudai-search.hpp) | `ChokudaiSearch`。ActionBeamと同じ3関数＋`is_terminal` / `final_score`。深さ別の容量・締切を指定 | [AHC032](../examples/search/ahc032_chokudai.cpp) |
+| [`large-neighborhood-search.hpp`](../library/large-neighborhood-search.hpp) | `LargeNeighborhoodSearch`。`destroy`→`repair`。修復後の絶対スコア、失敗は`nullopt` | [雛形](../template/search/local-search/destroy-repair.cpp)、[AHC059](../examples/search/ahc059_lns.cpp) |
+| [`iterated-local-search.hpp`](../library/iterated-local-search.hpp) | `IteratedLocalSearch`。`perturb`→`local_search`。合法な完成候補を残して絶対スコアを返す。内側でも`IlsBudget`を見る | [AHC059](../examples/search/ahc059_ils.cpp) |
+| [`deterministic-rollout.hpp`](../library/deterministic-rollout.hpp) | `choose_action`。全合法手の先読み評価を比較し1手返す。非終端の候補は空にしない。時間は問題側で管理 | [雛形](../template/advanced/deterministic-rollout.cpp)、[AHC026](../examples/search/ahc026_deterministic_rollout.cpp) |
+| [`monte-carlo-tree-search.hpp`](../library/monte-carlo-tree-search.hpp) | `choose_action`は`optional<Action>`。`sample_transition`は結果ID、`rollout`は[0,1]の評価値。異なる確率的結果を同じIDにしない | [Problemの契約](../SEARCH_GUIDE.md#モンテカルロ木探索) |
+| [`adaptive-operator-selector.hpp`](../library/adaptive-operator-selector.hpp) | `select(rng)`で近傍ID、`record(id, reward)`で[0,1]の成果を記録。失敗も0で記録 | [AHC059](../examples/search/ahc059_lns.cpp) |
+| [`aho-corasick.hpp`](../library/aho-corasick.hpp) | `add`→`build`→`advance` / `matches`。複数語の同時照合で出現IDを得る | [AHC004](../examples/search/ahc004_genome_sa.cpp) |
+| [`ordered-pair-insertion.hpp`](../library/ordered-pair-insertion.hpp) | `best_ordered_pair_insertion`。先行制約付き2点挿入の最良gapと距離増分。適用は後方の点から | [AHC006](../examples/search/ahc006_sa.cpp) |
+| [`scope-profiler.hpp`](../library/scope-profiler.hpp) | `ScopeProfiler`の`measure()`でスコープ計測、`report(cerr)`で表示。`-DAHC_ENABLE_PROFILING`時だけ有効 | ヘッダ先頭の呼び出し例 |
 
 ## Timer
 

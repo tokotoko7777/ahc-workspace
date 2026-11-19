@@ -79,7 +79,7 @@ AHC003の例は対話形式なので、対応するローカルテスタで実�
 | [`ahc002_destroy_repair_sa.cpp`](ahc002_destroy_repair_sa.cpp) | `TimeBasedAnnealingRunner` | AHC002 | 経路の末尾再構築と区間DFS修復。採用時の更新と最良解からの再開 |
 | [`ahc002_destroy_repair_lns.cpp`](ahc002_destroy_repair_lns.cpp) | `LargeNeighborhoodSearch` | AHC002 | 経路の変更をdestroy/repairへ分け、採用前のcache再構築を省く |
 | [`ahc003_online_fit.cpp`](ahc003_online_fit.cpp) | `TimeBasedAnnealingRunner`（山登り） | AHC003 | 観測履歴から未知の辺コストを推定。関係する観測の予測値を差分更新 |
-| [`ahc004_genome_sa.cpp`](ahc004_genome_sa.cpp) | `TimeBasedAnnealingRunner` + `AhoCorasick` | AHC004 | 変更した行・列だけ文字列の出現を再計算し、採用時にcacheを反映 |
+| [`ahc004_genome_sa.cpp`](ahc004_genome_sa.cpp) | `TimeBasedAnnealingRunner` + `AhoCorasick` + `CoverageCounter` | AHC004 | 行・列の重複ヒットを差し替え、出現数が0をまたぐ時だけ被覆得点を更新 |
 | [`ahc005_patrol_sa.cpp`](ahc005_patrol_sa.cpp) | `TimeBasedAnnealingRunner` | AHC005 | 道路の代表点と巡回順を探索。移動料金の扱いと境界辺の差分評価 |
 | [`ahc006_sa.cpp`](ahc006_sa.cpp) | `TimeBasedAnnealingRunner` | AHC006 | 経路の辺差分、逆引き位置cache、2点挿入、距離の前計算 |
 | [`ahc058_prefix_sa.cpp`](ahc058_prefix_sa.cpp) | `TimeBasedAnnealingRunner` + `PrefixReplay` | AHC058 | 先読みで作った購入順序を改善。共通する前半の再利用と待機の一括更新 |

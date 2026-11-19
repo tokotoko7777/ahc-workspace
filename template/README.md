@@ -17,6 +17,8 @@ g++ -O2 -std=c++17 -I . problems/ahc004/main.cpp -o /tmp/solver
 
 固定入力は `Problem`、探索で変化する情報は `State` に置きます。
 各ファイルは相互依存せず、`library/` の必要なヘッダだけを使用します。
+先頭の `AHC_SOURCE` コメントはコピー元の記録として残します。
+[出典付き結合](../docs/SOURCE_PROVENANCE.md) では、指定した公開版の雛形URLになります。
 
 ## どれをコピーするか
 

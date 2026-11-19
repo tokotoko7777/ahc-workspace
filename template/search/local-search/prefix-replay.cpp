@@ -1,3 +1,5 @@
+// AHC_SOURCE: template/search/local-search/prefix-replay.cpp
+// Source repository: https://github.com/tokotoko7777/ahc-workspace
 // 行動列を変更し、共通する前半の再実行を省く。TODOの型・宣言を実装する。
 #include <iostream>
 #include <optional>

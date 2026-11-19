@@ -1,3 +1,5 @@
+// AHC_SOURCE: template/search/beam/variable-cost-tree.cpp
+// Source repository: https://github.com/tokotoko7777/ahc-workspace
 // 1手で進む世代数が異なるビーム。tree.cppとの主な違いはget_advance。
 // TODOの型・関数宣言を問題に合わせて実装する。
 #include <iostream>

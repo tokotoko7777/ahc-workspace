@@ -1,3 +1,5 @@
+// AHC_SOURCE: template/advanced/deterministic-rollout.cpp
+// Source repository: https://github.com/tokotoko7777/ahc-workspace
 // 候補を仮実行して最初の1手だけを採用。TODOの型・関数宣言を実装する。
 #include <iostream>
 #include <vector>

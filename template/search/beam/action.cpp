@@ -1,3 +1,5 @@
+// AHC_SOURCE: template/search/beam/action.cpp
+// Source repository: https://github.com/tokotoko7777/ahc-workspace
 // 軽いActionで候補を選び、採用分だけStateをコピーするビーム。TODOを実装する。
 #include <iostream>
 #include <vector>

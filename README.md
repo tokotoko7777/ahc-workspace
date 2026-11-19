@@ -53,9 +53,26 @@ g++ -O2 -std=c++17 build/submit.cpp -o build/submit_solver
 | 小さな動作例を実行する | [basic_usage.cpp](examples/basic_usage.cpp) |
 | 差分更新・巻き戻しを検査する | [debug使用例](examples/debug/README.md) |
 
+## 困りごとからコードを選ぶ
+
+| 困りごと | コピーするファイル / 接続例 | 動く過去問例 |
+|---|---|---|
+| 完成解を少しずつ改善したい | [main.cpp](main.cpp)、[差分型SA](template/search/local-search/basic.cpp) | [AHC006: 経路の差分評価](examples/search/ahc006_sa.cpp) |
+| 同じ対象を複数箇所で覆うので、削除時の失点を数えにくい | [CoverageCounterの接続例](examples/coverage_usage.cpp) | [AHC004: 行・列のヒットを差し替える](examples/search/ahc004_genome_sa.cpp) |
+| 重い状態を全候補にコピーしたくない | [ActionBeamの雛形](template/search/beam/action.cpp) | [AHC032: スタンプ配置](examples/search/ahc032_action_beam.cpp)、[AHC071: 行単位の構築・再構築](examples/search/ahc071_action_beam.cpp) |
+| 盤面を進めて戻しながら探索したい | [TreeBeamの雛形](template/search/beam/tree.cpp) | [AHC011: apply/revertと履歴復元](examples/search/ahc011_tree_beam.cpp) |
+| 行動ごとに消費手数が違う | [可変手数ビームの雛形](template/search/beam/variable-cost-tree.cpp) | [AHC038: 把持・解放までを1行動にする](examples/search/ahc038_variable_cost_beam.cpp) |
+| 解の一部を壊して作り直したい | [LNSの雛形](template/search/local-search/destroy-repair.cpp) | [AHC002: 経路の部分修復](examples/search/ahc002_destroy_repair_lns.cpp)、[AHC059: ペア再挿入](examples/search/ahc059_lns.cpp) |
+| 行動列を評価するたび、先頭から再実行している | [PrefixReplayの雛形](template/search/local-search/prefix-replay.cpp) | [AHC058: 購入列の途中から再実行](examples/search/ahc058_prefix_sa.cpp) |
+| 有限状態の確率遷移で1操作の変更を速く評価したい | [ForwardBackwardDPの雛形](template/search/local-search/forward-backward.cpp) | 過去問の完成例は未追加。[APIと適用条件](docs/LIBRARY_REFERENCE.md#forwardbackwarddp) |
+| 候補の先を仮実行して、最初の1手だけ選びたい | [決定的先読みの雛形](template/advanced/deterministic-rollout.cpp) | [AHC026](examples/search/ahc026_deterministic_rollout.cpp)、[AHC058](examples/search/ahc058_deterministic_rollout.cpp) |
+
+`problems/ahcXXX/` が空でも、`examples/search/` にその回の実装がある場合があります。
+実問題の入力形式は各例に従い、対話形式の例は対応するローカルテスタで実行します。
+
 ## 構成
 
-- `library/`: 再利用できるC++ヘッダ100個。
+- `library/`: 再利用できるC++ヘッダ101個。
 - `main.cpp` / `template/`: 問題固有の部分を実装して使う10本の雛形。
 - `examples/`: 実行できる使用例。
 - `scripts/bundle.py`: 提出用1ファイルへの任意の展開コマンド。
@@ -76,4 +93,5 @@ AHC003は対話問題なので、対応する公式ローカルテスタで実�
 **自由に使ってください。** [MIT License](LICENSE) で公開しています。
 利用・改変・再配布・商用利用ができます。コピーや再配布時は著作権表示と許諾表示を保持してください。
 コンテストでの利用は参加する回のルールに従ってください。
+Human Only向けに公開版の出典を残す方法は [出典付きで提出用ファイルを作る](docs/SOURCE_PROVENANCE.md) を参照してください。
 参考リンクは [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md) にまとめています。
