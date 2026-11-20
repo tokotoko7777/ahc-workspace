@@ -13,6 +13,12 @@
 #include <utility>
 #include <vector>
 
+#if !defined(AHC069_NO_MOVES) && !defined(AHC069_NO_RESERVE) && !defined(AHC069_RESERVE_RELEASES)
+#ifndef AHC069_RESERVE_STATIC
+#define AHC069_RESERVE_STATIC
+#endif
+#endif
+
 using Clock=std::chrono::steady_clock;
 using U=uint64_t;
 struct Region {
@@ -25,7 +31,8 @@ struct Guest {
     std::vector<int> cells;
 };
 struct Park {
-    int N,M,free=0;
+    int N,M,free=0,capacity=0;
+    double observed_len=0,observed_area=0,observed_density=0;
     double R;
     U limit;
     std::array<std::array<U,50>,2> blocked{};
@@ -119,10 +126,41 @@ struct Park {
             for(int j=0;j<N;++j) if(s[j]=='#') set(i*N+j,true);
             else ++free;
         }
+        capacity=free;
         return true;
     }
     void show(const std::vector<int>& cells) const {
         for(int p:cells) std::cout<<p/N<<' '<<p%N<<'\n';
+    }
+    bool reserve(int id,int now,int end,int n,int value,bool exact_release) {
+        const double duration=end-now;
+        const double density=value/(n*duration);
+        bool reject=false;
+        if(id>=32 && id+24<M) {
+            constexpr int slices=6;
+            std::array<int,slices> known{};
+            const double tail=std::min(duration,double(100000-now));
+            double cost=0.;
+            const double mean_len=observed_len/id,mean_area=observed_area/id;
+            const double rate=std::clamp((id+20.)/(now+2000.),.007,.014);
+            for(int j=0;j<id;++j) if(!groups[j].cells.empty()) {
+                for(int k=0;k<slices;++k) {
+                    const double time=now+(k+.5)*tail/slices;
+                    if(groups[j].end>time || !exact_release) known[k]+=groups[j].size;
+                }
+            }
+            for(int k=0;k<slices;++k) {
+                const double delta=(k+.5)*tail/slices;
+                double future=.84*rate*mean_area*mean_len*(-std::expm1(-delta/mean_len));
+                double utilization=(n+known[k]+future)/capacity;
+                cost+=std::clamp((utilization-.68)/.51,0.,1.40);
+            }
+            reject=density<.94*(observed_density/id)*(cost/slices);
+        }
+        observed_area+=n;
+        observed_len+=duration;
+        observed_density+=std::min(4.,density);
+        return reject;
     }
     void solve() {
         for(int id=0;id<M;++id) {
@@ -136,11 +174,17 @@ struct Park {
             Guest& g=groups[id];
             g={end,size,value,0,{}};
             Region place;
-            if(Clock::now()<deadline) place=find(size);
+            bool hold=false;
+#ifdef AHC069_RESERVE_STATIC
+            hold=reserve(id,now,end,size,value,false);
+#elif defined(AHC069_RESERVE_RELEASES)
+            hold=reserve(id,now,end,size,value,true);
+#endif
+            if(!hold && Clock::now()<deadline) place=find(size);
             int victim=-1,worst=0;
             std::vector<int> relocation;
 #ifndef AHC069_NO_MOVES
-            if(!place.length && free>=size && Clock::now()<deadline) {
+            if(!hold && !place.length && free>=size && Clock::now()<deadline) {
                 std::vector<int> shortlist;
                 for(int j=0;j<id;++j) if(!groups[j].cells.empty() && groups[j].end>now+30 &&
                                            moving(groups[j])<value/3)
