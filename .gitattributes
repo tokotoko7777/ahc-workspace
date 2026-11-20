@@ -1,0 +1,4 @@
+# Keep C++ checkout bytes identical to Git blobs for bundle.py --source-ref,
+# including clones made with core.autocrlf=true on Windows.
+*.cpp text eol=lf
+*.hpp text eol=lf

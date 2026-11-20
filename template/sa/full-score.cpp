@@ -1,13 +1,14 @@
-// AHC_SOURCE: main.cpp
+// AHC_SOURCE: template/sa/full-score.cpp
 // Source repository: https://github.com/tokotoko7777/ahc-workspace
-// 最初にコピーする雛形: 完成解をコピーして変更する焼きなまし。
+// 焼きなましの雛形: 完成解をコピーして変更し、スコアを全評価する。
 // TODO の型・関数を問題に合わせて実装する。宣言だけの関数は意図的に未定義。
-// このまま実行するサンプルではない。完成例は examples/、別の型は template/。
+// このまま実行するサンプルではない。完成例は examples/、手法別の一覧は template/README.md。
 //
-// 作業: cp main.cpp problems/ahc004/main.cpp
-// 実装後: g++ -std=c++17 -O2 -I . problems/ahc004/main.cpp -o /tmp/solver
+// 作業: cp template/sa/full-score.cpp problems/ahc004/main.cpp
+// 実装後: g++ -std=c++17 -O2 -I . problems/ahc004/main.cpp -o build/solver
 // 提出: 必要なhppを貼るか、次で1ファイルに展開（詳細はUSAGE.md）。
-// python3 scripts/bundle.py problems/ahc004/main.cpp -o /tmp/submit.cpp
+// python3 scripts/bundle.py problems/ahc004/main.cpp -o build/submit.cpp
+// 出典を固定する場合は --source-ref に開始前に記録したコミットIDを渡す。
 
 #include <cstdint>
 #include <iostream>
@@ -84,6 +85,6 @@ int main() {
     problem.print_answer(best.best_state);
 }
 
-// 遅くなったら: template/search/local-search/basic.cpp で
+// 遅くなったら: template/sa/delta.cpp で
 // 「Moveの生成 → 差分評価 → 採用時だけ更新」に置き換える。
 // Stateのコピーと全評価が十分軽い場合は、この形のまま近傍を増やせる。

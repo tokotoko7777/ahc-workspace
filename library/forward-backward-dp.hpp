@@ -33,7 +33,7 @@
 // build/commit O(L*(N+E))、仮評価O(N+E)、メモリO(L*N)。
 // 仮評価が軽くても採用処理はO(L*(N+E))。挿入/削除はbuildし直すこと。
 // 浮動小数点の丸め順は全再計算と異なる。整数丸め前の値を比較する。
-// 例: template/search/local-search/forward-backward.cpp
+// 例: template/sa/forward-backward.cpp
 template <class Action, class Real = double>
 class ForwardBackwardDP {
   static_assert(std::is_floating_point_v<Real>, "Real must be floating point");

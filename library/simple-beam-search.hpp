@@ -17,7 +17,7 @@
 // 状態が大きくコピーが重い時は、actionから順位を差分計算できるなら
 // action-beam-search.hpp、apply/revertを書けるならtree-beam-search.hppも検討する。
 //
-// 問題固有の型・関数宣言を埋める雛形: template/search/beam/simple.cpp
+// 問題固有の型・関数宣言を埋める雛形: template/beam/simple.cpp
 // 一番簡単な使い方。TODOが付いた3か所だけ問題に合わせる:
 // TODO: 【問題ごと】盤面、現在手数、score、必要なら操作履歴をStateへ書く。
 // SimpleBeamSearch<State, long long> beam(initial_state, 100);

@@ -19,7 +19,7 @@
 // 同じgenerationに到着する候補ごとに上位beam_width個を残し、
 // 到着予定の一番早いgenerationから順番に展開する。
 //
-// 問題固有の型・関数宣言を埋める雛形: template/search/beam/variable-cost-tree.cpp
+// 問題固有の型・関数宣言を埋める雛形: template/beam/variable-cost-tree.cpp
 // ProblemへState、Move、Scoreと次の6関数を書く:
 // generate_moves / apply_move / revert_move / evaluate / get_advance / make_key
 // CostTreeBeamRunner<Problem> beam(
@@ -781,7 +781,7 @@ struct CostTreeBeamSearch {
 // 問題依存コードをProblemへ集める、世代飛ばしapply/revertビームのRunner。
 //
 // 【使う人がmain.cpp側へ書く場所】
-// 問題固有の型・関数宣言を埋める雛形: template/search/beam/variable-cost-tree.cpp
+// 問題固有の型・関数宣言を埋める雛形: template/beam/variable-cost-tree.cpp
 //
 //   TODO: 【問題ごと】State、軽いMove、候補順位Scoreを書く。
 //   using State, Move, Score
