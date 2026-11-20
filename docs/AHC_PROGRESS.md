@@ -30,7 +30,7 @@
 | [AHC020](https://atcoder.jp/contests/ahc020/tasks/ahc020_a) | 着手・本番未判定 | **504,832,157**（絶対点） | 未調整16件 平均1,687,384.19 | 本番 300 件・2 秒、同一ケースの証拠なし | [問題別ブランチ](https://github.com/tokotoko7777/ahc-workspace/tree/96a97144e57022f452ce216eddf9c2d76adc3b32)、[配線費の共同評価](https://github.com/tokotoko7777/ahc-workspace/tree/411425e2f761d00f879c4965b8eee3b9e959e56a) |
 | [AHC021](https://atcoder.jp/contests/ahc021/tasks/ahc021_a) | 着手・本番未判定 | **13,589,420**（絶対点） | 交換削除：新規未調整20件 1,814,625 | 本番150件・2秒、同一ケースの証拠なし | [問題別ブランチ](https://github.com/tokotoko7777/ahc-workspace/tree/9306c3d973e9b622e3a35431363f5f7f6ab64225)、[交換削除](https://github.com/tokotoko7777/ahc-workspace/tree/ce5987e9b2769010a4568b3442108f2e02e29909) |
 | [AHC022](https://atcoder.jp/contests/ahc022/tasks/ahc022_a) | 着手・本番未判定 | [公式順位](https://atcoder.jp/contests/ahc022/standings) 要ログイン、1位点未確認 | 低配置費版：新規未調整30件で誤対応0、全勝 | 本番3,000件・4秒、相対方式 | [問題別ブランチ](https://github.com/tokotoko7777/ahc-workspace/tree/d255c7a5ce936552a98346c8d2bf764f78add849)、[低配置費](https://github.com/tokotoko7777/ahc-workspace/tree/86f0b8b8dc3d75a877626672b36b2dec88da2e05) |
-| [AHC023](https://atcoder.jp/contests/ahc023/tasks/asprocon10_a) | 着手・本番未判定 | [公式順位](https://atcoder.jp/contests/ahc023/standings) 要ログイン、1位点未確認 | 本番公開2,000件 **1,100,483,250**（全件合法） | 本番公開2,000件・2秒、絶対点 | [問題別ブランチ](https://github.com/tokotoko7777/ahc-workspace/tree/52f76e1f5e905e5f4f11f0613285760073967281) |
+| [AHC023](https://atcoder.jp/contests/ahc023/tasks/asprocon10_a) | 着手・本番未判定 | [公式順位](https://atcoder.jp/contests/ahc023/standings) 要ログイン、1位点未確認 | 本番公開2,000件 **1,100,483,250**（全件合法） | 本番公開2,000件・2秒、絶対点 | [問題別ブランチ](https://github.com/tokotoko7777/ahc-workspace/tree/52f76e1f5e905e5f4f11f0613285760073967281)、[植付と収穫の順序](https://github.com/tokotoko7777/ahc-workspace/tree/2b4a9df1aa5ad9cdc0d435bb8271d669d1fe43a6) |
 | [AHC024](https://atcoder.jp/contests/ahc024/tasks/ahc024_a) | 着手・本番未判定 | **335,417**（絶対点） | 開発比較準備中 | 本番150件・2秒、同一ケースの証拠なし | 検証中 |
 | AHC025〜074 | 未着手 | — | — | — | — |
 
@@ -353,3 +353,9 @@
 ### AHC024 本番条件
 
 [公式問題文](https://atcoder.jp/contests/ahc024/tasks/ahc024_a)。空きマス数+1の本番150件合計、2秒 / 1,024 MiB。1位335,417は[AtCoder提供の順位・得点データ](https://huggingface.co/datasets/SakanaAI/ALE-Bench/blob/main/ahc024.zip)で確認（SHA-256 `b4f02d3cbcea3200d3e7d29dcf27b1e0bcce1fb566ed249541683114f7986585`）。本番同一ケースは未確認。行列の直線圧縮に対し、色ごとの連結と色の接触関係を保つ曲がった切断を試す。
+
+### AHC023 植付と収穫の順序を分けた期間制約
+
+[追試](https://github.com/tokotoko7777/ahc-workspace/tree/2b4a9df1aa5ad9cdc0d435bb8271d669d1fe43a6)。同じ日でも植付と収穫の開始・終了はアクセス条件が異なるので、安全な順序を使って期間を拡大。初版に対し新規dev16件8,777,400→10,001,200、未調整28件15,388,700→17,383,850（+13.0%、全件改善）。88出力が公式と独立再生で一致、改良版最大0.013410秒、単一ファイルでも得点一致。問題別ブランチの既定に採用。公式2,000件の既報得点は初版のもので、改良版の比較・調整には使わない。次は近隣の部分木の植付・収穫日を揃え、祖先マスの長い空き期間を作る。
+
+公式2,000件の再現は、[公開済みの凍結版](https://github.com/tokotoko7777/ahc-workspace/tree/52f76e1f5e905e5f4f11f0613285760073967281)をチェックアウトし、`g++ -std=c++23 -O3 problems/ahc023/main.cpp -o windows`。公式ツールを `cargo build --release --locked --bin gen --bin vis` で作り、`gen official-seeds.txt` で入力を生成。各入力に対して凍結版を1回・2秒上限で実行し、`vis input.txt output.txt` と `problems/ahc023/benchmark.py` の独立採点が一致した2,000整数点を合計する。
