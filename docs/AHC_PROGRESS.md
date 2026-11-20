@@ -49,8 +49,10 @@
 | [AHC039](https://atcoder.jp/contests/ahc039/tasks/ahc039_a) | 着手・本番未判定 | **566,997**（絶対点） | 隣列重複：新規未調整24件 平均3,429.67（追加探索の対照と比較） | 本番150件・2秒、同一ケースの証拠なし | [問題別ブランチ](https://github.com/tokotoko7777/ahc-workspace/tree/39ff40a8cce317a2ed00157ebb8cefefeeff0b16)、[隣列重複](https://github.com/tokotoko7777/ahc-workspace/tree/afa01fc73184f6fe316465a5c67f924057b6f4b9) |
 | [AHC040](https://atcoder.jp/contests/ahc040/tasks/ahc040_a) | 着手・本番未判定 | **2,981,293,882,216**（相対点） | 棚配置：未調整32件 平均1,123,661.47（低い方が良い） | 本番3,000件・3秒、公式ケース別基準を取得 | [混合配置](https://github.com/tokotoko7777/ahc-workspace/tree/c22499e74fe82e2fb3069820be96bd5ebc00b7bc)、[線形測定](https://github.com/tokotoko7777/ahc-workspace/tree/fcf1bbf603140f033820232afe5fbc5dc7c01e05) |
 | [AHC041](https://atcoder.jp/contests/ahc041/tasks/ahc041_a) | 着手・本番未判定 | hitonanode、得点未確認 | 未調整24件 11,915,002 | 本番150件・2秒、同一ケースの証拠なし | [部分木](https://github.com/tokotoko7777/ahc-workspace/tree/6e69ff15a72cc8d3b673248c4335c435bfb344be)、[複合修正](https://github.com/tokotoko7777/ahc-workspace/tree/3e6e4f9ea3ea3d9e65c0bd7e7a07e1e2fdccf908) |
-| [AHC042](https://atcoder.jp/contests/ahc042/tasks/ahc042_a) | 着手・本番未判定 | **468,807**（絶対点） | 開発比較中 | 本番150件・2秒、同一ケースの証拠なし | 検証中 |
-| AHC043〜074 | 未着手 | — | — | — | — |
+| [AHC042](https://atcoder.jp/contests/ahc042/tasks/ahc042_a) | 着手・本番未判定 | **468,807**（絶対点） | 未調整32件 111.125手/件（全件完了） | 本番150件・2秒、同一ケースの証拠なし | [部分復元](https://github.com/tokotoko7777/ahc-workspace/tree/e8796e286c2e197c2f1f5324755e4fb58da8f3f5)、[垂直方向の事前操作](https://github.com/tokotoko7777/ahc-workspace/tree/98a9e65e998f57a10a8f0b3f2cf2514a0b73b4cf) |
+| [AHC043](https://atcoder.jp/contests/ahc043/tasks/ahc043_a) | 着手・本番未判定 | **1,971,352,183,368**（相対点） | 未調整24件 最終資金合計63,926,853 | 本番2,000件・3秒、基準とseed列照合済み | [問題別ブランチ](https://github.com/tokotoko7777/ahc-workspace/tree/2920bc508229a62f10b0070b68f3f1941fae75a4) |
+| [AHC044](https://atcoder.jp/contests/ahc044/tasks/ahc044_a) | 着手・本番未判定 | **149,807,848**（絶対点） | 開発比較中 | 本番150件・2秒、同一ケースの証拠なし | 検証中 |
+| AHC045〜074 | 未着手 | — | — | — | — |
 
 ### AHC001 の次の仮説
 
@@ -612,3 +614,17 @@
 ### AHC042 本番条件
 
 [公式問題文](https://atcoder.jp/contests/ahc042/tasks/ahc042_a)。2秒、本番150件の絶対点、最大1,600操作。1位468,807は[AtCoder提供の順位・得点データ](https://huggingface.co/datasets/SakanaAI/ALE-Bench/blob/main/ahc042.zip)で確認（SHA-256 `cff8191b01d93c1790597f50ed8359c15ad172b52d82253b74d857b319d6f6ae`）。毎回完全に戻す合法な手順を基準に、途中まで・または戻さない候補をビームに追加する。
+
+### AHC042 行列移動の部分復元
+
+[初回](https://github.com/tokotoko7777/ahc-workspace/tree/e8796e286c2e197c2f1f5324755e4fb58da8f3f5)。全て戻す手順に対し、一部だけ／戻さない合法状態をビームで評価。dev32件281.125→111.469手/件、未調整32件282.875→111.125手/件、全64件で改善。全128出力で福を失わず鬼を全て除去、公式・独立検証が一致、最大0.188275秒。問題別既定に採用。
+[追試](https://github.com/tokotoko7777/ahc-workspace/tree/98a9e65e998f57a10a8f0b3f2cf2514a0b73b4cf)。垂直方向へ小さな事前移動を許す。別の未調整32件の平均は幅22の直接108.219、幅30の直接106.594、幅22の事前移動105.156手。幅30に17勝3分12敗・中央値1手改善。全192出力公式・独立一致、最大0.223740秒。事前移動版は任意。次は戻し量と後続の複数回排出のまとまりを直接比較する。
+
+### AHC043 資金を回収できる駅を増やす
+
+[公式問題文](https://atcoder.jp/contests/ahc043/tasks/ahc043_a)。3秒 / 1,024 MiB、800ターン。自宅・職場の近くが同じ路線につながる利用者から収入を得て、最終資金を最大化。[公式採点CSV](https://img.atcoder.jp/ahc_standings/ahc043/result.csv)（SHA-256 `37d47e533839a2fe41dfc382a476617640aeb994dfb861539adfad7121637be2`）1,422人×2,000件から首位1,971,352,183,368を再現。上位3人が公式結果JSONと一致、公式seed列照合済み。
+[初回](https://github.com/tokotoko7777/ahc-workspace/tree/2920bc508229a62f10b0070b68f3f1941fae75a4)。同じ初期の2駅に対し、追加コスト・投資回収を評価して駅やレールの改修を行う。dev12件 最終資金1,170,308→38,157,357、未調整24件2,236,615→63,926,853（全勝、単純な一路線の対照）。全72出力公式と独立検証が一致、最大0.058秒。問題別既定に採用。次は初期の路線を今後の展開も含めて比較する。本番未測定。
+
+### AHC044 本番条件
+
+[公式問題文](https://atcoder.jp/contests/ahc044/tasks/ahc044_a)。2秒、本番150件。50万回の担当割当で目標回数とのL1誤差を減らし、各ケース100万−誤差の合計を最大化。1位149,807,848は[AtCoder提供の順位・得点データ](https://huggingface.co/datasets/SakanaAI/ALE-Bench/blob/main/ahc044.zip)で確認（SHA-256 `52b6cb057545c468eb48910bf634170e1a89735bb3505b39cf4e1607c2e67135`）。同一ケースは未確認。連結な交互割当の基準に対して、残差が小さくなる複数辺変更を試す。
