@@ -11,8 +11,9 @@
 | [AHC001](https://atcoder.jp/contests/ahc001/tasks/ahc001_a) | 本番 1,000 件完走・未達 | **993,823,071,683** 点（[AtCoder 提供の順位データ](https://huggingface.co/datasets/SakanaAI/ALE-Bench/blob/main/ahc001.zip)） | 凍結 v64: **993,411,282,631** 点 | 本番公開シード全 1,000 件・公式採点。最長 4.838 秒（ローカル） | [codex/ahc001-coordinate-slide-20261120](https://github.com/tokotoko7777/ahc-workspace/tree/codex/ahc001-coordinate-slide-20261120) |
 | [AHC002](https://atcoder.jp/contests/ahc002/tasks/ahc002_a) | 既存版から着手・未判定 | **6,255,977** 点（[AtCoder 提供の順位データ](https://huggingface.co/datasets/SakanaAI/ALE-Bench/blob/main/ahc002.zip)） | V10（未調整 20 件 1,254,587） | 本番 100 件。通常配布の 0–99 は別ケース | [codex/ahc002-corridor-repair-20261120](https://github.com/tokotoko7777/ahc-workspace/tree/codex/ahc002-corridor-repair-20261120) |
 | [AHC003](https://atcoder.jp/contests/ahc003/tasks/ahc003_a) | 本番 3,000 件を評価中・未判定 | **2,926,767,743,437** 点（[AtCoder 提供の順位データ](https://huggingface.co/datasets/SakanaAI/ALE-Bench/blob/main/ahc003.zip)） | 既存版を凍結 | 公式対話テスタ、本番公開シード 3,000 件、2 秒 | [codex/ahc003-probe-design-20261120](https://github.com/tokotoko7777/ahc-workspace/tree/codex/ahc003-probe-design-20261120) |
-| [AHC004](https://atcoder.jp/contests/ahc004/tasks/ahc004_a) | ローカル改善・本番未判定 | **7,321,305,762** 点（[AtCoder 提供の順位データ](https://huggingface.co/datasets/SakanaAI/ALE-Bench/blob/main/ahc004.zip)） | 周期パターン初期化・未調整 10 件で平均 +1,847,067 点 | 本番 100 件。通常配布の 0–99 は別ケース | [codex/ahc004-contig-seed-20261120](https://github.com/tokotoko7777/ahc-workspace/tree/codex/ahc004-contig-seed-20261120) |
-| AHC005〜074 | 未着手 | — | — | — | — |
+| [AHC004](https://atcoder.jp/contests/ahc004/tasks/ahc004_a) | ローカル改善・本番未判定 | **7,321,305,762** 点（[AtCoder 提供の順位データ](https://huggingface.co/datasets/SakanaAI/ALE-Bench/blob/main/ahc004.zip)） | 周期パターン初期化: 未調整 10 件 681,224,023（旧 662,753,350） | 本番 100 件。通常配布の 0–99 は別ケース | [codex/ahc004-contig-seed-20261120](https://github.com/tokotoko7777/ahc-workspace/tree/codex/ahc004-contig-seed-20261120) |
+| AHC005 | 着手・未判定 | 確認中 | — | — | 検証中 |
+| AHC006〜074 | 未着手 | — | — | — | — |
 
 ### AHC001 の次の仮説
 
@@ -85,3 +86,8 @@
 - 開発用 10 件で平均 +2,185,938 点（8 勝）、未調整 10 件で平均 +1,847,067 点（5 勝 5 敗、中央値 +2,062,629 点）。全 40 出力で公式採点と独立検査が一致。最大 2.786604 秒。候補は問題別ブランチの通常ビルドに保存し、既存の使用例と main は変更しない。単一ファイル C++23 と汎用部品を検証済み。
 - [公式問題文](https://atcoder.jp/contests/ahc004/tasks/ahc004_a) は 100 ケース、各ケース整数点を合計、いずれかが失敗した提出は 0 点、3 秒。配布ローカルケースと本番は異なるので、順位データの 7,321,305,762 点とは未比較。配布した順位アーカイブ SHA-256 `2c43b467ddfabfa774306c350f397a272f1b4ae6023066a0c44ea93fe62a42c8` は配布元メタデータと一致。
 - 次は行の周期シフト・交換で平行方向の語を保ちつつ、直交方向を改善できるか同じ初期配置で検証する。
+
+### AHC004 行・列を循環移動する追加探索
+
+- [実装・再現手順](https://github.com/tokotoko7777/ahc-workspace/blob/88dfd64092fbefe29c5d2e8770d08813ee522452/problems/ahc004/experiments/line_cycle/README.md) を別の問題ブランチに保存。行や列を一つ回転、または同方向の二本を交換し、平行方向の部分列集合を維持。直交方向だけを差分更新する。
+- 新規開発 8 件、周期初期化版の同一盤面から両方 105 ms の追加探索で比較。既存操作の追加探索を対照とし、平均 +140,634 点、3 勝 5 分。最長 2.894019 秒（初期解込み・ローカル）。全 24 出力で公式採点と独立検査が一致し、ランダムな差分検査 70 盤面 × 各 100 操作と C++23 ビルドを通した。固定開始の診断だけで、通常版は変更しない。本番比較は未判定。
