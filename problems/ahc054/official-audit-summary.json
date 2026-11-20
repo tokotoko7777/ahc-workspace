@@ -1,0 +1,27 @@
+{
+  "frozen_git_commit": "86ecac3a43ec178c4c694db07c6d0c2163e9812b",
+  "cases_match": 3000,
+  "generator_mode": "untouched official seed list",
+  "ordered_cases_sha256": "555b0ef6eb7e45a3891785545cdb7ab22e9d2bc0f60f386d205d84e4d85814e4",
+  "sources_sha256": {
+    "seeds": "f46e04db0ec8f80d641bbc8e166b1d2f4050a340b356acea1adce1a41a0a7fc8",
+    "inputs": "12a79763705f3118ee2f2ce80c50a6f0a3569e89b251f98b173bc338048d3ba9",
+    "scores": "50617ebf3ae1d3a70dd27b4c712e61d72543b6a58ba7816e2fee6039dade0293"
+  },
+  "generator_sha256": "85d20b040cb06b950acde69fe3f32b5ddc1239eb28b11f0e76229874ff8cc908",
+  "tester_sha256": "cb752abdf967b652ac98a3f73d3169c2fb9a2de04d37afd248a9ea71645de4f2",
+  "binary_sha256": "f419056711c9e64a4f6240574a377c10695cc60231b1640e7734e3c6efdf39af",
+  "historical_winner": "saharan",
+  "historical_winner_score": 2409003089874,
+  "valid_cases": 3000,
+  "max_wall_seconds": 0.19677644899638835,
+  "total_absolute_score": 3042194,
+  "case_maxima_improvement_count": 0,
+  "own_fixed_historical_baseline": 419674926324,
+  "own_combined_baseline": 419674926324,
+  "archived_first_combined_baseline": 2409003089874,
+  "best_historical_user_after_combining": "saharan",
+  "best_historical_score_after_combining": 2409003089874,
+  "hypothetical_rank": 505,
+  "hypothetical_ties": 0
+}

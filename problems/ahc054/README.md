@@ -18,8 +18,8 @@ has SHA-256 `12a79763705f3118ee2f2ce80c50a6f0a3569e89b251f98b173bc338048d3ba9`
 and columns file, seed, N and K; the statement also links the final
 [seed list](https://img.atcoder.jp/ahc054/seeds.txt) with expected SHA-256
 `f46e04db0ec8f80d641bbc8e166b1d2f4050a340b356acea1adce1a41a0a7fc8`.
-No historical cases are used for this experiment; strict rank comparison
-remains **unjudged**. If the candidate improves any maxima, rerank the
+No historical cases were used for either development experiment. See
+the [separate frozen official audit](OFFICIAL_AUDIT.md) for the held final result. If the candidate improves any maxima, rerank the
 historic winner and candidate on the same new maxima.
 
 ## Static maze construction
