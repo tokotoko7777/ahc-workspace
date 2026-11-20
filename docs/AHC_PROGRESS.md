@@ -13,7 +13,8 @@
 | [AHC003](https://atcoder.jp/contests/ahc003/tasks/ahc003_a) | 本番 3,000 件を評価中・未判定 | **2,926,767,743,437** 点（[AtCoder 提供の順位データ](https://huggingface.co/datasets/SakanaAI/ALE-Bench/blob/main/ahc003.zip)） | 既存版を凍結 | 公式対話テスタ、本番公開シード 3,000 件、2 秒 | [codex/ahc003-probe-design-20261120](https://github.com/tokotoko7777/ahc-workspace/tree/codex/ahc003-probe-design-20261120) |
 | [AHC004](https://atcoder.jp/contests/ahc004/tasks/ahc004_a) | ローカル改善・本番未判定 | **7,321,305,762** 点（[AtCoder 提供の順位データ](https://huggingface.co/datasets/SakanaAI/ALE-Bench/blob/main/ahc004.zip)） | 周期パターン初期化: 未調整 10 件 681,224,023（旧 662,753,350） | 本番 100 件。通常配布の 0–99 は別ケース | [codex/ahc004-contig-seed-20261120](https://github.com/tokotoko7777/ahc-workspace/tree/codex/ahc004-contig-seed-20261120) |
 | [AHC005](https://atcoder.jp/contests/ahc005/tasks/ahc005_a) | ローカル比較・本番未判定 | **22,318,770** 点（[AtCoder 提供の順位データ](https://huggingface.co/datasets/SakanaAI/ALE-Bench/blob/main/ahc005.zip)） | 既存版: 未調整 8 件 1,761,160 | 通常配布の 0–99 は本番 100 件と別 | [codex/ahc005-route-splice-20261120](https://github.com/tokotoko7777/ahc-workspace/tree/codex/ahc005-route-splice-20261120) |
-| AHC006〜074 | 未着手 | — | — | — | — |
+| AHC006 | 着手・未判定 | 確認中 | — | — | 検証中 |
+| AHC007〜074 | 未着手 | — | — | — | — |
 
 ### AHC001 の次の仮説
 
@@ -98,3 +99,9 @@
 - 開発 8 件の合計 1,884,887 → 1,889,028、独立確認 8 件は 1,761,160 → 1,750,812。経路差し替えそのものが短縮した例は 0/16、既定は既存のまま。全 32 出力で完全観測、公式採点と独立の視線検査が一致、最大 2.638180 秒。C++23 単一ファイル、被覆・巻き戻しの乱択照合を通過。
 - 縦・横区間から観測する集合を二部グラフで調べたところ、16 件すべてで全長区間が単独観測セルまたは出発地により実質必須だった。この実験に対して安い被覆集合を選ぶだけの案は打ち切り。次は区間に専用の立ち寄り点を置くのではなく、順序探索中から経由する最短経路上の観測を組み込む。
 - [公式問題文](https://atcoder.jp/contests/ahc005/tasks/ahc005_a) は 100 ケース・3 秒、通常配布の 0–99 と本番は別。順位 `standings_scores.csv` の 1 位は 22,318,770 点。配布元と同じ SHA-256 `2d223bee36c1499c98f1e9e927766bbf135f5d8a7f4e05890b4df044d790b484` の公開順位アーカイブを参照した。本番比較は未判定。
+
+### AHC005 経由する最短路の観測を使う近傍
+
+- [追加実験](https://github.com/tokotoko7777/ahc-workspace/blob/a6b60ce8c6779c638c162ef63c65a4d484dc6dad/problems/ahc005/README.md) を別ブランチに保存。各立ち寄り間の有向最短経路が観測する縦・横区間をキャッシュし、同一開始順から、削除のみと隣接点の移設＋削除を比較。完全観測を維持する場合だけ短縮を採用する。
+- 新規開発 8 件はいずれの近傍でも合法な短縮なし。最長 2.652082 秒、公式点と独立視線計算が一致。100×30 回の差分検査と提出用単一ファイルの C++23 ビルドを通過。既定版は変更しない。
+- 次は調整終盤だけではなく、主探索中に経由点数の変化と一時的な距離増を許す。また、等距離最短路を一つ固定する代わりに、被覆が薄い区間を観測する経路を優先する。
