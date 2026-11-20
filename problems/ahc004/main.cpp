@@ -970,47 +970,68 @@ int main() {
     for (int id=0; id<target_count; ++id) if (seen[id]) supported_reads+=weights[id];
   }
 #ifdef AHC004_MERGED_CYCLES
-  int merged_new_lines=0;
+  int merged_new_lines=0, merged_overlap=0, merged_tries=0;
+  double merged_ms=0.0;
   const int orig_cycle_count=closed.cycles.size(), orig_supported=supported_reads;
   int longest_word=0;
   for(const auto& w:words)longest_word=max(longest_word,int(w.size()));
   if ((orig_cycle_count < 28 || 4*orig_supported < 3*m) &&
       longest_word >= 9 && !past_geometry()) {
-    const double merge_end=min(GEOMETRY_END_MS-60.0,timer.elapsed_ms()+18.0);
+#ifdef AHC004_MERGED_K4_RETRY
+    constexpr double MERGE_MS=20.0;
+#else
+    constexpr double MERGE_MS=18.0;
+#endif
+    const double merge_begin=timer.elapsed_ms();
+    const double merge_end=min(GEOMETRY_END_MS-60.0,merge_begin+MERGE_MS);
     const auto past_merge=[&] {return timer.elapsed_ms()>=merge_end;};
-    const auto partial=ahc004::partial_assembled_lines(n,words,5,past_merge);
-    std::set<std::string> unique_lines;
-    for(const auto& c:closed.cycles) unique_lines.insert(c.letters);
-    auto candidates=closed.cycles;
-    for(const auto& line:partial) {
-      if(past_merge())break;
-      if(line.known!=n)break;
-      if(!unique_lines.insert(line.letters).second)continue;
-      ahc004::Cycle cycle{line.letters,{},0};
-      const std::string wrapped=cycle.letters+cycle.letters.substr(0,n-1);
-      for(int i=0;i<int(words.size());++i) {
-        if(wrapped.find(words[i])>=size_t(n))continue;
-        cycle.words.push_back(i);
-        const int len=words[i].size();
-        cycle.evidence+=(len-1)*(len-1)*min(3,weights[i]);
+    auto try_assembled=[&](int overlap) {
+      ++merged_tries;
+      const auto partial=ahc004::partial_assembled_lines(n,words,overlap,past_merge);
+      std::set<std::string> unique_lines;
+      for(const auto& c:closed.cycles) unique_lines.insert(c.letters);
+      auto candidates=closed.cycles;
+      for(const auto& line:partial) {
+        if(past_merge())break;
+        if(line.known!=n)break;
+        if(!unique_lines.insert(line.letters).second)continue;
+        ahc004::Cycle cycle{line.letters,{},0};
+        const std::string wrapped=cycle.letters+cycle.letters.substr(0,n-1);
+        for(int i=0;i<int(words.size());++i) {
+          if((i&127)==0 && past_merge())return false;
+          if(wrapped.find(words[i])>=size_t(n))continue;
+          cycle.words.push_back(i);
+          const int len=words[i].size();
+          cycle.evidence+=(len-1)*(len-1)*min(3,weights[i]);
+        }
+        candidates.push_back(std::move(cycle));
+        ++merged_new_lines;
       }
-      candidates.push_back(std::move(cycle));
-      ++merged_new_lines;
-    }
-    if(!past_merge() && candidates.size()>=28) {
-      std::sort(candidates.begin(),candidates.end(),[](const auto& a,const auto& b){
-        return a.evidence!=b.evidence?a.evidence>b.evidence:a.letters<b.letters;
-      });
-      if(candidates.size()>40)candidates.resize(40);
-      std::vector<bool> seen(target_count);
-      for(const auto& c:candidates)for(int id:c.words)seen[id]=true;
-      int after=0;
-      for(int i=0;i<target_count;++i)if(seen[i])after+=weights[i];
-      if(4*after>=3*m) {
-        closed.cycles=std::move(candidates);
-        supported_reads=after;
+      if(!past_merge() && candidates.size()>=28) {
+        std::sort(candidates.begin(),candidates.end(),[](const auto& a,const auto& b){
+          return a.evidence!=b.evidence?a.evidence>b.evidence:a.letters<b.letters;
+        });
+        if(candidates.size()>40)candidates.resize(40);
+        std::vector<bool> seen(target_count);
+        for(const auto& c:candidates)for(int id:c.words)seen[id]=true;
+        int after=0;
+        for(int i=0;i<target_count;++i)if(seen[i])after+=weights[i];
+        if(!past_merge() && 4*after>=3*m) {
+          closed.cycles=std::move(candidates);
+          supported_reads=after;
+          merged_overlap=overlap;
+          return true;
+        }
       }
-    }
+      return false;
+    };
+    const bool primary_pass=try_assembled(5);
+#ifdef AHC004_MERGED_K4_RETRY
+    if(!primary_pass && !past_merge())try_assembled(4);
+#else
+    (void)primary_pass;
+#endif
+    merged_ms=timer.elapsed_ms()-merge_begin;
   }
 #endif
   if (closed.cycles.size() >= 28 && 4*supported_reads >= 3*m && !past_geometry()) {
@@ -1061,7 +1082,10 @@ int main() {
 #ifdef AHC004_MERGED_CYCLES
   cerr << "partial_original=" << orig_cycle_count
        << " partial_original_support=" << orig_supported
-       << " partial_novel=" << merged_new_lines << '\n';
+       << " partial_novel=" << merged_new_lines
+       << " partial_overlap=" << merged_overlap
+       << " partial_tries=" << merged_tries
+       << " partial_ms=" << merged_ms << '\n';
 #endif
 
 #ifdef AHC004_LINE_REBUILD

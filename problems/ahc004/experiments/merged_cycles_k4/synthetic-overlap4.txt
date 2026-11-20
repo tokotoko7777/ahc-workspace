@@ -1,0 +1,12 @@
+L=5 M=450 k=4 O true/false 0.0/0.5 P true/false 0.1/0.1 novel true/false 0.1/0.1 gates old/new/new-only 0/0/0 final true 0.0/0.1 assembly ms mean,max 2.5,2.9
+L=5 M=650 k=4 O true/false 0.1/0.6 P true/false 1.3/0.2 novel true/false 1.1/0.2 gates old/new/new-only 0/0/0 final true 0.1/1.3 assembly ms mean,max 3.2,3.9
+L=5 M=800 k=4 O true/false 0.2/0.7 P true/false 3.3/0.3 novel true/false 3.0/0.3 gates old/new/new-only 0/0/0 final true 0.2/3.3 assembly ms mean,max 3.8,5.4
+L=6 M=450 k=4 O true/false 0.6/0.2 P true/false 4.4/0.4 novel true/false 3.8/0.4 gates old/new/new-only 0/0/0 final true 0.6/4.4 assembly ms mean,max 3.2,3.9
+L=6 M=650 k=4 O true/false 2.9/0.7 P true/false 13.2/0.4 novel true/false 10.3/0.4 gates old/new/new-only 0/0/0 final true 2.9/13.2 assembly ms mean,max 4.2,4.9
+L=6 M=800 k=4 O true/false 6.8/1.1 P true/false 20.5/0.3 novel true/false 13.8/0.3 gates old/new/new-only 0/1/1 final true 6.8/20.6 assembly ms mean,max 5.3,12.7
+L=7 M=450 k=4 O true/false 5.0/0.9 P true/false 17.2/0.1 novel true/false 12.3/0.1 gates old/new/new-only 0/0/0 final true 5.0/17.3 assembly ms mean,max 4.1,12.5
+L=7 M=650 k=4 O true/false 13.5/1.1 P true/false 29.8/0.1 novel true/false 16.4/0.1 gates old/new/new-only 0/34/34 final true 13.5/29.9 assembly ms mean,max 5.5,15.0
+L=7 M=800 k=4 O true/false 20.5/1.4 P true/false 35.2/0.0 novel true/false 14.7/0.0 gates old/new/new-only 1/40/39 final true 20.5/35.2 assembly ms mean,max 6.3,10.5
+L=8 M=450 k=4 O true/false 13.1/1.3 P true/false 28.7/0.1 novel true/false 15.7/0.1 gates old/new/new-only 0/31/31 final true 13.1/28.8 assembly ms mean,max 4.5,8.8
+L=8 M=650 k=4 O true/false 24.9/1.8 P true/false 37.4/0.0 novel true/false 12.5/0.0 gates old/new/new-only 3/40/37 final true 24.9/37.4 assembly ms mean,max 6.3,7.8
+L=8 M=800 k=4 O true/false 31.9/2.1 P true/false 38.9/0.0 novel true/false 7.1/0.0 gates old/new/new-only 37/40/3 final true 31.9/38.8 assembly ms mean,max 8.1,14.0
