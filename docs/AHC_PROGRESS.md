@@ -27,8 +27,9 @@
 | [AHC017](https://atcoder.jp/contests/ahc017/tasks/ahc017_a) | 着手・未判定 | **1,993,227,663,417**（相対点） | 未調整 14 件 189,307,900（絶対点） | 本番 2,000 件・6 秒、ケース別基準が必要 | [問題別ブランチ](https://github.com/tokotoko7777/ahc-workspace/tree/6078ab465ffd5a225a464187bd443e4b62fcd38b) |
 | [AHC018](https://atcoder.jp/contests/ahc018/tasks/ahc018_a) | ローカル比較・本番未判定 | [公式順位](https://atcoder.jp/contests/ahc018/standings) 要ログイン。1 位の点数未確認 | 別の未調整 32 件で経路限定試掘／一様の比: 平均 0.9202、25 勝 | 本番公開 3,000 件、5 秒、相対方式 | [問題別ブランチ](https://github.com/tokotoko7777/ahc-workspace/tree/ff72f9a9577cff6a5ce466081ef959cdde836522)、[経路試掘](https://github.com/tokotoko7777/ahc-workspace/tree/0cca8b704bae33b8ad70a32d5db6ae139fb5c054) |
 | [AHC019](https://atcoder.jp/contests/ahc019/tasks/ahc019_a) | 着手・本番未判定 | **1,886,240,066,109**（相対点） | 新規未調整 30 件 30,684,752,148（絶対点・低い方が良い） | 本番公開 2,000 件、6 秒、ケース別基準が必要 | [問題別ブランチ](https://github.com/tokotoko7777/ahc-workspace/tree/7252e85e2d8a5d75038c0680f4ba43b4a43b3f05)、[部分再構築](https://github.com/tokotoko7777/ahc-workspace/tree/79fa2df9de9de4de4d658ea3f374ff983d7e4753) |
-| [AHC020](https://atcoder.jp/contests/ahc020/tasks/ahc020_a) | 着手・本番未判定 | **504,832,157**（絶対点） | 開発比較準備中 | 本番 300 件・2 秒、同一ケースの証拠なし | 検証中 |
-| AHC021〜074 | 未着手 | — | — | — | — |
+| [AHC020](https://atcoder.jp/contests/ahc020/tasks/ahc020_a) | 着手・本番未判定 | **504,832,157**（絶対点） | 未調整16件 平均1,687,384.19 | 本番 300 件・2 秒、同一ケースの証拠なし | [問題別ブランチ](https://github.com/tokotoko7777/ahc-workspace/tree/96a97144e57022f452ce216eddf9c2d76adc3b32) |
+| [AHC021](https://atcoder.jp/contests/ahc021/tasks/ahc021_a) | 着手・本番未判定 | **13,589,420**（絶対点） | 開発比較準備中 | 本番150件・2秒、同一ケースの証拠なし | 検証中 |
+| AHC022〜074 | 未着手 | — | — | — | — |
 
 ### AHC001 の次の仮説
 
@@ -303,3 +304,11 @@
 ### AHC019 同予算での部分再構築
 
 [追試](https://github.com/tokotoko7777/ahc-workspace/tree/79fa2df9de9de4de4d658ea3f374ff983d7e4753)。最初の共通ブロック解を揃え、その後の200msで全再始動と部分再構築を比較。未調整30件の絶対ペナルティは初版74,610,775,271、再始動49,583,909,998、部分再構築30,684,752,148（同予算で25勝、−38.1%）。片側専用ブロックの体積合計は28→8→0。全120出力を公式採点・独立検証で照合、最大0.261秒。問題別ブランチの既定解に採用。本番相対点は未判定。次は共通ブロックの葉だけを剥がし、専用ブロックなしを保ったまま共有ブロック数・逆体積和を減らす。
+
+### AHC020 発信局を結ぶ配線の再構成
+
+[MSTの枝刈りと発信局間の経路構築を比較](https://github.com/tokotoko7777/ahc-workspace/blob/96a97144e57022f452ce216eddf9c2d76adc3b32/problems/ahc020/README.md)。半径を全く同じにして、dev16件と未調整16件の全32件で改善。未調整平均は1,674,784.38→1,687,384.19。64出力のカバー・整数採点は公式と独立検証で一致、最大0.026912秒。別ケースなので1位を超えたとは判定しない。専用ブランチで採用。次は半径を決める探索にも、発信局集合ごとの配線費を入れて、枝刈り木の配線費を使う対照と比較する。
+
+### AHC021 本番条件
+
+[公式問題文](https://atcoder.jp/contests/ahc021/tasks/ahc021_a)。2秒 / 1,024 MiB、150ケース。三角格子で親子の順序違反が0なら100,000−5×交換回数、それ以外は50,000−50×違反数。1位13,589,420は[AtCoder提供の順位・得点データ](https://huggingface.co/datasets/SakanaAI/ALE-Bench/blob/main/ahc021.zip)で確認（SHA-256 `aea95345b11743f87a02ec87c075e00d0686925de9c51d84f21d6f4d624dcd5a`）。公式ツール付属の100例を本番例とみなさない。リポジトリの既存ビームを対照に、最小・最大ラベルの両側から確定する案を試す。
