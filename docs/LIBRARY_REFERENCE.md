@@ -2014,3 +2014,14 @@ sort(points.begin(), points.end(), [](const Point& a, const Point& b) {
 
 `bits=10` なら各座標は `0..1023` です。厳密な最近傍順ではありませんが、空間的に
 まとまったcluster作成、query順、cache localityの改善候補を1行のkeyで作れます。
+
+## 丸め・クリップ後の正規分布
+
+[`rounded-clipped-normal.hpp`](../library/rounded-clipped-normal.hpp)。
+整数に丸めて下限・上限でクリップした正規観測の対数確率を返す。上下端は裾全体を使う。
+
+```cpp
+double cost = -rounded_clipped_normal_logmass(observed, expected, sigma, 0, 1000);
+```
+
+[AHC022の測温尤度](../problems/ahc022/main.cpp)・[総和・対称性テスト](../tests/rounded_clipped_normal_test.cpp)。
