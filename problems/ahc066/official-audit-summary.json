@@ -1,0 +1,29 @@
+{
+  "frozen_git_commit": "673d5843e9570e435a445d0a31df28cd58b81bcd",
+  "cases_match": 2000,
+  "W_matched_trace_and_stock_bytes": 2000,
+  "generator_mode": "untouched official seed list",
+  "ordered_cases_sha256": "3b842db6421d26ca34f04ad2f906d793302be8beed08e900a737352bd8cac5ae",
+  "sources_sha256": {
+    "seeds": "d88ec61a00aa2dfb0be89801a7320e56550cf9c71cc2e6959f79c5eb057cf9ae",
+    "inputs": "50bfe8fa4be3e043f924c9bb6797fa78db9d0fc28c4db3f5a270934d77ecf7d1",
+    "scores": "edde18d960f3f47b2fad0ffa8e539274ce2d18797b73dca7d30c49d179866a82"
+  },
+  "generator_sha256": "9b13c529b7e299312b1655a235c05450440f40fb44573bdf1ab717ec29df788f",
+  "traced_generator_sha256": "a05c4770d1ecf6040938dd5cfcbe56f71e9d18436be9134491edaae739b925cc",
+  "visualizer_sha256": "7de7fe52bc8af68d3a8819d36c0c9cfd4517958f8bda76838b4dae23f0f7a7b4",
+  "binary_sha256": "627b0e97deebd79f963107d9e91f68a456e5b2461d7bf5a928660bf2a96ca4e7",
+  "historical_winner": "kurakura",
+  "historical_winner_score": 1893330847366,
+  "valid_cases": 2000,
+  "max_wall_seconds": 0.16727010600152425,
+  "total_absolute_score": 504280,
+  "case_minima_improvement_count": 0,
+  "own_fixed_historical_baseline": 1352700378901,
+  "own_combined_baseline": 1352700378901,
+  "archived_first_combined_baseline": 1893330847366,
+  "best_historical_user_after_combining": "kurakura",
+  "best_historical_score_after_combining": 1893330847366,
+  "hypothetical_rank": 472,
+  "hypothetical_ties": 0
+}

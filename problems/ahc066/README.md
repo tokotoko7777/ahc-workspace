@@ -21,7 +21,7 @@ fields file, seed, N, M, T, W; SHA-256
 `50bfe8fa4be3e043f924c9bb6797fa78db9d0fc28c4db3f5a270934d77ecf7d1`.
 [Published final seeds](https://img.atcoder.jp/ahc066/seeds.txt) expected hash
 `d88ec61a00aa2dfb0be89801a7320e56550cf9c71cc2e6959f79c5eb057cf9ae`.
-No historical cases were used in initial development: **unjudged**.
+Development did not use historical cases. See the [frozen audit](OFFICIAL_AUDIT.md).
 Historical raw mean 180.1755 is across different cases than the table below.
 
 ## Shared literal trace, then macro routing
