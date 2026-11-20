@@ -42,8 +42,9 @@
 | [AHC032](https://atcoder.jp/contests/ahc032/tasks/ahc032_a) | 着手・本番未判定 | **11,854,207,127,046**（絶対点） | 未調整16件 平均79,106,180,582.44 | 本番150件、同一ケースの証拠なし | [問題別ブランチ](https://github.com/tokotoko7777/ahc-workspace/tree/0f8a8d2946ce1c6691db7ce95eee5ffa8a51006e)、[方向の追試](https://github.com/tokotoko7777/ahc-workspace/tree/890cee4f0a8b60a076d3c98d6d8d6bffed43099) |
 | [AHC033](https://atcoder.jp/contests/ahc033/tasks/ahc033_a) | 着手・本番未判定 | bowwowforeach、得点未確認 | 新規未調整24件 合計6,867ターン | 本番2,000件、相対方式 | [問題別ブランチ](https://github.com/tokotoko7777/ahc-workspace/tree/131ef411f491cc1b6ed79c905fc98a8d52ffad5d)、[先行搬出](https://github.com/tokotoko7777/ahc-workspace/tree/81b3ab227a32818d6d4350351c5d4db5c9602b0f) |
 | [AHC034](https://atcoder.jp/contests/ahc034/tasks/ahc034_a) | 着手・本番未判定 | **9,486,350,384**（絶対点） | 積み降ろし再配分：新規未調整24件 平均35,727,578.04 | 本番150件・2秒、同一ケースの証拠なし | [問題別ブランチ](https://github.com/tokotoko7777/ahc-workspace/tree/6c2ea91bb86ef24c6c84cd99bf76df6355c16ce6)、[積み降ろし再配分](https://github.com/tokotoko7777/ahc-workspace/tree/e2c29731322790e744a17033d3fa937c450cede7) |
-| [AHC035](https://atcoder.jp/contests/ahc035/tasks/ahc035_a) | 着手・本番未判定 | 確認中 | 開発比較準備中 | 確認中 | 検証中 |
-| AHC036〜074 | 未着手 | — | — | — | — |
+| [AHC035](https://atcoder.jp/contests/ahc035/tasks/ahc035_a) | 着手・本番未判定 | **274,272,291**（絶対点） | 未調整36件 平均857,950.08 | 本番300件・2秒、同一ケースの証拠なし | [問題別ブランチ](https://github.com/tokotoko7777/ahc-workspace/tree/5e9d58aed81aae5dbdbe8563408ea91a0fbfdf57) |
+| [AHC036](https://atcoder.jp/contests/ahc036/tasks/ahc036_a) | 着手・本番未判定 | **1,872,786,019,642**（相対点） | 開発比較中 | 本番2,000件・3秒、基準とseed列を照合済み | 検証中 |
+| AHC037〜074 | 未着手 | — | — | — | — |
 
 ### AHC001 の次の仮説
 
@@ -530,3 +531,13 @@
 ### AHC034 移動を固定して積み降ろしを最適化
 
 [追試](https://github.com/tokotoko7777/ahc-workspace/tree/e2c29731322790e744a17033d3fa937c450cede7)。移動操作を一切変えず、同じマスを複数回通るときにいつ積み降ろすかを、時刻方向の最小費用流で決める。別の未調整24件平均30,949,419.92→35,727,578.04（全勝、移動費比0.86627）。別系列の近い時間予算の試験でも、経路焼きなましを多く回す対照の未調整平均約31.227M→34.774M（全24勝、中央値の時間0.152→0.164秒）。計192出力で公式と独立検証が一致、最大0.273714秒。問題別既定に採用。本番ケースは未確認。次は小さな経路変更の候補を絞り、積み降ろしを再計算して選ぶ。
+
+### AHC035 強い特徴を子に残す配置
+
+[検証と実装](https://github.com/tokotoko7777/ahc-workspace/tree/5e9d58aed81aae5dbdbe8563408ea91a0fbfdf57)。親の総評価を高くする対照に対し、長所が補い合う隣接候補と、座標ごとの希少な最大特徴の生存を優先。dev36件平均720,290.53→852,186.06、未調整36件722,317.89→857,950.08（全72件改善、未調整中央値+131,131.5点）。全144出力で公式と独立再生が一致し、テスタ込み最大0.161581秒。問題別既定に採用。次は序盤を固定し、終盤だけ子の最大得点の分布を評価する。
+
+[公式問題文](https://atcoder.jp/contests/ahc035/tasks/ahc035_a)。対話10世代、2秒 / 1,024 MiB。本番300件の絶対点1位274,272,291は[AtCoder提供の順位・得点データ](https://huggingface.co/datasets/SakanaAI/ALE-Bench/blob/main/ahc035.zip)で確認（SHA-256 `e42f0a604bb873d05845c8db311d31074d9e4e987a9235b7bd771e1dd6c0913b`）。本番と同じケースは未確認。
+
+### AHC036 本番条件
+
+[公式問題文](https://atcoder.jp/contests/ahc036/tasks/ahc036_a)。3秒 / 1,024 MiB。移動・信号操作合わせて100,000以下。信号操作の回数を最小化し、本番2,000件のケース別最低値で相対化する。[公式採点CSV](https://img.atcoder.jp/ahc_standings/ahc036/result.csv)（SHA-256 `da6d10f8d1339445009649d4e746709ca24751329a3434eb3ed645043174dccb`）1094人×2,000件を再集計して1位1,872,786,019,642。上位3人の順位と公式seed列を照合。最短路に沿って1都市だけ更新する基準に対し、通り道に沿う都市を配列上に連続して並べ、複数都市の信号をまとめて更新する案を試す。
