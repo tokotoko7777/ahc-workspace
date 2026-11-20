@@ -74,3 +74,58 @@ after `cargo build --release --locked`.
     /tmp/ahc040-slide-test
     python scripts/bundle.py problems/ahc040/main.cpp -o /tmp/ahc040-single.cpp
     g++ -std=c++23 -O3 /tmp/ahc040-single.cpp -o /tmp/ahc040-single
+
+## Optional fixed linear measurement probes
+
+The two probe arms replace the first `min(N,floor(T/3))` queries with
+identical prespecified partial layouts; no increase in T. In a horizontal
+chain every U slide starts at the right edge of the previous item, thus
+all horizontal interiors are disjoint and true width equals the sum of
+the selected (possibly rotated) widths. If only one item is placed, its
+height is a second independent measurement. The runner verifies both
+relations on true dimensions and byte-identical probe commands in the
+two probe arms.
+
+The update arm consumes those observations with the
+[linear Gaussian updater](../../library/linear-gaussian-updater.hpp),
+starting with independent error variance sigma² and adding each query's
+noise variance sigma². It skips clipped extreme responses because the
+unclipped noise model does not apply. This is a practical approximation
+to the bounded size prior; the solver clamps proposed dimensions before
+using them. Both arms continue with the same shelf geometry for remaining
+queries; the ignore arm discards probe responses. The third control
+spends all T queries on the same ordinary shelf portfolio.
+
+| 32 fresh cases each | No probes | Same probes ignored | Same probes with update |
+|---|---:|---:|---:|
+| Development mean absolute cost | 1,140,966.09 | 1,144,502.13 | 1,145,864.16 |
+| Untouched holdout mean absolute cost | 1,102,156.41 | 1,104,546.00 | 1,105,206.84 |
+
+Update vs no probes was 10 wins / 10 ties / 12 losses on holdout
+(mean paired ratio1.00293); update vs ignored was 12/11/9
+(mean paired ratio1.00097). The schedule does not improve packing enough
+to replace dedicated placements, so no-probe shelf remains default.
+All 192 solver transcripts matched independent legality and official
+absolute costs; worst wall 0.086101s including tester. No final seed run.
+[Data](probe-results.csv). The generic updater passed 700 batch normal
+equation and covariance comparisons.
+
+The official archive above identifies case ordinal, seed, N, T, sigma and
+the generator's lower-bound parameter L. The official generator's
+`--verbose` output exposes the former fields but not L; no final-corpus
+identity is inferred from a match of initials alone. The bounds and match
+method should be verified before a final audit, using the unmodified
+published seed sequence and side-channel trace of the generator's stored
+L without changing any RNG draws or generated case bytes.
+
+Next estimate along promising **full layouts** rather than sacrificing
+attempts: take width/height as active contact-path sums when those paths
+remain identical across perturbed dimensions. Update only stable constraints,
+testing alternative paths with a held-out error diagnostic before relying on
+them. Use no-probe shelf as the fallback.
+
+    g++ -std=c++23 -O3 -DAHC040_PROBES=1 problems/ahc040/main.cpp -o /tmp/ahc040-probe-ignore
+    g++ -std=c++23 -O3 -DAHC040_PROBES=2 problems/ahc040/main.cpp -o /tmp/ahc040-probe-update
+    python problems/ahc040/benchmark.py "$ATCODER_TOOLS/gen" "$ATCODER_TOOLS/tester" /tmp/ahc040-shelf /tmp/ahc040-probe-update /tmp/ahc040-probe.csv --probe-ablation /tmp/ahc040-probe-ignore
+    g++ -std=c++23 -O2 tests/linear_gaussian_updater_test.cpp -o /tmp/ahc040-gaussian-test
+    /tmp/ahc040-gaussian-test

@@ -1,5 +1,9 @@
 #include <bits/stdc++.h>
+#include "../../library/linear-gaussian-updater.hpp"
 using namespace std;
+#ifndef AHC040_PROBES
+#define AHC040_PROBES 0
+#endif
 #ifndef AHC040_MIXED
 #define AHC040_MIXED 0
 #endif
@@ -89,6 +93,34 @@ vector<Move> mixed(const vector<Dim>& dims,int turn){
   }
   return plan;
 }
+vector<Move> probe(int n,int turn){
+  mt19937 rng(440400+turn);
+  const int batch=turn%2?min(n,3+(turn%3)):1;
+  vector<int> p;
+  while(int(p.size())<batch){
+    int x=rng()%n;
+    if(find(p.begin(),p.end(),x)==p.end())p.push_back(x);
+  }
+  sort(p.begin(),p.end());
+  int prev=-1;
+  vector<Move> plan;
+  for(int id:p){
+    plan.push_back({id,int(rng()%2),'U',prev});
+    prev=id;
+  }
+  return plan;
+}
+vector<pair<int,double>> measured_width(const vector<Move>& plan){
+  vector<pair<int,double>> eq;
+  int prev=-1;
+  for(auto q:plan){
+    assert(q.dir=='U'&&q.anchor==prev);
+    eq.push_back({2*q.rect+q.rot,1.});
+    prev=q.rect;
+  }
+  return eq;
+}
+
 }
 #ifndef AHC040_TEST
 int main(){
@@ -97,14 +129,30 @@ int main(){
   int n,T,sigma;if(!(cin>>n>>T>>sigma))return 0;
   vector<Dim> obs(n);
   for(auto& [a,b]:obs)cin>>a>>b;
+  vector<double> initial;
+  for(auto [a,b]:obs){initial.push_back(clamp(a,10000,100000));initial.push_back(clamp(b,10000,100000));}
+  LinearGaussianUpdater updater(initial,double(sigma)*sigma);
+  const int probes=AHC040_PROBES?min(n,T/3):0;
   for(int t=0;t<T;++t){
-    const auto estimate=dimensions(obs,sigma,t);
+    auto values=obs;
+    if(AHC040_PROBES==2&&t>=probes)
+      for(int i=0;i<n;++i){
+        values[i]={int(lround(updater.mean()[2*i])),int(lround(updater.mean()[2*i+1]))};
+      }
+    const auto estimate=dimensions(values,sigma,t);
     const bool choose_mixed=AHC040_MIXED&&t%3!=0&&Clock::now()<deadline;
-    auto plan=choose_mixed?mixed(estimate,t):shelf(estimate,t);
+    auto plan=t<probes?probe(n,t):choose_mixed?mixed(estimate,t):shelf(estimate,t);
     cout<<plan.size()<<'\n';
     for(auto m:plan)cout<<m.rect<<' '<<m.rot<<' '<<m.dir<<' '<<m.anchor<<'\n';
     cout.flush();
     int w,h;if(!(cin>>w>>h))return 0;
+    if(AHC040_PROBES==2&&t<probes){
+      const double noise=double(sigma)*sigma;
+      // Far-tail clipping breaks the untruncated Gaussian equation.
+      if(w>1&&w<1000000000)updater.observe(measured_width(plan),w,noise);
+      if(plan.size()==1&&h>1&&h<1000000000)
+        updater.observe({{2*plan[0].rect+(1-plan[0].rot),1.}},h,noise);
+    }
   }
 }
 #endif

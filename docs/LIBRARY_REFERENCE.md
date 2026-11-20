@@ -2014,3 +2014,20 @@ sort(points.begin(), points.end(), [](const Point& a, const Point& b) {
 
 `bits=10` なら各座標は `0..1023` です。厳密な最近傍順ではありませんが、空間的に
 まとまったcluster作成、query順、cache localityの改善候補を1行のkeyで作れます。
+
+## Linear Gaussian Updater
+
+[ヘッダ](../library/linear-gaussian-updater.hpp)・[バッチ連立方程式との差分テスト](../tests/linear_gaussian_updater_test.cpp)。
+
+初期の各推定値に同じ独立分散があるとし、ノイズ付き線形観測から平均と共分散を
+逐次更新します。観測係数は疎な「添字, 係数」の列です。観測ノイズの分散は正。
+更新は変数数の二乗に比例します。
+
+```cpp
+LinearGaussianUpdater estimator({10.0, 20.0}, 4.0);
+estimator.observe({{0, 1.0}, {1, 1.0}}, 34.0, 1.0);
+auto estimated_first = estimator.mean()[0];
+```
+
+[AHC040](../problems/ahc040/main.cpp)の追試では、厳密な和として確定する
+直線配置の幅を観測し、不確実な各長方形寸法の平均を更新します。

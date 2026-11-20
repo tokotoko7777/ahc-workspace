@@ -9,7 +9,7 @@ import subprocess
 import tempfile
 import time
 
-def replay(data,out):
+def replay(data,out,probe_count=0):
     tokens=iter(map(int,data.split()))
     n,t,sigma=(next(tokens) for _ in range(3))
     obs=[(next(tokens),next(tokens)) for _ in range(n)]
@@ -22,6 +22,7 @@ def replay(data,out):
         count=int(next(lines))
         assert 0<=count<=n
         pos={}
+        width_probe=0
         old=-1
         for _ in range(count):
             a,b,dir,c=next(lines).split()
@@ -30,6 +31,9 @@ def replay(data,out):
             assert anchor==-1 or anchor in pos
             old=i
             w,h=truth[i][::(-1 if rot else 1)]
+            if rnd<probe_count:
+                assert dir==b"U" and anchor==(-1 if not pos else next(reversed(pos)))
+                width_probe+=w
             if dir==b"U":
                 x=0 if anchor==-1 else pos[anchor][2]
                 colliders=(Y for X,y,R,Y in pos.values() if X<x+w and x<R)
@@ -47,6 +51,8 @@ def replay(data,out):
         omitted=sum(w+h for i,(w,h) in enumerate(truth) if i not in pos)
         W=max((v[2] for v in pos.values()),default=0)
         H=max((v[3] for v in pos.values()),default=0)
+        if rnd<probe_count:
+            assert W==width_probe and (count!=1 or H==h)
         outcomes.append((W+H+omitted,rnd,W,H,omitted))
     assert next(lines,None) is None
     out=min(outcomes)
@@ -70,7 +76,10 @@ def main():
     p=argparse.ArgumentParser(description=__doc__)
     for k in ("gen","tester","base","candidate","csv"):
         p.add_argument(k,type=Path)
+    p.add_argument("--probe-ablation",type=Path,help="same probe schedule without updating")
     a=p.parse_args()
+    tag="linear-probe-v1" if a.probe_ablation else "mixed-slides-v1"
+    if a.probe_ablation:a.probe_ablation=a.probe_ablation.resolve()
     gen,tester,base,candidate=(getattr(a,k).resolve() for k in ("gen","tester","base","candidate"))
     with tempfile.TemporaryDirectory() as d,a.csv.open("w",newline="") as stream:
         work=Path(d)
@@ -78,16 +87,26 @@ def main():
         w=csv.writer(stream,lineterminator="\n")
         w.writerow(("split","seed","arm","score","best_turn","W","H","omitted","N","T","sigma","seconds"))
         for split in ("dev","holdout"):
-            ids=[int.from_bytes(hashlib.sha256(f"ahc040/mixed-slides-v1/{split}/{i}".encode()).digest()[:8],
+            ids=[int.from_bytes(hashlib.sha256(f"ahc040/{tag}/{split}/{i}".encode()).digest()[:8],
                                 "little") for i in range(32)]
             seeds.write_text("".join(f"{seed}\n" for seed in ids))
             subprocess.run([gen,seeds],cwd=work,check=True)
             for i,seed in enumerate(ids):
                 data=(work/"in"/f"{i:04d}.txt").read_bytes()
                 arms=[("shelf",base),("mixed",candidate)]
+                if a.probe_ablation:
+                    arms=[("shelf",base),("ignore",a.probe_ablation),("update",candidate)]
+                prefix=None
                 for label,binary in arms[::(-1 if i%2 else 1)]:
                     out,stderr,seconds=run(tester,binary,data)
-                    score=replay(data,out)
+                    n,t,*_=map(int,data.splitlines()[0].split())
+                    probes=min(n,t//3) if a.probe_ablation and label!="shelf" else 0
+                    score=replay(data,out,probes)
+                    if probes:
+                        lines=out.splitlines();end=0
+                        for _ in range(probes):end+=1+int(lines[end])
+                        if prefix is not None:assert prefix==lines[:end]
+                        prefix=lines[:end]
                     assert stderr.strip()==f"Score = {score[0]}".encode(),stderr
                     w.writerow((split,seed,label,*score,f"{seconds:.6f}"))
                     stream.flush()
