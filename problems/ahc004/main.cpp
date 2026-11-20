@@ -91,7 +91,10 @@ struct GenomeProblem {
     int empty = 0;
   };
   // TODO: 1近傍で変更する場所と変更後の値を書く（評価時にはStateを触らない）。
-  struct Move { vector<pair<int, char>> changes; };
+  struct Move {
+    vector<pair<int, char>> changes;
+    int invariant_line = -1, swap_line = -1;
+  };
   int n, m;
   vector<Target> targets;
   CoverageCounter<int> coverage;
@@ -240,6 +243,34 @@ struct GenomeProblem {
     return move;
   }
 
+  // A full cyclic line preserves that line's hit multiset. Swapping two
+  // parallel lines exchanges their hit multisets without changing coverage.
+  optional<Move> line_cycle(const State& state,int line,int amount) const {
+    Move move;
+    move.invariant_line=line;
+    for(int k=0;k<n;++k) {
+      int from=line_cells[line][(k+amount)%n],to=line_cells[line][k];
+      char c=state.board[from/n][from%n];
+      if(state.board[to/n][to%n]!=c)move.changes.emplace_back(to,c);
+    }
+    if(move.changes.empty())return nullopt;
+    return move;
+  }
+  optional<Move> line_swap(const State& state,int line,int other) const {
+    Move move;
+    move.invariant_line=line;move.swap_line=other;
+    assert(line/n==other/n);
+    for(int k=0;k<n;++k) {
+      int a=line_cells[line][k],b=line_cells[other][k];
+      char x=state.board[a/n][a%n],y=state.board[b/n][b%n];
+      if(x!=y) {
+        move.changes.emplace_back(a,y);move.changes.emplace_back(b,x);
+      }
+    }
+    if(move.changes.empty())return nullopt;
+    return move;
+  }
+
   // TODO: 「変更後score - 変更前score」を返す。負の値もそのまま返してよい。
   // thresholdを超えないと証明できる場合だけnulloptで打ち切れる。
   // この版では上限判定を入れず、正確な差分を最後まで求める。
@@ -254,6 +285,8 @@ struct GenomeProblem {
       scratch[cell/n][cell%n] = c;
       line_mask |= (1ULL << (cell/n)) | (1ULL << (n+cell%n));
     }
+    if(move.invariant_line>=0)line_mask &= ~(1ULL << move.invariant_line);
+    if(move.swap_line>=0)line_mask &= ~(1ULL << move.swap_line);
     changed_lines.clear();
     while (line_mask) {
       int line = __builtin_ctzll(line_mask);
@@ -269,13 +302,16 @@ struct GenomeProblem {
 
   // TODO: 採用した手だけ反映する。直前のevaluate_moveのcacheを使う。
   // 不採用なら呼ばれないので、rollbackは不要。
-  void apply_move(State& state, Move&) {
+  void apply_move(State& state, Move& move) {
     coverage.apply_delta(state.coverage);
     state.board.swap(scratch);
     for (int line : changed_lines) {
       state.line_hits[line].swap(next_hits[line]);
       encode_line(state, line);
     }
+    if(move.swap_line>=0)std::swap(state.line_hits[move.invariant_line],state.line_hits[move.swap_line]);
+    if(move.invariant_line>=0)encode_line(state,move.invariant_line);
+    if(move.swap_line>=0)encode_line(state,move.swap_line);
     state.empty = next_empty;
   }
 };
