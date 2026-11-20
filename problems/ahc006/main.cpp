@@ -1,6 +1,8 @@
 #define AHC006_NO_MAIN
 #include "../../examples/search/ahc006_sa.cpp"
 
+#include "batch-repair.hpp"
+
 namespace {
 DeliveryProblem::State make_spatial_seed(const DeliveryProblem& problem,
                                          DeliveryProblem::State best) {
@@ -61,12 +63,25 @@ int main() {
   assert(problem.is_valid(initial.route));
   const auto setup_ms =
       chrono::duration<double, milli>(chrono::steady_clock::now() - start).count();
+#ifdef AHC006_BATCH_REPAIR_DIAGNOSTIC
+  constexpr double sa_limit = 1740.0;
+#else
+  constexpr double sa_limit = SEARCH_EXAMPLE_TIME_LIMIT_MS;
+#endif
   TimeBasedAnnealingRunner<DeliveryProblem> runner(
       problem, initial, -initial.cost,
-      max(0.001, SEARCH_EXAMPLE_TIME_LIMIT_MS - setup_ms), 120.0, 1.0,
+      max(0.001, sa_limit - setup_ms), 120.0, 1.0,
       20211115, 64);
   runner.run();
-  const auto& answer = runner.best_state();
+  auto answer = runner.best_state();
+#ifdef AHC006_BATCH_REPAIR_DIAGNOSTIC
+  const int frozen = answer.cost;
+  auto r = ahc006_batch::diagnose(problem, answer, start + chrono::milliseconds(1910));
+  cerr << "frozen=" << frozen << " greedy=" << r.greedy.cost
+       << " beam=" << r.beam.cost << " trials=" << r.trials
+       << " greedy_improved=" << r.greedy_improved << " beam_improved=" << r.beam_improved << '\n';
+  answer = r.beam;
+#endif
   assert(problem.is_valid(answer.route));
   assert(problem.route_cost(answer.route) == answer.cost);
   print_answer(problem, answer);
