@@ -75,6 +75,7 @@ Windowsの既存クローンで改行差分が出る場合は [改行の確認](
 | 同じ対象を複数箇所で覆うので、削除時の失点を数えにくい | [CoverageCounterの接続例](examples/coverage_usage.cpp) | [AHC004: 行・列のヒットを差し替える](examples/search/ahc004_genome_sa.cpp) |
 | 重い状態を全候補にコピーしたくない | [ActionBeamの雛形](template/beam/action.cpp) | [AHC032: スタンプ配置](examples/search/ahc032_action_beam.cpp)、[AHC071: 行単位の構築・再構築](examples/search/ahc071_action_beam.cpp) |
 | 盤面を進めて戻しながら探索したい | [TreeBeamの雛形](template/beam/tree.cpp) | [AHC011: apply/revertと履歴復元](examples/search/ahc011_tree_beam.cpp) |
+| 区間内の推定値を大小関係で補正したい | [BoundedOrderProjection](docs/LIBRARY_REFERENCE.md#boundedorderprojection) | [AHC045: 木から分かる距離順](problems/ahc045/README.md) |
 | 行動ごとに消費手数が違う | [可変手数ビームの雛形](template/beam/variable-cost-tree.cpp) | [AHC038: 把持・解放までを1行動にする](examples/search/ahc038_variable_cost_beam.cpp) |
 | 解の一部を壊して作り直したい | [LNSの雛形](template/lns/destroy-repair.cpp) | [AHC002: 経路の部分修復](examples/search/ahc002_destroy_repair_lns.cpp)、[AHC059: ペア再挿入](examples/search/ahc059_lns.cpp) |
 | 行動列を評価するたび、先頭から再実行している | [PrefixReplayの雛形](template/sa/prefix-replay.cpp) | [AHC058: 購入列の途中から再実行](examples/search/ahc058_prefix_sa.cpp) |

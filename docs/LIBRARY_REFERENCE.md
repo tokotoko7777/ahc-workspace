@@ -2014,3 +2014,20 @@ sort(points.begin(), points.end(), [](const Point& a, const Point& b) {
 
 `bits=10` なら各座標は `0..1023` です。厳密な最近傍順ではありませんが、空間的に
 まとまったcluster作成、query順、cache localityの改善候補を1行のkeyで作れます。
+
+## BoundedOrderProjection
+
+ヘッダ: [`bounded-order-projection.hpp`](../library/bounded-order-projection.hpp)。
+
+`project_bounded_order(value, lower, upper, constraints, sweeps)` は、
+既に各 `[lower, upper]` 内にある実数推定値を、制約 `(a,b)` の
+`value[a] ≥ value[b]` を満たす方向へ調整します。
+関係が逆なら二値の平均を区間の共通部分に丸め、両方を置き換えます。
+両区間に共通部分がない違反は飛ばします。
+一対の更新は最小二乗の射影ですが、指定回数の反復は近似で、
+全制約の充足や大域最適の証明ではありません。
+計算量は `O(sweeps * constraints.size())`。
+
+[使用例](../examples/bounded_order_projection_usage.cpp) /
+[単一制約の全列挙・鎖の検査](../tests/bounded_order_projection_test.cpp) /
+[AHC045 の距離補正](../problems/ahc045/README.md)。
