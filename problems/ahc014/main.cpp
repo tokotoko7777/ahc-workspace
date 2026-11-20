@@ -130,8 +130,25 @@ Result solve(const State& initial,Clock::time_point stop){
   }
   return best;
 }
+#if defined(AHC014_CASCADE_DIAGNOSTIC) || defined(AHC014_CASCADE_TEST)
+#include "cascade-regrowth.hpp"
+#endif
+
+void print_moves(std::ostream& out,const std::vector<Move>& moves) {
+  out<<moves.size()<<'\n';
+  for(auto step:moves){
+    bool first=true;
+    for(auto p:step.corners()){
+      if(!first)out<<' ';
+      first=false;
+      out<<p.x<<' '<<p.y;
+    }
+    out<<'\n';
+  }
+}
 } // namespace
 
+#ifndef AHC014_NO_MAIN
 int main(){
   const auto start=Clock::now();
   ios::sync_with_stdio(false);
@@ -140,18 +157,21 @@ int main(){
   if(!(cin>>n>>m))return 0;
   State s(n);
   for(int i=0;i<m;++i){int x,y;cin>>x>>y;s.insert({x,y});}
+#ifdef AHC014_CASCADE_DIAGNOSTIC
+  auto frozen=solve(s,start+chrono::milliseconds(4270));
+  auto cmp=compare_cascade(s,frozen,start+chrono::milliseconds(4810));
+  cerr<<"frozen="<<frozen.value<<" suffix="<<cmp.suffix.value
+      <<" cascade="<<cmp.cascade.value<<" completed="<<cmp.completed
+      <<" deleted="<<cmp.deleted<<" preserved_after="<<cmp.preserved_after<<'\n';
+  print_moves(cerr,frozen.moves);
+  print_moves(cerr,cmp.suffix.moves);
+  auto out=std::move(cmp.cascade);
+#else
   auto out=solve(s,start+chrono::milliseconds(AHC014_MS));
-  cout<<out.moves.size()<<'\n';
-  for(auto step:out.moves){
-    bool first=true;
-    for(auto p:step.corners()){
-      if(!first)cout<<' ';
-      first=false;
-      cout<<p.x<<' '<<p.y;
-    }
-    cout<<'\n';
-  }
+#endif
+  print_moves(cout,out.moves);
 #ifdef AHC014_STATS
   cerr<<"weight="<<out.value<<" full="<<out.rest<<" rewind="<<out.rewind<<'\n';
 #endif
 }
+#endif
