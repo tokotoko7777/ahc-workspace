@@ -8,11 +8,18 @@
 
 | 問題 | 状態 | 本番最終 1 位 | 現在の基準値 | 比較条件 | 問題別ブランチ |
 |---|---|---|---|---|---|
-| [AHC001](https://atcoder.jp/contests/ahc001/tasks/ahc001_a) | 計測着手・未判定 | [公式最終順位表](https://atcoder.jp/contests/ahc001/standings) の値を確認中 | main の v64: 平均 993,851,080.03 点（既存記録の再参照） | 公式公開シードの先頭 30 件のみ。本番は 1,000 ケースの合計 | codex/ahc001-research（予定） |
+| [AHC001](https://atcoder.jp/contests/ahc001/tasks/ahc001_a) | 計測着手・未判定 | **993,823,071,683** 点（[AtCoder 提供の順位データ](https://huggingface.co/datasets/SakanaAI/ALE-Bench/blob/main/ahc001.zip)） | main の v64: 平均 993,851,080.03 点（既存記録の再参照） | 公式公開シードの先頭 30 件のみ。本番は 1,000 ケースの合計 | codex/ahc001-research（予定） |
 | AHC002〜074 | 未着手 | — | — | — | — |
 
 ### AHC001 の次の仮説
 
-希望点の密集部を含む複数の長方形の共有境界を連動させれば、単独長方形の伸縮で詰まった領域を再配分できる。既存 v64 を C++23 で計測し、同一開発ケース・条件で比較する。採用後は調整に使っていないケースで合法性・得点・実行時間を確認する。公開された公式 1,000 ケースは判定用として開発に使わない。
+希望点の密集部を含む複数の長方形の共有境界を連動させれば、単独長方形の伸縮で詰まった領域を再配分できる。既存 v64 を C++23 で計測し、同一開発ケース・条件で比較する。採用後は調整に使っていないケースで合法性・得点・実行時間を確認する。公開された公式 1,000 ケースは今回の判定用として開発に使わない。既存 v64 の先頭 30 件は既に計測履歴があるため、独立ホールドアウトとは呼ばない。
 
 問題ごとのコードは `problems/ahcNNN/`。再利用時の課題は [ライブラリ不便メモ](LIBRARY_FEEDBACK.md) に追記する。
+
+### AHC001 の本番比較根拠
+
+- [公式問題文](https://atcoder.jp/contests/ahc001/tasks/ahc001_a): 各ケースで満足度平均の 10 億倍を最も近い整数に丸め、本番 1,000 ケースを合計する（大きいほど良い）。不正出力・TLE のケースは 0 点。制限は 5 秒・1024 MiB。
+- [公式コンテスト告知](https://atcoder.jp/contests/ahc001): 最終順位はシステムテストのみ。直接の[公式最終順位表](https://atcoder.jp/contests/ahc001/standings)は未ログインで閲覧不可。
+- [AtCoder 提供の公開データセット](https://huggingface.co/datasets/SakanaAI/ALE-Bench)の `ahc001.zip` 内 `standings_scores.csv` の `rank=1`。Lite 版は使用しない。アーカイブ SHA-256 `87d4235e0d1ccccc2b4e4d1eae824c1308a935ee2d23b9e107c9d8ec2ffd762b` は配布元メタデータと一致。順位・得点列のみ確認し、他参加者のコード・解説は参照しない。
+- 本番比較には[公式シード](https://img.atcoder.jp/ahc001/seeds.zip)を使う。展開した `seeds.txt` の MD5 `8fc1ce3f4beabac6abc1bdb4206d7f7e` と件数 1,000 を確認済み。初回開発比較を実行中。本番比較およびマージは未実施。
