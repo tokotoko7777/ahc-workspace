@@ -2014,3 +2014,16 @@ sort(points.begin(), points.end(), [](const Point& a, const Point& b) {
 
 `bits=10` なら各座標は `0..1023` です。厳密な最近傍順ではありませんが、空間的に
 まとまったcluster作成、query順、cache localityの改善候補を1行のkeyで作れます。
+
+## 層ごとの状態遷移で最短経路
+
+[`bounded-layer-shortest-path.hpp`](../library/bounded-layer-shortest-path.hpp)。
+各層に1状態、隣層への移動差を制限し、許可された経路の最小費用と列を返す。禁止は `nullopt`。
+
+```cpp
+auto result = bounded_layer_shortest_path<int>(
+    height, width, 1, [&](int y,int x){ return node_cost[y][x]; },
+    [&](int y,int old,int x) -> optional<int> { return abs(old-x); });
+```
+
+[AHC024の波状切断](../problems/ahc024/main.cpp)・[全列挙との比較](../tests/bounded_layer_shortest_path_test.cpp)。
