@@ -2014,3 +2014,20 @@ sort(points.begin(), points.end(), [](const Point& a, const Point& b) {
 
 `bits=10` なら各座標は `0..1023` です。厳密な最近傍順ではありませんが、空間的に
 まとまったcluster作成、query順、cache localityの改善候補を1行のkeyで作れます。
+
+## Square Dihedral Transforms
+
+[ヘッダ](../library/square-dihedral.hpp)・[全変換テスト](../tests/square_dihedral_test.cpp)。
+
+正方形の座標を転置・行反転・列反転の8通りで変換します。変換IDは
+転置4、行反転1、列反転2のビット和です。逆変換には同じIDを渡します。
+盤の座標と、部分正方形の**左上アンカー**では引数の一辺が違います。
+
+```cpp
+auto [r1, c1] = square_dihedral(row, col, N, 3);  // 180度
+auto [r0, c0] = inverse_square_dihedral(r1, c1, N, 3);
+auto [a1, b1] = square_dihedral(anchor_r, anchor_c, N-K+1, 3);
+```
+
+[AHC032](../problems/ahc032/main.cpp)では、盤は9、スタンプは3、
+スタンプを置くアンカーは7として、探索方向を変えても同じ置き方を復元します。

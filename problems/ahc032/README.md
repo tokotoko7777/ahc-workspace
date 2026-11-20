@@ -71,3 +71,45 @@ the board and the stamps and inverse-transforming output anchors, against
 the same total beam work in the original direction. This changes which
 cells and budget allocations get committed early, not just the low-radius
 repair. Verify geometry and exact score invariance before a fresh split.
+
+## Opposite-orientation portfolio
+
+The portfolio compares two complete searches (width1750 from the top-left
+and width1750 in original coordinates from the bottom-right) to the same
+width3500 one-direction control above. The sum of widths is 3500. The
+number of candidate evaluations is logged separately because feasible
+action counts depend on the sampled path and its prefix stamp consumption;
+equal widths do not imply equal exact evaluation counts. Both share the
+1.46 s beam cutoff, with the same greedy completion fallback.
+
+When rotating, both the board and **all stamp patterns** are transformed,
+not just their locations. Convert the selected schedule back: the
+anchor grid is 7×7 rather than 9×9. The
+[square dihedral helper](../../library/square-dihedral.hpp) and its
+[exhaustive geometry test](../../tests/square_dihedral_test.cpp) check
+forward/inverse transformations and footprints over all eight transforms.
+No permission to rotate a stamp is presumed; output always uses the
+original input's stamp ID and anchor.
+
+```sh
+g++ -std=c++23 -O3 -DAHC032_PORTFOLIO=0 problems/ahc032/main.cpp -o /tmp/ahc032-single
+g++ -std=c++23 -O3 -DAHC032_PORTFOLIO=1 problems/ahc032/main.cpp -o /tmp/ahc032-portfolio
+python problems/ahc032/benchmark.py "$ATCODER_TOOLS/gen" "$ATCODER_TOOLS/vis" /tmp/ahc032-single /tmp/ahc032-portfolio /tmp/ahc032-portfolio.csv --portfolio
+g++ -std=c++23 -O2 tests/square_dihedral_test.cpp -o /tmp/ahc032-dihedral-test
+/tmp/ahc032-dihedral-test
+```
+
+| 16 fresh cases each | Width3500 single | 2×1750 portfolio | Portfolio W/T/L | Paired evaluation ratio (mean) |
+|---|---:|---:|---:|---:|
+| Development | 79,091,618,213.69 | 79,080,741,334.50 | 8/0/8 | 1.00035 |
+| Untouched holdout | 79,089,863,247.81 | 79,109,974,914.63 | 5/2/9 | 1.00291 |
+
+Holdout median gain was negative (−8,949,141.5 points), despite a higher
+arithmetic mean due to larger wins. The opposite orientation won its
+internal two-search comparison 10/16 development and 8/16 on holdout.
+All 64 scorer calls and independent replays agree; all searches reached
+depth49. Wall time ≤1.395991 s, evaluation ratio range 0.893–1.099.
+No broad gain, so keep the single width3500 default. See
+[paired log](portfolio-results.csv). Next try retaining beam lanes by
+used-stamp count rather than a single early cumulative cap; move unused
+budget to edges using explicit terminal slack and same-budget controls.

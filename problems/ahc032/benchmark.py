@@ -29,22 +29,25 @@ def main():
     p=argparse.ArgumentParser(description=__doc__)
     for key in ("gen","vis","base","repair","csv"):
         p.add_argument(key,type=Path)
+    p.add_argument("--portfolio",action="store_true")
     a=p.parse_args()
+    version="orientation-portfolio-v1" if a.portfolio else "coupled-stamp-v1"
+    competing="portfolio" if a.portfolio else "repair"
     gen,vis,base,repair=(getattr(a,k).resolve() for k in ("gen","vis","base","repair"))
     with tempfile.TemporaryDirectory() as tmp,a.csv.open("w",newline="") as stream:
         work=Path(tmp)
         sf,out=work/"seeds.txt",work/"answer.txt"
         w=csv.writer(stream,lineterminator="\n")
-        w.writerow(("split","seed","arm","score","moves","initial","beam_depth","accepted","seconds"))
+        w.writerow(("split","seed","arm","score","moves","initial","beam_depth","accepted","seconds","second_depth","orientation","beam_work"))
         for split in ("dev","holdout"):
-            seed=[int.from_bytes(hashlib.sha256(f"ahc032/coupled-stamp-v1/{split}/{i}".encode()).digest()[:8],
+            seed=[int.from_bytes(hashlib.sha256(f"ahc032/{version}/{split}/{i}".encode()).digest()[:8],
                                  "little") for i in range(16)]
             sf.write_text("".join(f"{j}\n" for j in seed))
             subprocess.run([gen,sf],cwd=work,check=True)
             for i,number in enumerate(seed):
                 inp=work/"in"/f"{i:04d}.txt"
                 case=inp.read_bytes()
-                arms=[("base",base),("repair",repair)]
+                arms=[("base",base),(competing,repair)]
                 paired={}
                 for label,binary in arms[::1 if i%2==0 else -1]:
                     start=time.monotonic()
@@ -54,14 +57,14 @@ def main():
                     out.write_bytes(run.stdout)
                     official=subprocess.run([vis,inp,out],cwd=work,check=True,capture_output=True,text=True)
                     assert official.stdout.strip()==f"Score = {score}",official.stdout
-                    detail=re.fullmatch(rb"initial=(\d+) final=(\d+) depth=(\d+) accepted=(\d+)\s*",run.stderr)
+                    detail=re.fullmatch(rb"initial=(\d+) final=(\d+) depth=(\d+) accepted=(\d+)(?: second=(\d+) orientation=(\d+) work=(\d+))?\s*",run.stderr)
                     assert detail
-                    initial,final,depth,accepted=map(int,detail.groups())
+                    initial,final,depth,accepted,second,orientation,beam_work=(int(x) if x else 0 for x in detail.groups())
                     assert score==final>=initial and sec<2
                     paired[label]=(initial,depth)
-                    w.writerow((split,number,label,score,count,initial,depth,accepted,f"{sec:.6f}"))
+                    w.writerow((split,number,label,score,count,initial,depth,accepted,f"{sec:.6f}",second,orientation,beam_work))
                     stream.flush()
-                assert paired["base"]==paired["repair"],paired
+                if not a.portfolio:assert paired["base"]==paired["repair"],paired
 
 if __name__=="__main__":
     main()

@@ -5,6 +5,10 @@
 #endif
 #include "../../examples/search/ahc032_action_beam.cpp"
 #undef main
+#include "../../library/square-dihedral.hpp"
+#ifndef AHC032_PORTFOLIO
+#define AHC032_PORTFOLIO 0
+#endif
 #ifndef AHC032_REPAIR
 #define AHC032_REPAIR 0
 #endif
@@ -81,22 +85,38 @@ int repair(const ModStampProblem& p,Board& board,vector<Press>& actions,
   }
   return accepts;
 }
+ModStampProblem rotated(const ModStampProblem& original,int transform){
+  ModStampProblem p;
+  for(int y=0;y<9;++y)for(int x=0;x<9;++x){
+    auto [a,b]=square_dihedral(y,x,9,transform);
+    p.initial_board[a*9+b]=original.initial_board[y*9+x];
+  }
+  for(int k=0;k<STAMP_COUNT;++k)for(int y=0;y<3;++y)for(int x=0;x<3;++x){
+    auto [a,b]=square_dihedral(y,x,3,transform);
+    p.stamps[k][a*3+b]=original.stamps[k][y*3+x];
+  }
+  p.prepare();
+  return p;
 }
-#ifndef AHC032_TEST
-int main(){
-  ios::sync_with_stdio(false);
-  cin.tie(nullptr);
-  const auto started=Clock::now();
-  ModStampProblem p;p.read_input();
-  auto initial=p.make_initial_state();
-  ActionBeamRunner<ModStampProblem> beam(p,initial,p.initial_score(),AHC032_BEAM_WIDTH);
+struct SearchResult{
+  Board board;
+  vector<Press> actions;
+  long long score=0,work=0;
   int depth=0;
-  while(depth<PLACEMENT_COUNT&&Clock::now()-started<chrono::milliseconds(1460)){
+};
+SearchResult solve_beam(
+    ModStampProblem& p,int width,Clock::time_point deadline){
+  auto initial=p.make_initial_state();
+  ActionBeamRunner<ModStampProblem> beam(p,initial,p.initial_score(),width);
+  int depth=0;
+  long long work=0;
+  while(depth<PLACEMENT_COUNT&&Clock::now()<deadline){
+    for(auto& s:beam.states())work+=p.generate_actions(s).size();
     if(!beam.step())break;
     ++depth;
   }
   auto state=beam.best();
-  // Always produce a complete legal schedule if the inherited beam was cut.
+  // Always emit a complete feasible answer even if the search was interrupted.
   while(state.position<PLACEMENT_COUNT){
     const auto& v=p.generate_actions(state);
     auto pick=v.front();
@@ -105,13 +125,52 @@ int main(){
     p.apply_action(state,pick);
   }
   p.validate(state);
-  auto actions=decode(p,state);
-  Board board=state.board;
-  const long long initial_score=accumulate(board.begin(),board.end(),0LL);
+  return {state.board,decode(p,state),
+          accumulate(state.board.begin(),state.board.end(),0LL),work,depth};
+}
+}
+#ifndef AHC032_TEST
+int main(){
+  ios::sync_with_stdio(false);
+  cin.tie(nullptr);
+  const auto started=Clock::now();
+  ModStampProblem p;p.read_input();
+  const auto beam_deadline=started+chrono::milliseconds(1460);
+  SearchResult result;
+  long long work=0;
+  int first_depth=0,second_depth=0,orientation=0;
+  if(AHC032_PORTFOLIO){
+    result=solve_beam(p,AHC032_BEAM_WIDTH/2,beam_deadline);
+    work=result.work;first_depth=result.depth;
+    if(Clock::now()<beam_deadline){
+      auto reverse=rotated(p,3);
+      auto second=solve_beam(reverse,AHC032_BEAM_WIDTH-AHC032_BEAM_WIDTH/2,beam_deadline);
+      second_depth=second.depth;
+      work+=second.work;
+      if(second.score>result.score){
+        result=std::move(second);
+        orientation=3;
+        Board reoriented{};
+        for(int r=0;r<9;++r)for(int c=0;c<9;++c){
+          auto [y,x]=inverse_square_dihedral(r,c,9,orientation);
+          reoriented[y*9+x]=result.board[r*9+c];
+        }
+        result.board=reoriented;
+        for(auto& a:result.actions)
+          tie(a.row,a.column)=inverse_square_dihedral(a.row,a.column,PLACEMENTS_PER_AXIS,orientation);
+      }
+    }
+  }else{
+    result=solve_beam(p,AHC032_BEAM_WIDTH,beam_deadline);
+    work=result.work;first_depth=result.depth;
+  }
+  auto& board=result.board;
+  auto& actions=result.actions;
   const int accepted=AHC032_REPAIR?repair(p,board,actions,started+chrono::milliseconds(1780)):0;
   const long long score=accumulate(board.begin(),board.end(),0LL);
   cout<<actions.size()<<'\n';
   for(auto a:actions)cout<<a.stamp<<' '<<a.row<<' '<<a.column<<'\n';
-  cerr<<"initial="<<initial_score<<" final="<<score<<" depth="<<depth<<" accepted="<<accepted<<'\n';
+  cerr<<"initial="<<result.score<<" final="<<score<<" depth="<<first_depth<<" accepted="<<accepted
+      <<" second="<<second_depth<<" orientation="<<orientation<<" work="<<work<<'\n';
 }
 #endif
