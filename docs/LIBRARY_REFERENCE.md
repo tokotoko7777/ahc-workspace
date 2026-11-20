@@ -2014,3 +2014,18 @@ sort(points.begin(), points.end(), [](const Point& a, const Point& b) {
 
 `bits=10` なら各座標は `0..1023` です。厳密な最近傍順ではありませんが、空間的に
 まとまったcluster作成、query順、cache localityの改善候補を1行のkeyで作れます。
+
+## Budgeted order buckets
+
+ヘッダ: [`budgeted-order-buckets.hpp`](../library/budgeted-order-buckets.hpp)
+
+比較回数が制限されたときに `budgeted_order_buckets(items,budget,compare,rng)`
+で比較順のバケット列を作ります。前のバケットの全要素は後ろのバケットの
+全要素以下です。バケット内部は未整列か、全要素が同値です。
+`compare` は符号付き三値を返し、呼び出し回数は budget を超えません。
+各ピボットでの分割に必要な比較を全部行える場合だけ、その分割を開始します。
+データ取得が比較呼び出しに限られる場合に向きます。
+
+[使用例](../examples/budgeted_order_buckets_usage.cpp)、
+[1,200 件で予算・順序・多重集合を確認するテスト](../tests/budgeted_order_buckets_test.cpp)、
+[AHC025 での秤の初期比較](../problems/ahc025/main.cpp)。
