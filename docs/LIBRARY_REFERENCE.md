@@ -2014,3 +2014,18 @@ sort(points.begin(), points.end(), [](const Point& a, const Point& b) {
 
 `bits=10` なら各座標は `0..1023` です。厳密な最近傍順ではありませんが、空間的に
 まとまったcluster作成、query順、cache localityの改善候補を1行のkeyで作れます。
+
+## CalendarIntervalPacking
+
+ヘッダ: [`calendar-interval-packing.hpp`](../library/calendar-interval-packing.hpp)
+
+整数日 1…T 上で、閉区間を重ねずに重みの合計を最大化します。
+`add(id,first,last,value)` で区間を登録します。`best(blackout,allowed)`
+は、配列中の使用不可日を通らず、`allowed(id)` も真である区間から選び、
+最適値と採用 ID を返します。採用される区間は終了日の逆順です。
+区間候補は保持されるため、使用不可日や既使用 ID を変えて繰り返し
+評価できます。1 評価 O(T＋登録数)、追加作業領域 O(T)。C++20 以降。
+
+[使用例](../examples/calendar_interval_packing_usage.cpp)、
+[部分集合の全列挙による比較](../tests/calendar_interval_packing_test.cpp)、
+[AHC023 での通路を塞げない時期の選別](../problems/ahc023/main.cpp)。
