@@ -2014,3 +2014,22 @@ sort(points.begin(), points.end(), [](const Point& a, const Point& b) {
 
 `bits=10` なら各座標は `0..1023` です。厳密な最近傍順ではありませんが、空間的に
 まとまったcluster作成、query順、cache localityの改善候補を1行のkeyで作れます。
+
+## Agglomerative Pair Merge
+
+[ヘッダ](../library/agglomerative-pair-merge.hpp)・[全候補再走査との差分テスト](../tests/agglomerative_pair_merge_test.cpp)。
+
+候補からスコアが最大の二要素を選び、二つを消して合成要素を追加します。
+初期要素は葉になり、合成順のノード配列と子IDの配列が返ります。
+ペア順位は**その二つの値だけ**に依存する必要があります。
+古いヒープ要素は取り出す時に無効判定します。O(n² log n) 時間、O(n²) メモリ。
+
+```cpp
+auto tree = agglomerative_pair_merge(
+    std::vector<int>{1, 7, 8},
+    [](int a, int b) { return -abs(a - b); },
+    [](int a, int b) { return std::min(a, b); });
+```
+
+[AHC037](../problems/ahc037/main.cpp)では、二点の座標別最小点を合成し、
+大きな共有点から順に接続して原点からの単調木を作ります。
