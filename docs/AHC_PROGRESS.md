@@ -9,7 +9,7 @@
 | 問題 | 状態 | 本番最終 1 位 | 現在の基準値 | 比較条件 | 問題別ブランチ |
 |---|---|---|---|---|---|
 | [AHC001](https://atcoder.jp/contests/ahc001/tasks/ahc001_a) | 本番 1,000 件完走・未達 | **993,823,071,683** 点（[AtCoder 提供の順位データ](https://huggingface.co/datasets/SakanaAI/ALE-Bench/blob/main/ahc001.zip)） | 凍結 v64: **993,411,282,631** 点 | 本番公開シード全 1,000 件・公式採点。最長 4.838 秒（ローカル） | [codex/ahc001-coordinate-slide-20261120](https://github.com/tokotoko7777/ahc-workspace/tree/codex/ahc001-coordinate-slide-20261120) |
-| AHC002 | 既存版と公式比較条件を確認中 | — | — | — | — |
+| [AHC002](https://atcoder.jp/contests/ahc002/tasks/ahc002_a) | 既存版から着手・未判定 | **6,255,977** 点（[AtCoder 提供の順位データ](https://huggingface.co/datasets/SakanaAI/ALE-Bench/blob/main/ahc002.zip)） | 本番 100 件。通常配布の 0–99 は別ケース | 検証中 |
 | AHC003〜074 | 未着手 | — | — | — | — |
 
 ### AHC001 の次の仮説
@@ -39,3 +39,9 @@
 - 参考 1 位 993,823,071,683 点。差 −411,789,052 点、未達。全シードの入力ハッシュ・件数・ケース別記録から集計値を再確認。
 - 凍結バイナリ SHA-256 `c9689986319fe53ac94c0d5567d708274b1aff13bf8cea22e16e424ca354ed7a`。[再現手順](https://github.com/tokotoko7777/ahc-workspace/blob/fe7273b40cc8cc8671283ace5d30b6aaf6ceec1a/problems/ahc001/README.md) の full suite を使用。ケースは公式ツールで生成し、比較時は時間制限 5 秒。
 - 1 位を超える改良は継続。次は順序制約を最小カットに落とし、離れた境界も一度に動かす案を、新しい開発用・未使用シードで比較する。本番評価と切り離し、AHC002 の準備も進める。
+
+### AHC002 の比較条件
+
+- [公式問題文](https://atcoder.jp/contests/ahc002/tasks/ahc002_a): 100 ケースの得点の総和を最大化。本番後のシステムテストなし。1 ケースでも不正または時間超過なら提出全体が 0 点。配布入力 0–99 は本番と異なるため、ローカル開発比較で 1 位超えは判定しない。
+- [AtCoder 提供データ](https://huggingface.co/datasets/SakanaAI/ALE-Bench/blob/main/ahc002.zip) の `standings_scores.csv` で1位 6,255,977 点を確認。アーカイブ SHA-256 `c39b6db91b1956d3f816e63755103622e0ec090d84c6cf81dba1abb5c631ebd9` は配布元と一致。
+- [ALE-Bench の論文 §A.2.2](https://arxiv.org/html/2506.09050v2) は full 版の非公開評価に本番と同じケースを使用すると記載。ケースやシードを直接参照せず、対応する評価インターフェースで公式と同じ集計・合法性を確認できた場合だけ比較する。現在は未判定。
