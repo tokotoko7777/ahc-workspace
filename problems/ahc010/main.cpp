@@ -101,6 +101,10 @@ struct Board {
   }
 };
 
+#if defined(AHC010_PATCH_DIAGNOSTIC) || defined(AHC010_PATCH_TEST)
+#include "contracted-patch.hpp"
+#endif
+
 pair<array<int,N>,int> solve(Board& b,Clock::time_point stop, uint32_t seed){
   mt19937 rng(seed);
   auto best_rot=b.rotation;
@@ -159,6 +163,7 @@ pair<array<int,N>,int> solve(Board& b,Clock::time_point stop, uint32_t seed){
 }
 } // namespace
 
+#ifndef AHC010_NO_MAIN
 int main(){
   const auto start=Clock::now();
   ios::sync_with_stdio(false);
@@ -172,12 +177,27 @@ int main(){
   for(auto& board:b) board.initialize();
   auto [left,l]=solve(b[0],start+chrono::milliseconds(AHC010_LIMIT_MS/2),1739);
   auto [right,r]=solve(b[1],start+chrono::milliseconds(AHC010_LIMIT_MS),7181);
-  for(int i=0;i<H;++i){
-    for(const auto& p:{cref(left),cref(right)})
-      for(int j=0;j<W;++j) cout<<p.get()[i*W+j];
-  }
-  cout<<'\n';
+  auto output=[&](ostream& out,const array<int,N>& a,const array<int,N>& b){
+    for(int i=0;i<H;++i){
+      for(const auto& p:{cref(a),cref(b)})
+        for(int j=0;j<W;++j) out<<p.get()[i*W+j];
+    }
+    out<<'\n';
+  };
+#ifdef AHC010_PATCH_DIAGNOSTIC
+  auto a=compare_patches(b[0],left,l,start+chrono::milliseconds(1860));
+  auto c=compare_patches(b[1],right,r,start+chrono::milliseconds(1910));
+  cerr << "l="<<l<<" r="<<r<<" sl="<<a.single_length<<" sr="<<c.single_length
+       <<" jl="<<a.joint_length<<" jr="<<c.joint_length
+       <<" lp="<<a.patches<<" rp="<<c.patches<<'\n';
+  output(cerr,left,right);
+  output(cerr,a.single,c.single);
+  left=a.joint;
+  right=c.joint;
+#endif
+  output(cout,left,right);
 #ifdef AHC010_STATS
   cerr<<"left="<<l<<" right="<<r<<'\n';
 #endif
 }
+#endif
