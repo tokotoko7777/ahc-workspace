@@ -12,6 +12,9 @@
 #include <string>
 #include <utility>
 #include <vector>
+#ifdef AHC_PROBE_DESIGN
+#include "../../library/gaussian-linear-information.hpp"
+#endif
 
 #include <algorithm>
 #include <array>
@@ -272,6 +275,20 @@ struct GaussianModel {
 
     double cost(int edge) const { return planning_cost[feature[edge]]; }
 
+#ifdef AHC_PROBE_DESIGN
+    std::pair<double,double> experiment(const std::vector<int>& path) const {
+        std::vector<int> counts(size);
+        std::vector<std::pair<int,double>> active;
+        for (int edge : path) ++counts[feature[edge]];
+        for (int k = 0; k < size; ++k) if (counts[k]) active.push_back({k, counts[k]});
+        double predicted = 0.0;
+        for (auto [k, x] : active) predicted += mean[k] * x;
+        const double noise = std::max(1.0, predicted * predicted / 300.0 + extra_noise * path.size());
+        return {predicted, gaussian_linear_information::expected_reduction(
+            size, covariance, active, noise).trace_drop / size};
+    }
+#endif
+
     double update(const std::vector<int> &path, int observed) {
         std::vector<int> counts(size), active;
         active.reserve(path.size());
@@ -448,6 +465,56 @@ int main(int argc, char **argv) {
             }
         } else for (int edge = 0; edge < EDGES; ++edge) edge_costs.values[edge] = model.cost(edge);
         auto [moves, edges] = grid.route(sr * SIDE + sc, tr * SIDE + tc, edge_costs);
+#ifdef AHC_PROBE_DESIGN
+        // On early turns, compare the existing route, an exploit-only route,
+        // and a more exploratory route. Information uses the noise along the
+        // entire selected path, not independent per-edge uncertainty bonuses.
+        if (turn < 140 && turn % 2 == 0 && turn >= straight_start) {
+            const double p = mixture
+                ? (locked ? double(locked == 1) : 1.0 / (1.0 + std::exp(-model_log_odds)))
+                : 1.0;
+            EdgeCosts exploit, explore;
+            for (int edge = 0; edge < EDGES; ++edge) {
+                int i = model.feature[edge];
+                int j = mixture ? split_model->feature[edge] : 0;
+                double a = model.mean[i];
+                double b = mixture ? split_model->mean[j] : a;
+                double average = p * a + (1 - p) * b;
+                double variance = p * model.covariance[i * model.size + i]
+                    + (mixture ? (1 - p) * split_model->covariance[j * split_model->size + j] : 0)
+                    + p * (1 - p) * (a - b) * (a - b);
+                exploit.values[edge] = std::clamp(average, 0.8, 9.0);
+                explore.values[edge] = std::clamp(
+                    average - 2.25 * std::sqrt(std::max(0.0, variance)), 0.8, 9.0);
+            }
+            using Route = std::pair<std::string, std::vector<int>>;
+            std::array<Route,3> routes{Route{moves,edges},
+                grid.route(sr * SIDE + sc, tr * SIDE + tc, exploit),
+                grid.route(sr * SIDE + sc, tr * SIDE + tc, explore)};
+            std::array<double,3> predictions{}, gains{};
+            for (int i = 0; i < 3; ++i) {
+                for (int edge : routes[i].second) predictions[i] += exploit.values[edge];
+                bool duplicate = false;
+                for (int j = 0; j < i; ++j) if (routes[i].first == routes[j].first) {
+                    gains[i] = gains[j]; duplicate = true; break;
+                }
+                if (duplicate) continue;
+                if (p >= 0.05) gains[i] += p * model.experiment(routes[i].second).second;
+                if (mixture && p <= 0.95) gains[i] += (1 - p) * split_model->experiment(routes[i].second).second;
+            }
+            double shortest = *std::min_element(predictions.begin(), predictions.end());
+            double max_gain = std::max(1e-18, *std::max_element(gains.begin(), gains.end()));
+            int best = 0;
+            double best_objective = 1e100;
+            double lambda = 0.20 * (1.0 - turn / 140.0);
+            for (int i = 0; i < 3; ++i) {
+                double objective = predictions[i] / shortest - lambda * gains[i] / max_gain;
+                if (objective < best_objective) { best_objective = objective; best = i; }
+            }
+            moves = std::move(routes[best].first);
+            edges = std::move(routes[best].second);
+        }
+#endif
         if (turn < straight_start) {
             double best = 1e100;
             for (bool horizontal_first : {false, true}) {

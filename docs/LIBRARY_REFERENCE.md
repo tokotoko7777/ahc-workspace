@@ -2014,3 +2014,17 @@ sort(points.begin(), points.end(), [](const Point& a, const Point& b) {
 
 `bits=10` なら各座標は `0..1023` です。厳密な最近傍順ではありませんが、空間的に
 まとまったcluster作成、query順、cache localityの改善候補を1行のkeyで作れます。
+
+### gaussian-linear-information.hpp
+
+共分散行列 `C` を持つ推定で、疎な特徴ベクトル `x` と独立雑音分散 `R`
+の候補観測を比較します。行列を変更せず、信号分散 `x^T C x` と、
+線形ガウスモデルでの事後共分散のトレース減少
+`||C x||² / (R + x^T C x)` を計算します。特徴は添字が重複しない
+非ゼロ係数列、行列は行優先の対称半正定値、雑音分散は正。
+計算量は行列の次元と特徴の非ゼロ数の積です。C++20 以降の
+`std::span` を使用します。
+
+[最小使用例](../examples/gaussian_linear_information_usage.cpp)、
+[密な更新との比較テスト](../tests/gaussian_linear_information_test.cpp)、
+[AHC003 の経路候補比較](../problems/ahc003/main.cpp)。
