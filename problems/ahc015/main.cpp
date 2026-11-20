@@ -5,6 +5,9 @@ using namespace std;
 #ifndef AHC015_ROLLOUT
 #define AHC015_ROLLOUT 1
 #endif
+#ifndef AHC015_LONG_ROLLOUT
+#define AHC015_LONG_ROLLOUT 0
+#endif
 
 namespace {
 using Clock=chrono::steady_clock;
@@ -110,8 +113,10 @@ int decision(const Board& b,int t,const Flavors& color,Rng& rng,Clock::time_poin
   }else{
     const auto stop=min(hard,Clock::now()+chrono::milliseconds(15));
     if(AHC015_ROLLOUT){
-      constexpr int samples=26, horizon=6;
+      constexpr int horizon=AHC015_LONG_ROLLOUT?12:6;
       const int h=min(horizon,T-1-t);
+      // Same deterministic simulated placement budget per direction as 26x6.
+      const int samples=26*min(6,T-1-t)/h;
       for(int sample=0;sample<samples && Clock::now()<stop;++sample){
         array<int,horizon> ranks{};
         for(int i=0;i<h;++i)ranks[i]=rng.rank(T-1-t-i);

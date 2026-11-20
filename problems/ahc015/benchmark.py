@@ -91,8 +91,8 @@ def independent(flavors,ranks,answer):
     return (2_000_000*squares+denom)//(2*denom),squares,largest
 
 
-def seeds(split):
-    return [int.from_bytes(hashlib.sha256(f"ahc015/rollout-v1/{split}/{i}".encode())
+def seeds(split,tag="rollout-v1"):
+    return [int.from_bytes(hashlib.sha256(f"ahc015/{tag}/{split}/{i}".encode())
                            .digest()[:8],"little") for i in range(24)]
 
 
@@ -100,6 +100,8 @@ def main():
     arg=argparse.ArgumentParser(description=__doc__)
     for k in ("gen","vis","base","rollout","csv"):
         arg.add_argument(k,type=Path)
+    arg.add_argument("--tag",default="rollout-v1")
+    arg.add_argument("--candidate-label",default="rollout")
     a=arg.parse_args()
     gen,vis,base,rollout=(x.resolve() for x in (a.gen,a.vis,a.base,a.rollout))
     with tempfile.TemporaryDirectory() as d, a.csv.open("w",newline="") as f:
@@ -108,12 +110,12 @@ def main():
         write=csv.writer(f,lineterminator="\n")
         write.writerow(("split","seed","arm","score","squares","max1","max2","max3","seconds"))
         for split in ("dev","holdout"):
-            inp_seeds.write_text("".join(f"{s}\n" for s in seeds(split)))
+            inp_seeds.write_text("".join(f"{s}\n" for s in seeds(split,a.tag)))
             subprocess.run([gen,inp_seeds],cwd=work,check=True)
-            for i,s in enumerate(seeds(split)):
+            for i,s in enumerate(seeds(split,a.tag)):
                 inp=work/"in"/f"{i:04}.txt"
                 flavors,ranks=gamecase(inp.read_bytes())
-                arms=[("base",base),("rollout",rollout)]
+                arms=[("base",base),(a.candidate_label,rollout)]
                 for arm,binary in (arms if i%2==0 else arms[::-1]):
                     answer,seconds=lockstep(binary,flavors,ranks)
                     score,squares,largest=independent(flavors,ranks,answer)
