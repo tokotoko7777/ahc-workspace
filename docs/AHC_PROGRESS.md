@@ -69,9 +69,10 @@
 | [AHC057](https://atcoder.jp/contests/ahc057/tasks/ahc057_a) | 着手・本番未判定 | yochan、得点未確認 | 新規未調整28件 合計130,959,921 | 本番150件・2秒、同一ケースの証拠なし | [合流時刻](https://github.com/tokotoko7777/ahc-workspace/tree/597f72f03de27400f38dd4cff9f5ee779055c0be)、[グループ交換](https://github.com/tokotoko7777/ahc-workspace/tree/743f74ba0a89e40350d866c59c3bb1ce6a036bf1) |
 | [AHC058](https://atcoder.jp/contests/ahc058/tasks/ahc058_a) | 着手・本番未判定 | fishylene、得点未確認 | 既存：未調整24件 平均5,187,704.58 | 本番150件、同一ケースの証拠なし | [問題別ブランチ](https://github.com/tokotoko7777/ahc-workspace/tree/c75e684905c14eb10a7d59da3c9e9d81d8f9ce7a)、[後期の購入順](https://github.com/tokotoko7777/ahc-workspace/tree/23fa6eb16cc7acbe74babdf1ff9f57b7f993d483) |
 | [AHC059](https://atcoder.jp/contests/ahc059/tasks/ahc059_a) | 着手・本番未判定 | chokudai、得点未確認 | 新規未調整28件 得点425,047（34,153移動） | 本番150件・2秒、同一ケースの証拠なし | [入れ子回収](https://github.com/tokotoko7777/ahc-workspace/tree/4848abd431bd612b8ab15199f2f5562fe1598974)、[部分列移動](https://github.com/tokotoko7777/ahc-workspace/tree/905faa4a34b05a6b0d5ded139f08fd8414e366fd) |
-| [AHC060](https://atcoder.jp/contests/ahc060/tasks/ahc060_a) | 着手・本番未判定 | Sweet_Sweet_Soul、得点未確認 | 開発比較中 | 本番150件、同一ケースの証拠なし | 検証中 |
-| [AHC061](https://atcoder.jp/contests/ahc061/tasks/ahc061_a) | 着手・本番未判定 | **2,424,667,397,941**（相対点） | 開発比較中 | 本番3,000件、公式ケース別基準を取得 | 検証中 |
-| AHC062〜074 | 未着手 | — | — | — | — |
+| [AHC060](https://atcoder.jp/contests/ahc060/tasks/ahc060_a) | 着手・本番未判定 | Sweet_Sweet_Soul、得点未確認 | 新規未調整24件 平均992.333 | 本番150件、同一ケースの証拠なし | [経路重複除去](https://github.com/tokotoko7777/ahc-workspace/tree/204933bff927c6bac159926766888181897cc748)、[途中で色を変更](https://github.com/tokotoko7777/ahc-workspace/tree/6e7f42ee36c537681b0db68526aba19077582ad0) |
+| [AHC061](https://atcoder.jp/contests/ahc061/tasks/ahc061_a) | 着手・本番未判定 | **2,424,667,397,941**（相対点） | 既定：未調整28件 2,596,131 | 本番3,000件、公式ケース別基準を取得 | [問題別ブランチ](https://github.com/tokotoko7777/ahc-workspace/tree/41ec433123816f9d026a4b719c5aeddbec16c29c) |
+| [AHC062](https://atcoder.jp/contests/ahc062/tasks/ahc062_a) | 着手・本番未判定 | gazelle、得点未確認 | 開発比較中 | 本番100件・3秒、同一ケースの証拠なし | 検証中 |
+| AHC063〜074 | 未着手 | — | — | — | — |
 
 ### AHC001 の次の仮説
 
@@ -806,3 +807,16 @@ AHC056は[公式採点CSV](https://img.atcoder.jp/ahc_standings/ahc056/result.cs
 
 [AHC060](https://atcoder.jp/contests/ahc060/tasks/ahc060_a)は本番150件の絶対点、1位名Sweet_Sweet_Soul、得点は未確認。同じ初期解と展開数で、ランダムな経路の候補と、同じ商品・現在地・直前位置を重複除去する候補を比べる。
 [AHC061](https://atcoder.jp/contests/ahc061/tasks/ahc061_a)の[公式採点CSV](https://img.atcoder.jp/ahc_standings/ahc061/result.csv)は1,171人×3,000件、ケース別最高値による相対点で1位2,424,667,397,941（cuthbert）、上位3名の順位が公式結果JSONと一致。相手方針の推定と手の評価を揃え、占有によって到達できる場所がどう変わるかを評価に加える案を比較する。
+
+### AHC060 配送マクロの重複除去と色変え
+
+[初回](https://github.com/tokotoko7777/ahc-workspace/tree/204933bff927c6bac159926766888181897cc748)。同じ暖機・展開上限1,000で、ランダムな配送経路と、直前地点・現在地・出力文字列を正確に照らして重複を除く方法を比較。未調整24件882.750→894.875（19勝5敗、中央値+14）、96出力で公式と独立の全10,000操作が一致、最大0.087508秒。
+[追試](https://github.com/tokotoko7777/ahc-workspace/tree/6e7f42ee36c537681b0db68526aba19077582ad0)。幅と展開上限を同じにし、配送の途中で色を不可逆に1回変える候補を追加。新規未調整24件は凍結888.833、同幅の色固定887.042、色変え992.333（全勝、対色固定中央値+105点）。色変え版は試行数と時間も少なく、全144出力で公式・独立一致、最大0.111667秒。専用既定に採用、本番未判定。次は今色を変えることにより後で得られる文字列の候補がどの程度残るかを評価する。
+
+### AHC061 領土の接続・進出可能性を評価する
+
+[検証](https://github.com/tokotoko7777/ahc-workspace/tree/41ec433123816f9d026a4b719c5aeddbec16c29c)。同じ予測48プロファイルと衝突判定を使い、局所得点の評価に占領後の到達範囲・接続・前線を追加。dev14件1,426,669→1,452,720（8勝）、未調整28件2,596,131→2,511,876（14勝14敗、−3.25%）。全84対話で100ターン合法、公式・独立・内部得点が一致。既定は予測＋局所得点のまま。次は同じ相手方針乱数で次の同時手まで見て、得点比で比べる。公式3,000件のseed列は照合済みだが未測定。
+
+### AHC062 本番条件
+
+[公式問題文](https://atcoder.jp/contests/ahc062/tasks/ahc062_a)。3秒、200×200のキング移動で全セル訪問、訪問順×人口を使う各ケース絶対点、本番100件。公式結果JSONの首位gazelleの点数は未確認。蛇行路の同じ初期解から、区間反転に加えて端点を変える操作を同じ提案数で試す。
