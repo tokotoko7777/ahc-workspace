@@ -55,9 +55,10 @@
 | [AHC045](https://atcoder.jp/contests/ahc045/tasks/ahc045_a) | 凍結版：本番未達 | **2,988,855,588,054**（相対点） | **1,809,922,568,865**（本番3,000件・全件合法） | 本番3,000件・2秒、基準とseed列照合済み | [順序推定](https://github.com/tokotoko7777/ahc-workspace/tree/ef908953cb79d12f7f5f71ef4aaef53d45fc4c04)、[グループ交換](https://github.com/tokotoko7777/ahc-workspace/tree/f594e37f013614a169ff675440bfcfec1e63d219)、[公式比較](https://github.com/tokotoko7777/ahc-workspace/tree/8d199405dc9bbdc8821997230ee282b8b4af168a) |
 | [AHC046](https://atcoder.jp/contests/ahc046/tasks/ahc046_a) | 着手・本番未判定 | **220,494**（絶対点） | 新規未調整30件 平均217.600手 | 本番150件・2秒、同一ケースの証拠なし | [停止ブロック](https://github.com/tokotoko7777/ahc-workspace/tree/00edc1ce4028926dcc2cfb8316e64994f3fe89bb)、[複数区間の探索](https://github.com/tokotoko7777/ahc-workspace/tree/8c258bffae710ee7b3764fa8f0da9e95d59a4f6d) |
 | [AHC047](https://atcoder.jp/contests/ahc047/tasks/ahc047_a) | 着手・本番未判定 | itigo、得点未確認 | 新規未調整24件 得点平均26,281.33 | 本番150件・2秒、同一ケースの証拠なし | [問題別ブランチ](https://github.com/tokotoko7777/ahc-workspace/tree/e8aa0d41b813933b676a6b0cb442f1e51e7a92bc)、[共有する文字列経路](https://github.com/tokotoko7777/ahc-workspace/tree/62f3f7888cb37d53f9c45bc289e04078ccf857d2) |
-| [AHC048](https://atcoder.jp/contests/ahc048/tasks/ahc048_a) | 着手・本番未判定 | **1,129,730,769,846**（相対点） | 未調整28件 費用22,488,549 | 本番2,000件・3秒、基準とseed列照合済み | [問題別ブランチ](https://github.com/tokotoko7777/ahc-workspace/tree/ad4f7e6bcdfa76f80a9b92052ea060f72085dc06) |
-| [AHC049](https://atcoder.jp/contests/ahc049/tasks/ahc049_a) | 着手・本番未判定 | 確認中 | 開発比較準備中 | 確認中 | 検証中 |
-| AHC050〜074 | 未着手 | — | — | — | — |
+| [AHC048](https://atcoder.jp/contests/ahc048/tasks/ahc048_a) | 凍結版：本番未達 | **1,129,730,769,846**（相対点） | **121,378,823,586**（本番2,000件・全件合法） | 本番2,000件・3秒、基準とseed列照合済み | [問題別ブランチ](https://github.com/tokotoko7777/ahc-workspace/tree/ad4f7e6bcdfa76f80a9b92052ea060f72085dc06)、[容量3](https://github.com/tokotoko7777/ahc-workspace/tree/2264494b2ec7fa3fa9cc1161c9cc7d3891649bcb)、[公式比較](https://github.com/tokotoko7777/ahc-workspace/tree/bd0d1fd309af7f9ba834e6688b8391a6afa2c3af) |
+| [AHC049](https://atcoder.jp/contests/ahc049/tasks/ahc049_a) | 着手・本番未判定 | Rafbill、得点未確認 | 未調整28件 平均5,167.64移動 | 本番150件・2秒、同一ケースの証拠なし | [問題別ブランチ](https://github.com/tokotoko7777/ahc-workspace/tree/a4688d135b0ecabf49fe877895782ced3e0aa5ca) |
+| [AHC050](https://atcoder.jp/contests/ahc050/tasks/ahc050_a) | 着手・本番未判定 | 確認中 | 開発比較準備中 | 確認中 | 検証中 |
+| AHC051〜074 | 未着手 | — | — | — | — |
 
 ### AHC001 の次の仮説
 
@@ -682,3 +683,14 @@
 ### AHC048 余った色を次の混色に利用
 
 [検証と実装](https://github.com/tokotoko7777/ahc-workspace/tree/ad4f7e6bcdfa76f80a9b92052ea060f72085dc06)。同じ2マス容量の井戸と色選択を使い、残った1gに新しい色を足せる案を追加した。dev14件15,520,443→13,428,201（13勝）、未調整28件26,983,603→22,488,549（−16.66%、26勝2分）。全84出力が公式・独立・C++内得点と一致、最大0.008秒、最大2,016操作、C++23単一ファイルでも一致。問題別既定は合法な2案の良い方。[公式採点CSV](https://img.atcoder.jp/ahc_standings/ahc048/result.csv)（SHA-256 `94707ef0dc8cdf6d2fac510234b75854a6f5b1aff78687d4210d00d9a23ab715`）1,205人×2,000件から、公式結果と整合する1位1,129,730,769,846を確認。次はより容量の大きい井戸で将来の色を見越し、凍結後に本番同一評価ができるか検証する。
+
+### AHC048 井戸の容量を上げる追試と本番比較
+
+[追試](https://github.com/tokotoko7777/ahc-workspace/tree/2264494b2ec7fa3fa9cc1161c9cc7d3891649bcb)。容量2の井戸を使う既存案に、容量3で余りを持ち越す案を追加。未調整28件で費用22,479,484→15,417,918（−31.41%、25勝1敗2分）、合法な2案の良い方なら15,417,227。最大0.027秒、全84件の公式・独立と単一ファイルの得点一致。問題別既定に採用。
+
+[公式比較](https://github.com/tokotoko7777/ahc-workspace/tree/bd0d1fd309af7f9ba834e6688b8391a6afa2c3af/problems/ahc048)。容量を選ぶ版を凍結し、公式seedの全2,000件でfile・seed・K・T・Dを照合。全件合法で公式・独立・C++内の評価一致。絶対費用合計1,213,262,536、最大2,237操作・0.083秒。相対点は候補 **121,378,823,586**、首位 **1,129,730,769,846**。ケース最小更新0のため同じ基準で集計でき、1,206人中355位相当、同点なし。**未達**、main未マージ。次は複数のチューブの配合を操作数・材料費と合わせて事前評価する。
+
+### AHC049 箱の耐久余裕を使った運搬経路探索
+
+[公式問題文](https://atcoder.jp/contests/ahc049/tasks/ahc049_a)。2秒 / 1,024 MiB、操作は16,000以下で耐久値を正に保つ。全搬出なら16,400−移動数の絶対点、本番150件。公式結果JSONの首位はRafbill、得点と同一ケースは未確認。
+[検証と実装](https://github.com/tokotoko7777/ahc-workspace/tree/a4688d135b0ecabf49fe877895782ced3e0aa5ca)。最短方向だけの積み方に対し、箱の追加と帰路の耐久性を毎回厳密にチェックして、少し離れた箱も幅14のビームで検討。dev28件6,426.14→5,077.00移動/件、未調整28件6,482.50→5,167.64（全56件改善、未調整中央値1,357移動短縮）。全112出力で公式・独立が一致し完了、最低耐久1・最大7,319操作・0.131841秒。問題別既定に採用。次は運搬の土台に選ぶ箱の候補を同予算で増やす。
