@@ -2014,3 +2014,19 @@ sort(points.begin(), points.end(), [](const Point& a, const Point& b) {
 
 `bits=10` なら各座標は `0..1023` です。厳密な最近傍順ではありませんが、空間的に
 まとまったcluster作成、query順、cache localityの改善候補を1行のkeyで作れます。
+
+## Reflection launch range
+
+ヘッダ: [`reflection-launch-range.hpp`](../library/reflection-launch-range.hpp)
+
+1次元で出発・着地点を範囲 `[0,n)` 内に保ちつつ、
+点反転の前後の必要歩数を最小化する発射位置を全て求めます。
+返り値は両端を含む区間で、軸ごとに使うと直積の長方形になります。
+
+```cpp
+auto [first, last] = reflection_launch_range(8, 2, 6, 4);
+// 2c-goal = 2 なので最短の発射位置は2だけ
+```
+
+O(1)。[AHC073の同コスト候補](../problems/ahc073/main.cpp) と
+[発射位置の全列挙テスト](../tests/reflection_launch_range_test.cpp)。
