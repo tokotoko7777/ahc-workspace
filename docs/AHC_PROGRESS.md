@@ -22,7 +22,8 @@
 | [AHC012](https://atcoder.jp/contests/ahc012/tasks/ahc012_a) | ローカル比較・本番未判定 | **99,781,619** 点（[AtCoder 提供の順位データ](https://huggingface.co/datasets/SakanaAI/ALE-Bench/blob/main/ahc012.zip)） | 格子版: 未調整 8 件平均 972,456.375 | 本番 100 件・3 秒。同一性未確認 | [問題別ブランチ](https://github.com/tokotoko7777/ahc-workspace/tree/dc1a18935430728a5dbca82c14f8bc84c57145e1) |
 | [AHC013](https://atcoder.jp/contests/ahc013/tasks/ahc013_a) | ローカル改善・本番の自己得点を評価中 | [公式順位](https://atcoder.jp/contests/ahc013/standings) 要ログイン。1 位の点数未確認 | 隣接移動版: 未調整 20 件 64,679 | 本番公開 2,000 シード、3 秒 | [問題別ブランチ](https://github.com/tokotoko7777/ahc-workspace/tree/7526fecad74457ce05f786e5127c4e45c0357203) |
 | [AHC014](https://atcoder.jp/contests/ahc014/tasks/ahc014_a) | ローカル改善・本番未判定 | **3,122,399,998** 点（[AtCoder 提供の順位データ](https://huggingface.co/datasets/SakanaAI/ALE-Bench/blob/main/ahc014.zip)） | 再成長版: 未調整 6 件平均 880,722.83 | 本番公開 2,000 シード、5 秒 | [問題別ブランチ](https://github.com/tokotoko7777/ahc-workspace/tree/25c2dea8a3d5f9b07432ee1a2b239cf4bd820cff) |
-| AHC015〜074 | 未着手 | — | — | — | — |
+| AHC015 | 着手・未判定 | 確認中 | — | — | 検証中 |
+| AHC016〜074 | 未着手 | — | — | — | — |
 
 ### AHC001 の次の仮説
 
@@ -225,3 +226,9 @@
 - 開発 6 件平均 788,064.17 → 810,083.17（5 勝 1 敗）、未調整 6 件 862,623.67 → 880,722.83（4 勝 2 敗）。全 24 出力で公式と独立線分検査が一致、最長 4.564538 秒（5 秒制限）。C++23 単一ファイルを含めて検証し、研究ブランチの既定に保存。
 - 本番 1 位 3,122,399,998 点、平均約 156 万。順位データ SHA-256 `43624bb9c24795ef1e792bace66bfeb59787265b025750b8708bee692c2e5021` を照合した。公開本番 2,000 件は今の版では未評価。本番比較は未判定。
 - 次は手順の末尾を全消去せず、一つの長方形と、それに依存する後続手だけを除き、無関係なほかの手を維持する。
+
+### AHC014 依存先だけを削除して再成長
+
+- [固定開始からの比較・再現手順](https://github.com/tokotoko7777/ahc-workspace/blob/b56da5cc4b1c38a5cd7cc4a9a8f90e7661ddb857/problems/ahc014/README.md)。長方形の新しい頂点に依存する後続手だけを除く方式を、削除数を揃えた末尾削除と比較。凍結 4,270 ms の開始解から 1 入力 32 対を実行。
+- 開発 6 件の平均 832,521.67 → 842,875.33（5 勝 1 分）、独立確認 6 件 899,786.50 → 909,102.33（6 勝）。全 384 試行対完了、出力 36 件は公式と独立検査一致、最長 4.366745 秒。ランダム 100 盤面の依存関係と C++23 結合を検証。
+- 既定の 4,550 ms 版との等時間比較ではないため任意実験。次は同じ予算を再始動と依存削除へ配分し、通常解を対照にする。本番集計はまだ未判定。
