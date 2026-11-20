@@ -28,21 +28,73 @@ struct Scale {
         return cmp(std::span(&a,1),std::span(&b,1));
     }
 };
+#ifdef AHC025_GROUP_INFORMATION
+struct SignScheduler {
+    std::vector<double> mean,variance;
+    static double cdf(double z) {return .5*std::erfc(-.7071067811865475*z);}
+    static double pdf(double z) {return .3989422804014327*std::exp(-.5*z*z);}
+    std::pair<double,double> gap(const std::vector<int>& a,const std::vector<int>& b) const {
+        double m=0.,v=0.;
+        for(int i:a) m+=mean[i],v+=variance[i];
+        for(int i:b) m-=mean[i],v+=variance[i];
+        return {m,std::max(v,1e-12)};
+    }
+    double information(const std::vector<int>& a,const std::vector<int>& b) const {
+        const auto [m,v]=gap(a,b);
+        const double z=m/std::sqrt(v),p=cdf(z),r=cdf(-z),f=pdf(z);
+        return std::min(p,r)<1e-14 ? 0. : v*f*f/(p*r);
+    }
+    void observe(const std::vector<int>& a,const std::vector<int>& b,int sign) {
+        const auto [m,v]=gap(a,b);
+        const double sd=std::sqrt(v);
+        double shift=-m,shrink=1.;
+        if(sign) {
+            const double z=sign*m/sd,p=cdf(z);
+            const double f=p>1e-14 ? pdf(z)/p : -z+1./std::max(1.,-z);
+            shift=sign*sd*f;
+            shrink=std::clamp(f*(f+z),0.,1.);
+        }
+        auto change=[&](int i,int side) {
+            const double fraction=variance[i]/v;
+            mean[i]+=side*fraction*shift;
+            variance[i]*=1.-fraction*shrink;
+        };
+        for(int i:a) change(i,1);
+        for(int i:b) change(i,-1);
+    }
+};
+#endif
 struct Balancer {
     int n,d;
     std::vector<double> w,load;
     std::vector<int> rank,where,version;
     std::vector<std::vector<int>> group;
+#ifdef AHC025_GROUP_INFORMATION
+    SignScheduler scheduler;
+#endif
     Balancer(int n,int d):n(n),d(d),w(n),load(d),rank(n),where(n),version(d),group(d){}
     void initialize(const std::vector<std::vector<int>>& buckets,std::mt19937& rng) {
         const double truncate=-std::expm1(-double(n)/d);
         int rank_index=0,offset=0;
+#ifdef AHC025_GROUP_INFORMATION
+        scheduler.mean.resize(n);
+        scheduler.variance.resize(n);
+#endif
         for(const auto& bucket:buckets) {
             double mean=0;
             for(int i=0;i<int(bucket.size());++i)
                 mean-=std::log1p(-truncate*(offset+i+.5)/n);
             mean/=bucket.size();
             for(int id:bucket) {w[id]=mean;rank[id]=rank_index;}
+#ifdef AHC025_GROUP_INFORMATION
+            double v=0.;
+            for(int i=0;i<int(bucket.size());++i) {
+                const double p=(offset+i+.5)/n,deriv=truncate/(1.-truncate*p);
+                const double diff=-std::log1p(-truncate*p)-mean;
+                v+=p*(1.-p)/(n+2.)*deriv*deriv+diff*diff;
+            }
+            for(int id:bucket) scheduler.mean[id]=mean,scheduler.variance[id]=v/bucket.size();
+#endif
             offset+=bucket.size();++rank_index;
         }
         for(auto it=buckets.rbegin();it!=buckets.rend();++it) for(int id:*it) {
@@ -65,17 +117,38 @@ struct Balancer {
         };
         std::vector<Cache> history(d*d);
         const int max_attempts=5*scale.queries;
+#ifdef AHC025_GROUP_INFORMATION
+        const int early_end=scale.queries/2;
+        auto priority=[&](int a,int b,bool early) {
+            if(!early) return std::abs(load[a]-load[b]);
+            if(a==b) return -1.;
+            if(a>b) std::swap(a,b);
+            auto& saved=history[a*d+b];
+            if(saved.va==version[a] && saved.vb==version[b]) return 0.;
+            return scheduler.information(group[a],group[b]);
+        };
+#endif
         for(int attempt=0;attempt<max_attempts&&scale.queries>=2;++attempt) {
             int a=rng()%d,b=rng()%d;
             if(a==b) continue;
+#ifdef AHC025_GROUP_INFORMATION
+            const bool early=scale.queries>early_end;
+#endif
             if(attempt%3==0) for(int tries=0;tries<2;++tries) {
                 int x=rng()%d,y=rng()%d;
+#ifdef AHC025_GROUP_INFORMATION
+                if(priority(x,y,early)>priority(a,b,early)) a=x,b=y;
+#else
                 if(std::abs(load[x]-load[y])>std::abs(load[a]-load[b])) a=x,b=y;
+#endif
             }
             if(a>b) std::swap(a,b);
             auto& cache=history[a*d+b];
             if(cache.va!=version[a]||cache.vb!=version[b]) {
                 cache={version[a],version[b],scale.cmp(group[a],group[b]),{}};
+#ifdef AHC025_GROUP_INFORMATION
+                if(early) scheduler.observe(group[a],group[b],cache.sign);
+#endif
             }
             if(!cache.sign) continue;
             if(cache.sign<0) std::swap(a,b);
