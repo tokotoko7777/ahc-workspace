@@ -13,8 +13,9 @@
 | [AHC003](https://atcoder.jp/contests/ahc003/tasks/ahc003_a) | 本番 3,000 件完走・未達 | **2,926,767,743,437** 点（[AtCoder 提供の順位データ](https://huggingface.co/datasets/SakanaAI/ALE-Bench/blob/main/ahc003.zip)） | 凍結既存版: **2,925,781,453,112** 点 | 本番公開シード全 3,000 件・公式対話テスタ・最大ローカル 0.897 秒 | [codex/ahc003-probe-design-20261120](https://github.com/tokotoko7777/ahc-workspace/tree/codex/ahc003-probe-design-20261120) |
 | [AHC004](https://atcoder.jp/contests/ahc004/tasks/ahc004_a) | ローカル改善・本番未判定 | **7,321,305,762** 点（[AtCoder 提供の順位データ](https://huggingface.co/datasets/SakanaAI/ALE-Bench/blob/main/ahc004.zip)） | 周期パターン初期化: 未調整 10 件 681,224,023（旧 662,753,350） | 本番 100 件。通常配布の 0–99 は別ケース | [codex/ahc004-contig-seed-20261120](https://github.com/tokotoko7777/ahc-workspace/tree/codex/ahc004-contig-seed-20261120) |
 | [AHC005](https://atcoder.jp/contests/ahc005/tasks/ahc005_a) | ローカル比較・本番未判定 | **22,318,770** 点（[AtCoder 提供の順位データ](https://huggingface.co/datasets/SakanaAI/ALE-Bench/blob/main/ahc005.zip)） | 既存版: 未調整 8 件 1,761,160 | 通常配布の 0–99 は本番 100 件と別 | [codex/ahc005-route-splice-20261120](https://github.com/tokotoko7777/ahc-workspace/tree/codex/ahc005-route-splice-20261120) |
-| AHC006 | 着手・未判定 | 確認中 | — | — | 検証中 |
-| AHC007〜074 | 未着手 | — | — | — | — |
+| [AHC006](https://atcoder.jp/contests/ahc006/tasks/ahc006_a) | ローカル比較・本番未判定 | **2,220,425** 点（[AtCoder 提供の順位データ](https://huggingface.co/datasets/SakanaAI/ALE-Bench/blob/main/ahc006.zip)） | 既存版: 未調整 10 件の合計 214,630 | 本番 100 件。配布シードとの同一性未確認 | [空間初期化の分岐](https://github.com/tokotoko7777/ahc-workspace/tree/761d6839f93d0e347820919714402360766c4ad5) |
+| AHC007 | 着手・未判定 | 確認中 | — | — | 検証中 |
+| AHC008〜074 | 未着手 | — | — | — | — |
 
 ### AHC001 の次の仮説
 
@@ -111,3 +112,14 @@
 - 既存版を凍結し、[実験と採点の再現手順](https://github.com/tokotoko7777/ahc-workspace/blob/0d42d1839a9ff4a1f35b2830ea4b2e2eeba682c4/problems/ahc003/README.md) に沿って公式対話テスタで実行。全 3,000 件が有効。ソルバとテスタを合わせた最大ローカル実測 0.896979 秒、ソルバ最大 CPU 0.825624 秒（制限 2 秒）。
 - 合計 2,925,781,453,112 点、1 位 2,926,767,743,437 点に対し −986,290,325 点（0.033699%）。本番公開シードを用いたローカル再現で、提出はしていない。ケース記録の合計と全 3,000 入力ハッシュを独立確認。未達のため main へのマージなし。
 - 本番ケース別結果は調整に使わない。次は「全パラメータの平均分散」ではなく、同程度の候補経路の所要コスト差の不確実性だけを減らす観測を、独立開発用ケースで比較する。
+
+### AHC006 空間マルチスタートによる初期解比較
+
+- [実装と再現手順](https://github.com/tokotoko7777/ahc-workspace/blob/761d6839f93d0e347820919714402360766c4ad5/problems/ahc006/README.md)。既存のペア挿入をそのまま使い、中心をずらした複数の近距離注文プールから初期解を作る。初期経路は約 30% 短縮したが、同じ主探索の後は開発 10 件平均 21,827.3 → 21,535.6、未調整 10 件平均 21,463.0 → 21,422.9。いずれも不採用。40 出力で公式採点と独立検査一致、最大 1.877630 秒（2 秒制限）、C++23 単一ビルドを通過。
+- 本番 100 ケースと配布シードの同一性を確認できないので未判定。順位データの配布元 SHA-256 `08f54f5ce375baf4a30c9730fdb71cd731619b89e88f63eec1894a850b59bf18` を照合。次は複数注文をまとめて取り除き、入れ替えを同時に再構成する。
+
+### AHC003 経路間の差を直接狙う追加観測
+
+- [実装と再現手順](https://github.com/tokotoko7777/ahc-workspace/blob/196a7404c62279475e6b868a305c949804e31404/problems/ahc003/README.md)。平均分散ではなく、ほぼ同程度の二経路のコスト差が観測でどれだけ再判定できるかを評価した。
+- 開発 20 件は +5,214,047 点（12 勝）、未使用 28 件は −48,433,654 点（9 勝）。全 96 出力で公式対話テスタと独立検査一致、最大ローカル実測 0.675 秒未満。未調整セットで悪化し既定版は変更しない。C++23 の単一ファイル化と汎用分散計算の 1,000 件照合を通過。
+- 先々の問い合わせで役立つ複数経路差を履歴から集め、今の経路の損失と次の経路への利益を分離する案を次の仮説として保存。公式 3,000 件の個別結果は反映しない。
