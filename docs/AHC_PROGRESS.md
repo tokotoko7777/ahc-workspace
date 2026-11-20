@@ -31,8 +31,9 @@
 | [AHC021](https://atcoder.jp/contests/ahc021/tasks/ahc021_a) | 着手・本番未判定 | **13,589,420**（絶対点） | 交換削除：新規未調整20件 1,814,625 | 本番150件・2秒、同一ケースの証拠なし | [問題別ブランチ](https://github.com/tokotoko7777/ahc-workspace/tree/9306c3d973e9b622e3a35431363f5f7f6ab64225)、[交換削除](https://github.com/tokotoko7777/ahc-workspace/tree/ce5987e9b2769010a4568b3442108f2e02e29909) |
 | [AHC022](https://atcoder.jp/contests/ahc022/tasks/ahc022_a) | 着手・本番未判定 | [公式順位](https://atcoder.jp/contests/ahc022/standings) 要ログイン、1位点未確認 | 低配置費版：新規未調整30件で誤対応0、全勝 | 本番3,000件・4秒、相対方式 | [問題別ブランチ](https://github.com/tokotoko7777/ahc-workspace/tree/d255c7a5ce936552a98346c8d2bf764f78add849)、[低配置費](https://github.com/tokotoko7777/ahc-workspace/tree/86f0b8b8dc3d75a877626672b36b2dec88da2e05) |
 | [AHC023](https://atcoder.jp/contests/ahc023/tasks/asprocon10_a) | 着手・本番未判定 | [公式順位](https://atcoder.jp/contests/ahc023/standings) 要ログイン、1位点未確認 | 本番公開2,000件 **1,100,483,250**（全件合法） | 本番公開2,000件・2秒、絶対点 | [問題別ブランチ](https://github.com/tokotoko7777/ahc-workspace/tree/52f76e1f5e905e5f4f11f0613285760073967281)、[植付と収穫の順序](https://github.com/tokotoko7777/ahc-workspace/tree/2b4a9df1aa5ad9cdc0d435bb8271d669d1fe43a6) |
-| [AHC024](https://atcoder.jp/contests/ahc024/tasks/ahc024_a) | 着手・本番未判定 | **335,417**（絶対点） | 開発比較準備中 | 本番150件・2秒、同一ケースの証拠なし | 検証中 |
-| AHC025〜074 | 未着手 | — | — | — | — |
+| [AHC024](https://atcoder.jp/contests/ahc024/tasks/ahc024_a) | 着手・本番未判定 | **335,417**（絶対点） | 未調整24件 平均2,025.63 | 本番150件・2秒、同一ケースの証拠なし | [問題別ブランチ](https://github.com/tokotoko7777/ahc-workspace/tree/c5b3b9f3d88b74ff5f9fa67446d16555dd509ef1) |
+| [AHC025](https://atcoder.jp/contests/ahc025/tasks/ahc025_a) | 着手・本番未判定 | **492,832,027,444**（相対点） | 開発比較準備中 | 本番5,000件・2秒、各参加者のケース別結果が必要 | 検証中 |
+| AHC026〜074 | 未着手 | — | — | — | — |
 
 ### AHC001 の次の仮説
 
@@ -359,3 +360,11 @@
 [追試](https://github.com/tokotoko7777/ahc-workspace/tree/2b4a9df1aa5ad9cdc0d435bb8271d669d1fe43a6)。同じ日でも植付と収穫の開始・終了はアクセス条件が異なるので、安全な順序を使って期間を拡大。初版に対し新規dev16件8,777,400→10,001,200、未調整28件15,388,700→17,383,850（+13.0%、全件改善）。88出力が公式と独立再生で一致、改良版最大0.013410秒、単一ファイルでも得点一致。問題別ブランチの既定に採用。公式2,000件の既報得点は初版のもので、改良版の比較・調整には使わない。次は近隣の部分木の植付・収穫日を揃え、祖先マスの長い空き期間を作る。
 
 公式2,000件の再現は、[公開済みの凍結版](https://github.com/tokotoko7777/ahc-workspace/tree/52f76e1f5e905e5f4f11f0613285760073967281)をチェックアウトし、`g++ -std=c++23 -O3 problems/ahc023/main.cpp -o windows`。公式ツールを `cargo build --release --locked --bin gen --bin vis` で作り、`gen official-seeds.txt` で入力を生成。各入力に対して凍結版を1回・2秒上限で実行し、`vis input.txt output.txt` と `problems/ahc023/benchmark.py` の独立採点が一致した2,000整数点を合計する。
+
+### AHC024 曲がった切断で地図を圧縮
+
+[検証と実装](https://github.com/tokotoko7777/ahc-workspace/blob/c5b3b9f3d88b74ff5f9fa67446d16555dd509ef1/problems/ahc024/README.md)。直線圧縮を揃えた後で、各行で少しずつ位置をずらせる切断をDPで選ぶ。新規のdev24件平均1,588.25→2,004.71、未調整24件平均1,621.42→2,025.63（全48件改善）。96出力で公式得点と独立の色連結・接触関係の検査が一致、最大0.037359秒。問題別既定に採用。次は異なる切断経路を作る再始動と、同予算の単純な順番変更を比べる。
+
+### AHC025 本番条件
+
+[公式問題文](https://atcoder.jp/contests/ahc025/tasks/ahc025_a)。対話式・比較回数Qを厳守、2秒 / 1,024 MiB。絶対評価は重さ合計の母標準偏差を100倍し丸めて+1、低い方が良い。本番5,000件、各ケースで自分より小さい絶対値の提出数＋同値の半分を用いる順位相対点を集計。1位492,832,027,444は[AtCoder提供の順位・得点データ](https://huggingface.co/datasets/SakanaAI/ALE-Bench/blob/main/ahc025.zip)で確認（SHA-256 `5f372be0c4814bc89cf1e5985c5b36e7816b1c0e01ae204d7f78f67c8505f667`）。歴史的ケース別全提出の絶対点は未取得。重さ順位の推定だけで割り振る基準と、比較回数を一部残して改善が確実な交換だけを行う案を比べる。
