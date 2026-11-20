@@ -2014,3 +2014,21 @@ sort(points.begin(), points.end(), [](const Point& a, const Point& b) {
 
 `bits=10` なら各座標は `0..1023` です。厳密な最近傍順ではありませんが、空間的に
 まとまったcluster作成、query順、cache localityの改善候補を1行のkeyで作れます。
+
+## Binary split fit
+
+ヘッダ: [`binary-split-fit.hpp`](../library/binary-split-fit.hpp)
+
+2択の分岐で、複数の確率ベクトルから1個と左右反転の有無を選びます。
+目的関数が分岐の確率に対して `constant + dot(gradient, probability)` と書ける場合に使えます。
+例えば、確率が高いほどよい種類と低いほどよい種類が各1個ある場合:
+
+```cpp
+vector<vector<double>> type = {{0.8, 0.3}, {0.6, 0.4}};
+auto fit = best_binary_split(type, vector<double>{1.0, -1.0});
+// fit.row == 0; fit.complement == false
+```
+
+時間は O(型数 × 種類数)、追加メモリは O(1)。
+[AHC051の型・向きの更新](../problems/ahc051/main.cpp) と
+[全候補の愚直評価との比較](../tests/binary_split_fit_test.cpp) を参照。
