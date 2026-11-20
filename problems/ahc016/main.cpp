@@ -4,6 +4,9 @@ using namespace std;
 #ifndef AHC016_DEGREES
 #define AHC016_DEGREES 1
 #endif
+#ifndef AHC016_MODEL_N
+#define AHC016_MODEL_N 1
+#endif
 
 namespace {
 struct Codebook {
@@ -128,8 +131,8 @@ struct DegreeCode : Codebook {
   vector<Feature> selected;
   int pair_id[3][3]={{0,1,2},{1,3,4},{2,4,5}};
   bool connected(int mask,int a,int b) const {return (mask>>pair_id[a][b])&1;}
-  DegreeCode(int m,double p) {
-    n=choose_n(m,p);
+  DegreeCode(int m,double p,int forced=0) {
+    n=forced?forced:choose_n(m,p);
     vector<vector<double>> pmf(n);
     for(int d=0;d<n;++d){
       vector<double> events(n-1,p);
@@ -175,6 +178,9 @@ struct DegreeCode : Codebook {
       if(s[i]=='1')++degree[u],++degree[v];
     vector<double> hist(n);
     for(int d:degree)++hist[d];
+    return decode_hist(hist);
+  }
+  int decode_hist(const vector<double>& hist) const {
     auto f=feature(hist,n);
     double best=1e100;
     int answer=0;
@@ -185,6 +191,9 @@ struct DegreeCode : Codebook {
     return answer;
   }
 };
+#if AHC016_MODEL_N || defined(AHC016_SIZE_TEST)
+#include "model-size.hpp"
+#endif
 } // namespace
 
 #ifndef AHC016_NO_MAIN
@@ -196,8 +205,12 @@ int main(){
   if(!(cin>>m>>p))return 0;
   unique_ptr<Codebook> code;
   if(p==0)code=make_unique<ExactCode>(m);
+#if AHC016_MODEL_N
+  else code=model_size(m,p,chrono::steady_clock::now()+chrono::milliseconds(1470));
+#else
   else if(AHC016_DEGREES) code=make_unique<DegreeCode>(m,p);
   else code=make_unique<EdgeCode>(m,p);
+#endif
   cout<<code->n<<'\n';
   for(const auto& s:code->code)cout<<s<<'\n';
   cout.flush();

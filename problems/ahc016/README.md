@@ -30,8 +30,8 @@ tools_dir=/path/to/extracted/tools
 (cd "$tools_dir" && cargo build --locked --release)
 work=$(mktemp -d)
 python scripts/bundle.py problems/ahc016/main.cpp -o "$work/submission.cpp"
-g++ -std=c++23 -O3 -DAHC016_DEGREES=0 "$work/submission.cpp" -o "$work/base"
-g++ -std=c++23 -O3 "$work/submission.cpp" -o "$work/degree"
+g++ -std=c++23 -O3 -DAHC016_MODEL_N=0 -DAHC016_DEGREES=0 "$work/submission.cpp" -o "$work/base"
+g++ -std=c++23 -O3 -DAHC016_MODEL_N=0 "$work/submission.cpp" -o "$work/degree"
 python problems/ahc016/benchmark.py "$tools_dir/target/release/gen" "$tools_dir/target/release/tester" "$work/base" "$work/degree" "$work/results.csv"
 g++ -std=c++23 -O3 tests/bernoulli_count_distribution_test.cpp -o "$work/dist-test"
 "$work/dist-test"
@@ -40,3 +40,26 @@ g++ -std=c++23 -O3 tests/bernoulli_count_distribution_test.cpp -o "$work/dist-te
 ### 次の仮説
 
 高ノイズ・大Mでは辺数だけの誤答近似からNが小さく選ばれ、構造符号でも情報を十分に持たせられない。既定のNその他複数の候補Nで、入力の `M, eps` のみから人工ノイズを生成し、構造符号自身の誤答率とサイズ罰を推定して選ぶ。推定用と確認用の人工乱数を分け、5秒以内に収まる上限を設け、公式生成の新しいベンチマークで比較する。乱数は実テスタの割り当てやシードに依存させない。
+
+## 追試: 人工ノイズで頂点サイズを選ぶ
+
+符号と復号器の構造は同じ。既定の頂点数、その0.6・0.8・1.2倍、および32, 52, 72, 88, 100を候補にし、頂点数が重なる場合は一度だけ試す。各候補で各符号の辺を `eps` で反転して12回ずつ分類し、誤答率 `e` から `(1-0.1e)^100 / N` を推定する。上位二つと元のNを別の固定乱数で32回ずつ再評価し、推定点が最も高いNを採用。実対話の真値・ノイズseedは使わない。復号特徴は頂点順不変のため、人工試行では置換を省く。探索打ち切り1,470ms、測定の上限は公式5秒より厳しい2秒。途中で打ち切った候補の誤差推定は使わない。
+
+| 分割 | 件数 | 元Nの平均絶対点 | モデルNの平均絶対点 | モデルNの勝 / 分 / 負 |
+| --- | ---: | ---: | ---: | ---: |
+| dev | 40 | 33,281,344.18 | 41,784,959.55 | 29 / 10 / 1 |
+| holdout | 40 | 33,561,640.38 | 42,457,716.95 | 29 / 11 / 0 |
+
+初回と別系列の[追試CSV](model-results.csv)。holdout平均誤答は12.825→6.075、ノイズ0.28以上の15件では34.133→15.733。160出力はすべて公式テスタと独立整数採点が一致し、最長0.368434秒だった。改善が両分割で再現したため、問題ブランチ既定をモデルNとした。ペアは同じ公式生成入力・ラベル列・seedで比較するが、**頂点数が違うと公式テスタの乱数消費が変わるため、同じノイズを受けているとは限らない**。絶対点ローカル値であり、本番相対点とは未比較。
+
+```sh
+# 上の再現手順で work と tools_dir を設定
+python scripts/bundle.py problems/ahc016/main.cpp -o "$work/submission.cpp"
+g++ -std=c++23 -O3 -DAHC016_MODEL_N=0 "$work/submission.cpp" -o "$work/degree"
+g++ -std=c++23 -O3 "$work/submission.cpp" -o "$work/model"
+python problems/ahc016/benchmark.py --tag model-v1 --limit 2 "$tools_dir/target/release/gen" "$tools_dir/target/release/tester" "$work/degree" "$work/model" "$work/model.csv"
+g++ -std=c++23 -O3 tests/ahc016_size_model_test.cpp -o "$work/model-test"
+"$work/model-test"
+```
+
+次は高ノイズで混同される符号対を減らす。次数帯の平均だけでは同じ次数分布を持つ別のブロック構造を分けられないため、観測次数で頂点を帯に分け、帯間の残差辺密度を補助特徴にする。人工乱数の学習・確認を分けて同じN・同じ符号表で復号だけを比較し、その後に符号表の選抜へ反映する。
