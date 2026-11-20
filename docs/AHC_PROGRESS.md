@@ -67,9 +67,11 @@
 | [AHC055](https://atcoder.jp/contests/ahc055/tasks/ahc055_a) | 着手・本番未判定 | nikaj、得点未確認 | 新規未調整28件 1,559,892（137,988手） | 本番150件・2秒、同一ケースの証拠なし | [使用回数割当](https://github.com/tokotoko7777/ahc-workspace/tree/56c542146db54bea2ac321420789e560c2706453)、[開封順の追試](https://github.com/tokotoko7777/ahc-workspace/tree/a41469d083df1817c2ff68de449305ff12ee9ba2) |
 | [AHC056](https://atcoder.jp/contests/ahc056/tasks/ahc056_a) | 着手・本番未判定 | **1,899,994,171,242**（相対点） | 新規未調整32件 費用平均71.531 | 本番2,000件、公式ケース別基準を取得 | [規則圧縮](https://github.com/tokotoko7777/ahc-workspace/tree/76777c4e88aac27d028dfa893c47db2a540e4f05)、[最短路選択](https://github.com/tokotoko7777/ahc-workspace/tree/fbc469f215b805732151a93d4f8213cb3071663f) |
 | [AHC057](https://atcoder.jp/contests/ahc057/tasks/ahc057_a) | 着手・本番未判定 | yochan、得点未確認 | 新規未調整28件 合計130,959,921 | 本番150件・2秒、同一ケースの証拠なし | [合流時刻](https://github.com/tokotoko7777/ahc-workspace/tree/597f72f03de27400f38dd4cff9f5ee779055c0be)、[グループ交換](https://github.com/tokotoko7777/ahc-workspace/tree/743f74ba0a89e40350d866c59c3bb1ce6a036bf1) |
-| [AHC058](https://atcoder.jp/contests/ahc058/tasks/ahc058_a) | 着手・本番未判定 | fishylene、得点未確認 | 既存：未調整24件 平均5,187,704.58 | 本番150件、同一ケースの証拠なし | [問題別ブランチ](https://github.com/tokotoko7777/ahc-workspace/tree/c75e684905c14eb10a7d59da3c9e9d81d8f9ce7a) |
-| [AHC059](https://atcoder.jp/contests/ahc059/tasks/ahc059_a) | 着手・本番未判定 | chokudai、得点未確認 | 開発比較中 | 本番150件・2秒、同一ケースの証拠なし | 検証中 |
-| AHC060〜074 | 未着手 | — | — | — | — |
+| [AHC058](https://atcoder.jp/contests/ahc058/tasks/ahc058_a) | 着手・本番未判定 | fishylene、得点未確認 | 既存：未調整24件 平均5,187,704.58 | 本番150件、同一ケースの証拠なし | [問題別ブランチ](https://github.com/tokotoko7777/ahc-workspace/tree/c75e684905c14eb10a7d59da3c9e9d81d8f9ce7a)、[後期の購入順](https://github.com/tokotoko7777/ahc-workspace/tree/23fa6eb16cc7acbe74babdf1ff9f57b7f993d483) |
+| [AHC059](https://atcoder.jp/contests/ahc059/tasks/ahc059_a) | 着手・本番未判定 | chokudai、得点未確認 | 新規未調整28件 得点425,047（34,153移動） | 本番150件・2秒、同一ケースの証拠なし | [入れ子回収](https://github.com/tokotoko7777/ahc-workspace/tree/4848abd431bd612b8ab15199f2f5562fe1598974)、[部分列移動](https://github.com/tokotoko7777/ahc-workspace/tree/905faa4a34b05a6b0d5ded139f08fd8414e366fd) |
+| [AHC060](https://atcoder.jp/contests/ahc060/tasks/ahc060_a) | 着手・本番未判定 | Sweet_Sweet_Soul、得点未確認 | 開発比較中 | 本番150件、同一ケースの証拠なし | 検証中 |
+| [AHC061](https://atcoder.jp/contests/ahc061/tasks/ahc061_a) | 着手・本番未判定 | **2,424,667,397,941**（相対点） | 開発比較中 | 本番3,000件、公式ケース別基準を取得 | 検証中 |
+| AHC062〜074 | 未着手 | — | — | — | — |
 
 ### AHC001 の次の仮説
 
@@ -790,3 +792,17 @@ AHC056は[公式採点CSV](https://img.atcoder.jp/ahc_standings/ahc056/result.cs
 ### AHC059 本番条件
 
 [公式問題文](https://atcoder.jp/contests/ahc059/tasks/ahc059_a)。20×20のカード盤面、2秒、カードを全て消去すると16,400−移動数。本番150件合計。首位chokudaiの点数と同一ケースは未確認。同じ初期経路から、ペアを隣接して入れ直す対照と、スタックの合法性を保って別々の位置に再挿入する近傍を比べる。
+
+### AHC058 購入の集合を変えずに後半の順序を変える
+
+[追試](https://github.com/tokotoko7777/ahc-workspace/tree/23fa6eb16cc7acbe74babdf1ff9f57b7f993d483)。既存の前半を固定し、同じ購入の集合を、340回の細かな移動・交換と340回の部分列回転・反転などで比較。新規未調整16件の平均は前半固定5,189,948、細かな変更5,197,425、部分列5,201,445（対細かな変更15勝1敗、中央値+1,842点）。96出力で公式と独立が一致、最大0.655秒。差は小さく任意。次は序盤の購入を崩さず、後半の特定の機械群をまとめて再評価する。
+
+### AHC059 スタックの合法性を保つ入れ子と部分列移動
+
+[初回](https://github.com/tokotoko7777/ahc-workspace/tree/4848abd431bd612b8ab15199f2f5562fe1598974)。同じ初期解と2万回の提案で、ペアを隣接させる対照と、同じスタック祖先の2位置に再挿入する案を比較。未調整28件413,250→421,321、移動45,950→37,879（−17.57%、全勝）。全84出力で公式・独立と一致、最大0.172秒未満。
+[追試](https://github.com/tokotoko7777/ahc-workspace/tree/905faa4a34b05a6b0d5ded139f08fd8414e366fd)。同じ最初の2万提案から、さらに2万回を単一ペアへ使う案と、対応が閉じた部分列の移動・反転に使う案を比較。新規未調整28件422,234→425,047、移動36,966→34,153（−7.61%、全勝）。全84出力公式・独立・内部評価が一致、最大0.299秒。問題別既定に採用。本番同一比較は未判定。次は2つの部分列をまたぐ入れ替えを試す。
+
+### AHC060・061 着手
+
+[AHC060](https://atcoder.jp/contests/ahc060/tasks/ahc060_a)は本番150件の絶対点、1位名Sweet_Sweet_Soul、得点は未確認。同じ初期解と展開数で、ランダムな経路の候補と、同じ商品・現在地・直前位置を重複除去する候補を比べる。
+[AHC061](https://atcoder.jp/contests/ahc061/tasks/ahc061_a)の[公式採点CSV](https://img.atcoder.jp/ahc_standings/ahc061/result.csv)は1,171人×3,000件、ケース別最高値による相対点で1位2,424,667,397,941（cuthbert）、上位3名の順位が公式結果JSONと一致。相手方針の推定と手の評価を揃え、占有によって到達できる場所がどう変わるかを評価に加える案を比較する。
