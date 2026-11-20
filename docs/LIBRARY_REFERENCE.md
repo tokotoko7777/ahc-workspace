@@ -795,6 +795,22 @@ auto shortest = grid_bfs(height, width, start, [&](int row, int column) {
 });
 ```
 
+### 平坦グリッドで最初の一歩を引くBFS
+
+ヘッダ: [`flat-grid-first-step-bfs.hpp`](../library/flat-grid-first-step-bfs.hpp)。
+複数の目的地を比べ、経路の最初の1マスだけを何度も取得する場合に使います。
+距離・次のマス・キューを使い回すため `run()` ごとに経路の配列は作りません。
+
+```cpp
+FlatGridFirstStepBfs bfs(height, width);
+bfs.run(start, [&](int cell) { return !wall[cell]; });
+int next = bfs.first_step(goal); // 到達不能なら -1、同じマスなら start
+int distance = bfs.distance(goal);
+```
+
+セル番号は `row * width + col`。実例は[AHC008の壁作りの移動](../problems/ahc008/main.cpp)。
+[差分テスト](../tests/flat_grid_first_step_bfs_test.cpp)では既存BFSで復元した経路の最初の一歩と突き合わせます。
+
 ## Topological Sort
 
 ヘッダ: [`topological-sort.hpp`](../library/topological-sort.hpp)
