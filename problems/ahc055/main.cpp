@@ -105,13 +105,14 @@ struct Model {
             buckets[alloc[slot]<0?n:alloc[slot]].push_back(slot);
         return buckets;
     }
-    void improve(const std::vector<int>& order,std::vector<int>& alloc,Clock::time_point deadline) const {
+    void improve(std::vector<int>& order,std::vector<int>& alloc,Clock::time_point deadline,
+                 bool extra=false,bool reorder=false) const {
         std::vector<int> rank(n);
         for(int i=0;i<n;++i) rank[order[i]]=i;
         std::vector<std::vector<int>> favored(n);
         for(int w=0;w<n;++w) {
             auto& f=favored[w];
-            for(int b=0;b<n;++b) if(rank[b]>rank[w]) f.push_back(b);
+            for(int b=0;b<n;++b) if(b!=w && (extra || rank[b]>rank[w])) f.push_back(b);
             const int best=std::min(18,int(f.size()));
             std::partial_sort(f.begin(),f.begin()+best,f.end(),[&](int a,int b) {
                 return std::pair(std::min(hardness[a],damage[w][a]),a)>
@@ -124,22 +125,47 @@ struct Model {
         int total=0;
         for(int b=0;b<n;++b) total+=value[b]=strikes(b,piles[b]);
         int best_total=total;
-        std::vector<int> best=alloc;
+        std::vector<int> best=alloc,best_order=order;
         RNG rng;
-        constexpr int steps=170000;
+        const int steps=extra ? 200000 : 170000;
+        if(extra) rng.value=7965451;
         double temp=12.;
         auto idx=[&](int box){return box<0 ? n : box;};
         for(int i=0;i<steps;++i) {
             if(i%256==0) {
                 if(Clock::now()>=deadline) break;
-                temp=12.*std::pow(.017,double(i)/steps);
+                temp=(extra ? 4. : 12.)*std::pow(.017,double(i)/steps);
+            }
+            if(reorder && i%8==0) {
+                const int pos=rng.next()%(n-1),a=order[pos],b=order[pos+1];
+                // The a -> b allocations are the only edges whose precedence flips.
+                // Temporarily unassign those slots and score b exactly before accepting.
+                auto& pile=piles[b];
+                std::vector<int> removed;
+                for(int j=begin[a];j<begin[a]+capacity[a];++j)
+                    if(alloc[j]==b) {
+                        auto it=std::find(pile.begin(),pile.end(),j);
+                        std::iter_swap(it,pile.end()-1);
+                        pile.pop_back();
+                        removed.push_back(j);
+                    }
+                const int next=strikes(b,pile),loss=next-value[b];
+                if(loss<=0 || rng.unit()<std::exp(-loss/temp)) {
+                    std::swap(order[pos],order[pos+1]);
+                    std::swap(rank[a],rank[b]);
+                    for(int j:removed) alloc[j]=-1,piles[n].push_back(j);
+                    total+=loss;value[b]=next;
+                    if(total<best_total) best_total=total,best=alloc,best_order=order;
+                } else pile.insert(pile.end(),removed.begin(),removed.end());
+                continue;
             }
             const int slot=rng.next()%alloc.size(),w=owner[slot];
-            if(favored[w].empty()) continue;
+            if(favored[w].empty() || rank[w]==n-1) continue;
             const unsigned mode=rng.next()%16;
             const int to=mode==0 ? -1 :
                 mode<13 ? favored[w][rng.next()%favored[w].size()] :
                 order[rank[w]+1+rng.next()%(n-1-rank[w])];
+            if(to>=0 && rank[to]<=rank[w]) continue;
             const int from=alloc[slot];
             if(to==from) continue;
             auto& a=piles[idx(from)];auto& b=piles[idx(to)];
@@ -154,12 +180,13 @@ struct Model {
                 if(to>=0) value[to]=second;
                 alloc[slot]=to;
                 total-=gain;
-                if(total<best_total) best_total=total,best=alloc;
+                if(total<best_total) best_total=total,best=alloc,best_order=order;
             } else {
                 b.pop_back();a.push_back(slot);
             }
         }
         alloc.swap(best);
+        order.swap(best_order);
     }
     std::vector<std::pair<int,int>> commands(const std::vector<int>& order,
                                              const std::vector<int>& alloc) const {
@@ -189,6 +216,11 @@ int main() {
     auto order=model.greedy(allocation);
 #ifndef AHC055_GREEDY_ONLY
     model.improve(order,allocation,deadline);
+#if defined(AHC055_EXTRA_ONLY)
+    model.improve(order,allocation,deadline,true,false);
+#elif !defined(AHC055_REALLOCATE)
+    model.improve(order,allocation,deadline,true,true);
+#endif
 #endif
     auto result=model.commands(order,allocation);
     for(auto [w,b]:result) std::cout<<w<<' '<<b<<'\n';

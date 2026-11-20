@@ -46,6 +46,7 @@ def main():
     p = argparse.ArgumentParser()
     for name in ("inputs", "out", "vis", "baseline", "candidate"):
         p.add_argument(name,type=Path)
+    p.add_argument("--allow-order-change", action="store_true")
     args = p.parse_args()
     files = sorted(args.inputs.resolve().glob("*.txt"))
     out = args.out.resolve()
@@ -53,7 +54,7 @@ def main():
     solvers = {"baseline":args.baseline.resolve(),"allocated":args.candidate.resolve()}
     vis = args.vis.resolve()
     manifest = out/"manifest.json"
-    metadata = {"runner":sha(Path(__file__)),"vis":sha(vis),
+    metadata = {"allow_order_change":args.allow_order_change,"runner":sha(Path(__file__)),"vis":sha(vis),
                 "solvers":{k:sha(v) for k,v in solvers.items()},
                 "inputs":{p.name:sha(p) for p in files}}
     if not files or manifest.exists() and json.loads(manifest.read_text()) != metadata:
@@ -72,7 +73,7 @@ def main():
                 response = subprocess.run([solvers[name]],input=inp,capture_output=True,
                                           check=True,timeout=3)
                 elapsed = time.perf_counter()-start
-                if elapsed >= 3:
+                if elapsed >= 2:
                     raise TimeoutError(f"{name} took {elapsed} s")
                 actual = score(inp,response.stdout)
                 internal = re.fullmatch(rb"Model = (\d+)\s*",response.stderr)
@@ -88,7 +89,7 @@ def main():
                 tmp.write_text(json.dumps(result)+"\n")
                 tmp.replace(row)
             results[case.name,name] = result
-        if results[case.name,"baseline"]["order"]!=results[case.name,"allocated"]["order"]:
+        if not args.allow_order_change and results[case.name,"baseline"]["order"]!=results[case.name,"allocated"]["order"]:
             raise ValueError("open order changed; expected only allocation to differ")
     summary={}
     for key in solvers:
