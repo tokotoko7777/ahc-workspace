@@ -63,3 +63,37 @@ python3 problems/ahc005/benchmark.py INPUTS_DIR dev --start 0 --end 8 --vis TOOL
 python3 problems/ahc005/benchmark.py INPUTS_DIR holdout --start 60 --end 68 --vis TOOLS_DIR/target/release/vis --entry baseline=baseline --entry splice=splice
 python3 problems/ahc005/segment_cover_diagnostic.py INPUTS_DIR 0 1 2 3 4 5 6 7 60 61 62 63 64 65 66 67
 ```
+
+## 通過中の可視性を含む可変長の代表点探索（小規模診断）
+
+`-DAHC005_PATH_AWARE_DIAGNOSTIC` は先の方式を変更せずに通常の探索を終え、
+同じ代表点順序を2群へ複製します。追加の1点削除だけを繰り返す群と、
+連続2点の同時削除や代表点の移動を含める群を比較します。
+新旧の有向最短路で通過する区間の集合を差分として費用と可視性に反映し、
+不完全なら変更を全て巻き戻します。同距離の最短路は向きが逆だと内容が
+変わり得るため、逆辺の可視性は流用しません。
+
+本番や他のローカル集合と重ならない新規8シードを公式 gen で生成しました。
+各群最大12,000近傍試行・66 ms（全体締切あり）。**8件のいずれも両群で移動時間は変化せず**、
+最長実測は **2.652082秒**。全出力が完全可視・公式採点と独立検査一致。
+これは、既に順序を調整済みの局面から費用減少だけを認める小規模な仕上げでは
+改善が見えなかったという結果です。通常ビルドへ採用しません。
+通過区間のキャッシュ更新は[差分テスト](../../tests/ahc005_path_coverage_test.cpp)で
+最大100×30の状態遷移を全再計算と比較しています。
+
+次に試すなら、終盤の仕上げでなく途中から代表点を追加・削除可能にし、
+制約を満たした別の経路へ動くため一時的な費用増を許す温度付き探索と、
+独立の短い純粋なランダム比較を設計します。この時も出力へ採用する解には
+完全可視・帰着・公式計算を要求します。
+
+```sh
+T=$(cd "${TOOLS_DIR:?}" && pwd)
+S=$(pwd)/problems/ahc005/path-aware-seeds.txt
+W=$(mktemp -d)
+(cd "$W" && "$T/target/release/gen" "$S")
+python3 scripts/bundle.py problems/ahc005/main.cpp -o "$W/main.cpp"
+g++ -std=c++23 -O3 -DAHC005_PATH_AWARE_DIAGNOSTIC "$W/main.cpp" -o "$W/variant"
+g++ -std=c++23 -O2 tests/ahc005_path_coverage_test.cpp -o "$W/test"
+"$W/test" < "$W/in/0000.txt"
+python3 problems/ahc005/benchmark.py "$W/in" "$W/scored" --vis "$T/target/release/vis" --entry "diagnostic=$W/variant"
+```

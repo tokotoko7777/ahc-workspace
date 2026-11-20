@@ -2,6 +2,9 @@
 #define AHC005_TEST
 #include "../../examples/search/ahc005_patrol_sa.cpp"
 #include "route-splice.hpp"
+#ifdef AHC005_PATH_AWARE_DIAGNOSTIC
+#include "path-aware.hpp"
+#endif
 
 int main() {
   ios::sync_with_stdio(false);
@@ -40,6 +43,22 @@ int main() {
   // 通過途中の視界も利用し、期限内だけ不要な代表点を削る。
   solver.remove_unneeded_waypoints(order, started+chrono::milliseconds(2820));
   string candidate = solver.make_answer(order);
+#ifdef AHC005_PATH_AWARE_DIAGNOSTIC
+  if(solver.answer_is_valid(candidate) && !candidate.empty()) {
+    const int common=travel_cost(candidate);
+    int entered_control=0,entered_aware=0;
+    auto now=chrono::steady_clock::now();
+    auto a=path_aware_polish(solver,order,min(now+chrono::milliseconds(66),started+chrono::milliseconds(2825)),false,entered_control);
+    now=chrono::steady_clock::now();
+    auto b=path_aware_polish(solver,order,min(now+chrono::milliseconds(66),started+chrono::milliseconds(2895)),true,entered_aware);
+    string ca=solver.make_answer(a),cb=solver.make_answer(b);
+    bool valid_a=solver.answer_is_valid(ca)&&!ca.empty(),valid_b=solver.answer_is_valid(cb)&&!cb.empty();
+    if(!valid_a||!valid_b)throw logic_error("path-aware coverage invariant");
+    cerr<<"path_common="<<common<<" path_control="<<travel_cost(ca)<<" path_extended="<<travel_cost(cb)
+        <<" path_control_moves="<<entered_control<<" path_extended_moves="<<entered_aware<<' ';
+    if(travel_cost(cb)<common)candidate=std::move(cb);
+  }
+#endif
   if (solver.answer_is_valid(candidate) && travel_cost(candidate) < legacy_cost)
     answer = std::move(candidate);
 #ifdef AHC005_SPLICE
