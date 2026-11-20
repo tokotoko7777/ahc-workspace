@@ -15,7 +15,7 @@
 | [AHC005](https://atcoder.jp/contests/ahc005/tasks/ahc005_a) | ローカル比較・本番未判定 | **22,318,770** 点（[AtCoder 提供の順位データ](https://huggingface.co/datasets/SakanaAI/ALE-Bench/blob/main/ahc005.zip)） | 既存版: 未調整 8 件 1,761,160 | 通常配布の 0–99 は本番 100 件と別 | [codex/ahc005-route-splice-20261120](https://github.com/tokotoko7777/ahc-workspace/tree/codex/ahc005-route-splice-20261120) |
 | [AHC006](https://atcoder.jp/contests/ahc006/tasks/ahc006_a) | ローカル比較・本番未判定 | **2,220,425** 点（[AtCoder 提供の順位データ](https://huggingface.co/datasets/SakanaAI/ALE-Bench/blob/main/ahc006.zip)） | 既存版: 未調整 10 件の合計 214,630 | 本番 100 件。配布シードとの同一性未確認 | [空間初期化の分岐](https://github.com/tokotoko7777/ahc-workspace/tree/761d6839f93d0e347820919714402360766c4ad5) |
 | [AHC007](https://atcoder.jp/contests/ahc007/tasks/ahc007_a) | 着手・未判定 | **14,241,733,941** 点（[AtCoder 提供の順位データ](https://huggingface.co/datasets/SakanaAI/ALE-Bench/blob/main/ahc007.zip)） | シナリオ版: 公開 150 件 **14,184,305,386** | 本番 150 件、2 秒。配布入力との同一性未確認 | [問題別ブランチ](https://github.com/tokotoko7777/ahc-workspace/tree/2793a9a782184c4b77376fab17482d24b353d6bd) |
-| AHC008 | 着手・未判定 | 確認中 | — | — | 検証中 |
+| [AHC008](https://atcoder.jp/contests/ahc008/tasks/ahc008_a) | 開発比較中・未判定 | **121,980,050,607** 点（[AtCoder 提供の順位データ](https://huggingface.co/datasets/SakanaAI/ALE-Bench/blob/main/ahc008.zip)） | 合法な仕切り版と適応分割版 | 公式対話テスタ、本番公開 2,000 シード、3 秒 | 検証中 |
 | AHC009〜074 | 未着手 | — | — | — | — |
 
 ### AHC001 の次の仮説
@@ -136,3 +136,9 @@
 - 開発 20 件 +34,154,630（19 勝）、未調整 36 件 3,337,415,004 → 3,393,731,903（+56,316,899、34 勝）、別の公式ツール同梱 150 件 13,878,237,519 → 14,184,305,386（+306,067,867、147 勝）。全 412 実行でローカル逐次対話と独立得点が公式スコアに一致、最大実測 0.280 秒、ソルバ最大 CPU 0.214 秒。C++23 単一結合と汎用テストを通過。
 - 問題別ブランチの新規解として保存。本番 150 件と公開 150 件の同一性を証明できないため、最終 1 位 14,241,733,941 点との比較は未判定。main は変更しない。
 - 次は同じ将来シナリオで、現在の辺を強制採用／見送りしたあとの短い決定列を追い、遅れて現れる代替辺も考慮する。
+
+### AHC007 採択／見送りの前方ロールアウト
+
+- [実装・再現手順](https://github.com/tokotoko7777/ahc-workspace/blob/93feeae1157993a5b59fbd93c7d0db0381c8ea17/problems/ahc007/README.md) を別ブランチに保存。同じ乱数シナリオで採択／見送りを強制し、先の 16 手を共通の方策で動かして比較。
+- 新規開発 20 件 +606,802（11 勝）、独立確認 36 件 −1,083,508（13 勝）。最大 0.365 秒、112 出力で公式採点と独立検査が一致。不採用、通常は元のシナリオ法を維持する。
+- 次は一律 16 手ではなく、代替パスの最後の辺が到着するまでの分布を使う。公開入力と本番の同一性は未確認のまま。
