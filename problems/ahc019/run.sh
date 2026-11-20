@@ -9,9 +9,9 @@ mkdir -p "$out"
 exec 9>"$out/experiment.lock"
 flock -n 9
 g++ -std=c++23 -O3 -DAHC019_SINGLETON_ONLY problems/ahc019/main.cpp -o "$out/baseline"
-g++ -std=c++23 -O3 problems/ahc019/main.cpp -o "$out/blocks"
+g++ -std=c++23 -O3 -DAHC019_FIRST_PASS problems/ahc019/main.cpp -o "$out/blocks"
 python3 scripts/bundle.py problems/ahc019/main.cpp -o "$out/submission.cpp"
-g++ -std=c++23 -O3 "$out/submission.cpp" -o "$out/bundled"
+g++ -std=c++23 -O3 -DAHC019_FIRST_PASS "$out/submission.cpp" -o "$out/bundled"
 g++ -std=c++23 -O2 tests/cube_rotations_test.cpp -o "$out/rotation-test"
 "$out/rotation-test"
 pin=()

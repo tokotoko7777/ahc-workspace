@@ -9,6 +9,10 @@
 #include <vector>
 #include "../../library/cube-rotations.hpp"
 
+#if !defined(AHC019_REBUILD_BLOCKS) && !defined(AHC019_EXTRA_RESTARTS) && !defined(AHC019_SINGLETON_ONLY) && !defined(AHC019_FIRST_PASS)
+#define AHC019_REBUILD_BLOCKS
+#endif
+
 using cube_rotations::Point;
 constexpr int max_d=14;
 struct Puzzle {
@@ -91,6 +95,59 @@ void finish(const Puzzle& p,const Fill& f,Answer& ans) {
     ans.cost+=cost;
 }
 
+#ifdef AHC019_REBUILD_BLOCKS
+void retain_blocks(const Puzzle& p,const Answer& previous,Answer& a,Fill& need,
+                   std::mt19937& rng,int restart) {
+    // Strip singleton debris; preserve all other blocks except a short
+    // neighborhood biased toward pieces obstructing a missing projection.
+    std::array<std::vector<int>,2> size{std::vector<int>(previous.used+1),
+                                       std::vector<int>(previous.used+1)};
+    for(int s=0;s<2;++s) for(int label:previous.b[s]) ++size[s][label];
+    std::vector<int> weight(previous.used+1),keep(previous.used+1);
+    for(int i=1;i<=previous.used;++i) if(size[0][i]>=2 && size[0][i]==size[1][i]) {
+        keep[i]=1;
+        weight[i]=8+40/size[0][i];
+    }
+    for(int s=0;s<2;++s) for(int cell:p.voxels[s]) {
+        int label=previous.b[s][cell];
+        if(!label||keep[label]) continue;
+        int importance=1+(size[1-s][label]==0);
+        const auto [x,y,z]=p.coord[cell];
+        for(int nbr:p.nei[cell]) if(nbr>=0) {
+            int b=previous.b[s][nbr];
+            if(keep[b]) weight[b]+=8*importance;
+        }
+        for(int j=0;j<p.d;++j) {
+            int b=previous.b[s][p.id(j,y,z)];
+            if(keep[b]) weight[b]+=importance;
+            b=previous.b[s][p.id(x,j,z)];
+            if(keep[b]) weight[b]+=importance;
+        }
+    }
+    const int removals=1+restart%3;
+    for(int rep=0;rep<removals;++rep) {
+        int total=0;
+        for(int w:weight) total+=w;
+        if(!total) break;
+        int x=rng()%total;
+        for(int i=1;i<=previous.used;++i) if((x-=weight[i])<0) {
+            keep[i]=0;weight[i]=0;break;
+        }
+    }
+    for(int i=1;i<=previous.used;++i) if(keep[i]) {
+        keep[i]=++a.used;
+        a.cost+=1.0L/size[0][i];
+    }
+    for(int s=0;s<2;++s) for(int cell:p.voxels[s]) {
+        const int label=keep[previous.b[s][cell]];
+        if(label) {
+            a.b[s][cell]=label;
+            need.add(s,p.coord[cell]);
+        }
+    }
+}
+#endif
+
 #ifndef AHC019_SINGLETON_ONLY
 Answer solve_blocks(const Puzzle& p,const Answer& upper) {
     using Match=std::array<int,2>;
@@ -100,9 +157,20 @@ Answer solve_blocks(const Puzzle& p,const Answer& upper) {
     component.reserve(p.n);placement.reserve(p.n);
     int stamp=0;
     std::mt19937 rng(3109759);
-    const auto stop=std::chrono::steady_clock::now()+std::chrono::milliseconds(1300);
-    for(int restart=0;restart<15&&std::chrono::steady_clock::now()<stop;++restart) {
+    auto stop=std::chrono::steady_clock::now()+std::chrono::milliseconds(1300);
+#if defined(AHC019_REBUILD_BLOCKS) || defined(AHC019_EXTRA_RESTARTS)
+    constexpr int restarts=100000;
+#else
+    constexpr int restarts=15;
+#endif
+    for(int restart=0;restart<restarts&&std::chrono::steady_clock::now()<stop;++restart) {
+#if defined(AHC019_REBUILD_BLOCKS) || defined(AHC019_EXTRA_RESTARTS)
+        if(restart==15) stop=std::chrono::steady_clock::now()+std::chrono::milliseconds(200);
+#endif
         Answer now(p.n);Fill need(p);
+#ifdef AHC019_REBUILD_BLOCKS
+        if(restart>=15 && restart%7!=0) retain_blocks(p,best,now,need,rng,restart);
+#endif
         for(int cnt=0;cnt<64&&!need.complete(p.d)&&std::chrono::steady_clock::now()<stop;++cnt) {
             std::array<std::vector<int>,2> free,new_ray;
             int deficit[2]{};

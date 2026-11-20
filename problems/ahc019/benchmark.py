@@ -91,10 +91,13 @@ def main():
     parser = argparse.ArgumentParser()
     for key in ("inputs", "out", "vis", "baseline", "blocks"):
         parser.add_argument(key, type=Path)
+    parser.add_argument("--restarts",type=Path)
     a = parser.parse_args()
     cases = sorted(a.inputs.resolve().glob("*.txt"))
     out, vis = a.out.resolve(), a.vis.resolve()
     solvers = [("baseline", a.baseline.resolve()), ("blocks", a.blocks.resolve())]
+    if a.restarts is not None:
+        solvers.append(("restarts",a.restarts.resolve()))
     out.mkdir(parents=True, exist_ok=True)
     scratch = out/"scratch"
     scratch.mkdir(exist_ok=True)
@@ -141,6 +144,11 @@ def main():
                           "max_wall":max(r["wall"] for r in rows)}
     summary["candidate_wins"] = sum(results["blocks",c.name]["score"] <
                                     results["baseline",c.name]["score"] for c in cases)
+    if a.restarts is not None:
+        summary["rebuild_vs_restarts_wins"] = sum(results["blocks",c.name]["score"] <
+                                  results["restarts",c.name]["score"] for c in cases)
+        summary["restarts_vs_base_wins"] = sum(results["restarts",c.name]["score"] <
+                                  results["baseline",c.name]["score"] for c in cases)
     (out/"summary.json").write_text(json.dumps(summary,indent=2)+"\n")
     print(json.dumps(summary))
 
