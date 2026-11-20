@@ -2014,3 +2014,18 @@ sort(points.begin(), points.end(), [](const Point& a, const Point& b) {
 
 `bits=10` なら各座標は `0..1023` です。厳密な最近傍順ではありませんが、空間的に
 まとまったcluster作成、query順、cache localityの改善候補を1行のkeyで作れます。
+
+## PairedCoverageReward
+
+ヘッダ: [`paired-coverage-reward.hpp`](../library/paired-coverage-reward.hpp)。
+
+各対象の重みを渡し、イベントを `2*id+side` （`side=0,1`）で表します。
+両側が一度以上覆われた時だけ、その対象の重みを一度加算します。
+`delta(events)` はイベント追加の差分だけを評価し、状態を変えません。
+同じ側の重複や、同一の追加で両側を初めて覆う場合にも対応します。
+`add(events)` で実際に追加し、`value()` が現在の得点です。
+取り消しや対象間の連結判定は提供せず、追加と評価はイベント数に比例します。
+
+[使用例](../examples/paired_coverage_reward_usage.cpp) /
+[全再計算との比較](../tests/paired_coverage_reward_test.cpp) /
+[AHC043 の駅勢圏の評価](../problems/ahc043/README.md)。
