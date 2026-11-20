@@ -123,6 +123,11 @@ int main() {
     std::vector<int> items(n);std::iota(items.begin(),items.end(),0);
 #ifndef AHC025_RANK_ONLY
     int reserve=q<3*n?q/7:q<5*n?q/5:q/3;
+#ifdef AHC025_RANK_FIRST_LOW
+    // In the lowest budget band, avoid sacrificing an entire atomic rank
+    // split. Use only comparisons left after the full rank budget got stuck.
+    if(q<3*n) reserve=0;
+#endif
 #else
     int reserve=0;
 #endif
