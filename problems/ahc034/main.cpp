@@ -3,6 +3,9 @@
 #include "../../library/min-cost-flow.hpp"
 #include "../../library/segment-tree.hpp"
 using namespace std;
+#ifndef AHC034_SHORTCUTS
+#define AHC034_SHORTCUTS 0
+#endif
 #ifndef AHC034_FLOW
 #define AHC034_FLOW 1
 #endif
@@ -67,7 +70,7 @@ struct Problem {
     }
     return best;
   }
-  Route search(Route base,Clock::time_point deadline)const{
+  Route search(Route base,Clock::time_point deadline,int epochs=AHC034_EPOCHS,uint32_t seed=340034)const{
     const int n=int(base.size());
     if(n<2)return base;
     auto join_segments=join();
@@ -78,8 +81,8 @@ struct Problem {
     };
     long long best_cost=cost(summarize(base));
     Route best=base;
-    mt19937 rng(340034);
-    for(int epoch=0;epoch<AHC034_EPOCHS;++epoch){
+    mt19937 rng(seed);
+    for(int epoch=0;epoch<epochs;++epoch){
       Route cur=best;
       build(cur);
       long long current=cost(tree.all());
@@ -146,7 +149,7 @@ struct Problem {
     assert(load==0);
     return cost;
   }
-  bool split_fixed_walk(Walk& w,Clock::time_point deadline)const{
+  bool split_fixed_walk(Walk& w,Clock::time_point deadline,long long target=-1)const{
     if(Clock::now()>=deadline)return false;
     const int n=int(w.point.size()),source=n+V,sink=source+1;
     int total=0;
@@ -173,10 +176,63 @@ struct Problem {
     assert(served==height);
     const long long computed=travel(candidate);
     assert(computed==100LL*(n-1)+work);
-    if(computed>=travel(w))return false;
+    if(computed>=(target<0?travel(w):target))return false;
     w=std::move(candidate);
     return true;
   }
+#if AHC034_SHORTCUTS
+  Route shorten(Route route,int span,bool first_col,Clock::time_point deadline,
+                int& attempts,int& applied)const{
+    array<int,V> visits{},delta{};
+    for(int v:route)++visits[v];
+    for(int l=0;l+2<int(route.size()) && Clock::now()<deadline;){
+      int best_save=0,right=-1;
+      Route best_insert;
+      for(int r=min(int(route.size())-1,l+span);r>=l+2;--r){
+        const int a=route[l],b=route[r];
+        int save=r-l-dist[a][b];
+        if(save<=best_save)continue;
+        for(bool col:{first_col,!first_col}){
+          Route insert;
+          int u=a;
+          auto move_to=[&](bool horizontal){
+            const int d=horizontal?1:N;
+            auto coord=[&](int v){return horizontal?v%N:v/N;};
+            while(coord(u)!=coord(b)){
+              u+=coord(u)<coord(b)?d:-d;insert.push_back(u);
+            }
+          };
+          move_to(col);move_to(!col);
+          assert(u==b && int(insert.size())==dist[a][b]);
+          ++attempts;
+          for(int k=l+1;k<=r;++k)--delta[route[k]];
+          for(int v:insert)++delta[v];
+          bool okay=true;
+          for(int k=l+1;k<=r;++k){
+            const int v=route[k];
+            if(height[v] && visits[v]+delta[v]==0)okay=false;
+          }
+          for(int v:insert)--delta[v];
+          for(int k=l+1;k<=r;++k)++delta[route[k]];
+          if(okay){best_save=save;right=r;best_insert=move(insert);break;}
+        }
+      }
+      if(right>=0){
+        for(int k=l+1;k<=right;++k)--visits[route[k]];
+        for(int v:best_insert)++visits[v];
+        route.erase(route.begin()+l+1,route.begin()+right+1);
+        route.insert(route.begin()+l+1,best_insert.begin(),best_insert.end());
+        ++applied;
+        // Return a few steps to catch a new local seam without rescanning everything.
+        l=max(0,l-2);
+      }else ++l;
+    }
+    assert(route.front()==0);
+    for(int v=0;v<V;++v)assert(!height[v] || visits[v]>0);
+    for(int i=1;i<int(route.size());++i)assert(dist[route[i-1]][route[i]]==1);
+    return route;
+  }
+#endif
   void print(const Walk& w)const{
     for(int i=0;i<int(w.point.size());++i){
       if(i){
@@ -200,7 +256,37 @@ int main(){
   auto walk=p.expand(answer);
   const long long fixed=p.travel(walk);
   if(AHC034_FLOW)p.split_fixed_walk(walk,begin+chrono::milliseconds(1730));
+#if AHC034_SHORTCUTS
+  const auto inherited=walk;
+  const long long floor_inherit=p.travel(inherited);
+  const auto end=begin+chrono::milliseconds(1850);
+  int attempts=0,edits=0,trials=0,better=0,min_steps=int(inherited.point.size())-1;
+  for(int i=0;i<2&&Clock::now()<end;++i){
+    Problem::Walk next;
+    if(AHC034_SHORTCUTS==1){
+      next=p.expand(p.search(answer,begin+chrono::milliseconds(1750),1,340241+997*i));
+    }else{
+      next.point=p.shorten(inherited.point,i?56:24,i!=0,end,attempts,edits);
+      next.change.assign(next.point.size(),0);
+    }
+    min_steps=min(min_steps,int(next.point.size())-1);
+    ++trials;
+    if(p.split_fixed_walk(next,end,p.travel(walk))){
+      walk=move(next);++better;
+    }else if(AHC034_SHORTCUTS==1 && p.travel(next)<p.travel(walk)){
+      // If the flow is no better within the clock, the legal literal cargo
+      // allocation on the control walk is also eligible.
+      walk=move(next);++better;
+    }
+  }
+#endif
   cerr<<"start="<<p.cost(p.summarize(base))<<" move="<<p.travel(walk)
-      <<" fixed="<<fixed<<" walk="<<walk.point.size()-1<<'\n';
+      <<" fixed="<<fixed<<" walk="<<walk.point.size()-1;
+#if AHC034_SHORTCUTS
+  cerr<<" inherited="<<floor_inherit<<" original_steps="<<inherited.point.size()-1
+      <<" min_steps="<<min_steps<<" trials="<<trials<<" attempts="<<attempts
+      <<" edits="<<edits<<" better="<<better;
+#endif
+  cerr<<'\n';
   p.print(walk);
 }
