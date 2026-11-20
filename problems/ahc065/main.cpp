@@ -69,18 +69,27 @@ struct Problem {
             [&](int at,int box){if(box>=0) s.position[box]=at;});
         clear(s);
     }
-    int priority(const State& s) const {
+    int priority(const State& s,int offset=0) const {
         int result=0;
 #ifdef AHC065_ONE_FUTURE
         constexpr std::array<int,1> weight{16};
 #else
         constexpr std::array<int,8> weight{16,13,10,8,6,5,3,2};
 #endif
-        for(int i=0;i<int(weight.size()) && s.next+i<n*n;++i)
-            result+=weight[i]*dist[s.position[s.next+i]];
+        for(int i=offset;i<int(weight.size()) && s.next+i-offset<n*n;++i)
+            result+=weight[i]*dist[s.position[s.next+i-offset]];
         return result;
     }
-    std::vector<Operation> solve() const {
+    void deliver(State& s,RNG& rng,std::vector<Operation>* record=nullptr) const {
+        const int target=s.next;
+        while(s.next==target) {
+            const auto& choice=toward[s.position[target]];
+            const auto& op=choice[rng.next()%choice.size()];
+            apply(s,op);
+            if(record) record->push_back(op);
+        }
+    }
+    std::vector<Operation> solve(bool joint=false) const {
         std::vector<Operation> result;
         State current=start;
         RNG rand;
@@ -89,17 +98,24 @@ struct Problem {
             int best=std::numeric_limits<int>::max();
             State winner=current;
             std::vector<Operation> selected,path;
-            for(int run=0;run<8;++run) {
+            const bool two=joint && target+1<n*n;
+            int route_trials=0;
+            for(int run=0;run<(two?4:8);++run) {
                 State copy=current;
                 path.clear();
-                while(copy.next==target) {
-                    const auto& choice=toward[copy.position[target]];
-                    const auto& op=choice[rand.next()%choice.size()];
-                    apply(copy,op);path.push_back(op);
+                deliver(copy,rand,&path);
+                ++route_trials;
+                int score=priority(copy);
+                if(two) {
+                    State trial=copy;
+                    const int second_turns=dist[copy.position[copy.next]];
+                    deliver(trial,rand);
+                    ++route_trials;
+                    score=16*second_turns+priority(trial,1);
                 }
-                const int score=priority(copy);
                 if(score<best) best=score,selected=path,winner=copy;
             }
+            assert(route_trials==8);
             result.insert(result.end(),selected.begin(),selected.end());
             current=winner;
         }
@@ -110,7 +126,11 @@ int main() {
     std::ios::sync_with_stdio(false);std::cin.tie(nullptr);
     Problem p;
     if(!p.init()) return 0;
+#ifdef AHC065_JOINT
+    const auto ops=p.solve(true);
+#else
     const auto ops=p.solve();
+#endif
     std::cout<<p.belts.size()<<'\n';
     for(auto& belt:p.belts) {
         std::cout<<belt.size();
