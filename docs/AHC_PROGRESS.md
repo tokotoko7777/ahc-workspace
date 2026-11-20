@@ -2,6 +2,8 @@
 
 用途から試作部品を引くには [研究ライブラリの用途別索引](RESEARCH_LIBRARY_INDEX.md) を参照。
 
+**現在の指示（2026-11-21 JST）:** 継続研究はAHC004に集中。目標は公式配布ローカル100件で7,321,305,762点。ほかの回は以下に初回の研究記録のみ保存し、現在は評価・変更しない。
+
 対象は終了済み AHC001〜AHC074。原則として番号順に着手し、長期戦や比較条件待ちの回はベストと次の仮説を保存して先へ進む。公式解説・参加者解説・第三者の提出コードは参照しない。
 
 
@@ -20,7 +22,7 @@
 | [AHC001](https://atcoder.jp/contests/ahc001/tasks/ahc001_a) | 本番 1,000 件完走・未達 | **993,823,071,683** 点（[AtCoder 提供の順位データ](https://huggingface.co/datasets/SakanaAI/ALE-Bench/blob/main/ahc001.zip)） | 凍結 v64: **993,411,282,631** 点 | 本番公開シード全 1,000 件・公式採点。最長 4.838 秒（ローカル） | [codex/ahc001-coordinate-slide-20261120](https://github.com/tokotoko7777/ahc-workspace/tree/codex/ahc001-coordinate-slide-20261120) |
 | [AHC002](https://atcoder.jp/contests/ahc002/tasks/ahc002_a) | 既存版から着手・未判定 | **6,255,977** 点（[AtCoder 提供の順位データ](https://huggingface.co/datasets/SakanaAI/ALE-Bench/blob/main/ahc002.zip)） | V10（未調整 20 件 1,254,587） | 本番 100 件。通常配布の 0–99 は別ケース | [codex/ahc002-corridor-repair-20261120](https://github.com/tokotoko7777/ahc-workspace/tree/codex/ahc002-corridor-repair-20261120) |
 | [AHC003](https://atcoder.jp/contests/ahc003/tasks/ahc003_a) | 本番 3,000 件完走・未達 | **2,926,767,743,437** 点（[AtCoder 提供の順位データ](https://huggingface.co/datasets/SakanaAI/ALE-Bench/blob/main/ahc003.zip)） | 凍結既存版: **2,925,781,453,112** 点 | 本番公開シード全 3,000 件・公式対話テスタ・最大ローカル 0.897 秒 | [codex/ahc003-probe-design-20261120](https://github.com/tokotoko7777/ahc-workspace/tree/codex/ahc003-probe-design-20261120) |
-| [AHC004](https://atcoder.jp/contests/ahc004/tasks/ahc004_a) | ローカル改善・本番未判定 | **7,321,305,762** 点（[AtCoder 提供の順位データ](https://huggingface.co/datasets/SakanaAI/ALE-Bench/blob/main/ahc004.zip)） | 周期パターン初期化: 未調整 10 件 681,224,023（旧 662,753,350） | 本番 100 件。通常配布の 0–99 は別ケース | [codex/ahc004-contig-seed-20261120](https://github.com/tokotoko7777/ahc-workspace/tree/codex/ahc004-contig-seed-20261120) |
+| [AHC004](https://atcoder.jp/contests/ahc004/tasks/ahc004_a) | **現在の研究対象**・ローカル改善 | 公式配布100件の目標 **7,321,305,762** | 全ライン再構築 **7,020,805,013**、目標差300,500,749 | 配布seed 0–99を公式・独立採点、比較用 `-O3`。本番順位の判定ではない | [100件明細・実装・再現](https://github.com/tokotoko7777/ahc-workspace/blob/codex/ahc004-focus-20261121/problems/ahc004/experiments/local100/README.md) |
 | [AHC005](https://atcoder.jp/contests/ahc005/tasks/ahc005_a) | ローカル比較・本番未判定 | **22,318,770** 点（[AtCoder 提供の順位データ](https://huggingface.co/datasets/SakanaAI/ALE-Bench/blob/main/ahc005.zip)） | 既存版: 未調整 8 件 1,761,160 | 通常配布の 0–99 は本番 100 件と別 | [codex/ahc005-route-splice-20261120](https://github.com/tokotoko7777/ahc-workspace/tree/codex/ahc005-route-splice-20261120) |
 | [AHC006](https://atcoder.jp/contests/ahc006/tasks/ahc006_a) | ローカル比較・本番未判定 | **2,220,425** 点（[AtCoder 提供の順位データ](https://huggingface.co/datasets/SakanaAI/ALE-Bench/blob/main/ahc006.zip)） | 既存版: 未調整 10 件の合計 214,630 | 本番 100 件。配布シードとの同一性未確認 | [空間初期化の分岐](https://github.com/tokotoko7777/ahc-workspace/tree/761d6839f93d0e347820919714402360766c4ad5) |
 | [AHC007](https://atcoder.jp/contests/ahc007/tasks/ahc007_a) | 着手・未判定 | **14,241,733,941** 点（[AtCoder 提供の順位データ](https://huggingface.co/datasets/SakanaAI/ALE-Bench/blob/main/ahc007.zip)） | シナリオ版: 公開 150 件 **14,184,305,386** | 本番 150 件、2 秒。配布入力との同一性未確認 | [問題別ブランチ](https://github.com/tokotoko7777/ahc-workspace/tree/2793a9a782184c4b77376fab17482d24b353d6bd) |
