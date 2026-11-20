@@ -58,10 +58,49 @@ novel string if it destroys many cheap still-unseen future strings.
 ```sh
 p=problems/ahc060
 d=$(mktemp -d)
-g++ -std=c++23 -O3 -DAHC060_FRONTIER=0 "$p/main.cpp" -o "$d/base"
+g++ -std=c++23 -O3 -DAHC060_RICH=0 -DAHC060_FRONTIER=0 "$p/main.cpp" -o "$d/base"
 python scripts/bundle.py "$p/main.cpp" -o "$d/submission.cpp"
-g++ -std=c++23 -O3 "$d/submission.cpp" -o "$d/frontier"
+g++ -std=c++23 -O3 -DAHC060_RICH=0 "$d/submission.cpp" -o "$d/frontier"
 python "$p/benchmark.py" /path/to/gen /path/to/vis "$d/base" "$d/frontier" "$d/results.csv"
 g++ -std=c++23 -O3 tests/nonbacktracking_path_test.cpp -o "$d/path-test"
 "$d/path-test"
+```
+
+## Follow-up: one flip within a delivery macro
+
+A macro may apply one irreversible flip immediately after harvesting from
+a white tree, at one out of every twelve dispatch opportunities. The
+already-harvested scoop stays white. Subsequent visits to that tree in
+the same path produce red. Count the flip as one real action and
+include its identity in the exact frontier key. Prefer not to spend
+a flip on the same delivery result; prohibit fallback duplicates with
+flips. The fixed wider control and flip arm both cap width at 104 and
+extensions at 1800 per dispatch, versus width 56 and extensions 1000 in
+the inherited mode. Flips also count against the extension budget.
+
+| Fresh cases | Frozen ↑ | Wider frozen ↑ | Flip macros ↑ | vs wider |
+|---|---:|---:|---:|---:|
+| Dev (24) | 872.333 | 870.875 | 980.708 | 24 / 0 / 0 |
+| Holdout (24) | 888.833 | 887.042 | 992.333 | 24 / 0 / 0 |
+
+Held-out median gain 105, with 488,729 actual probes versus 586,539 in
+the wider control. Median wall .03355 s vs .03875 s, max .111667 s
+across all arms. All 144 official and independent scores matched full
+legality replay with 10,000 operations per case. Flip macros are the
+branch default. Final comparisons remain unavailable.
+[Raw log](benchmark-flip-results.csv).
+
+Next estimate future coverage preserved on each proposed flip before
+committing: compare the short unseen closed paths around that tree with
+and without its color change, then account both immediate novelty and
+regional destruction of opportunities.
+
+```sh
+p=problems/ahc060
+d=$(mktemp -d)
+for i in 0 1 2; do
+  g++ -std=c++23 -O3 -DAHC060_RICH=$i "$p/main.cpp" -o "$d/arm$i"
+done
+python "$p/benchmark_flips.py" /path/to/gen /path/to/vis \
+  "$d/arm0" "$d/arm1" "$d/arm2" "$d/results.csv"
 ```
