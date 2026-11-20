@@ -2014,3 +2014,20 @@ sort(points.begin(), points.end(), [](const Point& a, const Point& b) {
 
 `bits=10` なら各座標は `0..1023` です。厳密な最近傍順ではありませんが、空間的に
 まとまったcluster作成、query順、cache localityの改善候補を1行のkeyで作れます。
+
+## Stack Durability Reserve
+
+[ヘッダ](../library/stack-durability-reserve.hpp)・[愚直な耐久力比較テスト](../tests/stack_durability_reserve_test.cpp)。
+
+持ち上げた品物の上積み重量だけ耐久力が減る場合に、各層の余裕を管理します。
+現在の経路から最短で帰る想定で、上積み案の寄り道分と新しい重量の影響を
+層ごとに評価します。失敗時は状態を変えません。
+
+```cpp
+StackDurabilityReserve<12> stack;
+stack.append(10, 300, 8, 8); // 重さ、初期耐久、到達にかかる距離、帰路長
+bool ok = stack.append(2, 100, 3, 5); // 元の層に新箱の 2*5 が追加される
+```
+
+[AHC049](../problems/ahc049/main.cpp)では、複数の箱を運ぶ途中で次の箱を
+拾えるかをこの余裕で厳密に判定します。
