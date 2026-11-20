@@ -171,8 +171,8 @@ struct Problem {
         browse(browse,start[0]);
         return result;
     }
-    Solution optimize(int mode,bool different,Clock::time_point stop) const {
-        Solution result{layouts(mode,different),{}};
+    Solution optimize_layout(int mode,const Controller& config,Clock::time_point stop) const {
+        Solution result{config,{}};
         std::vector<int> keys;
         for(int i=0;i<k;++i)
             if(std::none_of(keys.begin(),keys.end(),[&](int j){return result.keys[i]==result.keys[j];}))
@@ -191,6 +191,61 @@ struct Problem {
         if(cur.gained<n*n) return {};
         return result;
     }
+    Solution optimize(int mode,bool different,Clock::time_point stop) const {
+        return optimize_layout(mode,layouts(mode,different),stop);
+    }
+#ifdef AHC052_ADAPT_KEYS
+    Controller adapt(const Solution& prior,int phase) const {
+        Controller next=prior.keys;
+        State point=initial();
+        std::array<int,Keys> times{};
+        const auto length=int(prior.route.size());
+        const int fraction[]{3,4,5,6,7,5,6,7};
+        const int prefix=std::min(std::max(0,length-1),length*fraction[phase]/8);
+        for(int t=0;t<length;++t) {
+            const int key=prior.route[t];
+            ++times[key];
+            if(t<prefix) move(point,prior.keys,key);
+        }
+        std::vector<int> free_keys{4,5,6,7,8,9};
+        std::stable_sort(free_keys.begin(),free_keys.end(),[&](int a,int b){
+            return times[a]<times[b];
+        });
+        const int key=free_keys[phase%3];
+        std::vector<unsigned char> assigned(n*n);
+        for(int step=0;step<m;++step) {
+            const int i=(step+phase)%m,origin=point.pos[i];
+            std::vector<int> q{origin},distance(n*n,-1),direction(n*n,-1);
+            distance[origin]=0;
+            for(int d=0;d<int(q.size());++d) for(int a=0;a<4;++a) {
+                int v=grid[q[d]][(a+phase)%4];
+                if(distance[v]<0) {
+                    distance[v]=distance[q[d]]+1;
+                    direction[v]=(q[d]==origin)?(a+phase)%4:direction[q[d]];
+                    q.push_back(v);
+                }
+            }
+            int target=-1;
+            long long rank=std::numeric_limits<long long>::max();
+            for(int v=0;v<n*n;++v) if(!point.seen[v]) {
+                long long priority=(distance[v]+10*assigned[v])*64+
+                    (scramble(20157ULL*v+81*phase+143*i)&31);
+                if(priority<rank) target=v,rank=priority;
+            }
+            if(target>=0) {
+                assigned[target]=1;
+                const int a=direction[target];
+                if(a>=0 && (phase<5 || i%2==phase%2)) next[key][i]=a;
+            }
+        }
+        if(std::count(next.begin(),next.end(),next[key])>1) {
+            int i=int(scramble(2174236+phase*813ULL)%m);
+            next[key][i]=(next[key][i]+1+phase%3)%5;
+        }
+        return next;
+    }
+#endif
+
 };
 
 int main() {
@@ -210,6 +265,17 @@ int main() {
 #endif
 #ifndef AHC052_COMMON_KEYS_ONLY
     consider(true);
+#endif
+#if defined(AHC052_ADAPT_KEYS) || defined(AHC052_MORE_RANDOM_KEYS)
+    for(int trial=0;trial<8 && Clock::now()<deadline;++trial) {
+#ifdef AHC052_ADAPT_KEYS
+        auto configuration=model.adapt(best,trial);
+#else
+        auto configuration=model.layouts(trial+4,true);
+#endif
+        auto next=model.optimize_layout(trial+4,configuration,deadline);
+        if(!next.route.empty() && next.route.size()<best.route.size()) best=std::move(next);
+    }
 #endif
     for(const auto& button:best.keys) {
         for(int i=0;i<Robots;++i) std::cout<<Symbol[button[i]]<<(i+1==Robots?'\n':' ');
