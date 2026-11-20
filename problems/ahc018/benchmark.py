@@ -34,7 +34,7 @@ def run(tester,binary,case):
             raise
 
 
-def validate(case,out):
+def validate(case,out,wet_out=None):
     data=list(map(int,case.split()))
     n,w,k,cost=data[:4]
     hard=data[4:4+n*n]
@@ -76,6 +76,8 @@ def validate(case,out):
             progress=1
             break
     assert progress
+    if wet_out is not None:
+        wet_out.update(wet)
     return total,len(turns),broken_before,w,k,cost
 
 

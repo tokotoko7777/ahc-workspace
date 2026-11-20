@@ -4,6 +4,9 @@ using namespace std;
 #ifndef AHC018_PROBES
 #define AHC018_PROBES 0
 #endif
+#ifndef AHC018_ROUTE_PROBES
+#define AHC018_ROUTE_PROBES 0
+#endif
 
 namespace {
 using Clock=chrono::steady_clock;
@@ -11,7 +14,7 @@ constexpr int Ys[4]={-1,1,0,0},Xs[4]={0,0,-1,1};
 struct Solver {
   Clock::time_point stop=Clock::now()+chrono::milliseconds(4470);
   int n,w,k,c;
-  vector<int> sources,houses,hardness;
+  vector<int> sources,houses,hardness,partial;
   vector<char> hole,wet;
   vector<int> roots,samples;
   bool ended=false;
@@ -24,6 +27,7 @@ struct Solver {
       int y,x;cin>>y>>x;p=y*n+x;
     }
     hardness.assign(n*n,0);
+    partial.assign(n*n,0);
     hole.assign(n*n,0);
     wet.assign(n*n,0);
   }
@@ -44,10 +48,10 @@ struct Solver {
 
   void drill(int p,int prediction) {
     if(hole[p]||ended)return;
-    prediction=clamp(local_prediction(p,prediction),10,5000);
+    prediction=clamp(max(local_prediction(p,prediction),partial[p]+1),10,5000);
     int first=clamp(int(prediction*0.70)-c/4,10,4500);
     int next=clamp(int(sqrt(2.0*(c+2)*(max(16,prediction/4)))),9,1200);
-    int total=0;
+    int total=partial[p];
     while(!ended){
       const int power=Clock::now()>=stop?5000:total==0?first:next;
       cout<<p/n<<' '<<p%n<<' '<<power<<endl;
@@ -88,7 +92,9 @@ struct Solver {
       for(int p:samples){
         int dy=y*step-p/n,dx=x*step-p%n;
         double q=1.0/(49+dy*dy+dx*dx);
-        logsum+=q*log(double(hardness[p]));
+        if(!hardness[p])q*=0.6;
+        int v=hardness[p]?hardness[p]:min(5000,partial[p]+max(90,partial[p]/2));
+        logsum+=q*log(double(v));
         weight+=q;
       }
       coarse[y*side+x]=exp(logsum/weight);
@@ -130,6 +136,83 @@ struct Solver {
     }
   }
 
+  void partial_probe(int p,int power) {
+    assert(!hole[p] && partial[p]==0 && power>=1 && power<=620);
+    cout<<"# route-probe "<<p/n<<' '<<p%n<<' '<<power<<'\n';
+    cout<<p/n<<' '<<p%n<<' '<<power<<endl;
+    int reply=-1;
+    if(!(cin>>reply) || reply==-1){ended=true;return;}
+    partial[p]=power;
+    if(reply!=0){
+      hole[p]=1;
+      hardness[p]=max(10,power/2);
+      if(reply==2){ended=true;return;}
+      bool near=false;
+      neighbors(p,[&](int q){near|=wet[q];});
+      if(near)water_from(p);
+    }
+    samples.push_back(p);
+  }
+
+  int remaining_model(int p,int model) const {
+    int paid=partial[p];
+    int consistent=max(model,paid+(paid?max(90,paid/2):0));
+    return consistent-paid;
+  }
+
+  void rolling_solve(const vector<char>& is_house){
+    vector<char> surveyed(n*n,false);
+    int probe_left=min(2*k*(620+c),1550*k);
+    while(!ended){
+      bool smart=Clock::now()<stop;
+      vector<int> model=smart?field():vector<int>{};
+      auto choose_path=[&]{
+        return implicit_multi_source_dijkstra<int>(
+          n*n,roots,INT_MAX/4,[&](int v,auto add){
+            neighbors(v,[&](int q){
+              const int cost=hole[q]?0:smart?220+remaining_model(q,model[q])+2*c:1;
+              add(q,cost);
+            });
+          },[&](int p){return is_house[p]&&!wet[p];});
+      };
+      auto path=choose_path();
+      if(!path)return;
+      int goal=path->nodes.back();
+      if(AHC018_ROUTE_PROBES==1 && smart && !surveyed[goal] && probe_left>70+c){
+        surveyed[goal]=true;
+        const auto& route=path->nodes;
+        bool tried=false;
+        for(int at:{1,2}){
+          const int p=route[route.size()*at/3];
+          if(hole[p] || partial[p] || route.size()<30 || Clock::now()>=stop)continue;
+          int power=min({620,probe_left-c,max(70,model[p]*4/5)});
+          if(power<70)continue;
+          partial_probe(p,power);
+          probe_left-=power+c;
+          tried=true;
+          if(ended)return;
+        }
+        if(tried){
+          model=field();
+          path=choose_path();
+          if(!path)return;
+        }
+      }
+      int newly=0;
+      for(int p:path->nodes){
+        bool before=hole[p];
+        drill(p,smart?model[p]:480);
+        if(ended)return;
+        water_from(p);
+        if(!before){
+          ++newly;
+          if(smart && newly%5==0 && !partial[p])samples.push_back(p);
+        }
+        if(smart && newly>=18)break;
+      }
+    }
+  }
+
   void solve() {
     for(int p:sources){
       drill(p,480);
@@ -146,6 +229,7 @@ struct Solver {
     if(ended)return;
     vector<char> is_house(n*n);
     for(int p:houses)is_house[p]=1;
+    if(AHC018_ROUTE_PROBES){rolling_solve(is_house);return;}
     while(!ended){
       const bool estimated=AHC018_PROBES && Clock::now()<stop;
       vector<int> model=estimated?field():vector<int>{};
@@ -170,6 +254,7 @@ struct Solver {
 };
 } // namespace
 
+#ifndef AHC018_NO_MAIN
 int main(){
   ios::sync_with_stdio(false);
   cin.tie(nullptr);
@@ -177,3 +262,4 @@ int main(){
   solver.read();
   solver.solve();
 }
+#endif
