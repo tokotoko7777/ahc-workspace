@@ -2014,3 +2014,18 @@ sort(points.begin(), points.end(), [](const Point& a, const Point& b) {
 
 `bits=10` なら各座標は `0..1023` です。厳密な最近傍順ではありませんが、空間的に
 まとまったcluster作成、query順、cache localityの改善候補を1行のkeyで作れます。
+
+## Half-swap interval starts
+
+ヘッダ: [`half-swap-interval.hpp`](../library/half-swap-interval.hpp)
+
+半開の使用可能範囲 `[lo, hi)` に収まる等長2分割区間で、
+左右（または上下）を交換して指定した2位置を移せる開始点を返します。
+
+```cpp
+auto starts = half_swap_interval_starts(0, 8, 3, 6); // [1, 2]（両端を含む）
+```
+
+開始点の有効範囲を O(1) で計算し、解なしは `nullopt`。
+[AHC068でのストリップ選択](../problems/ahc068/main.cpp) と
+[愚直な開始位置全列挙との比較](../tests/half_swap_interval_test.cpp)。
