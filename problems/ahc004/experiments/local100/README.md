@@ -173,6 +173,31 @@ python3 "$E/summarize.py" "$IN" "$W/geometry/results.csv" --control anchor_contr
 python3 "$E/geometry_diagnostics.py" "$IN" "$W/geometry" "$W/geometry-diagnostics.csv"
 ```
 
+## GNU C++23単一ファイル（追加の最適化オプションなし）
+
+[検証した単一ファイル](https://github.com/tokotoko7777/ahc-workspace/blob/0ff1e348d9fecc8baecb0b5be85aa0adf797f41e/problems/ahc004/experiments/geometry_source/submission.single.cpp)は
+ファイル内のGCC O3 pragmaが有効。g++ 14.2.0で `-std=c++23` のみを指定し、
+公式配布100件で **7,489,107,407点**、目標を **167,801,645点** 上回った。
+全100出力で公式・独立採点一致。最長2.795434秒、中央値2.784421秒。
+4行交差の開始盤面を採用した15件はすべて1億点（全語を収録）。
+[ケース別結果](standalone-geometry-results.csv)。
+
+以前の `-O3` 指定の結果7,505,150,960点との差は−16,043,553点。
+ビルド条件だけでなく探索の高速化も異なるため、この差はフラグ単独の効果ではない。
+ソースSHA-256は `bf9321ff5fdf70d97a851e0dd4ac0de1d9421fa2a265d10000049b55a5195447`。
+最適化あり版の全語を収録した15盤面は、各語の全出現が通るセルの集合を
+重ねると全400セルを覆った。文字を置き換えない限り、1セルも空白化できない。
+
+単一ファイルを `submission.single.cpp` として保存し、リポジトリルートから実行する。
+
+```sh
+W=$(mktemp -d)
+P=problems/ahc004
+g++ -std=c++23 submission.single.cpp -o "$W/submission"
+taskset -c "${CPU:-6}" python3 "$P/benchmark.py" "$IN" "$W/local" --vis "$VIS" \
+  --entry "standalone_geometry=$W/submission"
+```
+
 ## 再現
 
 公式ツール側で `cargo build --release --locked`。環境変数 `IN` を入力ZIPの
