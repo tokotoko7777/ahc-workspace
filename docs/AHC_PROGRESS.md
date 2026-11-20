@@ -45,8 +45,8 @@
 | [AHC035](https://atcoder.jp/contests/ahc035/tasks/ahc035_a) | 着手・本番未判定 | **274,272,291**（絶対点） | 未調整36件 平均857,950.08 | 本番300件・2秒、同一ケースの証拠なし | [問題別ブランチ](https://github.com/tokotoko7777/ahc-workspace/tree/5e9d58aed81aae5dbdbe8563408ea91a0fbfdf57)、[終盤分布の追試](https://github.com/tokotoko7777/ahc-workspace/tree/503ea8770af2217fea4f8b9f3a866c144949ac60) |
 | [AHC036](https://atcoder.jp/contests/ahc036/tasks/ahc036_a) | 凍結版：本番未達 | **1,872,786,019,642**（相対点） | **1,048,370,275,931**（本番2,000件・全件合法） | 本番2,000件・3秒、基準とseed列を照合済み | [問題別ブランチ](https://github.com/tokotoko7777/ahc-workspace/tree/fb26d23b729e0e30e19da4d6181bd0421588196e)、[更新済み区間の利用](https://github.com/tokotoko7777/ahc-workspace/tree/5f1878dec204f611343c7e8b7a9066b7a0d8e3c3)、[公式比較](https://github.com/tokotoko7777/ahc-workspace/tree/2deddb2a4c35d9bfdbddaa21523042a8f17842c2) |
 | [AHC037](https://atcoder.jp/contests/ahc037/tasks/ahc037_a) | 着手・本番未判定 | Rafbill、得点未確認 | 未調整28件 平均35,832,854.21 | 本番150件・2秒、同一ケースの証拠なし | [中継点](https://github.com/tokotoko7777/ahc-workspace/tree/11e02827a706e05022f50a3f7956541fa388f9ea)、[親の付け替え](https://github.com/tokotoko7777/ahc-workspace/tree/38ce41a25380bb0b6d5b409da8631270b8a3f62f) |
-| [AHC038](https://atcoder.jp/contests/ahc038/tasks/ahc038_a) | 着手・本番未判定 | **1,986,808,184,140**（公式採点CSVの首位） | 開発比較準備中 | 本番2,000件・相対方式 | 検証中 |
-| [AHC039](https://atcoder.jp/contests/ahc039/tasks/ahc039_a) | 着手・本番未判定 | **566,997**（絶対点） | 開発比較準備中 | 本番150件・2秒、同一ケースの証拠なし | 検証中 |
+| [AHC038](https://atcoder.jp/contests/ahc038/tasks/ahc038_a) | 着手・本番未判定 | **1,986,808,184,140**（公式採点CSVの首位） | 既存ビーム：未調整22件 8,811ターン | 本番2,000件・相対方式 | [問題別ブランチ](https://github.com/tokotoko7777/ahc-workspace/tree/12ebdf8c71f19f11fac5b9c2053ae4267a053a18) |
+| [AHC039](https://atcoder.jp/contests/ahc039/tasks/ahc039_a) | 着手・本番未判定 | **566,997**（絶対点） | 未調整24件 平均3,429.71 | 本番150件・2秒、同一ケースの証拠なし | [問題別ブランチ](https://github.com/tokotoko7777/ahc-workspace/tree/39ff40a8cce317a2ed00157ebb8cefefeeff0b16) |
 | AHC040〜074 | 未着手 | — | — | — | — |
 
 ### AHC001 の次の仮説
@@ -574,3 +574,11 @@
 ### AHC039 本番条件
 
 [公式問題文](https://atcoder.jp/contests/ahc039/tasks/ahc039_a)。2秒、150件の絶対点合計。1位566,997は[AtCoder提供の順位・得点データ](https://huggingface.co/datasets/SakanaAI/ALE-Bench/blob/main/ahc039.zip)で確認（SHA-256 `34d478f166334d6c8a0f7e0d03f6b5c17c557eeff9f163d5510ecc8605a9f3cd`）。同一の150件は未確認。矩形を基準に、隣り合う列で上下端を変えた多角形を厳密な得点・周長制約で比較する。
+
+### AHC038 複数指の同時作業を一括で選ぶ
+
+[検証と実装](https://github.com/tokotoko7777/ahc-workspace/tree/12ebdf8c71f19f11fac5b9c2053ae4267a053a18)。未調整22件の合計は時間上限を設定した既存ビーム8,811、既存の貪欲のみ9,948、新しい同時作業案8,888ターン。候補は貪欲より10.66%短いが、ビームには4勝18敗。128出力が全件完成し公式・独立検証が一致。最大時間はビーム2.258秒、候補0.039秒、貪欲0.044秒未満。既存ビームを既定、候補は軽量オプション。次は従来ビームに候補の完成解・同時作業のまとまりを渡し、同程度の計算量で比較する。
+
+### AHC039 共通の行を持つ可変幅の多角形
+
+[検証と実装](https://github.com/tokotoko7777/ahc-workspace/tree/39ff40a8cce317a2ed00157ebb8cefefeeff0b16)。矩形だけの基準に対し、各列の上下端を可変にして、全列が共通の行を含む多角形をDPで選ぶ。dev24件平均1,897.75→3,342.96、未調整24件1,913.29→3,429.71（全48件改善、未調整中央値+1,465点）。公式・独立の単純性、周長、魚の選別が全96出力で一致、最大0.121809秒、頂点最大64。問題別既定に採用。次は共通の行をなくし、隣り合う列だけが正の長さで重なる多角形まで許す。
