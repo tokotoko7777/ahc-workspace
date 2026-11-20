@@ -78,9 +78,12 @@
 | [AHC066](https://atcoder.jp/contests/ahc066/tasks/ahc066_a) | 凍結版：本番未達 | **1,893,330,847,366**（相対点） | **1,352,700,378,901**（本番2,000件・全件合法） | 本番2,000件、ケース別最低値 | [経路](https://github.com/tokotoko7777/ahc-workspace/tree/b69f28ac27f1bdfc0e4cf829de16762ea408ae35)、[マクロ候補](https://github.com/tokotoko7777/ahc-workspace/tree/84edb3f6302d8c76beb38d494282f833eb06cc74)、[公式比較](https://github.com/tokotoko7777/ahc-workspace/tree/588082c3b7a07866a338ac201e65b2ac1887bab6) |
 | [AHC067](https://atcoder.jp/contests/ahc067/tasks/ahc067_a) | 着手・本番未判定 | udon1206、得点未確認 | 新規未調整28件 103,367,464 | 本番150件・2秒、同一ケースの証拠なし | [問題別ブランチ](https://github.com/tokotoko7777/ahc-workspace/tree/5799ad6db455dd0d973d5fcdea14cb56a32f98d2)、[壁の交換](https://github.com/tokotoko7777/ahc-workspace/tree/822e6835f0772872f57224924e02be8bace7e852) |
 | [AHC068](https://atcoder.jp/contests/ahc068/tasks/ahc068_a) | 着手・本番未判定 | PrussianBlue、得点未確認 | 新規未調整26件 平均1,485.500操作 | 本番150件・2秒、同一ケースの証拠なし | [半分交換](https://github.com/tokotoko7777/ahc-workspace/tree/532a0cf2a83e82849153637b8279bbd0d5c08d20)、[長方形の幅拡張](https://github.com/tokotoko7777/ahc-workspace/tree/02a539aa8e143b7e5f56313c4c1f7235bab8c9be) |
-| [AHC069](https://atcoder.jp/contests/ahc069/tasks/ahc069_a) | 着手・本番未判定 | **1,981,252,894,878**（相対点） | 未調整28件 得点1,388,914,694 | 本番2,000件、基準とseed列照合済み | [問題別ブランチ](https://github.com/tokotoko7777/ahc-workspace/tree/bf3cc5a9c1c2ffa113f15916340896c6366c1c43) |
-| [AHC070](https://atcoder.jp/contests/ahc070/tasks/ahc070_a) | 着手・本番未判定 | eijirou、得点未確認 | 未調整24件 平均2,840,819.13 | 本番150件、同一ケースの証拠なし | [問題別ブランチ](https://github.com/tokotoko7777/ahc-workspace/tree/3737c5016654eb51756f431f8fc90cd54ab58314) |
-| AHC071〜074 | 未着手 | — | — | — | — |
+| [AHC069](https://atcoder.jp/contests/ahc069/tasks/ahc069_a) | 凍結版：本番未達 | **1,981,252,894,878**（相対点） | **1,336,637,386,355**（本番2,000件・全件合法） | 本番2,000件、基準とseed列照合済み | [問題別ブランチ](https://github.com/tokotoko7777/ahc-workspace/tree/bf3cc5a9c1c2ffa113f15916340896c6366c1c43)、[受入余裕](https://github.com/tokotoko7777/ahc-workspace/tree/c26dbd7905022272bc37b18beb04e810239b361e)、[公式比較](https://github.com/tokotoko7777/ahc-workspace/tree/6bd633eade8df2dd1c67602130cc1aa76d52141a) |
+| [AHC070](https://atcoder.jp/contests/ahc070/tasks/ahc070_a) | 着手・本番未判定 | eijirou、得点未確認 | 未調整24件 平均2,840,819.13 | 本番150件、同一ケースの証拠なし | [問題別ブランチ](https://github.com/tokotoko7777/ahc-workspace/tree/3737c5016654eb51756f431f8fc90cd54ab58314)、[被覆重複の追試](https://github.com/tokotoko7777/ahc-workspace/tree/2f7c8b2c237219e2af6660023b37a296c0ed8fcd) |
+| [AHC071](https://atcoder.jp/contests/ahc071/tasks/ahc071_a) | 着手・本番未判定 | rhoo、得点未確認 | 開発比較中 | 本番150件、同一ケースの証拠なし | 検証中 |
+| [AHC072](https://atcoder.jp/contests/ahc072/tasks/ahc072_a) | 着手・本番未判定 | **1,995,670,086,683**（相対点） | 既定：未調整30件 平均345.67手 | 本番2,000件、公式ケース別基準を取得 | [同色まとめ](https://github.com/tokotoko7777/ahc-workspace/tree/36a890d2c5c19a137f67de5233c58f245d1e01e5)、[取り出し順](https://github.com/tokotoko7777/ahc-workspace/tree/23a0895828bc6d484120851c8669595e5cb4c31e) |
+| [AHC073](https://atcoder.jp/contests/ahc073/tasks/ahc073_a) | 着手・本番未判定 | hitonanode、得点未確認 | 開発比較中 | 本番150件・2秒、同一ケースの証拠なし | 検証中 |
+| AHC074 | 未着手 | — | — | — | — |
 
 ### AHC001 の次の仮説
 
@@ -892,3 +895,19 @@ AHC056は[公式採点CSV](https://img.atcoder.jp/ahc_standings/ahc056/result.cs
 ### AHC070 長い移動で配置の偏りを減らす
 
 [公式問題文](https://atcoder.jp/contests/ahc070/tasks/ahc070_a)。本番150件の絶対点、公式結果JSONの首位はeijirou、得点未確認。[検証](https://github.com/tokotoko7777/ahc-workspace/tree/3737c5016654eb51756f431f8fc90cd54ab58314)。同じ既定解から各8候補の1万ターンを評価し、短い移動と長い移動を比較。未調整24件の危険度393,179.42→352,032.04、公式点2,544,383.00→2,840,819.13（開発を含め全48勝）。全96出力公式と独立一致、最大0.062739秒。問題別既定。次は二つの配置の効果が重なる部分を二重に数えない。本番未判定。
+
+### AHC069 受け入れ余裕と本番比較
+
+[追試](https://github.com/tokotoko7777/ahc-workspace/tree/c26dbd7905022272bc37b18beb04e810239b361e)。今の空き地の逼迫度に応じて受け入れを制限する案は、別の未調整28件で1,430,559,731→1,557,336,616（+8.86%、25勝3敗）、追加24件で1,273,439,860→1,335,099,488（+4.84%、17勝6敗1分）。将来の空きを先取りする案は未調整28件で既定候補より悪く不採用。全216出力で公式・独立が一致、最大約0.3452秒。現在の逼迫度だけを既定。
+
+[公式比較](https://github.com/tokotoko7777/ahc-workspace/tree/6bd633eade8df2dd1c67602130cc1aa76d52141a/problems/ahc069)。公開seedで全2,000件を再現し、R・クラスタ数・池数と入力ハッシュを公式アーカイブに照合。全件合法で公式点と独立の整数採点が一致。凍結C++の費用表示のみ、浮動小数丸めで5件が最大1ずれたが、ソルバーを変更せず公式点で比較。テスタ込み最大0.450324秒。相対候補 **1,336,637,386,355**、首位 **1,981,252,894,878**。ケース別最大更新なし、共通基準で1,129人中612位、同点なし。**未達**。次は空き枠を保存するだけでなく、頻出形状が入る小区画を優先する。
+
+### AHC070 2箇所の被覆の重複を除く
+
+[追試](https://github.com/tokotoko7777/ahc-workspace/tree/2f7c8b2c237219e2af6660023b37a296c0ed8fcd)。同じ8試行と共通既定の下、2手目の限界効果から既に1手目で改善した分を除いた。別の未調整24件の危険度351,640.50→351,747.54（12勝12敗、中央値では72減）。96出力公式と独立が一致、最大0.062479秒。安定しないので任意。次は評価の係数でなく区間の始点・終点を固定した再計画。
+
+### AHC071・072・073
+
+[AHC071](https://atcoder.jp/contests/ahc071/tasks/ahc071_a)は本番150件で、首位rhooの値は未確認。1行ずつ組む基準に対し、上のレンガの中央支持を守って2行を同時に最適化する案を比較。
+[AHC072・初版](https://github.com/tokotoko7777/ahc-workspace/tree/36a890d2c5c19a137f67de5233c58f245d1e01e5)。最遠から1匹ずつ運ぶのと、同じ色を最大7匹まで拾って一緒に運ぶ案を比較。新規dev30件855.9→433.0手、未調整30件639.93→345.67手（全60勝）。全120出力公式・独立一致、最大0.055364秒、問題別既定。[追試](https://github.com/tokotoko7777/ahc-workspace/tree/23a0895828bc6d484120851c8669595e5cb4c31e)では同じ追加8候補で取り出し順を狙って変える案とランダム再始動を比較、新規未調整30件は既定433.833・ランダム429.800・狙った順432.533。ランダムに1勝16分13敗、全180出力公式・独立一致、最大0.086292秒、任意。次は複数色の集合を支持を壊さず順に運ぶ。公式採点CSVから首位1,995,670,086,683（mech_39）を復元したが、本番未測定。
+[AHC073](https://atcoder.jp/contests/ahc073/tasks/ahc073_a)は本番150件、首位hitonanodeの点数は未確認。着地点を合法に絞り、同数の貪欲の別初期解と円の状態を複数残すビームを比べる。
