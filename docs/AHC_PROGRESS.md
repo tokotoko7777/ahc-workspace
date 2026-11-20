@@ -28,8 +28,9 @@
 | [AHC018](https://atcoder.jp/contests/ahc018/tasks/ahc018_a) | ローカル比較・本番未判定 | [公式順位](https://atcoder.jp/contests/ahc018/standings) 要ログイン。1 位の点数未確認 | 別の未調整 32 件で経路限定試掘／一様の比: 平均 0.9202、25 勝 | 本番公開 3,000 件、5 秒、相対方式 | [問題別ブランチ](https://github.com/tokotoko7777/ahc-workspace/tree/ff72f9a9577cff6a5ce466081ef959cdde836522)、[経路試掘](https://github.com/tokotoko7777/ahc-workspace/tree/0cca8b704bae33b8ad70a32d5db6ae139fb5c054) |
 | [AHC019](https://atcoder.jp/contests/ahc019/tasks/ahc019_a) | 着手・本番未判定 | **1,886,240,066,109**（相対点） | 新規未調整 30 件 30,684,752,148（絶対点・低い方が良い） | 本番公開 2,000 件、6 秒、ケース別基準が必要 | [問題別ブランチ](https://github.com/tokotoko7777/ahc-workspace/tree/7252e85e2d8a5d75038c0680f4ba43b4a43b3f05)、[部分再構築](https://github.com/tokotoko7777/ahc-workspace/tree/79fa2df9de9de4de4d658ea3f374ff983d7e4753) |
 | [AHC020](https://atcoder.jp/contests/ahc020/tasks/ahc020_a) | 着手・本番未判定 | **504,832,157**（絶対点） | 未調整16件 平均1,687,384.19 | 本番 300 件・2 秒、同一ケースの証拠なし | [問題別ブランチ](https://github.com/tokotoko7777/ahc-workspace/tree/96a97144e57022f452ce216eddf9c2d76adc3b32)、[配線費の共同評価](https://github.com/tokotoko7777/ahc-workspace/tree/411425e2f761d00f879c4965b8eee3b9e959e56a) |
-| [AHC021](https://atcoder.jp/contests/ahc021/tasks/ahc021_a) | 着手・本番未判定 | **13,589,420**（絶対点） | 開発比較準備中 | 本番150件・2秒、同一ケースの証拠なし | 検証中 |
-| AHC022〜074 | 未着手 | — | — | — | — |
+| [AHC021](https://atcoder.jp/contests/ahc021/tasks/ahc021_a) | 着手・本番未判定 | **13,589,420**（絶対点） | 既存ビーム：未調整20件 1,813,745 | 本番150件・2秒、同一ケースの証拠なし | [問題別ブランチ](https://github.com/tokotoko7777/ahc-workspace/tree/9306c3d973e9b622e3a35431363f5f7f6ab64225) |
+| [AHC022](https://atcoder.jp/contests/ahc022/tasks/ahc022_a) | 着手・本番未判定 | [公式順位](https://atcoder.jp/contests/ahc022/standings) 要ログイン、1位点未確認 | 開発比較準備中 | 本番3,000件・4秒、相対方式 | 検証中 |
+| AHC023〜074 | 未着手 | — | — | — | — |
 
 ### AHC001 の次の仮説
 
@@ -316,3 +317,11 @@
 ### AHC020 半径と配線費の共同評価
 
 [追試](https://github.com/tokotoko7777/ahc-workspace/tree/411425e2f761d00f879c4965b8eee3b9e959e56a)。同じ初期半径・12,000試行・同じ最後の配線再構成で、探索中だけ枝刈りMSTと活動局集合ごとの再配線費を切り替えた。新規holdout16件の平均は1,654,711.81→1,665,150.44（12勝4敗、中央値+10,253）。devでは平均+6,164.13だが7勝9敗、中央値−706。全64出力が公式と独立採点で一致、最大0.340581秒。任意フラグとして保持。次は時間内に両評価で独立に探索し、最後に公式と同じ費用で選ぶポートフォリオを、同じ予算の独立再始動と比較する。
+
+### AHC021 両端からの前線確定
+
+[検証ブランチ](https://github.com/tokotoko7777/ahc-workspace/tree/9306c3d973e9b622e3a35431363f5f7f6ab64225)。リポジトリ既存の幅64ビームと、最大球も先に底側で確定できる両端方式を比較。dev10件は905,175→886,080、未調整20件は1,813,745→1,774,960（交換37,251→45,008、すべて悪化）。全60出力が順序違反ゼロ、公式と独立の得点一致、最大0.541秒。既存ビームを既定に残す。次はその交換列を末尾から調べ、後続交換が作る順列を使って、親子の順序を崩さず削れる操作を見つける。
+
+### AHC022 本番条件
+
+[公式問題文](https://atcoder.jp/contests/ahc022/tasks/ahc022_a)。対話式、最大10,000測定、4秒 / 1,024 MiB。本番3,000件でケース別最高点による相対評価。1位点は公開データから未確認。温度1点の繰り返し測定を基準に、複数方向の温度パターンと、候補が紛らわしい地点に測定を振り分ける方法を試す。
