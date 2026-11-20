@@ -4,6 +4,13 @@
 
 対象は終了済み AHC001〜AHC074。原則として番号順に着手し、長期戦や比較条件待ちの回はベストと次の仮説を保存して先へ進む。公式解説・参加者解説・第三者の提出コードは参照しない。
 
+
+## 初回の実装・検証を一巡（2026-11-21 JST）
+
+- AHC001〜074の全74回を実装・検証。別seedでの改善と本番比較を分けて記録。AHC009・011は既存出典の取扱い確認待ちで、検証済みの手元コミットを保持し、push保留。
+- 本番1位と同一ケース・採点で比較できた16回は未達。最も差が小さいのはAHC003（首位から0.033699%）とAHC001（同0.041435%）。この2回を優先して構造から見直す。AHC013は自身の本番2,000件は検証済みだが首位点を未確認で、比較済み16回に含めない。
+- **達成確認は0件、mainへの研究ブランチのマージなし。** 未判定は未達と区別する。引き続き公式ケースで順位を検証でき、差を縮められる回を優先する。
+
 ## 1 位超えの判定
 
 公式最終 1 位を、同じ対象ケース、公式の採点・丸め・集計・有効性条件で**厳密に**上回った場合のみ「達成」。相対評価は両者に同一のケース別基準を使う。本番相当を再現できなければ「未判定」。同点や別シードでの改善を達成と混同しない。
@@ -82,8 +89,8 @@
 | [AHC070](https://atcoder.jp/contests/ahc070/tasks/ahc070_a) | 着手・本番未判定 | eijirou、得点未確認 | 未調整24件 平均2,840,819.13 | 本番150件、同一ケースの証拠なし | [問題別ブランチ](https://github.com/tokotoko7777/ahc-workspace/tree/3737c5016654eb51756f431f8fc90cd54ab58314)、[被覆重複の追試](https://github.com/tokotoko7777/ahc-workspace/tree/2f7c8b2c237219e2af6660023b37a296c0ed8fcd) |
 | [AHC071](https://atcoder.jp/contests/ahc071/tasks/ahc071_a) | 着手・本番未判定 | rhoo、得点未確認 | 新規未調整28件 291,785点（費用44,243） | 本番150件、同一ケースの証拠なし | [2行DP](https://github.com/tokotoko7777/ahc-workspace/tree/ee229ea027b79e5e668683714e494d860d998f02)、[スライド再最適化](https://github.com/tokotoko7777/ahc-workspace/tree/58746cd7d8ae2eefb5147984a11c211581cd72cd) |
 | [AHC072](https://atcoder.jp/contests/ahc072/tasks/ahc072_a) | 着手・本番未判定 | **1,995,670,086,683**（相対点） | 既定：未調整30件 平均345.67手 | 本番2,000件、公式ケース別基準を取得 | [同色まとめ](https://github.com/tokotoko7777/ahc-workspace/tree/36a890d2c5c19a137f67de5233c58f245d1e01e5)、[取り出し順](https://github.com/tokotoko7777/ahc-workspace/tree/23a0895828bc6d484120851c8669595e5cb4c31e) |
-| [AHC073](https://atcoder.jp/contests/ahc073/tasks/ahc073_a) | 着手・本番未判定 | hitonanode、得点未確認 | 未調整28件 平均11,155.00操作 | 本番150件・2秒、同一ケースの証拠なし | [問題別ブランチ](https://github.com/tokotoko7777/ahc-workspace/tree/614cf90a321ba056b75894fdb9d00da56428a94c) |
-| [AHC074](https://atcoder.jp/contests/ahc074/tasks/ahc074_a) | 着手・本番未判定 | 確認中 | 開発比較準備中 | 確認中 | 検証中 |
+| [AHC073](https://atcoder.jp/contests/ahc073/tasks/ahc073_a) | 着手・本番未判定 | hitonanode、得点未確認 | 未調整28件 平均11,155.00操作 | 本番150件・2秒、同一ケースの証拠なし | [問題別ブランチ](https://github.com/tokotoko7777/ahc-workspace/tree/614cf90a321ba056b75894fdb9d00da56428a94c)、[二回反射](https://github.com/tokotoko7777/ahc-workspace/tree/3468c6eddc918ad794084cb891015db9e20524f7) |
+| [AHC074](https://atcoder.jp/contests/ahc074/tasks/ahc074_a) | 着手・本番未判定 | Human Only: noimi／With AI: mech_39、点数未確認 | 未調整28件 操作724,334、全件誤注文0 | 本番2,000件公開seed、部門別基準は未取得 | [問題別ブランチ](https://github.com/tokotoko7777/ahc-workspace/tree/b2c94ae0786e0805d6f5e63f3fe62c25ac404ca1) |
 
 ### AHC001 の次の仮説
 
@@ -924,3 +931,11 @@ AHC056は[公式採点CSV](https://img.atcoder.jp/ahc_standings/ahc056/result.cs
 ### AHC073 反射円の異なる配置をビームで残す
 
 [初版](https://github.com/tokotoko7777/ahc-workspace/tree/614cf90a321ba056b75894fdb9d00da56428a94c)。同じ合法な跳躍候補と初期解を使い、24種類の貪欲解と幅24の円配置を区別したビームを比較。未調整28件11,592.54→11,155.00操作（22勝1分5敗、中央値340.5削減）、中央値の時間は0.00278→0.00288秒。全112出力で公式・独立の到達と操作検証が一致、最大0.005064秒。問題別既定に採用、本番比較は未判定。次は一回の跳躍だけでなく二回の反射で達成できる移動を試す。
+
+### AHC073 2回の反射を許す追試
+
+[追試](https://github.com/tokotoko7777/ahc-workspace/tree/3468c6eddc918ad794084cb891015db9e20524f7)。試行数が近い新規未調整28件で、初回11,213.857、単発の探索増量11,172.000、2回反射10,966.607操作。単発との比較は13勝7分8敗、中央値は同点であり任意。時間中央値0.00417→0.00421秒、計336出力は公式・独立検証が一致。本番証拠なし。次は使った円を重複度で管理し、複数目標をまたぐ変更を試す。
+
+### AHC074 右端を固定するバーコードの紙で区間を切り替える
+
+[初版](https://github.com/tokotoko7777/ahc-workspace/tree/b2c94ae0786e0805d6f5e63f3fe62c25ac404ca1)。単一窓を切り替える合法な基準と、右端の窓を残しながら複数窓をまとめて切り替える紙を比較。各注文の覆う区間はDPで選び、次の注文のために全操作を戻せる。dev14件459,389→360,721操作、未調整28件918,184→724,334（−21.11%、全件改善）。全84対話で誤注文0、公式・独立・内部採点が一致、最大0.0914秒、C++23単一ファイルの出力も一致。問題別既定に採用。本番公開2,000seedのハッシュは照合したが、部門別の分布・首位点は未取得なので未判定。次は単一の紙の価値でなく、候補の紙を取り替えたときカタログ全体の注文の総操作数がどれだけ減るかで選ぶ。
