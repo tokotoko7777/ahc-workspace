@@ -43,10 +43,11 @@
 | [AHC033](https://atcoder.jp/contests/ahc033/tasks/ahc033_a) | 着手・本番未判定 | bowwowforeach、得点未確認 | 新規未調整24件 合計6,867ターン | 本番2,000件、相対方式 | [問題別ブランチ](https://github.com/tokotoko7777/ahc-workspace/tree/131ef411f491cc1b6ed79c905fc98a8d52ffad5d)、[先行搬出](https://github.com/tokotoko7777/ahc-workspace/tree/81b3ab227a32818d6d4350351c5d4db5c9602b0f) |
 | [AHC034](https://atcoder.jp/contests/ahc034/tasks/ahc034_a) | 着手・本番未判定 | **9,486,350,384**（絶対点） | 積み降ろし再配分：新規未調整24件 平均35,727,578.04 | 本番150件・2秒、同一ケースの証拠なし | [問題別ブランチ](https://github.com/tokotoko7777/ahc-workspace/tree/6c2ea91bb86ef24c6c84cd99bf76df6355c16ce6)、[積み降ろし再配分](https://github.com/tokotoko7777/ahc-workspace/tree/e2c29731322790e744a17033d3fa937c450cede7) |
 | [AHC035](https://atcoder.jp/contests/ahc035/tasks/ahc035_a) | 着手・本番未判定 | **274,272,291**（絶対点） | 未調整36件 平均857,950.08 | 本番300件・2秒、同一ケースの証拠なし | [問題別ブランチ](https://github.com/tokotoko7777/ahc-workspace/tree/5e9d58aed81aae5dbdbe8563408ea91a0fbfdf57)、[終盤分布の追試](https://github.com/tokotoko7777/ahc-workspace/tree/503ea8770af2217fea4f8b9f3a866c144949ac60) |
-| [AHC036](https://atcoder.jp/contests/ahc036/tasks/ahc036_a) | 着手・本番未判定 | **1,872,786,019,642**（相対点） | 新規未調整24件 信号更新38,507回 | 本番2,000件・3秒、基準とseed列を照合済み | [問題別ブランチ](https://github.com/tokotoko7777/ahc-workspace/tree/fb26d23b729e0e30e19da4d6181bd0421588196e)、[更新済み区間の利用](https://github.com/tokotoko7777/ahc-workspace/tree/5f1878dec204f611343c7e8b7a9066b7a0d8e3c3) |
+| [AHC036](https://atcoder.jp/contests/ahc036/tasks/ahc036_a) | 凍結版：本番未達 | **1,872,786,019,642**（相対点） | **1,048,370,275,931**（本番2,000件・全件合法） | 本番2,000件・3秒、基準とseed列を照合済み | [問題別ブランチ](https://github.com/tokotoko7777/ahc-workspace/tree/fb26d23b729e0e30e19da4d6181bd0421588196e)、[更新済み区間の利用](https://github.com/tokotoko7777/ahc-workspace/tree/5f1878dec204f611343c7e8b7a9066b7a0d8e3c3)、[公式比較](https://github.com/tokotoko7777/ahc-workspace/tree/2deddb2a4c35d9bfdbddaa21523042a8f17842c2) |
 | [AHC037](https://atcoder.jp/contests/ahc037/tasks/ahc037_a) | 着手・本番未判定 | Rafbill、得点未確認 | 未調整28件 平均35,832,854.21 | 本番150件・2秒、同一ケースの証拠なし | [中継点](https://github.com/tokotoko7777/ahc-workspace/tree/11e02827a706e05022f50a3f7956541fa388f9ea)、[親の付け替え](https://github.com/tokotoko7777/ahc-workspace/tree/38ce41a25380bb0b6d5b409da8631270b8a3f62f) |
-| [AHC038](https://atcoder.jp/contests/ahc038/tasks/ahc038_a) | 着手・本番未判定 | 確認中 | 開発比較準備中 | 本番2,000件・相対方式 | 検証中 |
-| AHC039〜074 | 未着手 | — | — | — | — |
+| [AHC038](https://atcoder.jp/contests/ahc038/tasks/ahc038_a) | 着手・本番未判定 | **1,986,808,184,140**（公式採点CSVの首位） | 開発比較準備中 | 本番2,000件・相対方式 | 検証中 |
+| [AHC039](https://atcoder.jp/contests/ahc039/tasks/ahc039_a) | 着手・本番未判定 | **566,997**（絶対点） | 開発比較準備中 | 本番150件・2秒、同一ケースの証拠なし | 検証中 |
+| AHC040〜074 | 未着手 | — | — | — | — |
 
 ### AHC001 の次の仮説
 
@@ -561,3 +562,15 @@
 [公式問題文](https://atcoder.jp/contests/ahc037/tasks/ahc037_a)。2秒 / 1,024 MiB、各ケース最大5,000操作。費用を低くして絶対点を増やし、本番150件の合計。公式結果JSONの首位はRafbill、点数と同一ケースは未確認。[比較](https://github.com/tokotoko7777/ahc-workspace/tree/11e02827a706e05022f50a3f7956541fa388f9ea)では、既存の目的点を親に使う基準に対し、複数の目的点をまとめる中継点を合成。dev28件平均22,779,093.11→35,997,057.68、未調整28件22,842,660.79→35,832,854.21（全56件改善、未調整費用比0.63749）。全112出力公式と独立検証が一致、最大0.421438秒・1,696操作。問題別既定に採用。
 
 [親付け替えの追試](https://github.com/tokotoko7777/ahc-workspace/tree/38ce41a25380bb0b6d5b409da8631270b8a3f62f)は同じ中継点集合から、目的点のみ／全中継点で親を付け替え。別のdev28件・未調整28件で3方式すべて得点・操作数同点。全168出力公式と独立検証が一致、最大0.460654秒。任意として残し、次は別の構築で得た中継点を混ぜて親を探す。
+
+### AHC036 凍結版の本番比較
+
+[監査手順](https://github.com/tokotoko7777/ahc-workspace/tree/2deddb2a4c35d9bfdbddaa21523042a8f17842c2/problems/ahc036)。更新済み区間を使う版を凍結し、公式seedのまま生成した2,000件を公式アーカイブと照合。全件合法で公式・独立・C++内得点が一致。信号更新合計3,095,915、全操作最大14,613、最大約0.164秒。ケース別最低値を更新したケースは0で、同じ基準で候補 **1,048,370,275,931**、本番首位 **1,872,786,019,642**。仮に加えると1,095人中197位、同点なし。**未達**でmainへはマージしない。次はよく使う区間を選ぶだけでなく、目的地間の移動経路を事前にまとめて見直す。
+
+### AHC038 本番条件
+
+[公式問題文](https://atcoder.jp/contests/ahc038/tasks/ahc038_a)。3秒 / 1,024 MiB、全対象を移動した場合は操作数、未完の場合は100,000+1,000×未完数を最小化。本番2,000件の相対点。[公式採点CSV](https://img.atcoder.jp/ahc_standings/ahc038/result.csv)（SHA-256 `f42a9700defa9c421eeeb52ae25c98e687ec25ecb982f5961f9a44e8ff5bac71`）から首位1,986,808,184,140を再現。CSVの首位ラベルはUSA、[公式結果JSON](https://atcoder.jp/contests/ahc038/results/json)の首位ラベルはnikaj。2〜3位は一致するが、データ上の表記差として記録する。既存ビームと、根の位置から複数指を一括で動かす案を比較中。
+
+### AHC039 本番条件
+
+[公式問題文](https://atcoder.jp/contests/ahc039/tasks/ahc039_a)。2秒、150件の絶対点合計。1位566,997は[AtCoder提供の順位・得点データ](https://huggingface.co/datasets/SakanaAI/ALE-Bench/blob/main/ahc039.zip)で確認（SHA-256 `34d478f166334d6c8a0f7e0d03f6b5c17c557eeff9f163d5510ecc8605a9f3cd`）。同一の150件は未確認。矩形を基準に、隣り合う列で上下端を変えた多角形を厳密な得点・周長制約で比較する。
