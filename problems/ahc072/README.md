@@ -68,3 +68,41 @@ g++ -std=c++23 -O3 "$d/submission.cpp" -o "$d/caravan"
 python "$p/benchmark.py" /path/to/gen /path/to/vis \
   "$d/base" "$d/caravan" "$d/results.csv"
 ```
+
+## Follow-up: global batch-aware construction order
+
+Keep the unchanged farthest-first caravan fallback. Both experimental
+arms try eight more complete caravan routes, with the same support-hop
+BFS, same carry cap, and exact routes after each pickup. They vary the
+start selection using the same seeded noise. The batch-aware arm also
+rewards up to three close, not-much-farther same-color slimes and
+penalizes clearing likely support for other local colors. This changes
+global processing order, not the pickup path rules.
+
+| Fresh cases | Frozen moves ↓ | Randomized order ↓ | Batch priority ↓ |
+|---|---:|---:|---:|
+| Dev (30) | 436.267 | 431.467 | 435.400 |
+| Holdout (30) | 433.833 | 429.800 | 432.533 |
+
+Batch priority improves on frozen in only 4 holdout cases and ties
+26. Against equal trials of randomized order it has 1 win, 16 ties,
+13 losses and worse mean. Randomized improvement is also modest;
+retain frozen as default and record both arms as optional. All 180
+runs completed legally and matched the exact independent score;
+maximum observed wall .086292 s. [Logs](benchmark-batch-results.csv).
+No final cases were run.
+
+Next test one truly different transport transition, such as two-color
+shared movement with explicit parity or preserving a stationary support
+until all planned routes using it finish. Do not infer historical gain
+from the above result.
+
+```sh
+p=problems/ahc072
+d=$(mktemp -d)
+for mode in 0 1 2; do
+  g++ -std=c++23 -O3 -DAHC072_BATCH=$mode "$p/main.cpp" -o "$d/arm$mode"
+done
+python "$p/benchmark_batches.py" /path/to/gen /path/to/vis \
+  "$d/arm0" "$d/arm1" "$d/arm2" "$d/results.csv"
+```

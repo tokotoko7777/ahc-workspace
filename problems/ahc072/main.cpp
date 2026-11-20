@@ -3,6 +3,9 @@ using namespace std;
 #ifndef AHC072_CARAVAN
 #define AHC072_CARAVAN 1
 #endif
+#ifndef AHC072_BATCH
+#define AHC072_BATCH 0
+#endif
 namespace {
 using Clock=chrono::steady_clock;
 constexpr int V=400;
@@ -19,6 +22,12 @@ struct Problem{
   vector<Ray> rays;
   Sheet below,homes;
   vector<Sheet> static_distance;
+  vector<Sheet> common_distance;
+  void prepare_batches(){
+    common_distance.resize(s);
+    for(int p=0;p<s;++p)
+      common_distance[p]=search(p,p,below,false).distance;
+  }
   void read(){
     cin>>n>>K;s=n*n;assert(s<=V);
     vector<string> field(n);
@@ -69,13 +78,39 @@ struct Problem{
     }
     result.insert(result.end(),block.rbegin(),block.rend());
   }
-  vector<Move> solve(bool caravan,Clock::time_point cutoff)const{
+  vector<Move> solve(bool caravan,Clock::time_point cutoff,int mode=0,int trial=0)const{
+    mt19937 rng(720171+trial);
     auto ground=below;
     vector<Move> result;
     while(true){
-      int start=-1;
+      int start=-1,best=INT_MIN;
       for(int p=0;p<s;++p)if(ground[p]>=0){
-        if(start<0||static_distance[ground[p]][p]>static_distance[ground[start]][start])start=p;
+        const int color=ground[p],away=static_distance[color][p];
+        int peer[3]={20,20,20},other=0;
+        if(mode){
+          for(int q=0;q<s;++q)if(q!=p&&ground[q]>=0){
+            const int dist=common_distance[p][q];
+            assert(dist>=0);
+            if(ground[q]==color&&static_distance[color][q]<=away+3){
+              if(dist<peer[2]){
+                peer[2]=dist;
+                if(peer[2]<peer[1])swap(peer[2],peer[1]);
+                if(peer[1]<peer[0])swap(peer[1],peer[0]);
+              }
+            }else if(dist<=2)++other;
+          }
+        }
+        int quality=away*32;
+        if(mode){
+          const int noise=int(rng()%640);
+          quality+=noise;
+          const int workload=(max(0,16-peer[0])*2+max(0,12-peer[1])+max(0,8-peer[2]));
+          const int potential=(trial%2?17:10)*workload-5*other;
+          // Both arms rank all current starts and compute the same features.
+          // The randomized control does not apply the batch-aware term.
+          if(mode==2)quality+=potential;
+        }
+        if(quality>best){best=quality;start=p;}
       }
       if(start<0)break;
       if(caravan&&Clock::now()>=cutoff)return {};
@@ -116,6 +151,19 @@ int main(){
     auto alt=p.solve(true,deadline);
     if(!alt.empty()&&alt.size()<answer.size())answer=move(alt);
   }
-  cerr<<"base="<<baseline<<" moves="<<answer.size()<<'\n';
+  const int frozen=answer.size();
+  int trials=0;
+  if(AHC072_BATCH){
+    p.prepare_batches();
+    for(int i=0;i<8&&Clock::now()<deadline;++i){
+      auto alt=p.solve(true,deadline,AHC072_BATCH,i);
+      if(alt.empty())break;
+      if(alt.size()<answer.size())answer=move(alt);
+      ++trials;
+    }
+  }
+  cerr<<"base="<<baseline<<" moves="<<answer.size();
+  if(AHC072_BATCH)cerr<<" frozen="<<frozen<<" trials="<<trials;
+  cerr<<'\n';
   for(auto [v,k,d,h]:answer)cout<<v/p.n<<' '<<v%p.n<<' '<<k<<' '<<directions[d]<<' '<<h<<'\n';
 }
