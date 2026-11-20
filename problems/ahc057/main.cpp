@@ -2,6 +2,8 @@
 #include <algorithm>
 #include <array>
 #include <cmath>
+#include <chrono>
+#include <cstdint>
 #include <iostream>
 #include <limits>
 #include <numeric>
@@ -123,16 +125,71 @@ struct Problem {
         }
         return out;
     }
+    Plan plan_group(const std::vector<int>& g,const std::vector<Point>& pts,int t) const {
+        Plan pick=mst(g,pts,t);
+#ifndef AHC057_STATIC
+        for(double delay : {0.,6.,20.}) {
+            Plan trial=moving(g,delay);
+            if(trial.cost<pick.cost) pick=std::move(trial);
+        }
+#endif
+        return pick;
+    }
+    // Two variants use the same sample/attempt budget and exact evaluator.
+    void exchange(std::vector<std::vector<int>>& groups,std::vector<Plan>& plans,
+                  const std::vector<Point>& at,int time,bool periodic,
+                  std::chrono::steady_clock::time_point deadline) const {
+        std::vector<std::vector<double>> d(n,std::vector<double>(n));
+        for(int i=0;i<n;++i) for(int j=0;j<i;++j) {
+            Point diff=p[i]-p[j],vel=v[i]-v[j];
+            d[i][j]=d[j][i]=periodic ? std::sqrt(periodic_closest_approach(
+                diff.x,diff.y,vel.x,vel.y,L,L,std::max(0,time-350),std::min(T-1,time+350)).squared_distance)
+                : std::sqrt(norm2(at[i]-at[j]));
+        }
+        uint32_t state=1845116969;
+        auto rng=[&]() {
+            state^=state<<13;state^=state>>17;state^=state<<5;
+            return state;
+        };
+        auto fit=[&](int u,const std::vector<int>& group,int skip) {
+            std::array<double,3> best{1e20,1e20,1e20};
+            for(int j:group) if(j!=skip) {
+                double value=d[u][j];
+                for(double& prior:best) if(value<prior) std::swap(value,prior);
+            }
+            return best[0]+best[1]+best[2];
+        };
+        for(int iteration=0;iteration<32 && std::chrono::steady_clock::now()<deadline;++iteration) {
+            int out_a=0,out_b=0,out_x=0,out_y=0;
+            double value=-1e30;
+            for(int draw=0;draw<72;++draw) {
+                int a=rng()%m,b=(a+1+rng()%(m-1))%m,x=rng()%k,y=rng()%k;
+                int u=groups[a][x],v=groups[b][y];
+                double gain=fit(u,groups[a],u)+fit(v,groups[b],v)
+                           -fit(u,groups[b],v)-fit(v,groups[a],u);
+                if(gain>value) value=gain,out_a=a,out_b=b,out_x=x,out_y=y;
+            }
+            auto& a=groups[out_a];auto& b=groups[out_b];
+            std::swap(a[out_x],b[out_y]);
+            Plan aa=plan_group(a,at,time),bb=plan_group(b,at,time);
+            if(aa.cost+bb.cost < plans[out_a].cost+plans[out_b].cost) {
+                plans[out_a]=std::move(aa);plans[out_b]=std::move(bb);
+            } else std::swap(a[out_x],b[out_y]);
+        }
+    }
+
 };
 int main() {
     std::ios::sync_with_stdio(false);std::cin.tie(nullptr);
+    [[maybe_unused]] const auto stop=std::chrono::steady_clock::now()+std::chrono::milliseconds(1550);
     Problem q;
     if(!(std::cin>>q.n>>q.T>>q.m>>q.k>>q.L)) return 0;
     q.p.resize(q.n);q.v.resize(q.n);
     for(int i=0;i<q.n;++i) std::cin>>q.p[i].x>>q.p[i].y>>q.v[i].x>>q.v[i].y;
     std::vector<std::vector<int>> best_groups;
     std::vector<Plan> best_static;
-    int best=std::numeric_limits<int>::max();
+    int best=std::numeric_limits<int>::max(),best_time=0;
+    std::vector<Point> best_points;
     for(int s=0;s<=10;++s) {
         const int t=s*(q.T-1)/10;
         std::vector<Point> pts(q.n);
@@ -144,19 +201,17 @@ int main() {
             plans.push_back(q.mst(g,pts,t));
             cost+=plans.back().cost;
         }
-        if(cost<best) best=cost,best_groups=std::move(groups),best_static=std::move(plans);
+        if(cost<best) best=cost,best_time=t,best_points=std::move(pts),
+            best_groups=std::move(groups),best_static=std::move(plans);
     }
-    Plan answer;
-    for(int i=0;i<q.m;++i) {
-        Plan pick=best_static[i];
-#ifndef AHC057_STATIC
-        for(double delay : {0.,6.,20.}) {
-            Plan time=q.moving(best_groups[i],delay);
-            if(time.cost<pick.cost) pick=std::move(time);
-        }
+    for(int i=0;i<q.m;++i) best_static[i]=q.plan_group(best_groups[i],best_points,best_time);
+#if defined(AHC057_SWAP_PERIODIC)
+    q.exchange(best_groups,best_static,best_points,best_time,true,stop);
+#elif !defined(AHC057_STATIC) && !defined(AHC057_NO_EXCHANGE)
+    q.exchange(best_groups,best_static,best_points,best_time,false,stop);
 #endif
-        answer.add(pick);
-    }
+    Plan answer;
+    for(const auto& plan:best_static) answer.add(plan);
     std::sort(answer.edges.begin(),answer.edges.end());
     for(auto [t,a,b]:answer.edges) std::cout<<t<<' '<<a<<' '<<b<<'\n';
     std::cerr<<"Cost = "<<answer.cost<<'\n';
