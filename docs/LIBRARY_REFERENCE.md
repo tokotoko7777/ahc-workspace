@@ -2014,3 +2014,28 @@ sort(points.begin(), points.end(), [](const Point& a, const Point& b) {
 
 `bits=10` なら各座標は `0..1023` です。厳密な最近傍順ではありませんが、空間的に
 まとまったcluster作成、query順、cache localityの改善候補を1行のkeyで作れます。
+
+## Class-Constrained Pair Insertion
+
+ヘッダ: [`class-constrained-pair-insertion.hpp`](../library/class-constrained-pair-insertion.hpp) /
+実例: [AHC059 の二点再挿入](../problems/ahc059/main.cpp) /
+[全再計算との比較テスト](../tests/class_constrained_pair_insertion_test.cpp)。
+
+順序が決まっている二点を、既存経路の同じ分類を持つ隙間へ最小費用で挿入します。
+隙間番号 `g` は元の `route[g-1]` と `route[g]` の間。両端を巡回に含めたくない
+場合は、入るコストまたは出るコストがゼロの仮想端点を置けます。
+同じ隙間への連続挿入は常に可能です。
+
+```cpp
+std::vector<int> route{0, 5, 9};
+std::vector<int> classes{0, 0, 0}; // 添字0は使わない (隙間の分類は 0..class_count-1)
+auto add = best_class_constrained_pair_insertion(
+    route, classes, 1, 2, 7, [](int a, int b){ return std::abs(a-b); });
+// add.delta == 0。位置を適用する時は second_gap を先に挿入。
+route.insert(route.begin() + add.second_gap, 7);
+route.insert(route.begin() + add.first_gap, 2);
+```
+
+分類ごとに手前側の最小増分を記録するので、経路長と分類数の和の時間で求められます。
+非対称コストにも対応します。解が複数なら隙間対の辞書順で最初です。
+他の制約は分類に反映するか、呼び出し側で検証してください。
