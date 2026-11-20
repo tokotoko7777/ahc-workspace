@@ -2014,3 +2014,20 @@ sort(points.begin(), points.end(), [](const Point& a, const Point& b) {
 
 `bits=10` なら各座標は `0..1023` です。厳密な最近傍順ではありませんが、空間的に
 まとまったcluster作成、query順、cache localityの改善候補を1行のkeyで作れます。
+
+## CyclicVisitEnergy
+
+ヘッダ: [`cyclic-visit-energy.hpp`](../library/cyclic-visit-energy.hpp)
+
+繰り返し巡回で「最後に訪れた時点からの経過時間」の重み付き和を、
+周期 1 回分まとめて計算します。各頂点の隣接する訪問間隔 (g) は
+`g*(g−1)/2` に対応し、周期をまたぐ間隔も数えます。
+`numerator(route,weight)` の `route` には各時刻の頂点 ID を並べ、
+末尾に開始点を繰り返して加えません。必要な頂点を訪れていない場合は
+`nullopt`。平均が必要なら整数値を周期長で割ります。呼び出し側は
+頂点 ID と入力サイズを合わせ、重み付き合計が int64 に収まるようにします。
+時間 O(V＋周期長)、作業領域 O(V)。C++20 以降。
+
+[使用例](../examples/cyclic_visit_energy_usage.cpp)、
+[直接シミュレーションと比較するテスト](../tests/cyclic_visit_energy_test.cpp)、
+[AHC027 の巡回評価](../problems/ahc027/main.cpp)。
