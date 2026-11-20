@@ -1,5 +1,11 @@
 #include <bits/stdc++.h>
 using namespace std;
+#ifndef AHC072_MIXED
+#define AHC072_MIXED 0
+#endif
+#if AHC072_MIXED
+#include "experiments/fixed_packet_v3/packet_router.hpp"
+#endif
 #ifndef AHC072_CARAVAN
 #define AHC072_CARAVAN 1
 #endif
@@ -78,7 +84,54 @@ struct Problem{
     }
     result.insert(result.end(),block.rbegin(),block.rend());
   }
-  vector<Move> solve(bool caravan,Clock::time_point cutoff,int mode=0,int trial=0)const{
+#if AHC072_MIXED
+  struct PacketStats{int trials=0,reachable=0,accepted=0,saved=0;};
+  bool try_packet(int at,int color,const Reach& gather,Sheet& ground,vector<Move>& out,
+                  PacketStats& stats,Clock::time_point cutoff)const{
+    vector<int> shortlist;
+    for(int v=0;v<s;++v)if(ground[v]>=0 && ground[v]!=color &&
+        gather.distance[v]>0 && gather.distance[v]<=3)
+      shortlist.push_back(v);
+    stable_sort(shortlist.begin(),shortlist.end(),[&](int a,int b){
+      return pair{gather.distance[a],-static_distance[ground[a]][a]}<
+             pair{gather.distance[b],-static_distance[ground[b]][b]};
+    });
+    if(shortlist.size()>3)shortlist.resize(3);
+    vector<int> nest(s,-1);
+    for(int c=0;c<K;++c)nest[homes[c]]=c;
+    int chosen=-1,best_gain=0;
+    vector<ahc072_packet::Jump> best;
+    for(int v:shortlist){
+      if(Clock::now()>=cutoff)break;
+      ++stats.trials;
+      const int second=ground[v];
+      Sheet remain=ground;
+      remain[v]=-1;
+      const int separate=gather.distance[homes[color]]+
+        search(v,homes[second],remain,true).distance[homes[second]];
+      assert(separate>0);
+      vector<ahc072_packet::Support> stable(s);
+      for(int u=0;u<s;++u)if(remain[u]>=0)stable[u]={1,remain[u]};
+      auto path=ahc072_packet::shortest(v,{second,color},stable,nest,
+          [&](int cell,int d,int jump){return rays[cell][d][jump-1];});
+      if(!path)continue;
+      ++stats.reachable;
+      const int gain=separate-gather.distance[v]-int(path->size());
+      if(gain>best_gain)chosen=v,best_gain=gain,best=move(*path);
+    }
+    if(chosen<0)return false;
+    follow(out,at,chosen,gather,ground);
+    for(auto [p,k,d,z]:best)out.push_back({p,k,d,z});
+    ground[chosen]=-1;
+    ++stats.accepted;stats.saved+=best_gain;
+    return true;
+  }
+#endif
+  vector<Move> solve(bool caravan,Clock::time_point cutoff,int mode=0,int trial=0
+#if AHC072_MIXED
+                     ,PacketStats* packet=nullptr
+#endif
+                     )const{
     mt19937 rng(720171+trial);
     auto ground=below;
     vector<Move> result;
@@ -116,6 +169,9 @@ struct Problem{
       if(caravan&&Clock::now()>=cutoff)return {};
       int color=ground[start],home=homes[color],carrying=1;
       int at=start;ground[at]=-1;
+#if AHC072_MIXED
+      if(packet && try_packet(at,color,search(at,home,ground,true),ground,result,*packet,cutoff))continue;
+#endif
       while(true){
         const auto reach=search(at,home,ground,true);
         assert(reach.distance[home]>0);
@@ -162,8 +218,18 @@ int main(){
       ++trials;
     }
   }
+#if AHC072_MIXED
+  Problem::PacketStats packet;
+  auto alternative=p.solve(true,deadline,0,0,&packet);
+  const int mixed=alternative.size();
+  if(!alternative.empty() && alternative.size()<answer.size())answer=move(alternative);
+#endif
   cerr<<"base="<<baseline<<" moves="<<answer.size();
   if(AHC072_BATCH)cerr<<" frozen="<<frozen<<" trials="<<trials;
+#if AHC072_MIXED
+  cerr<<" frozen="<<frozen<<" mixed="<<mixed<<" packet_trials="<<packet.trials
+      <<" reachable="<<packet.reachable<<" accepted="<<packet.accepted<<" saved="<<packet.saved;
+#endif
   cerr<<'\n';
   for(auto [v,k,d,h]:answer)cout<<v/p.n<<' '<<v%p.n<<' '<<k<<' '<<directions[d]<<' '<<h<<'\n';
 }

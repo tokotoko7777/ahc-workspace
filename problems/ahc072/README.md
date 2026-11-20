@@ -106,3 +106,8 @@ done
 python "$p/benchmark_batches.py" /path/to/gen /path/to/vis \
   "$d/arm0" "$d/arm1" "$d/arm2" "$d/results.csv"
 ```
+
+The [fixed-support mixed packet](experiments/fixed_packet_v3/README.md)
+prices actual gathering plus exact jumps, but usually loses the
+same-color caravan advantage. It improved just one of 20 untouched
+whole itineraries, so it remains opt-in.
