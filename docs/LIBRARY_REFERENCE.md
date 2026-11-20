@@ -2014,3 +2014,17 @@ sort(points.begin(), points.end(), [](const Point& a, const Point& b) {
 
 `bits=10` なら各座標は `0..1023` です。厳密な最近傍順ではありませんが、空間的に
 まとまったcluster作成、query順、cache localityの改善候補を1行のkeyで作れます。
+
+## GreedyPathForest
+
+ヘッダ: [`greedy-path-forest.hpp`](../library/greedy-path-forest.hpp)。
+
+`greedy_path_forest(n, edges)` に優先順の無向辺を渡すと、サイクルや
+次数 3 を作らない辺だけを残し、各頂点を一度だけ含むパスの列を返します。
+単独の頂点も長さ 1 のパスになります。重みの合計を厳密に最大化する
+アルゴリズムではありません。ソートが必要なら呼出側で行います。
+処理は Union-Find によっておおむね線形です。
+
+[使用例](../examples/greedy_path_forest_usage.cpp) /
+[愚直な連結性判定との比較](../tests/greedy_path_forest_test.cpp) /
+[AHC036 での配置](../problems/ahc036/README.md)。
