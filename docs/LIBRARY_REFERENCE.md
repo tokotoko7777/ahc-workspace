@@ -2014,3 +2014,21 @@ sort(points.begin(), points.end(), [](const Point& a, const Point& b) {
 
 `bits=10` なら各座標は `0..1023` です。厳密な最近傍順ではありませんが、空間的に
 まとまったcluster作成、query順、cache localityの改善候補を1行のkeyで作れます。
+
+## Weighted sequence treap
+
+ヘッダ: [`weighted-sequence-treap.hpp`](../library/weighted-sequence-treap.hpp)
+
+順列の区間を反転しながら、要素のIDから現在位置を取得し、
+`sum(i * weight[order[i]])` を差分で管理します。
+
+```cpp
+WeightedSequenceTreap seq(order, weight);
+int position = seq.rank(item_id);
+seq.try_reverse(left, right, [](long long delta) { return delta > 0; });
+long long value = seq.indexed_sum();
+```
+
+区間は半開 [left, right)。反転差分・位置参照は期待 O(log N)。
+[AHC062の経路反転](../problems/ahc062/main.cpp) と
+[愚直な配列との比較テスト](../tests/weighted_sequence_treap_test.cpp)。
