@@ -33,7 +33,7 @@
 | [AHC023](https://atcoder.jp/contests/ahc023/tasks/asprocon10_a) | 着手・本番未判定 | [公式順位](https://atcoder.jp/contests/ahc023/standings) 要ログイン、1位点未確認 | 本番公開2,000件 **1,100,483,250**（全件合法） | 本番公開2,000件・2秒、絶対点 | [問題別ブランチ](https://github.com/tokotoko7777/ahc-workspace/tree/52f76e1f5e905e5f4f11f0613285760073967281)、[植付と収穫の順序](https://github.com/tokotoko7777/ahc-workspace/tree/2b4a9df1aa5ad9cdc0d435bb8271d669d1fe43a6) |
 | [AHC024](https://atcoder.jp/contests/ahc024/tasks/ahc024_a) | 着手・本番未判定 | **335,417**（絶対点） | 再始動版：新規未調整24件 平均2,065.79 | 本番150件・2秒、同一ケースの証拠なし | [問題別ブランチ](https://github.com/tokotoko7777/ahc-workspace/tree/c5b3b9f3d88b74ff5f9fa67446d16555dd509ef1)、[多様な再始動](https://github.com/tokotoko7777/ahc-workspace/tree/a0aa3ad5ff0cf55d5f3f6ea9c8714d8ca19bcfe9) |
 | [AHC025](https://atcoder.jp/contests/ahc025/tasks/ahc025_a) | 着手・本番未判定 | **492,832,027,444**（相対点） | 未調整32件 77,452,712（絶対点・低い方が良い） | 本番5,000件・2秒、各参加者のケース別結果が必要 | [問題別ブランチ](https://github.com/tokotoko7777/ahc-workspace/tree/21034a6404bafe091bac193b8315b0ffd1ed0686)、[低Q追試](https://github.com/tokotoko7777/ahc-workspace/tree/93cfb59980bf24166658b1b40f60363cd8e63cf3) |
-| [AHC026](https://atcoder.jp/contests/ahc026/tasks/ahc026_a) | 着手・本番未判定 | **1,423,183**（絶対点） | 既存法：未調整16件 平均9,344.63 | 本番150件・2秒、同一ケースの証拠なし | [問題別ブランチ](https://github.com/tokotoko7777/ahc-workspace/tree/9d10bdadaa08a7ca84e01228951b4e965082f00b) |
+| [AHC026](https://atcoder.jp/contests/ahc026/tasks/ahc026_a) | 着手・本番未判定 | **1,423,183**（絶対点） | 既存法：未調整16件 平均9,344.63 | 本番150件・2秒、同一ケースの証拠なし | [問題別ブランチ](https://github.com/tokotoko7777/ahc-workspace/tree/9d10bdadaa08a7ca84e01228951b4e965082f00b)、[途中状態の追試](https://github.com/tokotoko7777/ahc-workspace/tree/22fe2ca8760d43489acbd895b3d63a1c9933963f) |
 | [AHC027](https://atcoder.jp/contests/ahc027/tasks/ahc027_a) | 着手・本番未判定 | **1,996,375,186,737**（相対点） | 未調整24件 568,819,988（絶対点・低い方が良い） | 本番2,000件・2秒、ケース別基準が必要 | [問題別ブランチ](https://github.com/tokotoko7777/ahc-workspace/tree/3ec2d6d02ab6aea5b461002201803016ce56ecb8) |
 | AHC028〜074 | 未着手 | — | — | — | — |
 
@@ -400,3 +400,7 @@
 ### AHC027 巡回の訪問間隔を直接評価する
 
 [比較と実装](https://github.com/tokotoko7777/ahc-workspace/blob/3ec2d6d02ab6aea5b461002201803016ce56ecb8/problems/ahc027/README.md)。同じ48本のDFS閉路から、追加予算でDFSを生成し直す版と、立ち寄り追加・区間の短絡や反転を訪問間隔の正確な費用で選ぶ版を比較（両方440ms上限）。dev12件373,539,272→305,718,347（11勝）、未調整24件623,349,268→568,819,988（−8.75%、19勝）。72出力は公式visと、2周期分の汚れを逐次再生する独立検証が一致、最大0.456秒。問題別既定に採用。公式本番2,000件のseedはハッシュのみ確認、ケース別基準値未取得。次は汚れの増加率が高く訪問間隔の長いマスを選び、間隔の中央近くに短い寄り道を足す。
+
+### AHC026 既存ロールアウトの途中に分割を挿入する
+
+[追試](https://github.com/tokotoko7777/ahc-workspace/tree/22fe2ca8760d43489acbd895b3d63a1c9933963f)。同じ24途中状態から一括・分割を各9候補、4種類の同じ固定方針で完走（各864回）。dev20件の平均は既存9,348.90、一括9,349.65、分割9,348.90。未調整20件は3方式とも全件同点で平均9,320.65。80出力で公式と独立再生が一致、最大0.449119秒。既定は変更しない。次は終盤で不利に見える途中状態だけを候補にして、固定方針ではなく既存の適応ロールアウト自体を再実行する。
