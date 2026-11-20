@@ -55,7 +55,10 @@ def main():
     p=argparse.ArgumentParser(description=__doc__)
     for k in ("gen","tester","base","candidate","csv"):
         p.add_argument(k,type=Path)
+    p.add_argument("--late",type=Path,help="benchmark frozen moment, long proxy, exact CDF")
     a=p.parse_args()
+    version="exact-final-cdf-v1" if a.late else "tail-selection-v1"
+    if a.late:a.late=a.late.resolve()
     gen,tester,base,candidate=(getattr(a,k).resolve() for k in ("gen","tester","base","candidate"))
     with tempfile.TemporaryDirectory() as d,a.csv.open("w",newline="") as stream:
         work=Path(d)
@@ -63,16 +66,22 @@ def main():
         w=csv.writer(stream,lineterminator="\n")
         w.writerow(("split","seed","arm","score","terminal_best","initial_ceiling","terminal_ceiling","seconds"))
         for split in ("dev","holdout"):
-            seeds=[int.from_bytes(hashlib.sha256(f"ahc035/tail-selection-v1/{split}/{i}".encode()).digest()[:8],
+            seeds=[int.from_bytes(hashlib.sha256(f"ahc035/{version}/{split}/{i}".encode()).digest()[:8],
                                 "little") for i in range(36)]
             file.write_text("".join(f"{seed}\n" for seed in seeds))
             subprocess.run([gen,file],cwd=work,check=True)
             for i,seed in enumerate(seeds):
                 data=(work/"in"/f"{i:04d}.txt").read_bytes()
-                arms=[("degree",base),("tail",candidate)]
+                arms=[("degree",base),("tail",candidate)] if not a.late else [
+                    ("tail",base),("cdf",candidate),("long",a.late)]
+                previous=None
                 for label,binary in arms[::(-1 if i%2 else 1)]:
                     out,err,seconds=run(tester,binary,data)
                     score=validate(data,out)
+                    if a.late:
+                        prefix=out.splitlines()[:54]
+                        if previous is not None:assert prefix==previous
+                        previous=prefix
                     assert err.strip()==f"Score = {score[0]}".encode(),err
                     w.writerow((split,seed,label,*score,f"{seconds:.6f}"))
                     stream.flush()

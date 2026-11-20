@@ -73,3 +73,46 @@ From the repository root (`ATCODER_TOOLS` points to the official tools'
     g++ -std=c++23 -O3 /tmp/ahc035-single.cpp -o /tmp/ahc035-single
 
 Use `-DAHC035_VERIFY` in a diagnostic build for full-vs-delta checks.
+
+## Optional exact final-generation objective
+
+All arms play the first nine layouts identically. On the last known
+population, the usual moment proxy chooses the initial final layout.
+The exact variant (`-DAHC035_LATE=1`) then anneals 6500 further swaps
+against the exact distribution of the highest child total.
+
+For each possible distinct-parent pair, the
+[integer two-choice PMF](../../library/two-choice-sum-pmf.hpp) counts the
+choices of 15 parental components. The maximum child's CDF is the product
+of the edge CDFs. The expected maximum equals the upper support minus
+the sum of all CDF values below that support. Incremental evaluation
+maintains sums of log-CDFs and separate zero counts, avoiding log(0).
+Integer counts are exact; the final products use floating arithmetic.
+This objective is one-turn expectation, not a guaranteed realized win.
+
+| 36 fresh cases each | Frozen proxy | Longer proxy | Exact final |
+|---|---:|---:|---:|
+| Development mean | 859,083.92 | 847,902.08 | 857,843.47 |
+| Untouched holdout mean | 867,204.75 | 866,434.08 | 866,918.64 |
+| Holdout median wall (s) | 0.054787 | 0.083299 | 0.106792 |
+
+On holdout the exact variant was 12/14/10 (W/T/L) vs frozen proxy,
+and 18/2/16 vs longer proxy. The longer proxy uses 100k final-stage
+proposals as an extra-work control (not a perfectly time-matched
+control; no padding). All 216 scores were legal and matched independent
+genetic-mask replay, with wall ≤0.210698s including tester. The experiment
+does not justify changing the default. [Paired log](late-results.csv).
+The PMF and max-expectation identity passed 900+400 small exhaustive
+comparisons, and debug checked incremental CDF swaps against full edges.
+
+    g++ -std=c++23 -O3 -DAHC035_LATE=1 problems/ahc035/main.cpp -o /tmp/ahc035-cdf
+    g++ -std=c++23 -O3 -DAHC035_LATE=2 problems/ahc035/main.cpp -o /tmp/ahc035-long
+    python problems/ahc035/benchmark.py "$ATCODER_TOOLS/gen" "$ATCODER_TOOLS/tester" /tmp/ahc035-tail /tmp/ahc035-cdf /tmp/ahc035-late.csv --late /tmp/ahc035-long
+    g++ -std=c++23 -O2 tests/two_choice_sum_pmf_test.cpp -o /tmp/ahc035-pmf-test
+    /tmp/ahc035-pmf-test
+
+For a later slice, use the earlier stage's actual loss mechanism: retain
+multiple high-value carriers of rare traits *with complementary companion
+traits*, rather than only one-step marginal survival. Compare two-generation
+simulated rollouts on matched early states and use a frozen final proxy.
+Do not retune it from these holdout cases.

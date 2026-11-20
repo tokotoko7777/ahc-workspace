@@ -1,5 +1,12 @@
 #include <bits/stdc++.h>
+#include "../../library/two-choice-sum-pmf.hpp"
 using namespace std;
+#ifndef AHC035_LATE
+#define AHC035_LATE 0
+#endif
+#ifndef AHC035_LONG_STEPS
+#define AHC035_LONG_STEPS 100000
+#endif
 #ifndef AHC035_TAIL
 #define AHC035_TAIL 1
 #endif
@@ -48,7 +55,7 @@ struct Solver {
       for(unsigned mask=p.both;mask;mask&=mask-1)both[countr_zero(mask)]+=sign;
     }
   };
-  Order optimize(const Population& values,Order order,int turn,Clock::time_point deadline)const{
+  Order optimize(const Population& values,Order order,int turn,Clock::time_point deadline,int steps=16000)const{
     array<int,M> maxTrait{},second{};
     for(auto& v:values)for(int f=0;f<M;++f){
       int x=v[f];
@@ -90,7 +97,7 @@ struct Solver {
     Stat stats=full(order);
     double cur=score(stats),best_score=cur;
     Order best=order;
-    for(int step=0;step<16000;++step){
+    for(int step=0;step<steps;++step){
       if((step&255)==0&&Clock::now()>=deadline)break;
       int a=rng()%C,b=rng()%P;
       if(a==b)continue;
@@ -116,7 +123,7 @@ struct Solver {
       }
 #endif
       const double gain=score(next)-cur;
-      double f=1-step/16000.;
+      double f=1-step/double(steps);
       const double temp=(turn<=6?3.:1.7)*f*f+.04;
       if(gain>=0||double(rng())/4294967296.<exp(gain/temp)){
         stats=next;cur+=gain;
@@ -127,6 +134,80 @@ struct Solver {
     }
     return best;
   }
+  Order exact_final(const Population& population,Order order,Clock::time_point deadline)const{
+    int lo=1500,hi=0;
+    array<array<int,P>,P> ids{};
+    vector<TwoChoiceSumPmf> pmfs;
+    for(int a=0;a<P;++a)for(int b=0;b<a;++b){
+      vector<pair<int,int>> pairs;
+      for(int j=0;j<M;++j)pairs.push_back({population[a][j],population[b][j]});
+      ids[a][b]=ids[b][a]=int(pmfs.size());
+      pmfs.push_back(two_choice_sum_pmf(pairs));
+      const auto& p=pmfs.back();
+      lo=min(lo,p.offset);
+      hi=max(hi,p.offset+int(p.count.size())-1);
+    }
+    const int range=hi-lo;
+    if(range==0)return order;
+    struct Cdf{int zeros;vector<double> logcdf;};
+    vector<Cdf> cdfs;
+    for(auto& p:pmfs){
+      Cdf c{p.offset-lo,vector<double>(range)};
+      uint64_t accum=0;
+      for(int k=c.zeros;k<range;++k){
+        if(k-c.zeros<int(p.count.size()))accum+=p.count[k-c.zeros];
+        c.logcdf[k]=log(double(accum)/p.outcomes);
+      }
+      cdfs.push_back(std::move(c));
+    }
+    struct MaxStat{vector<int> zero;vector<double> log;};
+    auto adjust=[&](MaxStat& s,int a,int b,int direction){
+      auto& c=cdfs[ids[a][b]];
+      for(int i=0;i<c.zeros;++i)s.zero[i]+=direction;
+      for(int i=c.zeros;i<range;++i)s.log[i]+=direction*c.logcdf[i];
+    };
+    auto build=[&](const Order& board){
+      MaxStat s{vector<int>(range),vector<double>(range)};
+      for(auto [a,b]:edge)adjust(s,board[a],board[b],1);
+      return s;
+    };
+    auto expected=[&](const MaxStat& s){
+      double v=hi;
+      for(int i=0;i<range;++i)if(s.zero[i]==0)v-=exp(min(0.,s.log[i]));
+      return v;
+    };
+    auto stat=build(order);
+    double val=expected(stat),high=val;
+    Order best=order;
+    mt19937 rng(350035);
+    for(int step=0;step<6500;++step){
+      if((step&127)==0 && Clock::now()>=deadline)break;
+      int a=rng()%C,b=rng()%P;
+      if(a==b)continue;
+      array<int,8> changed;int len=0;
+      for(int id:incident[a])changed[len++]=id;
+      for(int id:incident[b])if(find(changed.begin(),changed.begin()+len,id)==changed.begin()+len)
+        changed[len++]=id;
+      auto edit=[&](int sign){
+        for(int k=0;k<len;++k){
+          auto [x,y]=edge[changed[k]];adjust(stat,order[x],order[y],sign);
+        }
+      };
+      edit(-1);swap(order[a],order[b]);edit(1);
+      double next=expected(stat);
+#ifdef AHC035_VERIFY
+      if(step%73==0)assert(abs(next-expected(build(order)))<1e-8);
+#endif
+      const double f=1-step/6500.,temp=.8*f*f+.025;
+      if(next>=val||double(rng())/4294967296.<exp((next-val)/temp)){
+        val=next;
+        if(next>high){high=next;best=order;}
+      }else{edit(-1);swap(order[a],order[b]);edit(1);}
+      if((step&255)==0){stat=build(order);val=expected(stat);}
+    }
+    return best;
+  }
+
 };
 }
 int main(){
@@ -139,7 +220,12 @@ int main(){
     for(auto& row:values)for(int& v:row)if(!(cin>>v))return 0;
     if(turn==T)break;
     auto order=solve.baseline(values);
-    if(AHC035_TAIL&&Clock::now()<deadline)order=solve.optimize(values,order,turn,deadline);
+    if(AHC035_TAIL&&Clock::now()<deadline){
+      order=solve.optimize(values,order,turn,deadline,
+          turn==T-1&&AHC035_LATE==2?AHC035_LONG_STEPS:16000);
+      if(turn==T-1&&AHC035_LATE==1&&Clock::now()<deadline)
+        order=solve.exact_final(values,order,deadline);
+    }
     for(int y=0;y<N;++y)for(int x=0;x<N;++x)
       cout<<order[y*N+x]<<(x+1==N?'\n':' ');
     cout.flush();

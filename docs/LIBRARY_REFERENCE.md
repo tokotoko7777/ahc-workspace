@@ -2014,3 +2014,20 @@ sort(points.begin(), points.end(), [](const Point& a, const Point& b) {
 
 `bits=10` なら各座標は `0..1023` です。厳密な最近傍順ではありませんが、空間的に
 まとまったcluster作成、query順、cache localityの改善候補を1行のkeyで作れます。
+
+## Two-choice Sum PMF
+
+[ヘッダ](../library/two-choice-sum-pmf.hpp)・[総当たりテスト](../tests/two_choice_sum_pmf_test.cpp)。
+
+独立な各段で二つの整数から等確率で一つずつ選び、その総和になる場合の数を
+整数で数えます。負の値も基準値 `offset` に含め、表は範囲幅だけ持ちます。
+選択肢が同じ値でも両方の事象を数えます。選択段数は62以下、
+部分和の範囲は配列に収まる必要があります。
+
+```cpp
+auto pmf = two_choice_sum_pmf({{1, 4}, {3, 3}});
+double p7 = double(pmf.count[7 - pmf.offset]) / pmf.outcomes; // 0.5
+```
+
+[AHC035](../problems/ahc035/main.cpp)では各隣接ペアから生まれる子の
+合計値分布を求め、CDF積から1世代先の最大値の期待値を評価します。
