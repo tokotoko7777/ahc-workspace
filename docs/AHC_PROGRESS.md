@@ -40,9 +40,10 @@
 | [AHC030](https://atcoder.jp/contests/ahc030/tasks/ahc030_a) | 凍結版：本番未達 | **2,140,937,483,257**（相対点） | **323,222,495,387**（本番3,000件・全件初回正答） | 本番3,000件・3秒、ケース別基準・公式seedを照合済み | [問題別ブランチ](https://github.com/tokotoko7777/ahc-workspace/tree/ff4f0b02b3b5d35bb7a63748604649304e7c5d15)、[公式比較](https://github.com/tokotoko7777/ahc-workspace/tree/3dfdfcce6f81b2b034351960f8d506b8cdba735b)、[試し掘り追試](https://github.com/tokotoko7777/ahc-workspace/tree/a285e872f70c776469b2fe2780c9664de40bcc2b) |
 | [AHC031](https://atcoder.jp/contests/ahc031/tasks/ahc031_a) | 凍結版：本番未達 | **1,722,250,219,489**（相対点） | **126,909,397,521**（本番2,000件・全件合法） | 本番2,000件・3秒、ケース別基準とseed列照合済み | [問題別ブランチ](https://github.com/tokotoko7777/ahc-workspace/tree/c1d15b819b45223d0c27bc3191918083c1b18362)、[横壁整列](https://github.com/tokotoko7777/ahc-workspace/tree/fb4acc4255f313b63cc46c95b3965fc983b2d528)、[公式比較](https://github.com/tokotoko7777/ahc-workspace/tree/fe55a2264364f3c6f25df1fe9b5e12ff314d4186) |
 | [AHC032](https://atcoder.jp/contests/ahc032/tasks/ahc032_a) | 着手・本番未判定 | **11,854,207,127,046**（絶対点） | 未調整16件 平均79,106,180,582.44 | 本番150件、同一ケースの証拠なし | [問題別ブランチ](https://github.com/tokotoko7777/ahc-workspace/tree/0f8a8d2946ce1c6691db7ce95eee5ffa8a51006e)、[方向の追試](https://github.com/tokotoko7777/ahc-workspace/tree/890cee4f0a8b60a076d3c98d6d8d6bffed43099) |
-| [AHC033](https://atcoder.jp/contests/ahc033/tasks/ahc033_a) | 着手・本番未判定 | bowwowforeach、得点未確認 | 未調整32件 合計9,754ターン | 本番2,000件、相対方式 | [問題別ブランチ](https://github.com/tokotoko7777/ahc-workspace/tree/131ef411f491cc1b6ed79c905fc98a8d52ffad5d) |
-| [AHC034](https://atcoder.jp/contests/ahc034/tasks/ahc034_a) | 着手・本番未判定 | **9,486,350,384**（絶対点） | 未調整24件 平均33,027,861.63 | 本番150件・2秒、同一ケースの証拠なし | [問題別ブランチ](https://github.com/tokotoko7777/ahc-workspace/tree/6c2ea91bb86ef24c6c84cd99bf76df6355c16ce6) |
-| AHC035〜074 | 未着手 | — | — | — | — |
+| [AHC033](https://atcoder.jp/contests/ahc033/tasks/ahc033_a) | 着手・本番未判定 | bowwowforeach、得点未確認 | 新規未調整24件 合計6,867ターン | 本番2,000件、相対方式 | [問題別ブランチ](https://github.com/tokotoko7777/ahc-workspace/tree/131ef411f491cc1b6ed79c905fc98a8d52ffad5d)、[先行搬出](https://github.com/tokotoko7777/ahc-workspace/tree/81b3ab227a32818d6d4350351c5d4db5c9602b0f) |
+| [AHC034](https://atcoder.jp/contests/ahc034/tasks/ahc034_a) | 着手・本番未判定 | **9,486,350,384**（絶対点） | 積み降ろし再配分：新規未調整24件 平均35,727,578.04 | 本番150件・2秒、同一ケースの証拠なし | [問題別ブランチ](https://github.com/tokotoko7777/ahc-workspace/tree/6c2ea91bb86ef24c6c84cd99bf76df6355c16ce6)、[積み降ろし再配分](https://github.com/tokotoko7777/ahc-workspace/tree/e2c29731322790e744a17033d3fa937c450cede7) |
+| [AHC035](https://atcoder.jp/contests/ahc035/tasks/ahc035_a) | 着手・本番未判定 | 確認中 | 開発比較準備中 | 確認中 | 検証中 |
+| AHC036〜074 | 未着手 | — | — | — | — |
 
 ### AHC001 の次の仮説
 
@@ -521,3 +522,11 @@
 [検証と実装](https://github.com/tokotoko7777/ahc-workspace/tree/6c2ea91bb86ef24c6c84cd99bf76df6355c16ce6)。蛇行経路を残量が非負になる位置から始める基準に対し、区間をつなぐときの移動費と必要積載量を正確に評価し、順序を変更。dev24件平均23,160,596.71→30,677,647.17（23勝1分）、未調整24件25,131,542.38→33,027,861.63（全勝、移動費比平均0.74009）。96出力で全マスが整地され、公式と独立再生が一致、最大0.159890秒。専用既定に採用。
 
 本番150件・2秒。1位9,486,350,384は[AtCoder提供順位データ](https://huggingface.co/datasets/SakanaAI/ALE-Bench/blob/main/ahc034.zip)から確認（SHA-256 `a6c2666e596dee5a743d80cfcfac8cf1d90d80696a2c11acfd4891b7467ce889`）。同じ本番ケースと確認したデータはない。次は移動を固定し、積み降ろしだけを時間方向の最小費用流で組み直す。
+
+### AHC033 小クレーンの先行搬出
+
+[追試](https://github.com/tokotoko7777/ahc-workspace/tree/81b3ab227a32818d6d4350351c5d4db5c9602b0f)。行内限定で正しい出口に先行搬出する作業も候補に追加し、大クレーンの完走手順を残す。新規dev12件3,681→3,368、未調整24件7,384→6,867ターン（−7.00%、全件改善）。72出力で順番違反・誤配送・未配送ゼロ、公式と独立検証が一致、最大0.009秒未満。問題別既定に採用。次は行をまたぐ作業を時刻予約で併行させる。本番相対点は未計測。
+
+### AHC034 移動を固定して積み降ろしを最適化
+
+[追試](https://github.com/tokotoko7777/ahc-workspace/tree/e2c29731322790e744a17033d3fa937c450cede7)。移動操作を一切変えず、同じマスを複数回通るときにいつ積み降ろすかを、時刻方向の最小費用流で決める。別の未調整24件平均30,949,419.92→35,727,578.04（全勝、移動費比0.86627）。別系列の近い時間予算の試験でも、経路焼きなましを多く回す対照の未調整平均約31.227M→34.774M（全24勝、中央値の時間0.152→0.164秒）。計192出力で公式と独立検証が一致、最大0.273714秒。問題別既定に採用。本番ケースは未確認。次は小さな経路変更の候補を絞り、積み降ろしを再計算して選ぶ。
