@@ -90,7 +90,7 @@
 | [AHC071](https://atcoder.jp/contests/ahc071/tasks/ahc071_a) | 着手・本番未判定 | rhoo、得点未確認 | 新規未調整28件 291,785点（費用44,243） | 本番150件、同一ケースの証拠なし | [2行DP](https://github.com/tokotoko7777/ahc-workspace/tree/ee229ea027b79e5e668683714e494d860d998f02)、[スライド再最適化](https://github.com/tokotoko7777/ahc-workspace/tree/58746cd7d8ae2eefb5147984a11c211581cd72cd) |
 | [AHC072](https://atcoder.jp/contests/ahc072/tasks/ahc072_a) | 着手・本番未判定 | **1,995,670,086,683**（相対点） | 既定：未調整30件 平均345.67手 | 本番2,000件、公式ケース別基準を取得 | [同色まとめ](https://github.com/tokotoko7777/ahc-workspace/tree/36a890d2c5c19a137f67de5233c58f245d1e01e5)、[取り出し順](https://github.com/tokotoko7777/ahc-workspace/tree/23a0895828bc6d484120851c8669595e5cb4c31e) |
 | [AHC073](https://atcoder.jp/contests/ahc073/tasks/ahc073_a) | 着手・本番未判定 | hitonanode、得点未確認 | 未調整28件 平均11,155.00操作 | 本番150件・2秒、同一ケースの証拠なし | [問題別ブランチ](https://github.com/tokotoko7777/ahc-workspace/tree/614cf90a321ba056b75894fdb9d00da56428a94c)、[二回反射](https://github.com/tokotoko7777/ahc-workspace/tree/3468c6eddc918ad794084cb891015db9e20524f7) |
-| [AHC074](https://atcoder.jp/contests/ahc074/tasks/ahc074_a) | 着手・本番未判定 | Human Only: noimi／With AI: mech_39、点数未確認 | 未調整28件 操作724,334、全件誤注文0 | 本番2,000件公開seed、部門別基準は未取得 | [問題別ブランチ](https://github.com/tokotoko7777/ahc-workspace/tree/b2c94ae0786e0805d6f5e63f3fe62c25ac404ca1) |
+| [AHC074](https://atcoder.jp/contests/ahc074/tasks/ahc074_a) | 着手・本番未判定 | Division 1: noimi／Division 2: mech_39、点数未確認 | 未調整28件 操作724,334、全件誤注文0 | 本番2,000件公開seed、部門別基準は未取得 | [問題別ブランチ](https://github.com/tokotoko7777/ahc-workspace/tree/b2c94ae0786e0805d6f5e63f3fe62c25ac404ca1)、[紙の割当方法の追試](https://github.com/tokotoko7777/ahc-workspace/tree/96edf8020f4615c7d24c1bff857f1369614f6260) |
 
 ### AHC001 の次の仮説
 
@@ -939,3 +939,12 @@ AHC056は[公式採点CSV](https://img.atcoder.jp/ahc_standings/ahc056/result.cs
 ### AHC074 右端を固定するバーコードの紙で区間を切り替える
 
 [初版](https://github.com/tokotoko7777/ahc-workspace/tree/b2c94ae0786e0805d6f5e63f3fe62c25ac404ca1)。単一窓を切り替える合法な基準と、右端の窓を残しながら複数窓をまとめて切り替える紙を比較。各注文の覆う区間はDPで選び、次の注文のために全操作を戻せる。dev14件459,389→360,721操作、未調整28件918,184→724,334（−21.11%、全件改善）。全84対話で誤注文0、公式・独立・内部採点が一致、最大0.0914秒、C++23単一ファイルの出力も一致。問題別既定に採用。本番公開2,000seedのハッシュは照合したが、部門別の分布・首位点は未取得なので未判定。次は単一の紙の価値でなく、候補の紙を取り替えたときカタログ全体の注文の総操作数がどれだけ減るかで選ぶ。
+
+### AHC074 実際にカタログを注文して紙の候補を選ぶ
+
+[追試](https://github.com/tokotoko7777/ahc-workspace/tree/96edf8020f4615c7d24c1bff857f1369614f6260)。開示済み256品目の並べ直しに対し、同じ64の置換候補を単独の一致区間と実際の操作総数で比較。dev14件360,647→359,790（8勝6敗）、未調整28件721,543→722,521（12勝16敗、合計悪化）。全168対話が誤注文0で公式・独立・内部一致、最大約0.2653秒。既定は変更しない。次は単一のカタログ順を使わず、複数の順序で同じ紙を評価する。
+
+### AHC001 2巡目：異なる軸に分離する近傍
+
+[反対軸を強制する追試](https://github.com/tokotoko7777/ahc-workspace/tree/b1d242906edb29702c985520de3a7ab3eecb6ff8)。同じシード、4.8秒の基準で、同じ近傍内の2長方形を異なる軸に分離させた。新規dev8件で7勝1敗・平均+667,237点だが、未調整8件で2勝6敗・平均−459,751点。423試行中154は設定できたものの、他を再配置して採用した例は0。全32出力公式・独立一致、最大約4.822秒。既定維持。
+[同じ配置からの局所修復](https://github.com/tokotoko7777/ahc-workspace/tree/8e7640ec881c5e8577266c47f9e1d9a1ecd73099)は軸維持・反対軸それぞれ1,728形状、合法937／538でも改善0。新規dev6件・未調整6件を全36出力で公式・独立照合。終盤の配置を凍結し、近傍数個だけを切って戻す方法では範囲が狭い。次は序盤の空間に余裕がある時に競合する通路へ異なる軸の初期配置を与え、同じ4.8秒内で比べる。本番1,000件の凍結点は更新していない。
