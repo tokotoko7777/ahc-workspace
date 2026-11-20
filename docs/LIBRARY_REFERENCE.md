@@ -765,6 +765,27 @@ while (!queue.empty()) {
 キーは `uint64_t` です。負数、小数、取り出したキーより小さいキーを後から
 追加する用途には使えません。その場合は通常の `priority_queue` を使います。
 
+## 次数2以下の無向グラフを成分ごとに調べる
+
+ヘッダ: [`degree-two-components.hpp`](../library/degree-two-components.hpp)。
+成分の大きさ・開いた経路の両端・閉路かどうかを、毎回成分の頂点配列を作らずに取得できます。
+呼ぶたび変わるグラフの探索で、訪問フラグとスタックを再利用します。
+
+```cpp
+DegreeTwoComponents components(n);
+components.scan(
+    [&](int v) { return active[v]; },
+    [&](int v) { return links[v]; },    // std::array<int,2>、欠けた辺は -1
+    [&](int size, int a, int b) {
+      if (a < 0) best_cycle = max(best_cycle, size);
+      else best_path = max(best_path, size);
+    });
+```
+
+両端の順序は未規定で、孤立点では両端が同じ頂点です。無向の隣接情報と有効頂点は呼出側で整合させてください。
+[AHC010の線路の成分分類](../problems/ahc010/main.cpp)で使用。
+[差分テスト](../tests/degree_two_components_test.cpp)は普通のBFSと4,000回比較します。
+
 ## Grid BFS
 
 ヘッダ: [`grid-bfs.hpp`](../library/grid-bfs.hpp)
