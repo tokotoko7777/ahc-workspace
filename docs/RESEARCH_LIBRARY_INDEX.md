@@ -1,6 +1,6 @@
 # AHC研究ライブラリ: 用途別索引
 
-「何をしたいか」からC++部品を探す索引です。[進捗](AHC_PROGRESS.md)と[利用時の不便メモ](LIBRARY_FEEDBACK.md)で言及された公開部品62点を、ヘッダと検証先を版固定で掲載しています。AHC番号は用途の由来で、本番採用・順位・別問題での性能を示すものではありません。
+「何をしたいか」からC++部品を探す索引です。[進捗](AHC_PROGRESS.md)と[利用時の不便メモ](LIBRARY_FEEDBACK.md)で言及された公開部品63点を、ヘッダと検証先を版固定で掲載しています。AHC番号は用途の由来で、本番採用・順位・別問題での性能を示すものではありません。
 
 ## 取得と出典の残し方
 
@@ -95,6 +95,7 @@
 | ピボット選択と特異判定を伴う密行列の逆行列を求める | [`dense-matrix-inverse.hpp`](https://github.com/tokotoko7777/ahc-workspace/blob/39c6fccc3544603af106c420abf983f84ded74b1/library/dense-matrix-inverse.hpp) · AHC044 | [テスト](https://github.com/tokotoko7777/ahc-workspace/blob/39c6fccc3544603af106c420abf983f84ded74b1/tests/dense_matrix_inverse_test.cpp) / [仕様](https://github.com/tokotoko7777/ahc-workspace/blob/39c6fccc3544603af106c420abf983f84ded74b1/docs/LIBRARY_REFERENCE.md) |
 | マルコフ連鎖で特定パターンが一度でも出る確率を求める | [`markov-pattern-probability.hpp`](https://github.com/tokotoko7777/ahc-workspace/blob/e8aa0d41b813933b676a6b0cb442f1e51e7a92bc/library/markov-pattern-probability.hpp) · AHC047 | [テスト](https://github.com/tokotoko7777/ahc-workspace/blob/e8aa0d41b813933b676a6b0cb442f1e51e7a92bc/tests/markov_pattern_probability_test.cpp) / [仕様](https://github.com/tokotoko7777/ahc-workspace/blob/e8aa0d41b813933b676a6b0cb442f1e51e7a92bc/docs/LIBRARY_REFERENCE.md) |
 | 前向き確率・後向き価値から二分岐の確率行を選ぶ | [`binary-split-fit.hpp`](https://github.com/tokotoko7777/ahc-workspace/blob/c7a55c1984e3da4992f23c94bdb1a5430db232c4/library/binary-split-fit.hpp) · AHC051 | [テスト](https://github.com/tokotoko7777/ahc-workspace/blob/c7a55c1984e3da4992f23c94bdb1a5430db232c4/tests/binary_split_fit_test.cpp) / [仕様](https://github.com/tokotoko7777/ahc-workspace/blob/c7a55c1984e3da4992f23c94bdb1a5430db232c4/docs/LIBRARY_REFERENCE.md) |
+| 丸められた乗法一様ノイズから、正規事前分布の事後平均・分散を求める | [`rounded-multiplicative-normal.hpp`](https://github.com/tokotoko7777/ahc-workspace/blob/60f60000cefda6f413c1e1fb223eac5f80b8b0a3/library/rounded-multiplicative-normal.hpp) · AHC003 | [例](https://github.com/tokotoko7777/ahc-workspace/blob/60f60000cefda6f413c1e1fb223eac5f80b8b0a3/examples/rounded_multiplicative_normal_usage.cpp) / [テスト](https://github.com/tokotoko7777/ahc-workspace/blob/60f60000cefda6f413c1e1fb223eac5f80b8b0a3/tests/rounded_multiplicative_normal_test.cpp) |
 
 ## 文字列・周期
 
