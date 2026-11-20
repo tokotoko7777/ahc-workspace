@@ -606,7 +606,8 @@ class Ahc038BeamProblem {
   // State::hashは盤面、根、全指の向き、保持状態をすべて含む。
   uint64_t make_key(const State& state) const { return state.hash; }
 
-  Answer solve(int beam_width, double time_limit_ms) {
+  Answer solve(int beam_width, double time_limit_ms,
+               const Answer* incumbent = nullptr, int step_cap = -1) {
     const State initial = make_initial_state();
     Answer best;
     best.lengths = lengths_;
@@ -627,6 +628,10 @@ class Ahc038BeamProblem {
     }
 
     const int greedy_turns = best.turns();
+    if (incumbent && incumbent->turns() < best.turns()) {
+      validate_or_throw(*incumbent);
+      best = *incumbent;
+    }
     if (greedy_turns == 0 || beam_width <= 0 || time_limit_ms <= 0.0) {
       validate_or_throw(best);
       return best;
@@ -640,7 +645,10 @@ class Ahc038BeamProblem {
 
     const auto started = chrono::steady_clock::now();
     vector<Move> candidate_path;
-    while (beam.generation() < best.turns()) {
+    int steps = 0;
+    while (beam.generation() < best.turns() &&
+           (step_cap < 0 || steps < step_cap)) {
+      ++steps;
       const double elapsed_ms = chrono::duration<double, milli>(
                                     chrono::steady_clock::now() - started)
                                     .count();
@@ -652,11 +660,16 @@ class Ahc038BeamProblem {
             if (!finished(state) || next_generation >= best.turns()) return;
             beam.restore_candidate(parent_rank, move, candidate_path);
             best.moves = candidate_path;
+            best.initial_root_row = initial.root_row;
+            best.initial_root_column = initial.root_column;
           });
       if (!advanced) break;
     }
 
     State check = initial;
+    check.root_row = best.initial_root_row;
+    check.root_column = best.initial_root_column;
+    check.hash = compute_hash(check);
     for (Move& move : best.moves) apply_move(check, move);
     if (!finished(check)) throw runtime_error("AHC038: restored path is invalid");
     validate_or_throw(best);
@@ -767,6 +780,7 @@ class Ahc038BeamProblem {
   vector<int> lengths_;
 };
 
+#ifndef AHC038_NO_BEAM_EXAMPLE_MAIN
 int main() {
   ios::sync_with_stdio(false);
   cin.tie(nullptr);
@@ -786,3 +800,4 @@ int main() {
   const Answer answer = problem.solve(BEAM_WIDTH, SEARCH_TIME_MS);
   problem.print_answer(answer, cout);
 }
+#endif

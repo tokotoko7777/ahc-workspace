@@ -1,10 +1,3 @@
-// Default: tested original repository solver, with ample timeout margin.
-#ifndef AHC038_STATIONS
-#ifndef AHC038_SEARCH_TIME_MS
-#define AHC038_SEARCH_TIME_MS 2200.0
-#endif
-#include "../../examples/search/ahc038_variable_cost_beam.cpp"
-#else
 #pragma GCC optimize("O3")
 #include <algorithm>
 #include <array>
@@ -16,6 +9,12 @@
 #include <string>
 #include <vector>
 
+#if !defined(AHC038_STATIONS)
+#define AHC038_NO_BEAM_EXAMPLE_MAIN
+#include "../../examples/search/ahc038_variable_cost_beam.cpp"
+#endif
+
+namespace station {
 using Clock=std::chrono::steady_clock;
 constexpr int D=4,MAX_V=15;
 constexpr std::array<int,D> dr{0,1,0,-1},dc{1,0,-1,0};
@@ -171,14 +170,15 @@ struct Robot {
         return a;
     }
 };
-int main() {
-    std::ios::sync_with_stdio(false);std::cin.tie(nullptr);
-    const auto deadline=Clock::now()+std::chrono::milliseconds(2200);
+Board read(std::istream& in) {
     Board p;
-    if(!(std::cin>>p.n>>p.items>>p.limit)) return 1;
+    if(!(in>>p.n>>p.items>>p.limit)) return {};
     p.a.resize(p.n);p.b.resize(p.n);
-    for(auto& row:p.a) std::cin>>row;
-    for(auto& row:p.b) std::cin>>row;
+    for(auto& row:p.a) in>>row;
+    for(auto& row:p.b) in>>row;
+    return p;
+}
+Answer solve(const Board& p,Clock::time_point deadline,bool must_finish) {
     const int k=std::min(p.limit-1,p.n/2);
     std::vector<std::array<std::array<int,4>,MAX_V>> reach(p.n*p.n);
     for(int i=0;i<p.n*p.n;++i) for(int leaf=0;leaf<k;++leaf) for(int dir=0;dir<4;++dir) {
@@ -188,16 +188,64 @@ int main() {
     Answer best;
     for(int mode=0;mode<4;++mode) {
         Robot candidate(p,k,mode,reach);
-        auto plan=candidate.solve(mode==0 ? Clock::time_point::max() : deadline);
+        auto plan=candidate.solve(mode==0 && must_finish ? Clock::time_point::max() : deadline);
         if(plan.complete && (!best.complete || plan.commands.size()<best.commands.size()))
             best=std::move(plan);
         if(Clock::now()>deadline) break;
     }
+    return best;
+}
+}
+
+int main() {
+    std::ios::sync_with_stdio(false);std::cin.tie(nullptr);
+#ifdef AHC038_STATIONS
+    const auto start=station::Clock::now();
+    const auto p=station::read(std::cin);
+    if(!p.n) return 1;
+    auto best=station::solve(p,start+std::chrono::milliseconds(2200),true);
     if(!best.complete) return 1;
+    const int k=std::min(p.limit-1,p.n/2);
     std::cout<<k+1<<'\n';
     for(int i=1;i<=k;++i) std::cout<<"0 "<<i<<'\n';
     std::cout<<best.r<<' '<<best.c<<'\n';
     for(auto& s:best.commands) std::cout<<s<<'\n';
     std::cerr<<"Model = "<<best.commands.size()<<'\n';
-}
+#else
+    const std::string data{std::istreambuf_iterator<char>(std::cin),{}};
+    std::istringstream beam_input(data);
+    Ahc038BeamProblem problem;
+    problem.read(beam_input);
+#if defined(AHC038_HYBRID) || defined(AHC038_WORK_CONTROL)
+    constexpr int steps=256;
+#else
+    constexpr int steps=-1;
 #endif
+#ifdef AHC038_HYBRID
+    std::istringstream station_input(data);
+    auto board=station::read(station_input);
+    auto warm=station::solve(board,station::Clock::now()+std::chrono::milliseconds(60),false);
+    Answer incumbent;
+    if(warm.complete) {
+        const int k=std::min(board.limit-1,board.n/2);
+        incumbent.lengths.resize(k);
+        std::iota(incumbent.lengths.begin(),incumbent.lengths.end(),1);
+        incumbent.initial_root_row=warm.r;
+        incumbent.initial_root_column=warm.c;
+        auto& m=incumbent.moves.emplace_back();
+        m.advance=warm.commands.size();
+        m.commands=std::move(warm.commands);
+    }
+    const Answer answer=problem.solve(7,2100.0,warm.complete ? &incumbent : nullptr,steps);
+#elif defined(AHC038_WORK_CONTROL)
+    const Answer answer=problem.solve(7,2100.0,nullptr,steps);
+#else
+#ifndef AHC038_SEARCH_TIME_MS
+#define AHC038_SEARCH_TIME_MS 2200.0
+#endif
+    const Answer answer=problem.solve(7,AHC038_SEARCH_TIME_MS);
+#endif
+    problem.print_answer(answer,std::cout);
+    std::cerr<<"Model = "<<answer.turns()<<'\n';
+#endif
+}
