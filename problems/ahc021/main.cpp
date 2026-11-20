@@ -21,6 +21,9 @@
 
 #include "../../library/tree-beam-search.hpp"
 #include "../../library/radix-heap.hpp"
+#ifndef AHC021_BEAM_ONLY
+#include "../../library/swap-suffix-pruning.hpp"
+#endif
 
 // AHC021 "Pyramid Sorting" の公式入力分布と公式得点を使う。
 // https://atcoder.jp/contests/ahc021/tasks/ahc021_a
@@ -388,6 +391,39 @@ int main() {
   for (int i = 0; i < CELL_COUNT; ++i) if (sorted[i] != i) return 1;
   const auto result = solve_case(input, AHC021_BEAM_WIDTH);
   const PyramidProblem problem;
+#ifndef AHC021_BEAM_ONLY
+  std::vector<std::pair<int,int>> swaps;
+  swaps.reserve(result.operations);
+  auto board = input;
+  for (const auto& move : result.answer) {
+    for (std::size_t i=1; i<move.path.size(); ++i) {
+      int a=move.path[i-1], b=move.path[i];
+      swaps.emplace_back(a,b);
+      std::swap(board[a],board[b]);
+    }
+  }
+  const auto deadline = std::chrono::steady_clock::now()+std::chrono::milliseconds(90);
+  auto local_valid = [&](int v) {
+    for(int other:problem.adjacent[v]) {
+      if(problem.row[v]==problem.row[other]) continue;
+      if((problem.row[v]<problem.row[other]) != (board[v]<board[other])) return false;
+    }
+    return true;
+  };
+  for(int pass=0;pass<32 && std::chrono::steady_clock::now()<deadline;++pass) {
+    const auto removed = prune_swaps_by_suffix(CELL_COUNT,swaps,[&](int a,int b) {
+      std::swap(board[a],board[b]);
+      if(local_valid(a)&&local_valid(b)) return true;
+      std::swap(board[a],board[b]);
+      return false;
+    });
+    if(!removed) break;
+  }
+  std::cout<<swaps.size()<<'\n';
+  for(auto [a,b]:swaps)
+    std::cout << problem.row[a] << ' ' << problem.column[a] << ' '
+              << problem.row[b] << ' ' << problem.column[b] << '\n';
+#else
   std::cout << result.operations << '\n';
   for (const auto& move : result.answer) {
     for (std::size_t i = 1; i < move.path.size(); ++i) {
@@ -396,5 +432,6 @@ int main() {
                 << problem.row[to] << ' ' << problem.column[to] << '\n';
     }
   }
+#endif
   return 0;
 }

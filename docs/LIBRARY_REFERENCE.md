@@ -2029,3 +2029,19 @@ DAG の先行・後続制約の両端から頂点を確定したい場合に使�
 [使用例](../examples/two_sided_dag_frontier_usage.cpp)、
 [1,000 個のランダムな DAG の確認](../tests/two_sided_dag_frontier_test.cpp)、
 [AHC021 の両端確定アルゴリズム](../problems/ahc021/two_ended.cpp)。
+
+## Swap-suffix pruning
+
+ヘッダ: [`swap-suffix-pruning.hpp`](../library/swap-suffix-pruning.hpp)
+
+位置交換の列を後ろから走査し、最新の最終状態を壊さない交換を省略します。
+`prune_swaps_by_suffix(n, swaps, accept_final_swap)` に、(0) から `n−1`
+の位置を交換する列と、**最終盤面の**位置 2 つを受け取るコールバックを
+渡します。省略を認める場合だけ盤面を更新し `true`、認めない場合は
+盤面を変更せず `false` を返します。列をその場で縮め、削除件数を返します。
+1 回の走査の計算量は判定コールバックを除き O(n＋交換数)、追加メモリは O(n)。
+位置交換の効果が固定で、途中の状態に依存する合法性がない場合に限ります。
+
+[使用例](../examples/swap_suffix_pruning_usage.cpp)、
+[交換を一つずつ消して全再生する検査](../tests/swap_suffix_pruning_test.cpp)、
+[AHC021 の完成手順削減](../problems/ahc021/main.cpp)。

@@ -34,10 +34,11 @@ def main():
     parser = argparse.ArgumentParser()
     for key in ("inputs", "out", "vis", "baseline", "two_ended"):
         parser.add_argument(key, type=Path)
+    parser.add_argument("--candidate-label",default="two-ended")
     a = parser.parse_args()
     cases = sorted(a.inputs.resolve().glob("*.txt"))
     out, vis = a.out.resolve(), a.vis.resolve()
-    solvers = [("baseline", a.baseline.resolve()), ("two-ended", a.two_ended.resolve())]
+    solvers = [("baseline", a.baseline.resolve()), (a.candidate_label, a.two_ended.resolve())]
     out.mkdir(parents=True, exist_ok=True)
     scratch = out/"scratch"
     scratch.mkdir(exist_ok=True)
@@ -82,7 +83,7 @@ def main():
                           "complete":sum(r["errors"]==0 for r in rows),
                           "swaps":sum(r["swaps"] for r in rows),
                           "max_wall":max(r["wall"] for r in rows)}
-    summary["candidate_wins"] = sum(results["two-ended",c.name]["score"] >
+    summary["candidate_wins"] = sum(results[a.candidate_label,c.name]["score"] >
                                     results["baseline",c.name]["score"] for c in cases)
     (out/"summary.json").write_text(json.dumps(summary,indent=2)+"\n")
     print(json.dumps(summary))
