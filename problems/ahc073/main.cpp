@@ -4,11 +4,14 @@ using namespace std;
 #ifndef AHC073_BEAM
 #define AHC073_BEAM 1
 #endif
+#ifndef AHC073_DOUBLE
+#define AHC073_DOUBLE 0
+#endif
 namespace {
 using Clock=chrono::steady_clock;
 constexpr int N=128,M=150,K=3;
 using Rack=array<int,K>;
-struct Move{int launch=-1,center=-1;};
+struct Move{int launch=-1,center=-1,after=-1;};
 struct Node{
   Rack circle{};
   int cost=0,rank=0,parent=-1;
@@ -61,7 +64,7 @@ struct Problem{
     }
     return saving;
   }
-  Plan search(Rack initial,int width,Clock::time_point deadline)const{
+  Plan search(Rack initial,int width,Clock::time_point deadline,bool twice=false)const{
     vector<vector<Node>> layers(M+1);
     layers[0].push_back({initial,0,0,-1,{}});
     for(int step=0;step<M;++step){
@@ -102,6 +105,27 @@ struct Problem{
             add(circles,price,i,{launch,c});
           }
         }
+        if(twice)for(int k=0;k<K;++k)for(int l=0;l<K;++l)if(k!=l){
+          const int first=cur[i].circle[k],second=cur[i].circle[l];
+          const auto row=double_reflection_launch_range(N,a/N,b/N,first/N,second/N);
+          const auto col=double_reflection_launch_range(N,a%N,b%N,first%N,second%N);
+          if(!row||!col)continue;
+          const auto [y,z]=*row;
+          const auto [x,w]=*col;
+          const int sample=N*y+x;
+          const int price=2+md(a,sample)+md(reflect(reflect(sample,first),second),b);
+          if(price>walking+3)continue;
+          const int probes[]={N*y+x,N*y+w,N*z+x,N*z+w,N*((y+z)/2)+(x+w)/2};
+          array<int,5> seen{};
+          int len=0;
+          for(int launch:probes){
+            if(find(seen.begin(),seen.begin()+len,launch)!=seen.begin()+len)continue;
+            seen[len++]=launch;
+            auto circles=cur[i].circle;
+            circles[k]=launch;circles[l]=reflect(launch,first);
+            add(circles,price,i,{launch,first,second});
+          }
+        }
       }
       auto cmp=[](const Node& a,const Node& b){
         return tuple{a.rank,a.cost,a.circle}<tuple{b.rank,b.cost,b.circle};
@@ -128,13 +152,15 @@ struct Problem{
     };
     auto circle=plan.initial;
     for(int i=0;i<M;++i){
-      auto [launch,center]=plan.leg[i];
+      auto [launch,center,after]=plan.leg[i];
       if(launch>=0){
         walk(launch);
-        auto found=ranges::find(circle,center);assert(found!=circle.end());
-        *found=pos;
-        cout<<"J "<<center/N<<' '<<center%N<<'\n';
-        pos=reflect(pos,center);++steps;
+        for(int c:{center,after})if(c>=0){
+          auto found=ranges::find(circle,c);assert(found!=circle.end());
+          *found=pos;
+          cout<<"J "<<c/N<<' '<<c%N<<'\n';
+          pos=reflect(pos,c);++steps;
+        }
       }
       walk(p[i+1]);
     }
@@ -148,7 +174,14 @@ struct Problem{
     const int base=best.cost;
     if(AHC073_BEAM)accept(search(initial,24,deadline));
     else for(int i=1;i<=24&&Clock::now()<deadline;++i)accept(search(starts(i),1,deadline));
-    cerr<<"base="<<base<<" moves="<<best.cost<<" candidates="<<work<<'\n';
+    const int frozen=best.cost;
+    const auto common_work=work;
+    if(AHC073_DOUBLE==1)accept(search(initial,64,deadline));
+    if(AHC073_DOUBLE==2)accept(search(initial,24,deadline,true));
+    if(AHC073_DOUBLE==3)accept(search(initial,28,deadline));
+    cerr<<"base="<<base<<" moves="<<best.cost<<" candidates="<<work;
+    if(AHC073_DOUBLE)cerr<<" frozen="<<frozen<<" extra="<<work-common_work;
+    cerr<<'\n';
     print(best);
   }
 };
