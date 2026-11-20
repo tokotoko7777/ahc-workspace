@@ -68,9 +68,48 @@ joint compaction while verifying the exact original trace.
 ```sh
 p=problems/ahc056
 d=$(mktemp -d)
-g++ -std=c++23 -O3 -DAHC056_ALLOCATE=0 "$p/main.cpp" -o "$d/base"
+g++ -std=c++23 -O3 -DAHC056_ROUTE=0 -DAHC056_ALLOCATE=0 "$p/main.cpp" -o "$d/base"
 python scripts/bundle.py "$p/main.cpp" -o "$d/submission.cpp"
-g++ -std=c++23 -O3 "$d/submission.cpp" -o "$d/allocate"
+g++ -std=c++23 -O3 -DAHC056_ROUTE=0 "$d/submission.cpp" -o "$d/allocate"
 python "$p/benchmark.py" /path/to/gen /path/to/vis \
   "$d/base" "$d/allocate" "$d/results.csv"
+```
+
+## Follow-up: same-length route tie selection
+
+All three arms retain the identical frozen compiler result. Two additional
+arms each try five new routes and the same up-to-seven state counts around
+the frozen choice, with two allocator policies per count. The random control
+simply adds common seeded random priorities to shortest-path ties. The
+compression heuristic uses the same random priorities, additionally preferring
+a previously used departure direction from the same cell and continuing
+straight. All moves strictly decrease distance to the next destination,
+so total steps stay exactly the same.
+
+| Fresh cases | Frozen C+Q ↓ | Random ties ↓ | Compression ties ↓ | vs random |
+|---|---:|---:|---:|---:|
+| Dev (32) | 65.469 | 65.469 | 64.281 | 23 / 9 / 0 |
+| Holdout (32) | 72.719 | 72.594 | 71.531 | 21 / 10 / 1 |
+
+Median gain one palette/state unit vs both controls. Holdout median walls
+0.02462 s random vs 0.02537 s compression, max 0.405900 s across all arms.
+All 192 official and independent checks completed the identical minimal
+step count on each case. Compression ties are the branch default; the
+gain is modest, and no historical cases were used.
+[Results](benchmark-route-results.csv).
+
+Next structural test: compact the entire rule graph by merging color pairs
+only when all touched state-indexed outgoing actions agree after merge.
+Allow one simultaneous state merge to undo a palette collision, and verify
+the full visited-goal trace rather than individual rules, using equal
+candidate work against route-tie exploration alone.
+
+```sh
+p=problems/ahc056
+d=$(mktemp -d)
+for i in 0 1 2; do
+  g++ -std=c++23 -O3 -DAHC056_ROUTE=$i "$p/main.cpp" -o "$d/arm$i"
+done
+python "$p/benchmark_routes.py" /path/to/gen /path/to/vis \
+  "$d/arm0" "$d/arm1" "$d/arm2" "$d/results.csv"
 ```

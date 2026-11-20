@@ -4,6 +4,9 @@ using namespace std;
 #ifndef AHC056_ALLOCATE
 #define AHC056_ALLOCATE 1
 #endif
+#ifndef AHC056_ROUTE
+#define AHC056_ROUTE 2
+#endif
 namespace {
 using Clock=chrono::steady_clock;
 constexpr char letters[]="UDLR";
@@ -41,6 +44,31 @@ struct Problem{
       }
     }
     assert(int(positions.size())<=t);
+  }
+  void reroute(const vector<vector<int>>& dist,int attempt,bool compressed){
+    positions.clear();dirs.clear();
+    vector<array<int,4>> reuse(n*n);
+    mt19937 rng(895600+attempt);
+    int last=4;
+    for(int i=1;i<k;++i){
+      const auto& reach=dist[i-1];
+      for(int v=stops[i-1];v!=stops[i];){
+        int next=-1,hd=-1,best=INT_MIN;
+        for(int u:adj[v])if(reach[u]+1==reach[v]){
+          const int diff=u-v,dir=diff==-n?0:diff==n?1:diff==-1?2:3;
+          int score=int(rng()%97);
+          if(compressed){
+            score+=(attempt%2?65:120)*(dir==last);
+            score+=(attempt%2?130:72)*int(reuse[v][dir]>0);
+            score+=8*min(3,reuse[v][dir]);
+          }
+          if(score>best){next=u;hd=dir;best=score;}
+        }
+        assert(next>=0);
+        ++reuse[v][hd];positions.push_back(v);dirs.push_back(hd);
+        v=next;last=hd;
+      }
+    }
   }
   Program compile(int Q,int mode)const{
     Program out{1,Q,vector<int>(n*n),{}};
@@ -98,6 +126,23 @@ int main(){
   const int baseline=best.cost();
   if(AHC056_ALLOCATE)for(int q=2;q<=qmax&&q+1<best.cost()&&Clock::now()<deadline;++q)
     for(int mode=2;mode<4;++mode)try_one(q,mode);
-  cerr<<"base="<<baseline<<" cost="<<best.cost()<<" steps="<<len<<'\n';
+  const int frozen=best.cost();
+  if(AHC056_ROUTE){
+    vector<vector<int>> dist;
+    for(int i=1;i<p.k;++i)dist.push_back(graph_bfs(p.adj,p.stops[i]).distance);
+    const int anchor=best.Q;
+    for(int attempt=0;attempt<5&&Clock::now()<deadline;++attempt){
+      p.reroute(dist,attempt,AHC056_ROUTE==2);
+      assert(int(p.positions.size())==len);
+      for(int dq=-6;dq<=6&&Clock::now()<deadline;dq+=2){
+        const int q=anchor+dq;
+        if(1<q&&q<qmax+1)
+          for(int mode=2;mode<4;++mode)try_one(q,mode);
+      }
+    }
+  }
+  cerr<<"base="<<baseline<<" cost="<<best.cost()<<" steps="<<len;
+  if(AHC056_ROUTE)cerr<<" frozen="<<frozen;
+  cerr<<'\n';
   p.print(best);
 }
