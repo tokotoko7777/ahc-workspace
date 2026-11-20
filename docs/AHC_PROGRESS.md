@@ -27,7 +27,7 @@
 | [AHC017](https://atcoder.jp/contests/ahc017/tasks/ahc017_a) | 着手・未判定 | **1,993,227,663,417**（相対点） | 未調整 14 件 189,307,900（絶対点） | 本番 2,000 件・6 秒、ケース別基準が必要 | [問題別ブランチ](https://github.com/tokotoko7777/ahc-workspace/tree/6078ab465ffd5a225a464187bd443e4b62fcd38b) |
 | [AHC018](https://atcoder.jp/contests/ahc018/tasks/ahc018_a) | ローカル比較・本番未判定 | [公式順位](https://atcoder.jp/contests/ahc018/standings) 要ログイン。1 位の点数未確認 | 別の未調整 32 件で経路限定試掘／一様の比: 平均 0.9202、25 勝 | 本番公開 3,000 件、5 秒、相対方式 | [問題別ブランチ](https://github.com/tokotoko7777/ahc-workspace/tree/ff72f9a9577cff6a5ce466081ef959cdde836522)、[経路試掘](https://github.com/tokotoko7777/ahc-workspace/tree/0cca8b704bae33b8ad70a32d5db6ae139fb5c054) |
 | [AHC019](https://atcoder.jp/contests/ahc019/tasks/ahc019_a) | 着手・本番未判定 | **1,886,240,066,109**（相対点） | 新規未調整 30 件 30,684,752,148（絶対点・低い方が良い） | 本番公開 2,000 件、6 秒、ケース別基準が必要 | [問題別ブランチ](https://github.com/tokotoko7777/ahc-workspace/tree/7252e85e2d8a5d75038c0680f4ba43b4a43b3f05)、[部分再構築](https://github.com/tokotoko7777/ahc-workspace/tree/79fa2df9de9de4de4d658ea3f374ff983d7e4753) |
-| [AHC020](https://atcoder.jp/contests/ahc020/tasks/ahc020_a) | 着手・本番未判定 | **504,832,157**（絶対点） | 未調整16件 平均1,687,384.19 | 本番 300 件・2 秒、同一ケースの証拠なし | [問題別ブランチ](https://github.com/tokotoko7777/ahc-workspace/tree/96a97144e57022f452ce216eddf9c2d76adc3b32) |
+| [AHC020](https://atcoder.jp/contests/ahc020/tasks/ahc020_a) | 着手・本番未判定 | **504,832,157**（絶対点） | 未調整16件 平均1,687,384.19 | 本番 300 件・2 秒、同一ケースの証拠なし | [問題別ブランチ](https://github.com/tokotoko7777/ahc-workspace/tree/96a97144e57022f452ce216eddf9c2d76adc3b32)、[配線費の共同評価](https://github.com/tokotoko7777/ahc-workspace/tree/411425e2f761d00f879c4965b8eee3b9e959e56a) |
 | [AHC021](https://atcoder.jp/contests/ahc021/tasks/ahc021_a) | 着手・本番未判定 | **13,589,420**（絶対点） | 開発比較準備中 | 本番150件・2秒、同一ケースの証拠なし | 検証中 |
 | AHC022〜074 | 未着手 | — | — | — | — |
 
@@ -312,3 +312,7 @@
 ### AHC021 本番条件
 
 [公式問題文](https://atcoder.jp/contests/ahc021/tasks/ahc021_a)。2秒 / 1,024 MiB、150ケース。三角格子で親子の順序違反が0なら100,000−5×交換回数、それ以外は50,000−50×違反数。1位13,589,420は[AtCoder提供の順位・得点データ](https://huggingface.co/datasets/SakanaAI/ALE-Bench/blob/main/ahc021.zip)で確認（SHA-256 `aea95345b11743f87a02ec87c075e00d0686925de9c51d84f21d6f4d624dcd5a`）。公式ツール付属の100例を本番例とみなさない。リポジトリの既存ビームを対照に、最小・最大ラベルの両側から確定する案を試す。
+
+### AHC020 半径と配線費の共同評価
+
+[追試](https://github.com/tokotoko7777/ahc-workspace/tree/411425e2f761d00f879c4965b8eee3b9e959e56a)。同じ初期半径・12,000試行・同じ最後の配線再構成で、探索中だけ枝刈りMSTと活動局集合ごとの再配線費を切り替えた。新規holdout16件の平均は1,654,711.81→1,665,150.44（12勝4敗、中央値+10,253）。devでは平均+6,164.13だが7勝9敗、中央値−706。全64出力が公式と独立採点で一致、最大0.340581秒。任意フラグとして保持。次は時間内に両評価で独立に探索し、最後に公式と同じ費用で選ぶポートフォリオを、同じ予算の独立再始動と比較する。
