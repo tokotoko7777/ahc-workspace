@@ -157,3 +157,7 @@ python3 problems/ahc001/benchmark.py mincut-headroom/in bench-mincut-headroom --
 
 既存の初期化を戻せる形で温存し、初期配置の前に空き領域を
 競う長方形を選んだ[初期軸順序の比較](experiments/early_corridor_v4/README.md)も参照。
+
+外側を固定し、6アンカーの候補長方形の組合せを厳密に選ぶ
+[局所集合探索](experiments/pocket_v5/README.md)は、未調整10件で
+平均+14.2点、局所2個変更と全件同点でした。既定版には組み込みません。
