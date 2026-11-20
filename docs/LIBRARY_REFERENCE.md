@@ -2014,3 +2014,19 @@ sort(points.begin(), points.end(), [](const Point& a, const Point& b) {
 
 `bits=10` なら各座標は `0..1023` です。厳密な最近傍順ではありませんが、空間的に
 まとまったcluster作成、query順、cache localityの改善候補を1行のkeyで作れます。
+
+## OrthogonalSlideGrid
+
+ヘッダ: [`orthogonal-slide-grid.hpp`](../library/orthogonal-slide-grid.hpp)。
+
+`OrthogonalSlideGrid(h,w,wall)` は各セルから左・右・上・下へ
+壁の手前まで滑る停止点を保持します。行優先で番号を振り、
+`set_blocked(v,bool)` で壁を立てたり戻したりできます。
+更新は 1 行と 1 列だけで `O(h+w)`。壁セルの停止点は便宜上自分です。
+`redistribute(p,next)` は異なる二つの浮動小数点配列を受け取り、
+壁以外の各セルから 4 方向へ等確率で質量を移します。
+総量の正規化や、次に壁を立てたセル分を除く処理は呼出側で行います。
+
+[使用例](../examples/orthogonal_slide_grid_usage.cpp) /
+[素朴な 4 方向走査との比較](../tests/orthogonal_slide_grid_test.cpp) /
+[AHC050 の確率遷移](../problems/ahc050/README.md)。
