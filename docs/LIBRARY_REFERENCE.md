@@ -97,7 +97,7 @@ if (sa.accept(candidate - cache.score())) {
 | [`monte-carlo-tree-search.hpp`](../library/monte-carlo-tree-search.hpp) | `choose_action`は`optional<Action>`。`sample_transition`は結果ID、`rollout`は[0,1]の評価値。異なる確率的結果を同じIDにしない | [Problemの契約](../SEARCH_GUIDE.md#モンテカルロ木探索) |
 | [`adaptive-operator-selector.hpp`](../library/adaptive-operator-selector.hpp) | `select(rng)`で近傍ID、`record(id, reward)`で[0,1]の成果を記録。失敗も0で記録 | [AHC059](../examples/search/ahc059_lns.cpp) |
 | [`aho-corasick.hpp`](../library/aho-corasick.hpp) | `add`→`build`→`advance` / `matches`。複数語の同時照合で出現IDを得る | [AHC004](../examples/search/ahc004_genome_sa.cpp) |
-| [`ordered-pair-insertion.hpp`](../library/ordered-pair-insertion.hpp) | `best_ordered_pair_insertion`。先行制約付き2点挿入の最良gapと距離増分。適用は後方の点から | [AHC006](../examples/search/ahc006_sa.cpp) |
+| [`ordered-pair-insertion.hpp`](../library/ordered-pair-insertion.hpp) | `best_ordered_pair_insertion`。先行制約付き2点挿入の最良gapと距離増分。適用は後方の点から | [AHC006 既存例](../examples/search/ahc006_sa.cpp)、[複数中心からの構築](../problems/ahc006/main.cpp) |
 | [`scope-profiler.hpp`](../library/scope-profiler.hpp) | `ScopeProfiler`の`measure()`でスコープ計測、`report(cerr)`で表示。`-DAHC_ENABLE_PROFILING`時だけ有効 | ヘッダ先頭の呼び出し例 |
 
 ## Timer
