@@ -30,8 +30,9 @@
 | [AHC020](https://atcoder.jp/contests/ahc020/tasks/ahc020_a) | 着手・本番未判定 | **504,832,157**（絶対点） | 未調整16件 平均1,687,384.19 | 本番 300 件・2 秒、同一ケースの証拠なし | [問題別ブランチ](https://github.com/tokotoko7777/ahc-workspace/tree/96a97144e57022f452ce216eddf9c2d76adc3b32)、[配線費の共同評価](https://github.com/tokotoko7777/ahc-workspace/tree/411425e2f761d00f879c4965b8eee3b9e959e56a) |
 | [AHC021](https://atcoder.jp/contests/ahc021/tasks/ahc021_a) | 着手・本番未判定 | **13,589,420**（絶対点） | 交換削除：新規未調整20件 1,814,625 | 本番150件・2秒、同一ケースの証拠なし | [問題別ブランチ](https://github.com/tokotoko7777/ahc-workspace/tree/9306c3d973e9b622e3a35431363f5f7f6ab64225)、[交換削除](https://github.com/tokotoko7777/ahc-workspace/tree/ce5987e9b2769010a4568b3442108f2e02e29909) |
 | [AHC022](https://atcoder.jp/contests/ahc022/tasks/ahc022_a) | 着手・本番未判定 | [公式順位](https://atcoder.jp/contests/ahc022/standings) 要ログイン、1位点未確認 | 低配置費版：新規未調整30件で誤対応0、全勝 | 本番3,000件・4秒、相対方式 | [問題別ブランチ](https://github.com/tokotoko7777/ahc-workspace/tree/d255c7a5ce936552a98346c8d2bf764f78add849)、[低配置費](https://github.com/tokotoko7777/ahc-workspace/tree/86f0b8b8dc3d75a877626672b36b2dec88da2e05) |
-| [AHC023](https://atcoder.jp/contests/ahc023/tasks/asprocon10_a) | 着手・本番未判定 | [公式順位](https://atcoder.jp/contests/ahc023/standings) 要ログイン、1位点未確認 | 開発比較準備中 | 本番公開2,000件・2秒、絶対点 | 検証中 |
-| AHC024〜074 | 未着手 | — | — | — | — |
+| [AHC023](https://atcoder.jp/contests/ahc023/tasks/asprocon10_a) | 着手・本番未判定 | [公式順位](https://atcoder.jp/contests/ahc023/standings) 要ログイン、1位点未確認 | 本番公開2,000件 **1,100,483,250**（全件合法） | 本番公開2,000件・2秒、絶対点 | [問題別ブランチ](https://github.com/tokotoko7777/ahc-workspace/tree/52f76e1f5e905e5f4f11f0613285760073967281) |
+| [AHC024](https://atcoder.jp/contests/ahc024/tasks/ahc024_a) | 着手・本番未判定 | **335,417**（絶対点） | 開発比較準備中 | 本番150件・2秒、同一ケースの証拠なし | 検証中 |
+| AHC025〜074 | 未着手 | — | — | — | — |
 
 ### AHC001 の次の仮説
 
@@ -342,3 +343,13 @@
 ### AHC022 低配置費の符号盤面
 
 [追試](https://github.com/tokotoko7777/ahc-workspace/tree/86f0b8b8dc3d75a877626672b36b2dec88da2e05)。識別用の温度を保ち、温度差が大きい辺を減らす。新規の開発30件・未調整30件は両版とも全件誤対応0、低配置費版が全60勝。未調整のケース別絶対点比は平均1.666倍、中央値1.728倍。配置費比平均0.5673、計測回数平均2,007.47→2,033.40、最長0.081582秒・最大5,909計測。全120出力公式と独立再生が一致し、問題別ブランチの既定に採用。次はノイズ段階ごとに符号の温度差と測定予算を配分する。本番相対点とは比較しない。
+
+### AHC023 木の通路を時期ごとに使う
+
+[開発検証と実装](https://github.com/tokotoko7777/ahc-workspace/blob/52f76e1f5e905e5f4f11f0613285760073967281/problems/ahc023/README.md)。葉だけに作付けする版に対し、子孫の植付・収穫を妨げない時期に限って内側のマスを使う。dev12件5,447,400→6,551,125、未調整24件10,825,325→13,194,825（全勝、+21.9%）。72出力は公式と独立の毎日の到達判定が一致。
+
+別に、開発比較で凍結したC++23版を[公式公開seed](https://img.atcoder.jp/ahc023/seeds.txt)で評価し、**2,000件合計1,100,483,250**、全件合法・独立採点と一致、最大0.035019秒。凍結バイナリSHA-256 `87a1ca2ae0f370e104b83d2f4b69590cb0eed6d79c5b625797adc0bbc51c5a69`。本番1位値は未確認なので比較結果は未判定。改善判断には本番ケースの結果を使わない。次は植付・収穫の同日順序を使って、内部マスの禁止期間を狭める。
+
+### AHC024 本番条件
+
+[公式問題文](https://atcoder.jp/contests/ahc024/tasks/ahc024_a)。空きマス数+1の本番150件合計、2秒 / 1,024 MiB。1位335,417は[AtCoder提供の順位・得点データ](https://huggingface.co/datasets/SakanaAI/ALE-Bench/blob/main/ahc024.zip)で確認（SHA-256 `b4f02d3cbcea3200d3e7d29dcf27b1e0bcce1fb566ed249541683114f7986585`）。本番同一ケースは未確認。行列の直線圧縮に対し、色ごとの連結と色の接触関係を保つ曲がった切断を試す。
