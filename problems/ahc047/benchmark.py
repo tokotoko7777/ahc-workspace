@@ -43,7 +43,10 @@ def main():
     p=argparse.ArgumentParser(description=__doc__)
     for name in ("gen","vis","base","candidate","csv"):
         p.add_argument(name,type=Path)
+    p.add_argument("--extra-starts",type=Path)
     a=p.parse_args()
+    tag="shared-routes-v1" if a.extra_starts else "markov-mixture-v1"
+    if a.extra_starts:a.extra_starts=a.extra_starts.resolve()
     gen,vis,base,candidate=(getattr(a,k).resolve() for k in ("gen","vis","base","candidate"))
     with tempfile.TemporaryDirectory() as d,a.csv.open("w",newline="") as file:
         work=Path(d)
@@ -51,7 +54,7 @@ def main():
         w=csv.writer(file,lineterminator="\n")
         w.writerow(("split","seed","arm","score","expectation","baseline","seconds"))
         for split in ("dev","holdout"):
-            ids=[int.from_bytes(hashlib.sha256(f"ahc047/markov-mixture-v1/{split}/{i}".encode()).digest()[:8],
+            ids=[int.from_bytes(hashlib.sha256(f"ahc047/{tag}/{split}/{i}".encode()).digest()[:8],
                                 "little") for i in range(24)]
             seed.write_text("".join(f"{s}\n" for s in ids))
             subprocess.run([gen,seed],cwd=work,check=True)
@@ -59,6 +62,7 @@ def main():
                 inp=work/"in"/f"{i:04d}.txt"
                 data=inp.read_bytes()
                 arms=[("cycle",base),("mixture",candidate)]
+                if a.extra_starts:arms=[("mixture",base),("extra",a.extra_starts),("paths",candidate)]
                 starts=[]
                 for label,binary in arms[::(-1 if i%2 else 1)]:
                     start=time.monotonic()

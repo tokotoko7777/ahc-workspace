@@ -61,9 +61,46 @@ From repository root (`ATCODER_TOOLS` points to their `target/release`,
 Python with NumPy):
 
     g++ -std=c++23 -O3 -DAHC047_MIX=0 problems/ahc047/main.cpp -o /tmp/ahc047-cycle
-    g++ -std=c++23 -O3 problems/ahc047/main.cpp -o /tmp/ahc047-mixture
+    g++ -std=c++23 -O3 -DAHC047_PATHS=0 problems/ahc047/main.cpp -o /tmp/ahc047-mixture
     OPENBLAS_NUM_THREADS=1 python problems/ahc047/benchmark.py "$ATCODER_TOOLS/gen" "$ATCODER_TOOLS/vis" /tmp/ahc047-cycle /tmp/ahc047-mixture /tmp/ahc047.csv
     g++ -std=c++23 -O2 tests/markov_pattern_probability_test.cpp -o /tmp/ahc047-prob-test
     /tmp/ahc047-prob-test
     python scripts/bundle.py problems/ahc047/main.cpp -o /tmp/ahc047-single.cpp
     g++ -std=c++23 -O3 /tmp/ahc047-single.cpp -o /tmp/ahc047-single
+
+## Shared word-path initialization
+
+Keep the exact-scored four original starts. Two added starts differ only
+in labels: two copies per character or a fixed base copy plus six
+copies assigned by high-value word demand. For each of ten desirable
+words, use a Viterbi scan over compatible copies, favoring edges already
+supported by other words and penalizing competition within an outgoing
+row. Add its route to fractional edge weights and round with largest
+remainders to integer row sums of 100. From there run the **same** 4,500
+proposal budget per start as before and adopt only an exact-score winner.
+
+A resource control adds the same two restarts from shuffled labels
+on the existing weighted matrix, rather than giving the variant more
+annealing. All three arms otherwise share the four original starts.
+
+| 24 fresh cases each | Four starts | Six, random extra | Six, mapped paths |
+|---|---:|---:|---:|
+| Development mean | 23,054.25 | 24,121.33 | 26,979.54 |
+| Untouched holdout mean | 21,549.25 | 22,646.17 | 26,281.33 |
+
+Against the extra-restart control, holdout 15/6/3 (W/T/L), median +1131.5.
+Median solver wall 0.08805s vs0.08673s (random extra vs mapped) and
+overall max0.114058s. All 144 outputs matched official and independent
+exact scoring. The branch defaults to the mapped paths; no final data.
+[Paired log](shared-path-results.csv).
+
+The compatibility scoring and integer row fitting are local model
+choices, not a new generic component. The synthetic test replays both
+initializers, checking supported word routes and row sums on random inputs.
+Next alternate between reassigning just the top few word routes and
+retuning the row probabilities, using the current exact score as the
+outer quality filter. That can escape greedy insertion order constraints.
+
+    g++ -std=c++23 -O3 problems/ahc047/main.cpp -o /tmp/ahc047-shared
+    g++ -std=c++23 -O3 -DAHC047_PATHS=2 problems/ahc047/main.cpp -o /tmp/ahc047-extra
+    OPENBLAS_NUM_THREADS=1 python problems/ahc047/benchmark.py "$ATCODER_TOOLS/gen" "$ATCODER_TOOLS/vis" /tmp/ahc047-mixture /tmp/ahc047-shared /tmp/ahc047-shared.csv --extra-starts /tmp/ahc047-extra

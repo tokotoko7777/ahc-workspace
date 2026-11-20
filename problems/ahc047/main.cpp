@@ -1,6 +1,9 @@
 #include <bits/stdc++.h>
 #include "../../library/markov-pattern-probability.hpp"
 using namespace std;
+#ifndef AHC047_PATHS
+#define AHC047_PATHS 1
+#endif
 #ifndef AHC047_MIX
 #define AHC047_MIX 1
 #endif
@@ -81,13 +84,70 @@ struct Problem {
     }
     return res;
   }
+  Model shared_paths(int variant)const{
+    Model p;
+    p.label="abcdef";
+    array<int,6> want{};
+    for(int k=0;k<8;++k)for(char c:word[k].first)++want[c-'a'];
+    if(variant==0)p.label+="abcdef";
+    else{
+      array<int,6> used{1,1,1,1,1,1};
+      for(int k=6;k<N;++k){
+        int b=0;
+        for(int a=1;a<6;++a)if(want[a]*used[b]>want[b]*used[a])b=a;
+        ++used[b];p.label+=char('a'+b);
+      }
+    }
+    array<array<double,N>,N> mass;
+    for(auto& row:mass)row.fill(0.7);
+    array<double,N> total;
+    total.fill(0.7*N);
+    for(int idx=0;idx<10;++idx){
+      const auto& [w,weight]=word[idx];
+      const double pay=1.5+sqrt(weight)/18.;
+      array<array<double,N>,12> v;
+      array<array<int,N>,12> parent{};
+      for(auto& row:v)row.fill(-1e30);
+      for(int j=0;j<N;++j)if(p.label[j]==w[0])v[0][j]=0.;
+      for(int k=1;k<int(w.size());++k)
+        for(int j=0;j<N;++j)if(p.label[j]==w[k])
+          for(int i=0;i<N;++i)if(p.label[i]==w[k-1]){
+            double score=v[k-1][i]+log((mass[i][j]+pay)/(total[i]+pay));
+            if(score>v[k][j]){v[k][j]=score;parent[k][j]=i;}
+          }
+      int last=int(w.size())-1;
+      int j=max_element(v[last].begin(),v[last].end())-v[last].begin();
+      for(int k=last;k>0;--k){
+        int i=parent[k][j];
+        mass[i][j]+=pay;total[i]+=pay;
+        j=i;
+      }
+    }
+    for(int i=0;i<N;++i){
+      int left=100;array<pair<double,int>,N> rank;
+      for(int j=0;j<N;++j){
+        double ideal=100*mass[i][j]/total[i];
+        p.row[i][j]=int(ideal);left-=p.row[i][j];
+        rank[j]={ideal-p.row[i][j],j};
+      }
+      sort(rank.rbegin(),rank.rend());
+      for(int j=0;j<left;++j)++p.row[i][rank[j].second];
+    }
+    return p;
+  }
   Model improve(Model incumbent,Clock::time_point deadline)const{
     double actual=exact(incumbent);
     mt19937 rng(470447);
-    for(int pass=0;pass<4;++pass){
+    for(int pass=0;pass<(AHC047_PATHS?6:4);++pass){
       if(Clock::now()>=deadline)break;
-      Model p=pass==3?weighted():cycle(word[pass].first);
-      if(pass!=3){
+      Model p;
+      if(pass<4)p=pass==3?weighted():cycle(word[pass].first);
+      else if(AHC047_PATHS==1)p=shared_paths(pass-4);
+      else{
+        p=weighted();
+        shuffle(p.label.begin(),p.label.end(),rng);
+      }
+      if(pass<3){
         for(auto& row:p.row){
           auto i=max_element(row.begin(),row.end())-row.begin();
           row.fill(2);row[i]+=76;
@@ -126,6 +186,7 @@ struct Problem {
   }
 };
 }
+#ifndef AHC047_TEST
 int main(){
   const auto end=Clock::now()+chrono::milliseconds(1500);
   ios::sync_with_stdio(false);cin.tie(nullptr);
@@ -140,3 +201,4 @@ int main(){
     cout<<'\n';
   }
 }
+#endif
