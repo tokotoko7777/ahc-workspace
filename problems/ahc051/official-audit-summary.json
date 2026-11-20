@@ -1,0 +1,28 @@
+{
+  "frozen_git_commit": "858e24331cd9b2b1ad0c114c91e72d341f552d18",
+  "cases_match": 2000,
+  "generator_mode": "untouched official seed list",
+  "ordered_cases_sha256": "3e445ad76729140d14bb4d3461270bb5c4fdac74e89ecf8a33c08c65bcdd3766",
+  "sources_sha256": {
+    "seeds": "b61fb5678d480a79e25a50141403e14e8e245d5699e90aa53d4fad893e10dee8",
+    "inputs": "1e3708bf9507f664c83dc1c4ac4cb4ec065739eb712be1f1ddce65c0c43e51d8",
+    "scores": "7c1b931d4c62deb3fd63d1a3401e398e9ecba0bffdc2d3439d6f58b2bf0ec838"
+  },
+  "generator_sha256": "023c1eb09779268251c9cb6828141de0701d0edc8c64b0bb0eca3e5e4d269667",
+  "visualizer_sha256": "a431f1ea70cd6838e994ecb6b50440372046e147911ccef67cef6d65f43e2902",
+  "binary_sha256": "cb2d803e17afc8ddf0eccbf1660fb8a11d48c059d0bc2e51b7d5523f6b1aaa93",
+  "historical_winner": "eijirou",
+  "historical_winner_score": 1721504233142,
+  "valid_cases": 2000,
+  "all_processors_reached_cases": 1997,
+  "max_wall_seconds": 0.24244916099996772,
+  "total_absolute_score": 1164111277187,
+  "case_minima_improvement_count": 0,
+  "own_fixed_historical_baseline": 310855698519,
+  "own_combined_baseline": 310855698519,
+  "archived_first_combined_baseline": 1721504233142,
+  "best_historical_user_after_combining": "eijirou",
+  "best_historical_score_after_combining": 1721504233142,
+  "hypothetical_rank": 208,
+  "hypothetical_ties": 0
+}

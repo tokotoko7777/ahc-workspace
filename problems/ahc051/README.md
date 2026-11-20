@@ -16,8 +16,8 @@ rows, integer rounding `(2*10**9*min_abs_case + abs_case)//(2*abs_case)`
 identifies eijirou's historical winning score **1,721,504,233,142**, agreeing
 with the public rank metadata. If a new evaluation sets a new case minimum,
 the contestant and historical leader must both use this new minimum for
-a joint comparison. No historical input cases were run in this experiment;
-the historical rank remains **unjudged** for this solver.
+a joint comparison. No historical cases were used for the development experiments below. See
+[the separate frozen historical audit](OFFICIAL_AUDIT.md).
 
 ## Implementation
 
