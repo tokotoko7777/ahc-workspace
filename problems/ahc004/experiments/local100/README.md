@@ -51,17 +51,25 @@ GNU g++ 14.2.0、単独CPU 6、元の単独例と既存版を開始順交互で�
 | 正確な配置再選択 | 6,984,932,092 | +34,703,814 | 33／54／13 | 2.788073秒 |
 | [観測閉路の初期化](https://github.com/tokotoko7777/ahc-workspace/tree/6cc6477214c0a339a546486e44c99742e3132ba6) | 6,952,490,997 | +2,262,719 | 42／17／41 | 2.788058秒 |
 | 循環窓キャッシュ／POPCNT | **6,998,515,279** | **+48,287,001** | 35／56／9 | 2.800836秒 |
+| 高速化＋正確な配置再選択 | **7,012,486,156** | **+62,257,878** | 40／48／12 | 2.825020秒 |
 
 300出力すべて公式採点と独立検査が一致。計測CSVは
 [再選択・観測閉路](variants-results.csv)と[高速化](fast-results.csv)。
 高速化は探索反復数の中央値を336,976回から855,504回へ（2.54倍）。
 短・中のケースで計48,287,001点伸びたが、長さパラメータ8〜10では40件すべて同点。
-現時点の最高は高速化単独版で目標まで322,790,483点。再選択との併用は別に計測する。
+[併用100件](combined-results.csv)も全件採点一致。高速化単独に対し
++13,970,877点（29勝49分22敗）、現時点最高で目標まで308,819,606点。
+長さ8〜10には−405,831点で、短い断片での改善が主。
 
 観測閉路は長い40ケースで延べ1,204本を列挙できたが、全100件で閉路から
 作った盤面はSAの開始盤面に一度も選ばれなかった。得点が微増したことは
 閉路の有効性を示さない。次は通常と閉路の盤面を同じ時間だけ試し焼きし、
 初期点で早く捨てていたのか、交差の置き方自体が弱いのかを分ける。
+同じ公式入力100件で、列挙だけを20,000訪問上限・壁時計打ち切りなしで調べると、
+パラメータ9では平均32.9本、10では平均35.1本あり、掲載回数で重みづけした
+観測語の81.82%／88.49%を候補閉路の和集合が含んだ。同時に配置できる
+保証はなく、盤面の得点ではない。この差から、少数の閉路を貪欲に置く
+だけでなく、複数の交点で行・列の相対位置をまとめて絞る案を検討する。
 
 ## 再現
 
@@ -76,11 +84,21 @@ g++ -std=c++23 -O3 examples/search/ahc004_genome_sa.cpp -o "$W/original"
 g++ -std=c++23 -O3 problems/ahc004/main.cpp -o "$W/incumbent"
 g++ -std=c++23 -O3 -DAHC004_EXACT_PLACEMENT problems/ahc004/main.cpp -o "$W/rerank"
 g++ -std=c++23 -O3 -DAHC004_FAST_PLACEMENT problems/ahc004/main.cpp -o "$W/fast"
+g++ -std=c++23 -O3 -DAHC004_FAST_PLACEMENT -DAHC004_EXACT_PLACEMENT problems/ahc004/main.cpp -o "$W/fast_rerank"
 g++ -std=c++23 -DAHC004_FAST_PLACEMENT -DAHC004_EXACT_PLACEMENT tests/ahc004_line_cycle_test.cpp -o "$W/differential"
 "$W/differential"
 python3 scripts/bundle.py problems/ahc004/main.cpp -o "$W/submission.cpp"
 g++ -std=c++23 "$W/submission.cpp" -o "$W/submission"
 taskset -c "${CPU:-6}" python3 problems/ahc004/benchmark.py "$IN" "$W/base" --vis "$VIS" --entry "original=$W/original" --entry "incumbent=$W/incumbent"
-taskset -c "${CPU:-6}" python3 problems/ahc004/benchmark.py "$IN" "$W/candidates" --vis "$VIS" --entry "rerank=$W/rerank" --entry "fast=$W/fast"
+taskset -c "${CPU:-6}" python3 problems/ahc004/benchmark.py "$IN" "$W/candidates" --vis "$VIS" --entry "rerank=$W/rerank" --entry "fast=$W/fast" --entry "fast_rerank=$W/fast_rerank"
 python3 "$E/summarize.py" "$IN" "$W/base/results.csv" "$W/candidates/results.csv"
+```
+
+候補閉路の診断だけを再現する場合、`CYCLE` は観測閉路実験のチェックアウト先。
+CSV列はファイル名、長さパラメータ、入力語数、候補数、全候補・上位20本・
+上位30本の語被覆数、訪問上限到達の順。
+
+```sh
+g++ -std=c++23 -O3 -I "$CYCLE/problems/ahc004" "$E/cycle-bank-diagnostic.cpp" -o "$W/bank"
+"$W/bank" "$IN"/*.txt > "$W/cycle-bank-diagnostic.csv"
 ```
