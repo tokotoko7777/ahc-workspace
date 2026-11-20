@@ -60,3 +60,40 @@ python "$p/benchmark.py" /path/to/gen /path/to/vis "$d/near" "$d/spread" "$d/res
 g++ -std=c++23 -O3 tests/incremental_manhattan_distance_test.cpp -o "$d/test"
 "$d/test"
 ```
+
+## Follow-up: first-placement-conditioned forecast
+
+Both arms preserve the same original fallback, then evaluate the same
+eight long-translation walks with the same acceptance/tie rules. For each
+first action and each of its three second actions, the new arm evaluates
+the second action's event improvement against the exact minimum of
+the current distance field and distance from the first action's ward.
+This avoids double credit where both actions reach the same near-future
+attack. The unconditioned control uses the same probes and horizon.
+
+| Fresh cases | Approx. danger ↓ | Conditional danger ↓ | Conditional win / tie / loss |
+|---|---:|---:|---:|
+| Dev (24) | 351,711.79 | 350,302.46 | 16 / 0 / 8 |
+| Holdout (24) | 351,640.50 | 351,747.54 | 12 / 0 / 12 |
+
+Holdout mean score 2,843,945 vs 2,843,117, median danger saving −72 and
+slightly lower unique coverage for conditional. Both medians .033 s.
+The gain does not generalize; retain the prior default, alternative opt-in.
+All 96 legal and exact official/independent; max wall .062479 s.
+[Logs](benchmark-marginal-results.csv). No historical case use.
+
+Next replace per-turn greedy with periodic finite-horizon route patches:
+freeze the same translations, mutate a short action window while forcing
+the same endpoint (permuting the same multiset of translations), and
+rescore earliest-placement changes for only nearby future event cells.
+Compare against equal-work independent legal rollouts.
+
+```sh
+p=problems/ahc070
+d=$(mktemp -d)
+for mode in 0 1; do
+  g++ -std=c++23 -O3 -DAHC070_CONDITIONAL=$mode "$p/main.cpp" -o "$d/arm$mode"
+done
+python "$p/benchmark_marginal.py" /path/to/gen /path/to/vis \
+  "$d/arm0" "$d/arm1" "$d/results.csv"
+```
