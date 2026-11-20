@@ -2014,3 +2014,24 @@ sort(points.begin(), points.end(), [](const Point& a, const Point& b) {
 
 `bits=10` なら各座標は `0..1023` です。厳密な最近傍順ではありませんが、空間的に
 まとまったcluster作成、query順、cache localityの改善候補を1行のkeyで作れます。
+
+## 周期付き部分パターンの併合
+
+ヘッダ: [circular-pattern-components.hpp](../library/circular-pattern-components.hpp)
+
+同じ周期を持つ部分パターンを、相対開始位置の制約で一つの成分へ併合します。
+周期外は折り返し、`.` だけを未知として扱います。文字に矛盾する併合は
+実行しません。位置関係は [WeightedDsu](../library/weighted-dsu.hpp) で管理します。
+
+```cpp
+CircularPatternComponents components(5, {"BCD", "DE", "B."});
+bool compatible = components.join(0, 1, 2);  // BCD と DE を D で接続
+int origin = components.offset(1);          // 成分の座標系での開始位置
+const auto& layout = components.pattern(1); // 例: "BCDE."
+```
+
+同じ成分内の再指定は、相対位置が周期を法として一致するときだけ成功します。
+`pattern(i)` は成分の代表元の座標系で返るので、個別の開始位置には
+`offset(i)` を使います。成功した併合の後に再取得してください。
+[AHC004の初期解生成](../problems/ahc004/main.cpp)、
+[隠し周期に基づくランダム照合テスト](../tests/circular_pattern_components_test.cpp)。
