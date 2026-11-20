@@ -2014,3 +2014,20 @@ sort(points.begin(), points.end(), [](const Point& a, const Point& b) {
 
 `bits=10` なら各座標は `0..1023` です。厳密な最近傍順ではありませんが、空間的に
 まとまったcluster作成、query順、cache localityの改善候補を1行のkeyで作れます。
+
+## Markov Pattern Probability
+
+[ヘッダ](../library/markov-pattern-probability.hpp)・[全履歴列挙テスト](../tests/markov_pattern_probability_test.cpp)。
+
+ラベル付き有限マルコフ鎖で、長さLの生成列に指定パターンが一度でも出る
+確率を返します。初期状態の文字から出力します。遷移確率を行優先で渡します。
+初出現する辺を除いた部分一致オートマトンを行列累乗するため、
+生成長Lが大きくても計算できます。数値演算にはdoubleを使います。
+
+```cpp
+double hit = markov_pattern_probability("ab", {0.5, 0.5, 0.0, 1.0}, 0, 2, "ab");
+// hit = 0.5
+```
+
+[AHC047](../problems/ahc047/main.cpp)で、近似探索の採択候補を厳密な
+有限長モデルで認定するのに使います。
