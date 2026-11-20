@@ -2014,3 +2014,22 @@ sort(points.begin(), points.end(), [](const Point& a, const Point& b) {
 
 `bits=10` なら各座標は `0..1023` です。厳密な最近傍順ではありませんが、空間的に
 まとまったcluster作成、query順、cache localityの改善候補を1行のkeyで作れます。
+
+## Unit lexicographic BFS
+
+ヘッダ: [`unit-lexicographic-bfs.hpp`](../library/unit-lexicographic-bfs.hpp)
+
+辺数を最小化し、その同点内で辺の第2コストを最小化する BFS。
+第1コストは全辺1、第2コストは非負整数です。
+
+```cpp
+UnitLexicographicBfs bfs(graph.size());
+bfs.run(graph, source);
+if (bfs.length[goal] >= 0) {
+    auto moves = bfs.edges_to(goal); // 各探索頂点の隣接配列における辺番号
+}
+```
+
+各層内の更新が確定してから次層を処理するので O(V+E)。
+[AHC066のマクロ付き経路](../problems/ahc066/main.cpp) と
+[辞書順Dijkstraとの比較テスト](../tests/unit_lexicographic_bfs_test.cpp)。
