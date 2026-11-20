@@ -9,9 +9,9 @@ mkdir -p "$out"
 exec 9>"$out/experiment.lock"
 flock -n 9
 g++ -std=c++23 -O3 -DAHC036_SINGLETON problems/ahc036/main.cpp -o "$out/baseline"
-g++ -std=c++23 -O3 problems/ahc036/main.cpp -o "$out/blocks"
+g++ -std=c++23 -O3 -DAHC036_NO_WINDOW_ROUTE problems/ahc036/main.cpp -o "$out/blocks"
 python3 scripts/bundle.py problems/ahc036/main.cpp -o "$out/submission.cpp"
-g++ -std=c++23 -O3 "$out/submission.cpp" -o "$out/bundled"
+g++ -std=c++23 -O3 -DAHC036_NO_WINDOW_ROUTE "$out/submission.cpp" -o "$out/bundled"
 python3 problems/ahc036/replay_test.py
 g++ -std=c++23 -O3 tests/greedy_path_forest_test.cpp -o "$out/path-test"
 "$out/path-test"
