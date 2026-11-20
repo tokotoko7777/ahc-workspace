@@ -27,4 +27,22 @@ inline Reduction expected_reduction(int n, std::span<const double> covariance,
     }
     return {signal, squared / (noise_variance + signal)};
 }
+// Sparse linear target coefficients can be signed (e.g. one route minus
+// another). Given y = feature^T theta + noise, return how much one
+// observation reduces Var(target^T theta). No dense matrix update is needed.
+inline double target_variance_drop(int n, std::span<const double> covariance,
+                                   std::span<const std::pair<int,double>> feature,
+                                   std::span<const std::pair<int,double>> target,
+                                   double noise_variance) {
+    auto dot_row = [&](int i) {
+        double value = 0.0;
+        for (auto [j, x] : feature) value += covariance[i * n + j] * x;
+        return value;
+    };
+    double variance = noise_variance, cross = 0.0;
+    for (auto [i, x] : feature) variance += x * dot_row(i);
+    for (auto [i, d] : target) cross += d * dot_row(i);
+    return cross * cross / variance;
+}
+
 }

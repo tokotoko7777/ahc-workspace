@@ -2022,7 +2022,12 @@ sort(points.begin(), points.end(), [](const Point& a, const Point& b) {
 線形ガウスモデルでの事後共分散のトレース減少
 `||C x||² / (R + x^T C x)` を計算します。特徴は添字が重複しない
 非ゼロ係数列、行列は行優先の対称半正定値、雑音分散は正。
-計算量は行列の次元と特徴の非ゼロ数の積です。C++20 以降の
+トレース減少の計算量は行列の次元と特徴の非ゼロ数の積です。
+特定の疎な線形量 `d^T θ` を改善したい場合は `target_variance_drop`
+で `(d^T C x)^2 / (R + x^T C x)` を計算できます。例えば `d` に
+二つの経路の特徴回数の差（負の係数も可）を渡すと、経路長の差の分散減少を
+直接得られます。計算量は `nnz(x) * (nnz(x) + nnz(d))` です。
+C++20 以降の
 `std::span` を使用します。
 
 [最小使用例](../examples/gaussian_linear_information_usage.cpp)、

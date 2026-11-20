@@ -12,7 +12,7 @@
 #include <string>
 #include <utility>
 #include <vector>
-#ifdef AHC_PROBE_DESIGN
+#if defined(AHC_PROBE_DESIGN) || defined(AHC_TARGET_PROBE)
 #include "../../library/gaussian-linear-information.hpp"
 #endif
 
@@ -275,7 +275,32 @@ struct GaussianModel {
 
     double cost(int edge) const { return planning_cost[feature[edge]]; }
 
-#ifdef AHC_PROBE_DESIGN
+#if defined(AHC_PROBE_DESIGN) || defined(AHC_TARGET_PROBE)
+#ifdef AHC_TARGET_PROBE
+    double decision_value(const std::vector<int>& observed, const std::vector<int>& compare_a,
+                          const std::vector<int>& compare_b, double predicted_gap) const {
+        std::vector<int> obs(size), diff(size);
+        for (int e : observed) ++obs[feature[e]];
+        for (int e : compare_a) ++diff[feature[e]];
+        for (int e : compare_b) --diff[feature[e]];
+        std::vector<std::pair<int,double>> x, d;
+        double prediction = 0.0;
+        for (int i = 0; i < size; ++i) {
+            if (obs[i]) { x.emplace_back(i, obs[i]); prediction += mean[i] * obs[i]; }
+            if (diff[i]) d.emplace_back(i, diff[i]);
+        }
+        const double noise = std::max(1.0, prediction * prediction / 300.0 + extra_noise * observed.size());
+        const double sd = std::sqrt(gaussian_linear_information::target_variance_drop(size, covariance, x, d, noise));
+        if (sd < 1e-10) return 0.0;
+        // The conditional mean of the gap changes by a zero-mean Gaussian
+        // with variance equal to the variance reduction. Integrate the
+        // positive part beyond the current gap: expected decision improvement.
+        const double z = std::abs(predicted_gap) / sd;
+        if (z > 8.0) return 0.0;
+        return std::max(0.0, sd * std::exp(-0.5 * z * z) * 0.3989422804014327
+                             - std::abs(predicted_gap) * 0.5 * std::erfc(0.7071067811865475 * z));
+    }
+#endif
     std::pair<double,double> experiment(const std::vector<int>& path) const {
         std::vector<int> counts(size);
         std::vector<std::pair<int,double>> active;
@@ -465,10 +490,9 @@ int main(int argc, char **argv) {
             }
         } else for (int edge = 0; edge < EDGES; ++edge) edge_costs.values[edge] = model.cost(edge);
         auto [moves, edges] = grid.route(sr * SIDE + sc, tr * SIDE + tc, edge_costs);
-#ifdef AHC_PROBE_DESIGN
-        // On early turns, compare the existing route, an exploit-only route,
-        // and a more exploratory route. Information uses the noise along the
-        // entire selected path, not independent per-edge uncertainty bonuses.
+#if defined(AHC_PROBE_DESIGN) || defined(AHC_TARGET_PROBE)
+        // Compare the incumbent, a mean-cost route, and a more exploratory
+        // one. Score the information carried by each full path observation.
         if (turn < 140 && turn % 2 == 0 && turn >= straight_start) {
             const double p = mixture
                 ? (locked ? double(locked == 1) : 1.0 / (1.0 + std::exp(-model_log_odds)))
@@ -492,16 +516,40 @@ int main(int argc, char **argv) {
                 grid.route(sr * SIDE + sc, tr * SIDE + tc, exploit),
                 grid.route(sr * SIDE + sc, tr * SIDE + tc, explore)};
             std::array<double,3> predictions{}, gains{};
-            for (int i = 0; i < 3; ++i) {
+            for (int i = 0; i < 3; ++i)
                 for (int edge : routes[i].second) predictions[i] += exploit.values[edge];
+            for (int i = 0; i < 3; ++i) {
                 bool duplicate = false;
                 for (int j = 0; j < i; ++j) if (routes[i].first == routes[j].first) {
                     gains[i] = gains[j]; duplicate = true; break;
                 }
                 if (duplicate) continue;
+#ifdef AHC_TARGET_PROBE
+                int count = 0;
+                for (int j : {0,2}) {
+                    if (routes[j].first == routes[1].first ||
+                        (j == 2 && routes[2].first == routes[0].first)) continue;
+                    double gap = predictions[j] - predictions[1];
+                    ++count;
+                    if (p >= 0.05) gains[i] += p * model.decision_value(
+                        routes[i].second, routes[j].second, routes[1].second, gap);
+                    if (mixture && p <= 0.95) gains[i] += (1 - p) * split_model->decision_value(
+                        routes[i].second, routes[j].second, routes[1].second, gap);
+                }
+                if (count) gains[i] /= count;
+#else
                 if (p >= 0.05) gains[i] += p * model.experiment(routes[i].second).second;
                 if (mixture && p <= 0.95) gains[i] += (1 - p) * split_model->experiment(routes[i].second).second;
+#endif
             }
+#ifdef AHC_TARGET_PROBE
+            int best = 0;
+            if (*std::max_element(gains.begin(), gains.end()) > 1e-3) {
+                const double lambda = 2.0 * (1.0 - turn / 140.0);
+                for (int i = 1; i < 3; ++i)
+                    if (predictions[i] - lambda * gains[i] < predictions[best] - lambda * gains[best]) best = i;
+            }
+#else
             double shortest = *std::min_element(predictions.begin(), predictions.end());
             double max_gain = std::max(1e-18, *std::max_element(gains.begin(), gains.end()));
             int best = 0;
@@ -511,6 +559,7 @@ int main(int argc, char **argv) {
                 double objective = predictions[i] / shortest - lambda * gains[i] / max_gain;
                 if (objective < best_objective) { best_objective = objective; best = i; }
             }
+#endif
             moves = std::move(routes[best].first);
             edges = std::move(routes[best].second);
         }
