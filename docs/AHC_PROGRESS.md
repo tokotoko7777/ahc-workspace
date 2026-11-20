@@ -28,7 +28,7 @@
 | [AHC018](https://atcoder.jp/contests/ahc018/tasks/ahc018_a) | ローカル比較・本番未判定 | [公式順位](https://atcoder.jp/contests/ahc018/standings) 要ログイン。1 位の点数未確認 | 別の未調整 32 件で経路限定試掘／一様の比: 平均 0.9202、25 勝 | 本番公開 3,000 件、5 秒、相対方式 | [問題別ブランチ](https://github.com/tokotoko7777/ahc-workspace/tree/ff72f9a9577cff6a5ce466081ef959cdde836522)、[経路試掘](https://github.com/tokotoko7777/ahc-workspace/tree/0cca8b704bae33b8ad70a32d5db6ae139fb5c054) |
 | [AHC019](https://atcoder.jp/contests/ahc019/tasks/ahc019_a) | 着手・本番未判定 | **1,886,240,066,109**（相対点） | 新規未調整 30 件 30,684,752,148（絶対点・低い方が良い） | 本番公開 2,000 件、6 秒、ケース別基準が必要 | [問題別ブランチ](https://github.com/tokotoko7777/ahc-workspace/tree/7252e85e2d8a5d75038c0680f4ba43b4a43b3f05)、[部分再構築](https://github.com/tokotoko7777/ahc-workspace/tree/79fa2df9de9de4de4d658ea3f374ff983d7e4753) |
 | [AHC020](https://atcoder.jp/contests/ahc020/tasks/ahc020_a) | 着手・本番未判定 | **504,832,157**（絶対点） | 未調整16件 平均1,687,384.19 | 本番 300 件・2 秒、同一ケースの証拠なし | [問題別ブランチ](https://github.com/tokotoko7777/ahc-workspace/tree/96a97144e57022f452ce216eddf9c2d76adc3b32)、[配線費の共同評価](https://github.com/tokotoko7777/ahc-workspace/tree/411425e2f761d00f879c4965b8eee3b9e959e56a) |
-| [AHC021](https://atcoder.jp/contests/ahc021/tasks/ahc021_a) | 着手・本番未判定 | **13,589,420**（絶対点） | 既存ビーム：未調整20件 1,813,745 | 本番150件・2秒、同一ケースの証拠なし | [問題別ブランチ](https://github.com/tokotoko7777/ahc-workspace/tree/9306c3d973e9b622e3a35431363f5f7f6ab64225) |
+| [AHC021](https://atcoder.jp/contests/ahc021/tasks/ahc021_a) | 着手・本番未判定 | **13,589,420**（絶対点） | 交換削除：新規未調整20件 1,814,625 | 本番150件・2秒、同一ケースの証拠なし | [問題別ブランチ](https://github.com/tokotoko7777/ahc-workspace/tree/9306c3d973e9b622e3a35431363f5f7f6ab64225)、[交換削除](https://github.com/tokotoko7777/ahc-workspace/tree/ce5987e9b2769010a4568b3442108f2e02e29909) |
 | [AHC022](https://atcoder.jp/contests/ahc022/tasks/ahc022_a) | 着手・本番未判定 | [公式順位](https://atcoder.jp/contests/ahc022/standings) 要ログイン、1位点未確認 | 開発比較準備中 | 本番3,000件・4秒、相対方式 | 検証中 |
 | AHC023〜074 | 未着手 | — | — | — | — |
 
@@ -325,3 +325,7 @@
 ### AHC022 本番条件
 
 [公式問題文](https://atcoder.jp/contests/ahc022/tasks/ahc022_a)。対話式、最大10,000測定、4秒 / 1,024 MiB。本番3,000件でケース別最高点による相対評価。1位点は公開データから未確認。温度1点の繰り返し測定を基準に、複数方向の温度パターンと、候補が紛らわしい地点に測定を振り分ける方法を試す。
+
+### AHC021 後続の置換を使った不要交換の削除
+
+[追試](https://github.com/tokotoko7777/ahc-workspace/blob/ce5987e9b2769010a4568b3442108f2e02e29909/problems/ahc021/README.md)。同じ既存ビームの出力から、後続の交換により最後に影響する2頂点を特定し、ヒープ条件を維持できる操作だけを削除した。新規dev12件22,341→22,332交換、未調整20件37,088→37,075交換（10件改善、+65点、悪化なし）。64出力の公式点は独立再生と一致し全件完成、最大0.431秒。枝の既定に採用。次は2つの交換を同時に削除する近傍を調べる。
