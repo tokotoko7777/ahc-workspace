@@ -4,6 +4,13 @@
 #define AHC_VARIANT 64
 #endif
 #include <bits/stdc++.h>
+#if (defined(AHC_CUT_SHIFT) && defined(AHC_CUT_SHIFT_HEADROOM)) || \
+    (defined(AHC_FACE_SLIDE) && (defined(AHC_CUT_SHIFT) || defined(AHC_CUT_SHIFT_HEADROOM)))
+#error "Select only one optional polishing experiment"
+#endif
+#if defined(AHC_CUT_SHIFT) || defined(AHC_CUT_SHIFT_HEADROOM)
+#include "../../library/binary-submodular-energy.hpp"
+#endif
 #ifdef AHC_FACE_SLIDE
 #include "../../library/coordinate-face-slide.hpp"
 #endif
@@ -955,6 +962,78 @@ struct Solver {
             <<" face_slide_gain="<<llround((best_value-before)/n*1e9)<<' ';
     }
 #endif
+#if defined(AHC_CUT_SHIFT) || defined(AHC_CUT_SHIFT_HEADROOM)
+    // Joint integer line move. Keep the current left/right ordering of
+    // every pair with positive perpendicular overlap. Bounds preserve anchors.
+    bool cut_shift(int axis,int d) {
+        constexpr long long INF=1LL<<55,SCALE=1000000000000LL;
+        auto lex=[&](int left,int right,int gap,BinarySubmodularEnergy<long long>& e) {
+            if(gap>=abs(d))return;
+            if(d>0)e.imply(left,right,INF);
+            else e.imply(right,left,INF);
+        };
+        BinarySubmodularEnergy<long long> energy(2*n);
+        const int t=axis^1;
+        for(int i=0;i<n;++i) {
+            const int a=state[i].q[axis],b=state[i].q[axis+2];
+            const int point=axis?y[i]:x[i],width=state[i].q[t+2]-state[i].q[t];
+            if(a+d<0||a+d>point)energy.unary(2*i,0,INF);
+            if(b+d>10000||b+d<=point)energy.unary(2*i+1,0,INF);
+            auto neg=[&](int w){return -llround(SCALE*quality(w*width,desired[i]));};
+            const auto same=neg(b-a);
+            // A nonpositive width is infeasible by the point constraints;
+            // a finite overestimate here keeps the pair representable.
+            auto only_left=b-a-d>0?neg(b-a-d):0;
+            auto only_right=b-a+d>0?neg(b-a+d):0;
+            if(only_left+only_right<2*same) {
+                if(only_left>only_right)only_left=2*same-only_right;
+                else only_right=2*same-only_left;
+            }
+            energy.pair(2*i,2*i+1,same,only_right,only_left,same);
+            for(int j=0;j<i;++j) {
+                if(state[i].q[t]>=state[j].q[t+2]||state[j].q[t]>=state[i].q[t+2])continue;
+                const int c=state[j].q[axis],u=state[j].q[axis+2];
+                if(b<=c)lex(2*i+1,2*j,c-b,energy);
+                else if(u<=a)lex(2*j+1,2*i,a-u,energy);
+                else assert(false);
+            }
+        }
+        auto [merit,chosen]=energy.solve();
+        (void)merit;
+        double improvement=0.;
+        for(int i=0;i<n;++i) {
+            Rect r=state[i]; r.q[axis]+=d*chosen[2*i]; r.q[axis+2]+=d*chosen[2*i+1];
+            improvement+=quality(r.area(),desired[i])-quality(state[i].area(),desired[i]);
+            assert(valid(i,r));
+        }
+        if(improvement<=1e-13)return false;
+        for(int i=0;i<n;++i) {
+            state[i].q[axis]+=d*chosen[2*i];state[i].q[axis+2]+=d*chosen[2*i+1];
+        }
+        return true;
+    }
+    void cut_shift_polish(chrono::steady_clock::time_point deadline) {
+        copy(best,best+n,state);
+        const double before=best_value;
+        int moves=0,queries=0;
+        for(int step=1024;step;step/=2) {
+            for(int sweep=0;sweep<2;++sweep) {
+                int previous=moves;
+                for(int t=0;t<4;++t) {
+                    if(chrono::steady_clock::now()>=deadline) goto finish;
+                    moves+=cut_shift(t/2,t%2?step:-step);++queries;
+                }
+                if(moves==previous)break;
+            }
+        }
+        finish:
+        value=0.;for(int i=0;i<n;++i)value+=quality(state[i].area(),desired[i]);
+        remember();
+        cerr<<"cut_shift_moves="<<moves<<" queries="<<queries
+            <<" cut_shift_gain="<<llround((best_value-before)/n*1e9)
+            <<" pre_cut_score="<<llround(before/n*1e9)<<' ';
+    }
+#endif
     void solve(double seconds, int selected_variant) {
 #ifdef AHC_VARIANT
         if(selected_variant!=variant) throw invalid_argument("binary was compiled for a different variant");
@@ -990,6 +1069,9 @@ struct Solver {
         double polish_time=variant==27 ? seconds*.075 : variant==36 ? seconds*.025 : 0;
 #ifdef AHC_FACE_SLIDE
         if(variant==64) polish_time=min(seconds*.05,.14);
+#endif
+#ifdef AHC_CUT_SHIFT
+        if(variant==64) polish_time=min(seconds*.035,.12);
 #endif
         double phase_seconds=(seconds-preliminary-polish_time)/phases;
         for (;; ++iterations) {
@@ -1114,6 +1196,19 @@ struct Solver {
             else if(repair) repaired_change(i,c,temperature);
             else change(i, c, temperature, (variant >= 4 && variant<6) || (variant != 2 && (rng.next()&3) == 0));
         }
+#ifdef AHC_CUT_SHIFT_HEADROOM
+        if(variant==64) {
+            const auto cutoff=start+chrono::duration_cast<chrono::steady_clock::duration>(
+                chrono::duration<double>(min(4.88,seconds+.07)));
+            if(chrono::steady_clock::now()<cutoff) cut_shift_polish(cutoff);
+        } else
+#endif
+#ifdef AHC_CUT_SHIFT
+        if(variant==64 && polish_time>0) {
+            cut_shift_polish(start+chrono::duration_cast<chrono::steady_clock::duration>(
+                chrono::duration<double>(seconds-.008)));
+        } else
+#endif
 #ifdef AHC_FACE_SLIDE
         if(variant==64 && polish_time>0) {
             face_slide_polish(start+chrono::duration_cast<chrono::steady_clock::duration>(

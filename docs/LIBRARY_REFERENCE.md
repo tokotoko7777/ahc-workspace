@@ -2044,3 +2044,27 @@ for (const auto& group : groups) {
 build は二乗走査なので、毎反復ではなく一周ごとに再構築して使います。
 [AHC001の終盤改善](../problems/ahc001/main.cpp)と
 [愚直な衝突判定と照合するテスト](../tests/coordinate_face_slide_test.cpp)。
+
+## 2値サブモジュラエネルギー
+
+ヘッダ: [binary-submodular-energy.hpp](../library/binary-submodular-energy.hpp)
+
+複数の0/1の決定を一括で行い、単項コストと2変数の組み合わせコストの総和を
+最小にします。ペアコストは、同じ選択にした2通りの和が異なる選択にした
+2通りの和以下（b00 + b11 ≤ b01 + b10）である必要があります。最大流を再利用し、
+最小値と一つの割当を返します。タイの割当は保証しません。
+
+```cpp
+BinarySubmodularEnergy<long long> energy(2);
+energy.unary(0, 0, -3);           // 0番を動かす利得は3
+energy.unary(1, 0, 1);            // 1番を動かすコストは1
+energy.pair(0, 1, 0, 2, 2, 0);   // 異なる選択にコスト2
+energy.imply(0, 1, 100);          // 0番だけ動く場合にコスト100
+auto [minimum, move] = energy.solve();  // -2、どちらも動く
+```
+
+整数の符号付き型で、差・ペア和・定数項・必要な容量和をオーバーフロー
+しない範囲で使います。imply は有限ペナルティなので、硬い制約にする場合は
+有限コスト全体の改善幅を超える値を設定します。solve は1回だけ呼びます。
+[AHC001の一括境界移動](../problems/ahc001/main.cpp)と
+[愚直全探索との比較テスト](../tests/binary_submodular_energy_test.cpp)を参照。
