@@ -6,6 +6,10 @@
 #include <vector>
 #include "../../library/calendar-interval-packing.hpp"
 
+#if !defined(AHC023_PHASE_WINDOWS) && !defined(AHC023_CLOSED_WINDOWS) && !defined(AHC023_STATIC_LEAVES)
+#define AHC023_PHASE_WINDOWS
+#endif
+
 struct Crop {int start,end;};
 struct Task {int crop,cell,start;};
 
@@ -60,28 +64,64 @@ int main() {
     std::vector<unsigned char> used(k),empty(t+1);
     std::vector<std::vector<unsigned char>> events(n,empty);
     std::vector<Task> result;
+#ifdef AHC023_PHASE_WINDOWS
+    std::vector<std::vector<unsigned char>> planting(n,empty), harvesting(n,empty);
+    auto assign=[&](int cell,const std::vector<unsigned char>& blackout,auto allowed) {
+        auto plan=pack.best(blackout,[&](int job){return !used[job]&&allowed(job);});
+#else
     auto assign=[&](int cell,const std::vector<unsigned char>& blackout) {
         auto plan=pack.best(blackout,[&](int job){return !used[job];});
+#endif
         for(int job:plan.jobs) {
             used[job]=1;
             result.push_back({job,cell,crops[job].start});
             events[cell][crops[job].start]=1;
             events[cell][crops[job].end]=1;
+#ifdef AHC023_PHASE_WINDOWS
+            planting[cell][crops[job].start]=1;
+            harvesting[cell][crops[job].end]=1;
+#endif
         }
     };
     for(auto it=order.rbegin();it!=order.rend();++it) {
         int cell=*it;
-        if(cell!=root&&children[cell].empty()) assign(cell,empty);
+        if(cell!=root&&children[cell].empty()) {
+#ifdef AHC023_PHASE_WINDOWS
+            assign(cell,empty,[](int){return true;});
+#else
+            assign(cell,empty);
+#endif
+        }
     }
 #ifndef AHC023_STATIC_LEAVES
     for(auto it=order.rbegin();it!=order.rend();++it) {
         int cell=*it;
         if(cell==root||children[cell].empty()) continue;
+#ifdef AHC023_PHASE_WINDOWS
+        for(int child:children[cell]) for(int d=1;d<=t;++d) {
+            planting[cell][d]|=planting[child][d];
+            harvesting[cell][d]|=harvesting[child][d];
+        }
+        std::vector<int> plant_prefix(t+1), harvest_prefix(t+1);
+        for(int d=1;d<=t;++d) {
+            plant_prefix[d]=plant_prefix[d-1]+planting[cell][d];
+            harvest_prefix[d]=harvest_prefix[d-1]+harvesting[cell][d];
+        }
+        // Same-phase ties are schedulable: descendants plant before the
+        // ancestor; the ancestor harvests before descendants. In the opposite
+        // phases the ancestor still has a crop, so those are blocked.
+        assign(cell,empty,[&](int job) {
+            const auto [s,e]=crops[job];
+            return plant_prefix[e]==plant_prefix[s] &&
+                   harvest_prefix[e-1]==harvest_prefix[s-1];
+        });
+#else
         auto descendant=empty;
         for(int child:children[cell]) for(int d=1;d<=t;++d)
             descendant[d]|=events[child][d];
         events[cell]=descendant;
         assign(cell,descendant);
+#endif
     }
 #endif
     std::cout<<result.size()<<'\n';
