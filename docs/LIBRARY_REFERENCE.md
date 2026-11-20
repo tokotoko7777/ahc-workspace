@@ -36,6 +36,21 @@ assert(score.value() == 2);
 上限が0または範囲外のサイズは記録しません。[AHC012の区画スコア](../problems/ahc012/main.cpp)で使用。
 [差分テスト](../tests/capped_size_histogram_test.cpp)で更新と取り消しを全再計算と比較します。
 
+### 共通閾値で全グループを2分する
+
+ヘッダ: [`capped-partition-sweep.hpp`](../library/capped-partition-sweep.hpp)。
+各要素を共通の座標でソートしておき、同じ座標をまとめて移して全候補を評価します。
+既存グループは互いに独立して分け、全グループのサイズ別上限スコアを最大化します。
+
+```cpp
+vector<pair<int,int>> events = {{0,0}, {1,0}}; // (座標, グループ)
+auto best = best_capped_partition_split(events, {2}, {0,2,0});
+assert(best.threshold == 0 && best.value == 2);
+```
+
+入力をソートした後は線形時間です。改善がなければ閾値は空。
+[AHC012の追加切断](../problems/ahc012/target-cut.hpp)・[差分テスト](../tests/capped_partition_sweep_test.cpp)参照。
+
 ## CoverageCounter
 
 ヘッダ: [`coverage-counter.hpp`](../library/coverage-counter.hpp)

@@ -42,3 +42,34 @@ devとholdoutの各8件は別々のSHA-256系列から公式ジェネレータ�
 ### 次の仮説
 
 高得点の2方向格子から、余ったカット枠で欠損サイズをねらう直線を一本ずつ足す。現状の区画のうち過剰供給または10個を超える区画を選び、欠損サイズの点だけを分離できる方向と切断位置を候補化する。全盤面での副作用は整数符号列で厳密に集計し、一区画の改善をほかの区画の損失が上回らない場合だけ適用する。満点に届かないケースで、どのサイズの欠損をどの過剰区画から補えたかを記録する。
+
+## 追試: 余った枠に一本だけ追加
+
+`-DAHC012_TARGET_CUT_DIAGNOSTIC` では、2方向SAの2,710ms予算をそのまま使って解を凍結する。追加枠があり、未配布の参加者がいる場合にだけ、元の区画をまとめて分割する直線を探す。法線 `(a,b)` ごとに整数の射影 `a*x+b*y` をソートし、同じ射影値を持つ点をまとめて移動する。左右それぞれで区画のサイズ頻度を差分更新するので、目当ての区画だけでなく他区画への損失も含め、全オフセットを厳密に比較できる。
+
+凍結解、水平・垂直の2方向だけで最善の追加、斜めも含めた24方向で最善の追加の3つを**同じ凍結解**から比較する。得点が厳密に上がらない場合は切らない。カットの端点は `a*x+b*y=c` と `a*x+b*y=c+1` 上で、接線方向にケーキより十分遠い整数点を使う。円内の符号は整数射影の閾値と一致する。探索は開始2,880msで打ち切る（法線を始める前に時計を確認）。
+
+| 分割 | 件数 | 凍結平均 | 軸方向追加平均 | 全方向追加平均 | 全方向の勝 / 分 / 負（対凍結） |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| dev | 8 | 974,401.000 | 974,664.625 | 974,920.250 | 2 / 6 / 0 |
+| holdout | 8 | 978,711.750 | 978,711.750 | 978,711.750 | 0 / 8 / 0 |
+
+[dev](target-dev-results.csv)・[holdout](target-holdout-results.csv)とも初回とは別の公式生成seed。devで2件だけ1人増え、うち1件は斜めでなければ改善しなかった。holdoutは全件・全24方向で改善なし。全48出力が合法で公式visと独立整数採点に一致し、最長2.727876秒。追加探索は任意フラグ `-DAHC012_TARGET_CUT` のまま、既定の解法は変更しない。
+
+[共通閾値の上限付き分割スイープ](../../library/capped-partition-sweep.hpp)をライブラリに分けた。区画ごとに両側の個数を全再計算する[800ケースの差分テスト](../../tests/capped_partition_sweep_test.cpp)と、整数外積の符号を確認する[幾何テスト](../../tests/ahc012_extra_cut_geometry_test.cpp)を追加した。
+
+上の再現手順で `work` と `tools_dir` を設定し、以下を実行する。
+
+```sh
+python scripts/bundle.py problems/ahc012/main.cpp -o "$work/submission.cpp"
+g++ -std=c++23 -O3 -DAHC012_TARGET_CUT_DIAGNOSTIC "$work/submission.cpp" -o "$work/target"
+for split in dev holdout; do
+  python problems/ahc012/target-benchmark.py "$split" "$tools_dir/target/release/gen" "$tools_dir/target/release/vis" "$work/target" "$work/target-$split.csv"
+done
+for test in capped_partition_sweep ahc012_extra_cut_geometry; do
+  g++ -std=c++23 -O3 "tests/${test}_test.cpp" -o "$work/test"
+  "$work/test"
+done
+```
+
+次は既存の直線を1本外し、その直線の符号を除いた区画IDで同じ分割スイープを使う。追加だけでは小さい区画を統合できないが、置換なら両側の片を結合してから別角度で再分割できる。薄い斜めを候補に含め、不足サイズが複数同時に改善するかを確認する。

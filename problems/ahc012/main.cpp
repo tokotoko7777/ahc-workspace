@@ -1,5 +1,8 @@
 #include <bits/stdc++.h>
 #include "../../library/capped-size-histogram.hpp"
+#if defined(AHC012_TARGET_CUT_DIAGNOSTIC) || defined(AHC012_TARGET_CUT)
+#include "../../library/capped-partition-sweep.hpp"
+#endif
 using namespace std;
 
 #ifndef AHC012_DIAGONAL
@@ -139,6 +142,9 @@ Solution solve(const Input& in,Clock::time_point stop){
   }
   return best;
 }
+#if defined(AHC012_TARGET_CUT_DIAGNOSTIC) || defined(AHC012_TARGET_CUT)
+#include "target-cut.hpp"
+#endif
 } // namespace
 
 #ifndef AHC012_NO_MAIN
@@ -149,16 +155,37 @@ int main(){
   Input in{};
   in.read();
   auto solution=solve(in,start+chrono::milliseconds(AHC012_MS));
-  auto& c=solution.cuts;
-  cout<<c[0].size()+c[1].size()+c[2].size()<<'\n';
+  const auto& c=solution.cuts;
+  vector<array<int,4>> lines;
   constexpr int B=1000000;
   // y (or x) lies strictly between -B and B in the cake. Thus the cut
   // lands between consecutive integral projections everywhere relevant.
-  for(int t:c[0])cout<<t<<' '<<-B<<' '<<t+1<<' '<<B<<'\n';
-  for(int t:c[1])cout<<-B<<' '<<t<<' '<<B<<' '<<t+1<<'\n';
-  for(int t:c[2])cout<<t+B<<' '<<-B<<' '<<t+1-B<<' '<<B<<'\n';
-#ifdef AHC012_STATS
+  for(int t:c[0])lines.push_back({t,-B,t+1,B});
+  for(int t:c[1])lines.push_back({-B,t,B,t+1});
+  for(int t:c[2])lines.push_back({t+B,-B,t+1-B,B});
+#if defined(AHC012_TARGET_CUT_DIAGNOSTIC) || defined(AHC012_TARGET_CUT)
+  auto compared=target_cut(in,solution,start+chrono::milliseconds(2880));
+#ifdef AHC012_TARGET_CUT_DIAGNOSTIC
+  cerr<<"frozen="<<solution.value<<" axis="<<compared.axis_value
+      <<" all="<<compared.all_value<<" normals="<<compared.normals<<'\n';
+  auto log_extra=[&](optional<TargetCut> cut){
+    if(!cut){cerr<<"-\n";return;}
+    auto l=cut->endpoints();
+    cerr<<l[0]<<' '<<l[1]<<' '<<l[2]<<' '<<l[3]<<'\n';
+  };
+  log_extra(compared.axis);
+  log_extra(compared.all);
+#endif
+  if(compared.all)lines.push_back(compared.all->endpoints());
+#endif
+  cout<<lines.size()<<'\n';
+  for(auto [a,b,p,q]:lines)cout<<a<<' '<<b<<' '<<p<<' '<<q<<'\n';
+#if defined(AHC012_STATS) && !defined(AHC012_TARGET_CUT_DIAGNOSTIC)
+#ifdef AHC012_TARGET_CUT
+  cerr<<"served="<<compared.all_value<<" diagonal="<<c[2].size()<<'\n';
+#else
   cerr<<"served="<<solution.value<<" diagonal="<<c[2].size()<<'\n';
+#endif
 #endif
 }
 #endif
