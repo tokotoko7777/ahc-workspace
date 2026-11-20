@@ -2014,3 +2014,23 @@ sort(points.begin(), points.end(), [](const Point& a, const Point& b) {
 
 `bits=10` なら各座標は `0..1023` です。厳密な最近傍順ではありませんが、空間的に
 まとまったcluster作成、query順、cache localityの改善候補を1行のkeyで作れます。
+
+## 二部グラフの辺被覆カウンタ
+
+ヘッダ: [bipartite-edge-cover-counter.hpp](../library/bipartite-edge-cover-counter.hpp)
+
+頂点ごとの活動数を管理します。活動数が正の頂点の端に付く辺を全て被覆済み
+として扱い、両端の活動数が0の辺だけを未被覆として数えます。
+
+```cpp
+BipartiteEdgeCoverCounter counter(2, 2, {{0,0}, {0,1}, {1,1}});
+counter.add(0, 0, 1);  // 左頂点0を活動状態にする
+counter.add(1, 1, 1);  // 右頂点1を活動状態にする
+bool covered = counter.all_covered();  // true
+counter.add(1, 1, -1); // 巻き戻す。左1－右1だけ未被覆
+```
+
+更新で活動数が0をまたぐときだけ隣接先を走査します。状態を非負に保ちます。
+多重辺は別々に数えます。
+[AHC005の路線区間の置換](../problems/ahc005/route-splice.hpp)、
+[愚直比較と巻き戻しテスト](../tests/bipartite_edge_cover_counter_test.cpp)。
