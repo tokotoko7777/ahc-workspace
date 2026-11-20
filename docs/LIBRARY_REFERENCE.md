@@ -2014,3 +2014,20 @@ sort(points.begin(), points.end(), [](const Point& a, const Point& b) {
 
 `bits=10` なら各座標は `0..1023` です。厳密な最近傍順ではありませんが、空間的に
 まとまったcluster作成、query順、cache localityの改善候補を1行のkeyで作れます。
+
+## Maximum-weight noncrossing matching
+
+ヘッダ: [`noncrossing-matching.hpp`](../library/noncrossing-matching.hpp)
+
+左右の端点が両方とも厳密な昇順になる辺集合を、重みの合計が最大になるように選びます。
+空集合も可。返り値は元の辺配列のインデックスです。
+
+```cpp
+struct Edge { int left, right, weight; };
+vector<Edge> edges = {{0, 1, 4}, {1, 0, 3}, {2, 2, 7}};
+auto selected = maximum_weight_noncrossing_matching(edges); // {0, 2}
+```
+
+辺数 E に対して O(E²) 時間、O(E) 追加メモリなので小さい ready-set 向け。
+[AHC064の同時搬送](../problems/ahc064/main.cpp) と
+[部分集合全列挙との比較テスト](../tests/noncrossing_matching_test.cpp)。
