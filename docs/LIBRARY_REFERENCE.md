@@ -2014,3 +2014,17 @@ sort(points.begin(), points.end(), [](const Point& a, const Point& b) {
 
 `bits=10` なら各座標は `0..1023` です。厳密な最近傍順ではありませんが、空間的に
 まとまったcluster作成、query順、cache localityの改善候補を1行のkeyで作れます。
+
+## Cube rotations
+
+ヘッダ: [`cube-rotations.hpp`](../library/cube-rotations.hpp)
+
+軸に平行な整数格子を保つ立方体の **24 通りの正回転**を
+`cube_rotations::all` から列挙できます。各 `Rotation` に
+`Point = array<int,3>` を渡すと、原点まわりで回した座標や差ベクトルを
+得ます。鏡映は含みません。任意の中心の回転や位置合わせは呼び出し側で
+平行移動を加えます。C++20 以降で定数式の回転表を使用します。
+
+[使用例](../examples/cube_rotations_usage.cpp)、
+[行列式・閉包性と鏡像のテスト](../tests/cube_rotations_test.cpp)、
+[AHC019 での方向写像](../problems/ahc019/main.cpp)。
