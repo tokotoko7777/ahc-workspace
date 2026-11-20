@@ -2014,3 +2014,22 @@ sort(points.begin(), points.end(), [](const Point& a, const Point& b) {
 
 `bits=10` なら各座標は `0..1023` です。厳密な最近傍順ではありませんが、空間的に
 まとまったcluster作成、query順、cache localityの改善候補を1行のkeyで作れます。
+
+## Undirected Bridges
+
+ヘッダ: [`undirected-bridges.hpp`](../library/undirected-bridges.hpp) /
+実例: [AHC067 の扉区間](../problems/ahc067/main.cpp) /
+[辺を除いた連結性との突合](../tests/undirected_bridges_test.cpp)。
+
+無向グラフで 1 本外すと連結成分数が増える辺（橋）を、入力の辺番号で返します。
+同じ二頂点間の平行辺や自己ループがあっても、親辺を頂点でなく番号で
+追跡するため正しく扱います。非連結グラフにも適用できます。
+
+```cpp
+std::vector<std::pair<int,int>> edges{{0,1},{0,1},{1,2}};
+auto bridge = undirected_bridges(3, edges);
+// bridge == {false, false, true}
+```
+
+頂点と辺の数の和に比例します。再帰 DFS のため、極めて深いグラフでは
+コールスタック上限に注意してください。
