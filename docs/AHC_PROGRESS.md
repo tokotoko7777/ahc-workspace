@@ -42,9 +42,10 @@
 | [AHC032](https://atcoder.jp/contests/ahc032/tasks/ahc032_a) | 着手・本番未判定 | **11,854,207,127,046**（絶対点） | 未調整16件 平均79,106,180,582.44 | 本番150件、同一ケースの証拠なし | [問題別ブランチ](https://github.com/tokotoko7777/ahc-workspace/tree/0f8a8d2946ce1c6691db7ce95eee5ffa8a51006e)、[方向の追試](https://github.com/tokotoko7777/ahc-workspace/tree/890cee4f0a8b60a076d3c98d6d8d6bffed43099) |
 | [AHC033](https://atcoder.jp/contests/ahc033/tasks/ahc033_a) | 着手・本番未判定 | bowwowforeach、得点未確認 | 新規未調整24件 合計6,867ターン | 本番2,000件、相対方式 | [問題別ブランチ](https://github.com/tokotoko7777/ahc-workspace/tree/131ef411f491cc1b6ed79c905fc98a8d52ffad5d)、[先行搬出](https://github.com/tokotoko7777/ahc-workspace/tree/81b3ab227a32818d6d4350351c5d4db5c9602b0f) |
 | [AHC034](https://atcoder.jp/contests/ahc034/tasks/ahc034_a) | 着手・本番未判定 | **9,486,350,384**（絶対点） | 積み降ろし再配分：新規未調整24件 平均35,727,578.04 | 本番150件・2秒、同一ケースの証拠なし | [問題別ブランチ](https://github.com/tokotoko7777/ahc-workspace/tree/6c2ea91bb86ef24c6c84cd99bf76df6355c16ce6)、[積み降ろし再配分](https://github.com/tokotoko7777/ahc-workspace/tree/e2c29731322790e744a17033d3fa937c450cede7) |
-| [AHC035](https://atcoder.jp/contests/ahc035/tasks/ahc035_a) | 着手・本番未判定 | **274,272,291**（絶対点） | 未調整36件 平均857,950.08 | 本番300件・2秒、同一ケースの証拠なし | [問題別ブランチ](https://github.com/tokotoko7777/ahc-workspace/tree/5e9d58aed81aae5dbdbe8563408ea91a0fbfdf57) |
-| [AHC036](https://atcoder.jp/contests/ahc036/tasks/ahc036_a) | 着手・本番未判定 | **1,872,786,019,642**（相対点） | 開発比較中 | 本番2,000件・3秒、基準とseed列を照合済み | 検証中 |
-| AHC037〜074 | 未着手 | — | — | — | — |
+| [AHC035](https://atcoder.jp/contests/ahc035/tasks/ahc035_a) | 着手・本番未判定 | **274,272,291**（絶対点） | 未調整36件 平均857,950.08 | 本番300件・2秒、同一ケースの証拠なし | [問題別ブランチ](https://github.com/tokotoko7777/ahc-workspace/tree/5e9d58aed81aae5dbdbe8563408ea91a0fbfdf57)、[終盤分布の追試](https://github.com/tokotoko7777/ahc-workspace/tree/503ea8770af2217fea4f8b9f3a866c144949ac60) |
+| [AHC036](https://atcoder.jp/contests/ahc036/tasks/ahc036_a) | 着手・本番未判定 | **1,872,786,019,642**（相対点） | 未調整24件 信号更新47,549回 | 本番2,000件・3秒、基準とseed列を照合済み | [問題別ブランチ](https://github.com/tokotoko7777/ahc-workspace/tree/fb26d23b729e0e30e19da4d6181bd0421588196e) |
+| [AHC037](https://atcoder.jp/contests/ahc037/tasks/ahc037_a) | 着手・本番未判定 | 確認中 | 開発比較準備中 | 確認中 | 検証中 |
+| AHC038〜074 | 未着手 | — | — | — | — |
 
 ### AHC001 の次の仮説
 
@@ -541,3 +542,11 @@
 ### AHC036 本番条件
 
 [公式問題文](https://atcoder.jp/contests/ahc036/tasks/ahc036_a)。3秒 / 1,024 MiB。移動・信号操作合わせて100,000以下。信号操作の回数を最小化し、本番2,000件のケース別最低値で相対化する。[公式採点CSV](https://img.atcoder.jp/ahc_standings/ahc036/result.csv)（SHA-256 `da6d10f8d1339445009649d4e746709ca24751329a3434eb3ed645043174dccb`）1094人×2,000件を再集計して1位1,872,786,019,642。上位3人の順位と公式seed列を照合。最短路に沿って1都市だけ更新する基準に対し、通り道に沿う都市を配列上に連続して並べ、複数都市の信号をまとめて更新する案を試す。
+
+### AHC035 最終世代の最大得点分布
+
+[追試](https://github.com/tokotoko7777/ahc-workspace/tree/503ea8770af2217fea4f8b9f3a866c144949ac60)。最初9世代を完全に揃え、最後の代理評価、回数を増やした代理評価、各子の合計分布から最大の期待値を取る案を比較。新規未調整36件の平均は867,204.75、866,434.08、866,918.64。厳密評価は既定に対して12勝14分10敗だが平均−286、中央値0。216出力で公式と独立再生が一致、最大0.210698秒。ライブラリは残し問題の既定は維持。次は最終世代の評価だけでなく、最終配置で組み合わせやすい特徴を一つ前の世代へ残す。
+
+### AHC036 都市並びを工夫して信号をまとめて更新
+
+[検証と実装](https://github.com/tokotoko7777/ahc-workspace/tree/fb26d23b729e0e30e19da4d6181bd0421588196e)。同じ最短移動列を通りつつ、よく続けて訪問する都市を配列に連続して置いて、一度の操作で複数都市の信号を更新する。dev12件65,381→23,451、未調整24件132,076→47,549（−64.0%、すべて改善）。未調整の移動数175,121は同じ。72出力の公式・独立・C++内検証が一致、最大約0.037秒、最大合計操作11,289。問題別既定に採用。次は配列を同じにしても、既に更新済みの都市を伝う経路や更新区間を合わせて選ぶ。
