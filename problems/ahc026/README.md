@@ -35,3 +35,42 @@ g++ -std=c++23 -O3 tests/ahc026_stack_map_test.cpp -o "$work/test"
 ```
 
 dev/holdoutは独立なSHA-256系列を公式生成器で変換し16件ずつ。次は既存解の途中状態に2区間移動を差し込み、その後を既存方策で最後まで計算して、局所評価に頼らず実消費が下がる場合だけ採る。保存した元解との比較で、どの段・どの形の分割が有効か確認する。
+
+### Frozen incumbent snapshot edit (optional)
+
+The unchanged inherited rollout produces an incumbent and exact state before
+each ascending pop. Both arms use the same first 24 states with at least two
+blocking boxes, nine distinct first-macro alternatives per state, and the
+same four completion policies (fixed ranges 0, 2, 6, 15). The whole arm sends
+the suffix to each destination. The split arm ranks the possible two-chunk,
+distinct-destination transfers by a blocking-risk heuristic and checks nine.
+A candidate replaces the incumbent only if the full legal completion costs
+less. This judges literal energy and completion, not a beam heuristic; the
+fixed-range tail is **not** the more expensive adaptive inherited tail.
+
+| 20 new cases each | Inherited | Whole | Split | Split W/T/L vs whole |
+|---|---:|---:|---:|---:|
+| Development | 9348.90 | 9349.65 | 9348.90 | 0 / 19 / 1 |
+| Untouched holdout | 9320.65 | 9320.65 | 9320.65 | 0 / 20 / 0 |
+
+All 80 answers matched independent replay and the official visualizer, each
+arm actually used 864 completions per case, and worst measured wall time was
+0.449119 s. No default change. A single whole edit saved 15 energy on one
+development case, while neither arm improved any holdout. Those exact scores
+show the restricted completion has no useful advantage, not that two-chunk
+moves are inherently worse. For a later experiment use a handful of *late*
+snapshots and rerun the same adaptive inherited rollout after each macro,
+with the same number of completions for the control. Test a new split rather
+than retune these seeds. No final official cases were used.
+
+From the repository root (`ATCODER_TOOLS` is the extracted official tools'
+`target/release` directory; choose an available isolated CPU if pinning):
+
+    g++ -std=c++23 -O3 problems/ahc026/snapshot.cpp -o /tmp/ahc026-snapshot
+    python problems/ahc026/snapshot-benchmark.py "$ATCODER_TOOLS/gen" "$ATCODER_TOOLS/vis" /tmp/ahc026-snapshot /tmp/ahc026-snapshot.csv
+    python scripts/bundle.py problems/ahc026/snapshot.cpp -o /tmp/ahc026-snapshot-single.cpp
+    g++ -std=c++23 -O3 /tmp/ahc026-snapshot-single.cpp -o /tmp/ahc026-snapshot-single
+
+The existing example is included without edits, including its attribution.
+GCC may warn that the renamed, intentionally unused original entry lacks an
+explicit return; the actual experimental entry and runner are unaffected.
