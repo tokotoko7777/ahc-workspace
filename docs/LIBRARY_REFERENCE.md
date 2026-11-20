@@ -2014,3 +2014,23 @@ sort(points.begin(), points.end(), [](const Point& a, const Point& b) {
 
 `bits=10` なら各座標は `0..1023` です。厳密な最近傍順ではありませんが、空間的に
 まとまったcluster作成、query順、cache localityの改善候補を1行のkeyで作れます。
+
+## Scattered Cycle Rotation
+
+ヘッダ: [`scattered-cycle-rotation.hpp`](../library/scattered-cycle-rotation.hpp) /
+実例: [AHC065 のコンベア](../problems/ahc065/main.cpp) /
+[同時コピー方式との比較テスト](../tests/scattered_cycle_rotation_test.cpp)。
+
+離れた位置の値を、指定した巡回順に 1 マス回します。
+`direction=1` なら `cycle[i]` の旧値は `cycle[(i+1)%length]` へ、
+`-1` なら逆に移ります。添字は重複なし。盤面と巡回順を書き換えない
+コールバックで、書き込み直後の各セルの最終値を 1 回ずつ読めます。
+
+```cpp
+std::vector<int> board{0, 1, 2, 3, 4};
+std::vector<int> pos{0, 1, 2, 3, 4}, cycle{0, 4, 2};
+rotate_scattered_cycle(board, cycle, +1, [&](int at, int id) { pos[id] = at; });
+// board == {2, 1, 4, 3, 0}, pos[0] == 4。
+```
+
+時間は長さに比例、作業用には保存する値 1 個だけが必要です。
