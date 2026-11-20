@@ -14,8 +14,9 @@
 | [AHC004](https://atcoder.jp/contests/ahc004/tasks/ahc004_a) | ローカル改善・本番未判定 | **7,321,305,762** 点（[AtCoder 提供の順位データ](https://huggingface.co/datasets/SakanaAI/ALE-Bench/blob/main/ahc004.zip)） | 周期パターン初期化: 未調整 10 件 681,224,023（旧 662,753,350） | 本番 100 件。通常配布の 0–99 は別ケース | [codex/ahc004-contig-seed-20261120](https://github.com/tokotoko7777/ahc-workspace/tree/codex/ahc004-contig-seed-20261120) |
 | [AHC005](https://atcoder.jp/contests/ahc005/tasks/ahc005_a) | ローカル比較・本番未判定 | **22,318,770** 点（[AtCoder 提供の順位データ](https://huggingface.co/datasets/SakanaAI/ALE-Bench/blob/main/ahc005.zip)） | 既存版: 未調整 8 件 1,761,160 | 通常配布の 0–99 は本番 100 件と別 | [codex/ahc005-route-splice-20261120](https://github.com/tokotoko7777/ahc-workspace/tree/codex/ahc005-route-splice-20261120) |
 | [AHC006](https://atcoder.jp/contests/ahc006/tasks/ahc006_a) | ローカル比較・本番未判定 | **2,220,425** 点（[AtCoder 提供の順位データ](https://huggingface.co/datasets/SakanaAI/ALE-Bench/blob/main/ahc006.zip)） | 既存版: 未調整 10 件の合計 214,630 | 本番 100 件。配布シードとの同一性未確認 | [空間初期化の分岐](https://github.com/tokotoko7777/ahc-workspace/tree/761d6839f93d0e347820919714402360766c4ad5) |
-| [AHC007](https://atcoder.jp/contests/ahc007/tasks/ahc007_a) | 着手・未判定 | **14,241,733,941** 点（[AtCoder 提供の順位データ](https://huggingface.co/datasets/SakanaAI/ALE-Bench/blob/main/ahc007.zip)） | 開発比較準備中 | 本番 150 件、2 秒。配布入力との同一性未確認 | 検証中 |
-| AHC008〜074 | 未着手 | — | — | — | — |
+| [AHC007](https://atcoder.jp/contests/ahc007/tasks/ahc007_a) | 着手・未判定 | **14,241,733,941** 点（[AtCoder 提供の順位データ](https://huggingface.co/datasets/SakanaAI/ALE-Bench/blob/main/ahc007.zip)） | シナリオ版: 公開 150 件 **14,184,305,386** | 本番 150 件、2 秒。配布入力との同一性未確認 | [問題別ブランチ](https://github.com/tokotoko7777/ahc-workspace/tree/2793a9a782184c4b77376fab17482d24b353d6bd) |
+| AHC008 | 着手・未判定 | 確認中 | — | — | 検証中 |
+| AHC009〜074 | 未着手 | — | — | — | — |
 
 ### AHC001 の次の仮説
 
@@ -128,3 +129,10 @@
 
 - [ソースと再現手順](https://github.com/tokotoko7777/ahc-workspace/blob/0e7380c86bf2f895cc47b0f44cd976f7bb01e9cd/problems/ahc006/README.md)。新規開発 8 件の同じ開始解で、3/4 注文を抜いて 256 組の貪欲・幅 4 ビーム修復を比較。両方とも全件同点で改善なし。公式採点と独立検査が一致し、最長 1.760048 秒。未使用ケースを消費せず診断を終了し、既定は変更しない。
 - 既存挿入 API では最良の隙間一組に固定されるため、まだ注文間の位置の相互作用を扱えていない。次は連続区間内のイベント 8〜12 件を先行制約付き DP で一度に並べ直すか、主探索の中で一時悪化を許す。
+
+### AHC007 将来の辺重みを複数シナリオで評価
+
+- [実装・再現手順](https://github.com/tokotoko7777/ahc-workspace/blob/2793a9a782184c4b77376fab17482d24b353d6bd/problems/ahc007/README.md)。候補辺を採らない場合の接続コストを、複数の将来重みで評価して閾値を決める。未来の実測値は見ない。
+- 開発 20 件 +34,154,630（19 勝）、未調整 36 件 3,337,415,004 → 3,393,731,903（+56,316,899、34 勝）、別の公式ツール同梱 150 件 13,878,237,519 → 14,184,305,386（+306,067,867、147 勝）。全 412 実行でローカル逐次対話と独立得点が公式スコアに一致、最大実測 0.280 秒、ソルバ最大 CPU 0.214 秒。C++23 単一結合と汎用テストを通過。
+- 問題別ブランチの新規解として保存。本番 150 件と公開 150 件の同一性を証明できないため、最終 1 位 14,241,733,941 点との比較は未判定。main は変更しない。
+- 次は同じ将来シナリオで、現在の辺を強制採用／見送りしたあとの短い決定列を追い、遅れて現れる代替辺も考慮する。
