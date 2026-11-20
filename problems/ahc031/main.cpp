@@ -4,6 +4,12 @@
 #include <iostream>
 #include <numeric>
 #include <vector>
+#if !defined(AHC031_NO_ALIGNMENT) && !defined(AHC031_SINGLE_STRIP) && !defined(AHC031_ALIGN_CUTS)
+#define AHC031_ALIGN_CUTS
+#endif
+#ifdef AHC031_ALIGN_CUTS
+#include "../../library/ordered-cut-placement.hpp"
+#endif
 
 struct Box {int a,b,c,d;};
 struct Layout {std::vector<int> ends,width;};
@@ -79,6 +85,50 @@ struct Solver {
         }
         return cost;
     }
+#ifdef AHC031_ALIGN_CUTS
+    Score align(const Layout& l,std::vector<std::vector<Box>>& boxes,Score cost) const {
+        for(int sweep=0;sweep<4;++sweep) {
+            bool improved=false;
+            int first=0;
+            for(int g=0;g<int(l.ends.size());++g) {
+                const int end=l.ends[g],width=l.width[g],count=end-first;
+                if(count>1) for(int index=0;index<d;++index) {
+                    const int day=(sweep&1)?d-index-1:index;
+                    std::vector<int> gaps(count);
+                    int min_sum=0;
+                    for(int j=first;j<end;++j) {
+                        const int needed=(area[day][j]+width-1)/width;
+                        const Box& box=boxes[day][j];
+                        // Preserve area on deficit rows and preserve enough
+                        // area on rows that fully satisfy the request.
+                        min_sum+=gaps[j-first]=std::min(needed,box.c-box.a);
+                    }
+                    if(min_sum==w) continue;
+                    std::vector<int> reward(w+1);
+                    if(day>0) for(int j=first;j<end-1;++j) ++reward[boxes[day-1][j].c];
+                    if(day+1<d) for(int j=first;j<end-1;++j) ++reward[boxes[day+1][j].c];
+                    int old=0;
+                    for(int j=first;j<end-1;++j) old+=reward[boxes[day][j].c];
+                    auto placement=maximize_ordered_cut_reward(w,gaps,reward);
+                    if(placement.reward<=old) continue;
+                    improved=true;
+                    cost-=2LL*width*(placement.reward-old);
+                    int top=0;
+                    for(int j=first;j<end;++j) {
+                        auto& b=boxes[day][j];
+                        int bottom=(j==end-1)?w:placement.cuts[j-first];
+                        auto penalty=[&](int height) {return std::max(0,area[day][j]-height*width);};
+                        cost+=100LL*(penalty(bottom-top)-penalty(b.c-b.a));
+                        b.a=top;b.c=bottom;top=bottom;
+                    }
+                }
+                first=end;
+            }
+            if(!improved) break;
+        }
+        return cost;
+    }
+#endif
     Layout construct(int m,int shape) {
         Layout result;
         std::vector<int> cuts;
@@ -148,7 +198,11 @@ int main() {
     }
 #endif
     std::vector<std::vector<Box>> boxes(s.d,std::vector<Box>(s.n));
-    std::cerr<<"Model = "<<s.evaluate(answer,&boxes)<<'\n';
+    Score predicted=s.evaluate(answer,&boxes);
+#ifdef AHC031_ALIGN_CUTS
+    predicted=s.align(answer,boxes,predicted);
+#endif
+    std::cerr<<"Model = "<<predicted<<'\n';
     for(auto& row:boxes) for(auto [a,b,c,d]:row)
         std::cout<<a<<' '<<b<<' '<<c<<' '<<d<<'\n';
 }

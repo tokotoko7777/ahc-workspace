@@ -9,9 +9,9 @@ mkdir -p "$out"
 exec 9>"$out/experiment.lock"
 flock -n 9
 g++ -std=c++23 -O3 -DAHC031_SINGLE_STRIP problems/ahc031/main.cpp -o "$out/baseline"
-g++ -std=c++23 -O3 problems/ahc031/main.cpp -o "$out/strips"
+g++ -std=c++23 -O3 -DAHC031_NO_ALIGNMENT problems/ahc031/main.cpp -o "$out/strips"
 python3 scripts/bundle.py problems/ahc031/main.cpp -o "$out/submission.cpp"
-g++ -std=c++23 -O3 "$out/submission.cpp" -o "$out/bundled"
+g++ -std=c++23 -O3 -DAHC031_NO_ALIGNMENT "$out/submission.cpp" -o "$out/bundled"
 python3 problems/ahc031/replay_test.py
 pin=()
 if [[ ${4-} ]]; then pin=(taskset -c "$4"); fi

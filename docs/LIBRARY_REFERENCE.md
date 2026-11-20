@@ -2014,3 +2014,20 @@ sort(points.begin(), points.end(), [](const Point& a, const Point& b) {
 
 `bits=10` なら各座標は `0..1023` です。厳密な最近傍順ではありませんが、空間的に
 まとまったcluster作成、query順、cache localityの改善候補を1行のkeyで作れます。
+
+## OrderedCutPlacement
+
+ヘッダ: [`ordered-cut-placement.hpp`](../library/ordered-cut-placement.hpp)。
+
+`maximize_ordered_cut_reward(length, min_gap, reward_at)` は、固定端点
+`0,length` の間に `min_gap.size()-1` 個のカットを置き、
+両端を含む各区間に正の最小長を課した上で、通過した内部座標の報酬を
+最大化します。`reward_at` は負も許容し、長さは `length+1`。
+返すのは最大報酬と昇順の内部カット座標です。
+最小長を引いた累積余裕は非減少になるので、余裕に対する前状態の
+累積最大値を使い、必要時間と復元用メモリは
+`O(min_gap.size() * (length-sum(min_gap)+1))` です。
+
+[使用例](../examples/ordered_cut_placement_usage.cpp) /
+[小問題の全列挙テスト](../tests/ordered_cut_placement_test.cpp) /
+[AHC031 の実験](../problems/ahc031/README.md#固定列の横壁を前後日と揃える追加実験採用)。
