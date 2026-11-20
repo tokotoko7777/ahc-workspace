@@ -15,7 +15,7 @@
 | [AHC005](https://atcoder.jp/contests/ahc005/tasks/ahc005_a) | ローカル比較・本番未判定 | **22,318,770** 点（[AtCoder 提供の順位データ](https://huggingface.co/datasets/SakanaAI/ALE-Bench/blob/main/ahc005.zip)） | 既存版: 未調整 8 件 1,761,160 | 通常配布の 0–99 は本番 100 件と別 | [codex/ahc005-route-splice-20261120](https://github.com/tokotoko7777/ahc-workspace/tree/codex/ahc005-route-splice-20261120) |
 | [AHC006](https://atcoder.jp/contests/ahc006/tasks/ahc006_a) | ローカル比較・本番未判定 | **2,220,425** 点（[AtCoder 提供の順位データ](https://huggingface.co/datasets/SakanaAI/ALE-Bench/blob/main/ahc006.zip)） | 既存版: 未調整 10 件の合計 214,630 | 本番 100 件。配布シードとの同一性未確認 | [空間初期化の分岐](https://github.com/tokotoko7777/ahc-workspace/tree/761d6839f93d0e347820919714402360766c4ad5) |
 | [AHC007](https://atcoder.jp/contests/ahc007/tasks/ahc007_a) | 着手・未判定 | **14,241,733,941** 点（[AtCoder 提供の順位データ](https://huggingface.co/datasets/SakanaAI/ALE-Bench/blob/main/ahc007.zip)） | シナリオ版: 公開 150 件 **14,184,305,386** | 本番 150 件、2 秒。配布入力との同一性未確認 | [問題別ブランチ](https://github.com/tokotoko7777/ahc-workspace/tree/2793a9a782184c4b77376fab17482d24b353d6bd) |
-| [AHC008](https://atcoder.jp/contests/ahc008/tasks/ahc008_a) | 開発比較中・未判定 | **121,980,050,607** 点（[AtCoder 提供の順位データ](https://huggingface.co/datasets/SakanaAI/ALE-Bench/blob/main/ahc008.zip)） | 合法な仕切り版と適応分割版 | 公式対話テスタ、本番公開 2,000 シード、3 秒 | 検証中 |
+| [AHC008](https://atcoder.jp/contests/ahc008/tasks/ahc008_a) | ローカル改善・本番未判定 | **121,980,050,607** 点（[AtCoder 提供の順位データ](https://huggingface.co/datasets/SakanaAI/ALE-Bench/blob/main/ahc008.zip)） | 適応分割版: 未調整 24 件合計 53,656,251 | 公式対話テスタ、本番公開 2,000 シード、3 秒 | [問題別ブランチ](https://github.com/tokotoko7777/ahc-workspace/tree/af41b4e70a89fef3c0389c689aa09dc633fffa16) |
 | AHC009〜074 | 未着手 | — | — | — | — |
 
 ### AHC001 の次の仮説
@@ -142,3 +142,10 @@
 - [実装・再現手順](https://github.com/tokotoko7777/ahc-workspace/blob/93feeae1157993a5b59fbd93c7d0db0381c8ea17/problems/ahc007/README.md) を別ブランチに保存。同じ乱数シナリオで採択／見送りを強制し、先の 16 手を共通の方策で動かして比較。
 - 新規開発 20 件 +606,802（11 勝）、独立確認 36 件 −1,083,508（13 勝）。最大 0.365 秒、112 出力で公式採点と独立検査が一致。不採用、通常は元のシナリオ法を維持する。
 - 次は一律 16 手ではなく、代替パスの最後の辺が到着するまでの分布を使う。公開入力と本番の同一性は未確認のまま。
+
+### AHC008 仕切り位置を適応的に選ぶ初回構成
+
+- [実装・再現手順](https://github.com/tokotoko7777/ahc-workspace/blob/af41b4e70a89fef3c0389c689aa09dc633fffa16/problems/ahc008/README.md)。合法な仕切り 1 本を基準とし、各ターンで動物分布を見て次の長方形分割を選ぶ解を比較。
+- 新規開発 24 件 6,068,929 → 79,174,426、未調整 24 件 1,650,490 → 53,656,251（平均 2,235,677）。全 48 ペアで改善し、96 実行で公式対話テスタ v3 と全ターンの独立検査一致。ローカル最長 0.049386 秒。C++23 を問題別ブランチへ保存。
+- 保てる面積が平均約 135 マスと小さく、未使用セットでも中に平均約 3.38 匹残る。現時点では本番目標に遠いので公式 2,000 ケースの評価はまだ実施しない。順位データ 1 位 121,980,050,607 点（配布元と同一 SHA-256 `7dc040eb07f4543a16ef550a198859519a98af899771237b2bf1517c8a419300`）。
+- 次は何度も人間側を縮めるのではなく、複数人で小部屋を並行に建て、動物を小部屋へ入れることで人間側の面積を残す。
