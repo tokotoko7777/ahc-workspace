@@ -2014,3 +2014,19 @@ sort(points.begin(), points.end(), [](const Point& a, const Point& b) {
 
 `bits=10` なら各座標は `0..1023` です。厳密な最近傍順ではありませんが、空間的に
 まとまったcluster作成、query順、cache localityの改善候補を1行のkeyで作れます。
+
+## BoundedDepthForest
+
+ヘッダ: [`bounded-depth-forest.hpp`](../library/bounded-depth-forest.hpp)。
+
+親配列、各頂点の重み、深さ上限を渡し、`try_reparent(v,p,accept)` で
+部分木を付け替えます。`p=-1` なら独立した根になります。
+循環と深さ上限違反を除き、合法な案だけに
+`accept(重み付き深さ点の差)` を呼び、真の場合に更新します。
+隣接辺の存在は呼出側で保証してください。
+親と兄弟を配列でつなぎ、移す部分木のサイズに比例した時間で、
+親・全深さ・`sum(w[v]*(depth[v]+1))` を更新します。
+
+[使用例](../examples/bounded_depth_forest_usage.cpp) /
+[愚直な根経路計算との比較](../tests/bounded_depth_forest_test.cpp) /
+[AHC041 での焼きなまし](../problems/ahc041/README.md)。
