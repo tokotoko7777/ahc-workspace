@@ -5,6 +5,9 @@
 #include <string>
 #include <vector>
 #include "../../library/calendar-interval-packing.hpp"
+#ifdef AHC023_SIBLING_FLOW
+#include "../../library/parallel-interval-packing.hpp"
+#endif
 
 #if !defined(AHC023_PHASE_WINDOWS) && !defined(AHC023_CLOSED_WINDOWS) && !defined(AHC023_STATIC_LEAVES)
 #define AHC023_PHASE_WINDOWS
@@ -123,6 +126,53 @@ int main() {
         assign(cell,descendant);
 #endif
     }
+#endif
+#if defined(AHC023_SIBLING_FLOW) && defined(AHC023_PHASE_WINDOWS)
+    // Freeze all interior schedules and every leaf outside this sibling set.
+    // Sibling leaves have precisely the same tree-ancestor path; their
+    // access phase masks are identical and their intervals interchangeable.
+    std::vector<std::vector<Task>> by_cell(n);
+    for(auto task:result) by_cell[task.cell].push_back(task);
+    for(int branch:order) {
+        std::vector<int> leaves;
+        for(int child:children[branch])
+            if(children[child].empty()) leaves.push_back(child);
+        if(leaves.size()<2) continue;
+        auto plant_block=empty,harvest_block=empty;
+        for(int v=branch;v>=0;v=parent[v]) for(auto task:by_cell[v]) {
+            int end=crops[task.crop].end;
+            for(int d=task.start+1; d<=end; ++d) plant_block[d]=1;
+            for(int d=task.start; d<end; ++d) harvest_block[d]=1;
+        }
+        std::vector<int> latest(t+1);
+        for(int d=1;d<=t;++d) latest[d]=plant_block[d]?latest[d-1]:d;
+        int before=0;
+        for(int cell:leaves) for(auto task:by_cell[cell]) {
+            const auto [s,e]=crops[task.crop];
+            before+=e-s+1;
+            used[task.crop]=0;
+        }
+        std::vector<ParallelIntervalJob> jobs;
+        std::vector<int> job_ids;
+        for(int j=0;j<k;++j) if(!used[j]) {
+            const auto [s,e]=crops[j];
+            if(latest[s] && !harvest_block[e]) {
+                jobs.push_back({latest[s],e,e-s+1});
+                job_ids.push_back(j);
+            }
+        }
+        auto plan=pack_parallel_intervals(t,leaves.size(),jobs);
+        int after=0;
+        for(const auto& lane:plan) for(int j:lane) after+=jobs[j].weight;
+        if(after>before) for(int i=0;i<int(leaves.size());++i) {
+            auto& lane=by_cell[leaves[i]];
+            lane.clear();
+            for(int j:plan[i]) lane.push_back({job_ids[j],leaves[i],jobs[j].start});
+        }
+        for(int cell:leaves) for(auto task:by_cell[cell]) used[task.crop]=1;
+    }
+    result.clear();
+    for(const auto& lane:by_cell) for(auto task:lane) result.push_back(task);
 #endif
     std::cout<<result.size()<<'\n';
     for(auto [crop,cell,start]:result)

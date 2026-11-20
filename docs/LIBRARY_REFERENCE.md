@@ -2029,3 +2029,18 @@ sort(points.begin(), points.end(), [](const Point& a, const Point& b) {
 [使用例](../examples/calendar_interval_packing_usage.cpp)、
 [部分集合の全列挙による比較](../tests/calendar_interval_packing_test.cpp)、
 [AHC023 での通路を塞げない時期の選別](../problems/ahc023/main.cpp)。
+
+## ParallelIntervalPacking
+
+ヘッダ: [`parallel-interval-packing.hpp`](../library/parallel-interval-packing.hpp)。
+
+`pack_parallel_intervals(horizon, lanes, jobs)` は、同じ制約の複数枠に
+固定の閉区間を置き、各候補を高々一度使って重みの合計を最大化します。
+日は 1 始まりで、非負の重みは区間の長さ以下。戻り値は枠ごとに
+開始日順の候補添字です。隣接する日に未使用枠を通す費用を 1、
+区間を通す費用を長さから重みを引いた値とし、既存の非負費用
+最小費用流を使います。枠ごとに候補の可否が異なる場合には適用できません。
+
+[短い使用例](../examples/parallel_interval_packing_usage.cpp) /
+[全列挙との比較](../tests/parallel_interval_packing_test.cpp) /
+[AHC023 の実験](../problems/ahc023/README.md#兄弟葉をまとめて再配置する追加実験不採用)。
