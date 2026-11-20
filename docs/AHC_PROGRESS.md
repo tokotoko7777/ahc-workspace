@@ -14,7 +14,7 @@
 | [AHC004](https://atcoder.jp/contests/ahc004/tasks/ahc004_a) | ローカル改善・本番未判定 | **7,321,305,762** 点（[AtCoder 提供の順位データ](https://huggingface.co/datasets/SakanaAI/ALE-Bench/blob/main/ahc004.zip)） | 周期パターン初期化: 未調整 10 件 681,224,023（旧 662,753,350） | 本番 100 件。通常配布の 0–99 は別ケース | [codex/ahc004-contig-seed-20261120](https://github.com/tokotoko7777/ahc-workspace/tree/codex/ahc004-contig-seed-20261120) |
 | [AHC005](https://atcoder.jp/contests/ahc005/tasks/ahc005_a) | ローカル比較・本番未判定 | **22,318,770** 点（[AtCoder 提供の順位データ](https://huggingface.co/datasets/SakanaAI/ALE-Bench/blob/main/ahc005.zip)） | 既存版: 未調整 8 件 1,761,160 | 通常配布の 0–99 は本番 100 件と別 | [codex/ahc005-route-splice-20261120](https://github.com/tokotoko7777/ahc-workspace/tree/codex/ahc005-route-splice-20261120) |
 | [AHC006](https://atcoder.jp/contests/ahc006/tasks/ahc006_a) | ローカル比較・本番未判定 | **2,220,425** 点（[AtCoder 提供の順位データ](https://huggingface.co/datasets/SakanaAI/ALE-Bench/blob/main/ahc006.zip)） | 既存版: 未調整 10 件の合計 214,630 | 本番 100 件。配布シードとの同一性未確認 | [空間初期化の分岐](https://github.com/tokotoko7777/ahc-workspace/tree/761d6839f93d0e347820919714402360766c4ad5) |
-| AHC007 | 着手・未判定 | 確認中 | — | — | 検証中 |
+| [AHC007](https://atcoder.jp/contests/ahc007/tasks/ahc007_a) | 着手・未判定 | **14,241,733,941** 点（[AtCoder 提供の順位データ](https://huggingface.co/datasets/SakanaAI/ALE-Bench/blob/main/ahc007.zip)） | 開発比較準備中 | 本番 150 件、2 秒。配布入力との同一性未確認 | 検証中 |
 | AHC008〜074 | 未着手 | — | — | — | — |
 
 ### AHC001 の次の仮説
@@ -123,3 +123,8 @@
 - [実装と再現手順](https://github.com/tokotoko7777/ahc-workspace/blob/196a7404c62279475e6b868a305c949804e31404/problems/ahc003/README.md)。平均分散ではなく、ほぼ同程度の二経路のコスト差が観測でどれだけ再判定できるかを評価した。
 - 開発 20 件は +5,214,047 点（12 勝）、未使用 28 件は −48,433,654 点（9 勝）。全 96 出力で公式対話テスタと独立検査一致、最大ローカル実測 0.675 秒未満。未調整セットで悪化し既定版は変更しない。C++23 の単一ファイル化と汎用分散計算の 1,000 件照合を通過。
 - 先々の問い合わせで役立つ複数経路差を履歴から集め、今の経路の損失と次の経路への利益を分離する案を次の仮説として保存。公式 3,000 件の個別結果は反映しない。
+
+### AHC006 複数注文の取り外し・ビーム修復
+
+- [ソースと再現手順](https://github.com/tokotoko7777/ahc-workspace/blob/0e7380c86bf2f895cc47b0f44cd976f7bb01e9cd/problems/ahc006/README.md)。新規開発 8 件の同じ開始解で、3/4 注文を抜いて 256 組の貪欲・幅 4 ビーム修復を比較。両方とも全件同点で改善なし。公式採点と独立検査が一致し、最長 1.760048 秒。未使用ケースを消費せず診断を終了し、既定は変更しない。
+- 既存挿入 API では最良の隙間一組に固定されるため、まだ注文間の位置の相互作用を扱えていない。次は連続区間内のイベント 8〜12 件を先行制約付き DP で一度に並べ直すか、主探索の中で一時悪化を許す。
