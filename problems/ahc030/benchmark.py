@@ -50,7 +50,10 @@ def main():
     parser=argparse.ArgumentParser(description=__doc__)
     for name in ["gen","tester","scan","active","csv"]:
         parser.add_argument(name,type=Path)
+    parser.add_argument("--survey",action="store_true",help="fresh survey-prior comparison")
     args=parser.parse_args()
+    seed_version="soft-survey-prior-v1" if args.survey else "exact-fields-v1"
+    labels=("active","survey") if args.survey else ("scan","active")
     gen,tester,scan,active=(getattr(args,key).resolve() for key in ("gen","tester","scan","active"))
     with tempfile.TemporaryDirectory() as tmp,args.csv.open("w",newline="") as stream:
         work=Path(tmp)
@@ -58,13 +61,13 @@ def main():
         writer=csv.writer(stream,lineterminator="\n")
         writer.writerow(("split","seed","arm","score","drills","surveys","guesses","n","m","eps","seconds"))
         for split in ("dev","holdout"):
-            seeds=[int.from_bytes(hashlib.sha256(f"ahc030/exact-fields-v1/{split}/{i}".encode()).digest()[:8],
+            seeds=[int.from_bytes(hashlib.sha256(f"ahc030/{seed_version}/{split}/{i}".encode()).digest()[:8],
                                   "little") for i in range(40)]
             seedfile.write_text("".join(f"{n}\n" for n in seeds))
             subprocess.run([gen,seedfile],cwd=work,check=True)
             for i,seed in enumerate(seeds):
                 case=(work/"in"/f"{i:04d}.txt").read_text()
-                arms=[("scan",scan),("active",active)]
+                arms=list(zip(labels,(scan,active)))
                 for label,binary in arms[::(-1 if i%2 else 1)]:
                     start=time.monotonic()
                     run=subprocess.run([tester,binary],input=case,check=True,capture_output=True,

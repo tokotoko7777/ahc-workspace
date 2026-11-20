@@ -1,16 +1,26 @@
 #include <bits/stdc++.h>
 using namespace std;
+#ifndef AHC030_SURVEY
+#define AHC030_SURVEY 0
+#endif
 #ifndef AHC030_PROPAGATE
 #define AHC030_PROPAGATE 1
 #endif
 namespace {
 using Clock=chrono::steady_clock;
 constexpr int Limit=400;
-struct Placement{bitset<Limit> mask;vector<int> cells;bool active=true;};
+struct Placement{bitset<Limit> mask;vector<int> cells;bool active=true;double weight=1;};
 struct Shape{
   vector<Placement> pos;
   array<int,Limit> cover{};
   int active_count=0;
+  void weighted_coverage(array<double,Limit>& hit,double& sum)const{
+    hit.fill(0.);sum=0.;
+    for(const auto& p:pos)if(p.active){
+      sum+=p.weight;
+      for(int c:p.cells)hit[c]+=p.weight;
+    }
+  }
   void filter(int cell,bool contains){
     for(auto& p:pos)if(p.active&&p.mask[cell]!=contains){
       p.active=false;--active_count;
@@ -82,13 +92,23 @@ struct Solver{
       upper[i]=observed[i]<0?hi:observed[i];
     }
   }
-  int next_dig()const{
+  int next_dig(bool weighted)const{
+    vector<array<double,Limit>> probability;
+    if(weighted){
+      probability.resize(m);
+      for(int k=0;k<m;++k){
+        double z=0.;
+        shapes[k].weighted_coverage(probability[k],z);
+        for(int i=0;i<L;++i)probability[k][i]/=z;
+      }
+    }
     int best=-1;
     double best_score=-1;
     for(int i=0;i<L;++i)if(observed[i]<0&&lower[i]<upper[i]){
       double score=0;
-      for(auto& s:shapes){
-        double p=double(s.cover[i])/s.active_count;
+      for(int k=0;k<m;++k){
+        const auto& s=shapes[k];
+        double p=weighted?probability[k][i]:double(s.cover[i])/s.active_count;
         score+=p*(1-p);
       }
       // A support-ambiguous cell is immediately useful even if it does not
@@ -97,6 +117,74 @@ struct Solver{
       if(score>best_score){best_score=score;best=i;}
     }
     return best;
+  }
+  using Mask=bitset<Limit>;
+  struct Moment {double mean=0,var=0;};
+  Moment moments(const Shape& s,const Mask& mask)const{
+    double z=0.,one=0.,two=0.;
+    for(auto& p:s.pos)if(p.active){
+      int v=int((p.mask&mask).count());
+      z+=p.weight;one+=p.weight*v;two+=p.weight*v*v;
+    }
+    const double mu=one/z;
+    return {mu,max(0.,two/z-mu*mu)};
+  }
+  void survey_prior(Clock::time_point deadline){
+    mt19937 rng(30030);
+    vector<Mask> previous;
+    const double scale=1-2*eps;
+    for(int t=0;t<14&&Clock::now()<deadline;++t){
+      Mask best;
+      double best_info=0.;
+      vector<Moment> saved;
+      for(int j=0;j<34;++j){
+        int h=2+rng()%max(1,3*n/4-1),w=2+rng()%max(1,3*n/4-1);
+        if(j%7==0)h=n;
+        if(j%7==1)w=n;
+        int y=rng()%(n-h+1),x=rng()%(n-w+1);
+        Mask q;
+        for(int r=y;r<y+h;++r)for(int c=x;c<x+w;++c)q[r*n+c]=1;
+        if(find(previous.begin(),previous.end(),q)!=previous.end())continue;
+        double v=0.;
+        vector<Moment> stats;
+        for(auto& s:shapes){stats.push_back(moments(s,q));v+=stats.back().var;}
+        const int k=int(q.count());
+        double info=log1p(scale*scale*v/(k*eps*(1-eps)+1.0/12))*sqrt(k);
+        if(info>best_info){best_info=info;best=q;saved=std::move(stats);}
+      }
+      if(best_info==0.)break;
+      previous.push_back(best);
+      const int k=int(best.count());
+      cout<<"q "<<k;
+      for(int i=0;i<L;++i)if(best[i])cout<<' '<<i/n<<' '<<i%n;
+      cout<<endl;
+      int response;
+      if(!(cin>>response)||response<0)exit(0);
+      double mean=0.,var=0.;
+      for(auto [f,v]:saved){mean+=f;var+=v;}
+      for(int i=0;i<m;++i){
+        const auto [f,v]=saved[i];
+        const double sd=sqrt(k*eps*(1-eps)+scale*scale*max(0.,var-v)+1.0/12);
+        vector<double> log_likelihood(L+1,numeric_limits<double>::quiet_NaN());
+        auto& shape=shapes[i];
+        double peak=-1e100;
+        for(auto& p:shape.pos)if(p.active){
+          int hit=int((p.mask&best).count());
+          if(isnan(log_likelihood[hit])){
+            double mu=k*eps+scale*(mean-f+hit);
+            double z=(response-mu)/sd;
+            // Clip observation: response=0 includes the entire left tail.
+            log_likelihood[hit]=response==0?
+              log(max(1e-32,0.5*erfc((mu-0.5)/(sd*sqrt(2.))))):-0.5*z*z;
+          }
+          p.weight=log(p.weight)+0.55*log_likelihood[hit];
+          peak=max(peak,p.weight);
+        }
+        // Soft prior changes selection only, never removes candidates.
+        for(auto& p:shape.pos)if(p.active)
+          p.weight=exp(max(-7.,p.weight-peak));
+      }
+    }
   }
   void finish_scan(){
     vector<int> found;
@@ -109,6 +197,7 @@ struct Solver{
   }
   void solve(bool active,Clock::time_point deadline){
     if(!active){finish_scan();return;}
+    if(AHC030_SURVEY)survey_prior(min(deadline,Clock::now()+chrono::milliseconds(700)));
     for(int i=0;i<L;++i){
       propagate(deadline);
       if(Clock::now()>=deadline)break;
@@ -132,7 +221,7 @@ struct Solver{
         if(!answer(found))throw logic_error("support is certified");
         return;
       }
-      int p=next_dig();
+      int p=next_dig(AHC030_SURVEY);
       assert(p>=0);
       dig(p);
     }

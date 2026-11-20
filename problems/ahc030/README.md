@@ -69,3 +69,37 @@ From repository root (`ATCODER_TOOLS` is official Rust `target/release`):
     g++ -std=c++23 -O3 /tmp/ahc030-single.cpp -o /tmp/ahc030-single
 
 [Paired results](benchmark-results.csv) include dimensions and epsilon.
+
+## Optional survey prior
+
+`-DAHC030_SURVEY=1` tries 14 cheap rectangle/stripe surveys before any exact
+drills. Rank sampled survey masks by moment-matched signal variance per cost:
+sum the variance of *intersection sizes* per shape, then compare it to the
+judge noise. For each translation update a soft weight using a tempered
+Gaussian likelihood with other shapes marginalized by their first two
+moments. Exact drilling ranks cells using the new weights, but filtering,
+termination, and fallback still use the identical exact-count proof.
+Weights cannot eliminate a candidate, even at high noise.
+
+| 40 new cases each | Exact mean cost | Survey mean cost | Survey W/T/L | Paired mean ratio |
+|---|---:|---:|---:|---:|
+| Development | 55.15000 | 56.67805 | 16/0/24 | 1.08575 |
+| Untouched holdout | 69.90000 | 69.40362 | 24/0/16 | 1.02022 |
+
+Holdout median ratio 0.97279; at eps≤0.1 it was 0.94044 (11 cases), but
+that subgroup was not consistently improved in development (paired mean
+1.03390). At eps>0.1 the holdout paired mean ratio was 1.05512. The weak
+inconsistent effect does not justify changing the default or a final run
+for the survey variant. All 160 official transcripts and independent replay
+agreed, and worst wall time including tester was 0.078703 s.
+[Data](survey-results.csv) includes per-case dimensions/eps/phase cost.
+
+    g++ -std=c++23 -O3 -DAHC030_SURVEY=1 problems/ahc030/main.cpp -o /tmp/ahc030-survey
+    python problems/ahc030/benchmark.py "$ATCODER_TOOLS/gen" "$ATCODER_TOOLS/tester" /tmp/ahc030-active /tmp/ahc030-survey /tmp/ahc030-survey.csv --survey
+
+Next explore **joint** feasible placement hypotheses after a small number of
+exact queries. A soft posterior or search pool can find a likely support but
+must keep separate exact feasibility bookkeeping. Use targeted surveys to
+distinguish plausible full assignments; validate candidates through an
+exact or sufficiently favorable answer guess and retain the scan fallback.
+Review false-confidence cases on a new development split.

@@ -20,6 +20,7 @@ int main(){
         }
         shape.pos.push_back(std::move(pos));
       }
+      for(auto& pos:shape.pos)pos.weight=0.2+(rng()%111)/100.;
       shape.active_count=count;
       truth.push_back(rng()%count);
       for(int i:shape.pos[truth.back()].cells)++ground[i];
@@ -40,6 +41,19 @@ int main(){
           for(int v=0;v<s.L;++v)brute[v]+=pos.mask[v];
         }
         assert(count==shape.active_count&&brute==shape.cover);
+        Solver::Mask mask;
+        for(int q=0;q<s.L;++q)mask[q]=bool(rng()%2);
+        const auto value=s.moments(shape,mask);
+        double sum=0,one=0,two=0;
+        for(auto& pos:shape.pos)if(pos.active){
+          int overlap=0;
+          for(int c:pos.cells)overlap+=mask[c];
+          sum+=pos.weight;
+          one+=overlap*pos.weight;
+          two+=overlap*overlap*pos.weight;
+        }
+        assert(abs(one/sum-value.mean)<1e-9);
+        assert(abs(two/sum-value.mean*value.mean-value.var)<1e-9);
       }
       for(int j=0;j<s.L;++j)
         assert(s.lower[j]<=ground[j]&&ground[j]<=s.upper[j]);
