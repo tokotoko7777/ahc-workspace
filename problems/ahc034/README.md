@@ -62,13 +62,13 @@ or exact work in candidate fixed walks.
 From repository root (`ATCODER_TOOLS` is the extracted official tools'
 `target/release` directory, built with `cargo build --release --locked`):
 
-    g++ -std=c++23 -O3 -DAHC034_ANNEAL=0 -DAHC034_FLOW=0 problems/ahc034/main.cpp -o /tmp/ahc034-snake
-    g++ -std=c++23 -O3 -DAHC034_FLOW=0 problems/ahc034/main.cpp -o /tmp/ahc034-anneal
+    g++ -std=c++23 -O3 -DAHC034_SHORTCUTS=0 -DAHC034_ANNEAL=0 -DAHC034_FLOW=0 problems/ahc034/main.cpp -o /tmp/ahc034-snake
+    g++ -std=c++23 -O3 -DAHC034_SHORTCUTS=0 -DAHC034_FLOW=0 problems/ahc034/main.cpp -o /tmp/ahc034-anneal
     python problems/ahc034/benchmark.py "$ATCODER_TOOLS/gen" "$ATCODER_TOOLS/vis" /tmp/ahc034-snake /tmp/ahc034-anneal /tmp/ahc034.csv
     g++ -std=c++23 -O2 tests/load_aware_route_test.cpp -o /tmp/ahc034-summary-test
     /tmp/ahc034-summary-test
     python scripts/bundle.py problems/ahc034/main.cpp -o /tmp/ahc034-single.cpp
-    g++ -std=c++23 -O3 /tmp/ahc034-single.cpp -o /tmp/ahc034-single
+    g++ -std=c++23 -O3 -DAHC034_SHORTCUTS=0 /tmp/ahc034-single.cpp -o /tmp/ahc034-single
 
 Optional `-DAHC034_VERIFY` compares every accepted move to full route
 recomputation, intended only for local diagnostics.
@@ -114,9 +114,9 @@ all augmentations, even when a legal incumbent already existed.
 stop callback with [partial-flow tests](../../tests/min_cost_flow_stop_test.cpp).
 It polls between shortest path augmentations; AHC034 stops flow at 1.73 s.
 
-    g++ -std=c++23 -O3 problems/ahc034/main.cpp -o /tmp/ahc034-flow
+    g++ -std=c++23 -O3 -DAHC034_SHORTCUTS=0 problems/ahc034/main.cpp -o /tmp/ahc034-flow
     python problems/ahc034/benchmark.py "$ATCODER_TOOLS/gen" "$ATCODER_TOOLS/vis" /tmp/ahc034-anneal /tmp/ahc034-flow /tmp/ahc034-flow.csv --flow
-    g++ -std=c++23 -O3 -DAHC034_FLOW=0 -DAHC034_EPOCHS=5 problems/ahc034/main.cpp -o /tmp/ahc034-long
+    g++ -std=c++23 -O3 -DAHC034_SHORTCUTS=0 -DAHC034_FLOW=0 -DAHC034_EPOCHS=5 problems/ahc034/main.cpp -o /tmp/ahc034-long
     python problems/ahc034/benchmark.py "$ATCODER_TOOLS/gen" "$ATCODER_TOOLS/vis" /tmp/ahc034-long /tmp/ahc034-flow /tmp/ahc034-control.csv --resource
 
 Next try **constructing several resource-matched short walks** optimized for
@@ -146,7 +146,7 @@ path changes that keep step count unchanged.
 成立するので、この仮想の残作業を実際に出力する必要はない。
 
 ```bash
-g++ -std=c++23 -O3 problems/ahc034/main.cpp -o /tmp/ahc034-flow
+g++ -std=c++23 -O3 -DAHC034_SHORTCUTS=0 problems/ahc034/main.cpp -o /tmp/ahc034-flow
 python3 problems/ahc034/diagnose_ceiling.py "$gen" "$vis" /tmp/ahc034-flow /tmp/ahc034-diagnostic
 ```
 
@@ -162,3 +162,9 @@ python3 problems/ahc034/diagnose_ceiling.py "$gen" "$vis" /tmp/ahc034-flow /tmp/
 未調整16件中3件を改善しましたが、全非ゼロセルを残しても52候補中43件は
 訪問順の関係で積載量が不足しました。既定版は変えず、次は経路変更時に
 最速積載・最遅荷下ろしの接頭辞を検査します。
+
+[積荷の接頭辞を守るショートカット](experiments/chronological_shortcuts_v4/README.md)
+では、未調整16件で固定経路の流量版に15勝1分、平均得点が35,225,693.81から
+43,686,637.44に上がりました。全104出力で公式採点と独立再生が一致し、
+最大0.391493秒のため問題別ブランチの既定版とします。過去実験には
+`-DAHC034_SHORTCUTS=0` を指定します。本番と同じケースでの比較は未判定です。

@@ -4,7 +4,7 @@
 #include "../../library/segment-tree.hpp"
 using namespace std;
 #ifndef AHC034_SHORTCUTS
-#define AHC034_SHORTCUTS 0
+#define AHC034_SHORTCUTS 3
 #endif
 #ifndef AHC034_FLOW
 #define AHC034_FLOW 1
@@ -181,8 +181,26 @@ struct Problem {
     return true;
   }
 #if AHC034_SHORTCUTS
+  bool chronological_splice(const Route& route,int l,int r,const Route& insert,
+                            const array<int,V>& visits,const array<int,V>& delta) const {
+    array<int,V> remaining;
+    for(int v=0;v<V;++v)remaining[v]=visits[v]+delta[v];
+    int load=0;
+    auto step=[&](int v){
+      const int before=remaining[v]--;
+      assert(before>0);
+      if(height[v]>0 && before==visits[v]+delta[v])load+=height[v];
+      if(height[v]<0 && before==1)load+=height[v];
+      return load>=0;
+    };
+    for(int k=0;k<=l;++k)if(!step(route[k]))return false;
+    for(int v:insert)if(!step(v))return false;
+    for(int k=r+1;k<int(route.size());++k)if(!step(route[k]))return false;
+    assert(load==0);
+    return true;
+  }
   Route shorten(Route route,int span,bool first_col,Clock::time_point deadline,
-                int& attempts,int& applied)const{
+                int& attempts,int& applied,int* gated=nullptr,int* rejected=nullptr)const{
     array<int,V> visits{},delta{};
     for(int v:route)++visits[v];
     for(int l=0;l+2<int(route.size()) && Clock::now()<deadline;){
@@ -211,6 +229,11 @@ struct Problem {
           for(int k=l+1;k<=r;++k){
             const int v=route[k];
             if(height[v] && visits[v]+delta[v]==0)okay=false;
+          }
+          if(AHC034_SHORTCUTS==3 && okay){
+            if(gated)++*gated;
+            okay=chronological_splice(route,l,r,insert,visits,delta);
+            if(!okay && rejected)++*rejected;
           }
           for(int v:insert)--delta[v];
           for(int k=l+1;k<=r;++k)++delta[route[k]];
@@ -260,13 +283,13 @@ int main(){
   const auto inherited=walk;
   const long long floor_inherit=p.travel(inherited);
   const auto end=begin+chrono::milliseconds(1850);
-  int attempts=0,edits=0,trials=0,better=0,min_steps=int(inherited.point.size())-1;
+  int attempts=0,edits=0,trials=0,better=0,gates=0,rejected=0,min_steps=int(inherited.point.size())-1;
   for(int i=0;i<2&&Clock::now()<end;++i){
     Problem::Walk next;
     if(AHC034_SHORTCUTS==1){
       next=p.expand(p.search(answer,begin+chrono::milliseconds(1750),1,340241+997*i));
     }else{
-      next.point=p.shorten(inherited.point,i?56:24,i!=0,end,attempts,edits);
+      next.point=p.shorten(inherited.point,i?56:24,i!=0,end,attempts,edits,&gates,&rejected);
       next.change.assign(next.point.size(),0);
     }
     min_steps=min(min_steps,int(next.point.size())-1);
@@ -286,6 +309,7 @@ int main(){
   cerr<<" inherited="<<floor_inherit<<" original_steps="<<inherited.point.size()-1
       <<" min_steps="<<min_steps<<" trials="<<trials<<" attempts="<<attempts
       <<" edits="<<edits<<" better="<<better;
+  if(AHC034_SHORTCUTS==3)cerr<<" gates="<<gates<<" rejected="<<rejected;
 #endif
   cerr<<'\n';
   p.print(walk);

@@ -65,7 +65,7 @@ cut would destroy chronological supply.
 p=problems/ahc034
 d="$p/experiments/physical_shortcuts_v3"
 python scripts/bundle.py "$p/main.cpp" -o /tmp/034-submission.cpp
-g++ -std=c++23 -O3 /tmp/034-submission.cpp -o /tmp/034-base
+g++ -std=c++23 -O3 -DAHC034_SHORTCUTS=0 /tmp/034-submission.cpp -o /tmp/034-base
 g++ -std=c++23 -O3 -DAHC034_SHORTCUTS=1 /tmp/034-submission.cpp -o /tmp/034-long
 g++ -std=c++23 -O3 -DAHC034_SHORTCUTS=2 /tmp/034-submission.cpp -o /tmp/034-shortcuts
 g++ -std=c++23 -O2 "$d/feasibility_probe.cpp" -o /tmp/034-prefix
