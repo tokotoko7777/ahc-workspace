@@ -1,6 +1,10 @@
 #include <bits/stdc++.h>
+#include "../../library/overlapping-interval-max-transform.hpp"
 #include "../../library/manhattan-max-transform.hpp"
 using namespace std;
+#ifndef AHC039_OVERLAP
+#define AHC039_OVERLAP 1
+#endif
 #ifndef AHC039_STRIPS
 #define AHC039_STRIPS 1
 #endif
@@ -70,9 +74,9 @@ struct Grid{
     }
     return ans;
   }
-  vector<Point> trace(int last_x,int state,int above,const vector<int>& hi,const vector<int>& predecessor)const{
-    // The multiplier above is the number of valid upper cuts per lower cut.
-    const int num=(G+1-int(hi.size()))*above;
+  vector<Point> trace_shape(int last_x,int state,int n,int above,const vector<int>& hi,
+                            const vector<int>& predecessor)const{
+    const int num=n*above;
     vector<tuple<int,int,int>> sequence;
     for(int x=last_x;state>=0;--x){
       int l=state/above,h=state%above;
@@ -98,13 +102,14 @@ struct Grid{
     }
     return ans;
   }
-  void strips(Answer& best,Clock::time_point deadline)const{
+  void strips(Answer& best,Clock::time_point deadline,bool extra=false)const{
     array<array<int,G+1>,G> prefix{};
     for(int x=0;x<G;++x)for(int y=0;y<G;++y)prefix[x][y+1]=prefix[x][y]+weight[x][y];
     for(int a=0;a<G;++a){
       vector<int> lo(ys.begin(),ys.begin()+a+1),hi(ys.begin()+a+1,ys.end());
       const int n=lo.size(),m=hi.size(),z=n*m;
-      for(long long penalty:{0LL,1LL,2LL,4LL,7LL,11LL}){
+      const vector<long long> penalties=extra?vector<long long>{3,5,9,14}:vector<long long>{0,1,2,4,7,11};
+      for(long long penalty:penalties){
         if(Clock::now()>=deadline)return;
         vector<int> parent(z*G),old_raw(z),old_p(z),next_raw(z),next_p(z);
         vector<long long> value(z),d(z);
@@ -130,7 +135,7 @@ struct Grid{
             const int p=next_p[k]+length;
             if(p<=MAX_PERIM&&(next_raw[k]>best.gain||
                 (next_raw[k]==best.gain&&p<best.perimeter))){
-              best.gain=next_raw[k];best.perimeter=p;best.polygon=trace(x,k,m,hi,parent);
+              best.gain=next_raw[k];best.perimeter=p;best.polygon=trace_shape(x,k,n,m,hi,parent);
             }
           }
           old_raw.swap(next_raw);old_p.swap(next_p);
@@ -138,6 +143,47 @@ struct Grid{
       }
     }
   }
+  void overlap(Answer& best,Clock::time_point deadline)const{
+    constexpr int M=G+1,Z=M*M;
+    array<array<int,M>,G> prefix{};
+    for(int x=0;x<G;++x)for(int y=0;y<G;++y)prefix[x][y+1]=prefix[x][y]+weight[x][y];
+    for(long long penalty:{0LL,1LL,2LL,4LL,7LL,11LL}){
+      if(Clock::now()>=deadline)return;
+      vector<int> parent(Z*G),old_raw(Z),old_p(Z),next_raw(Z),next_p(Z),prv(Z);
+      vector<long long> cost(Z),trans(Z);
+      for(int x=0;x<G;++x){
+        trans=cost;
+        fill(prv.begin(),prv.end(),-1);
+        if(x){
+          for(int l=0;l<M;++l)for(int h=l+1;h<M;++h)prv[l*M+h]=l*M+h;
+          overlapping_interval_max_transform(ys,penalty,trans,prv);
+        }
+        const int width=xs[x+1]-xs[x];
+        for(int l=0;l<M;++l)for(int h=l+1;h<M;++h){
+          int k=l*M+h, delta=prefix[x][h]-prefix[x][l],length=ys[h]-ys[l], q=prv[k];
+          long long start=SCALE*delta-penalty*(2*width+length);
+          long long carry=q<0?LLONG_MIN:trans[k]+SCALE*delta-penalty*2*width;
+          if(carry>start){
+            assert(max(l,q/M)<min(h,q%M));
+            cost[k]=carry;
+            next_raw[k]=old_raw[q]+delta;
+            next_p[k]=old_p[q]+2*width+abs(ys[l]-ys[q/M])+abs(ys[h]-ys[q%M]);
+            parent[x*Z+k]=q;
+          }else{
+            cost[k]=start;next_raw[k]=delta;next_p[k]=2*width+length;parent[x*Z+k]=-1;
+          }
+          const int p=next_p[k]+length;
+          if(p<=MAX_PERIM&&(next_raw[k]>best.gain||
+              (next_raw[k]==best.gain&&p<best.perimeter))){
+            best.gain=next_raw[k];best.perimeter=p;
+            best.polygon=trace_shape(x,k,M,M,ys,parent);
+          }
+        }
+        old_raw.swap(next_raw);old_p.swap(next_p);
+      }
+    }
+  }
+
 };
 }
 int main(){
@@ -151,6 +197,13 @@ int main(){
     g.strips(result,deadline);
     Answer rotated=result;
     g.transpose().strips(rotated,deadline);
+    if(AHC039_OVERLAP==1){
+      g.overlap(result,deadline);
+      g.transpose().overlap(rotated,deadline);
+    }else if(AHC039_OVERLAP==2){
+      g.strips(result,deadline,true);
+      g.transpose().strips(rotated,deadline,true);
+    }
     if(pair{rotated.gain,-rotated.perimeter}>pair{result.gain,-result.perimeter}){
       result=std::move(rotated);
       for(auto& [x,y]:result.polygon)swap(x,y);

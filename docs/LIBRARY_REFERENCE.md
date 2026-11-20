@@ -2033,3 +2033,24 @@ manhattan_max_transform(xs, ys, 1LL, best, origin);
 
 [AHC039](../problems/ahc039/main.cpp)では両端点の変化量を周長に加える
 列DPで、状態間の全ペア比較をこの変換に置き換えます。
+
+## Overlapping Interval Max Transform
+
+[ヘッダ](../library/overlapping-interval-max-transform.hpp)・[全ペアとの比較テスト](../tests/overlapping_interval_max_transform_test.cpp)。
+
+同じ昇順の境界配列に対する全区間について、「元得点−係数×両端点の移動距離」を
+最大にする遷移元を求めます。ただし二つの区間の重なりには正の長さが必要です。
+平坦な二次元配列で `lo*size+hi` に区間を置き、有効な遷移元には非負IDを
+割り当てます。4つの方向条件への分割によりO(size²)で処理します。
+
+```cpp
+std::vector<int> cut{0, 2, 5};
+std::vector<long long> value(9);
+std::vector<int> origin(9, -1);
+value[2] = 20; origin[2] = 2; // [0,5]
+overlapping_interval_max_transform(cut, 1LL, value, origin);
+// 区間 [2,5] (index 5) の値は18、遷移元は2
+```
+
+[AHC039](../problems/ahc039/main.cpp)では、隣の列との区間重なりで
+多角形をつなぎながら周長を評価します。

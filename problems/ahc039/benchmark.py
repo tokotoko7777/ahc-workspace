@@ -49,7 +49,15 @@ def main():
     p=argparse.ArgumentParser(description=__doc__)
     for k in ("gen","vis","base","candidate","csv"):
         p.add_argument(k,type=Path)
+    options=p.add_mutually_exclusive_group()
+    options.add_argument("--overlap",action="store_true")
+    options.add_argument("--resource",action="store_true")
     a=p.parse_args()
+    tag="overlap-strips-v1" if a.overlap else "anchored-strips-v1"
+    labels=("strips","overlap") if a.overlap else ("rect","strips")
+    if a.resource:
+        tag="overlap-resource-v1"
+        labels=("extra-anchors","overlap")
     gen,vis,base,candidate=(getattr(a,k).resolve() for k in ("gen","vis","base","candidate"))
     with tempfile.TemporaryDirectory() as d,a.csv.open("w",newline="") as f:
         work=Path(d)
@@ -57,14 +65,14 @@ def main():
         w=csv.writer(f,lineterminator="\n")
         w.writerow(("split","seed","arm","score","gain","perimeter","vertices","positive","negative","seconds"))
         for split in ("dev","holdout"):
-            ids=[int.from_bytes(hashlib.sha256(f"ahc039/anchored-strips-v1/{split}/{i}".encode()).digest()[:8],
+            ids=[int.from_bytes(hashlib.sha256(f"ahc039/{tag}/{split}/{i}".encode()).digest()[:8],
                                "little") for i in range(24)]
             seeds.write_text("".join(f"{x}\n" for x in ids))
             subprocess.run([gen,seeds],cwd=work,check=True)
             for i,seed in enumerate(ids):
                 inp=work/"in"/f"{i:04d}.txt"
                 data=inp.read_bytes()
-                arms=[("rect",base),("strips",candidate)]
+                arms=list(zip(labels,(base,candidate)))
                 same=[]
                 for label,binary in arms[::(-1 if i%2 else 1)]:
                     start=time.monotonic()
