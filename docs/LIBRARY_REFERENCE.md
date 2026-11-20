@@ -2014,3 +2014,20 @@ sort(points.begin(), points.end(), [](const Point& a, const Point& b) {
 
 `bits=10` なら各座標は `0..1023` です。厳密な最近傍順ではありませんが、空間的に
 まとまったcluster作成、query順、cache localityの改善候補を1行のkeyで作れます。
+
+## SparseGroupConflicts
+
+ヘッダ: [`sparse-group-conflicts.hpp`](../library/sparse-group-conflicts.hpp)
+
+同じグループに置かれた 2 要素だけに重み付き罰則が付くとき、
+`add(a,b,weight)` で無向の罰則を登録します。重複辺は加算し、
+負の重みも可。自己辺は登録しません。
+`cost(labels)` は合計、`move_delta(labels,i,new_group)` と
+`swap_delta(labels,i,j)` はそれぞれ変更後との差です。
+呼び出し側のグループ列を変更しません。変更を採用する場合は、
+呼び出し側で制約とグループ列を管理します。変更差分の計算量は
+対象要素の罰則隣接リストの長さの和です。C++20 以降。
+
+[使用例](../examples/sparse_group_conflicts_usage.cpp)、
+[全再計算とのランダム差分比較](../tests/sparse_group_conflicts_test.cpp)、
+[AHC017 の同日工事の衝突罰則](../problems/ahc017/main.cpp)。
