@@ -1,6 +1,9 @@
 #include <bits/stdc++.h>
 #include "../../library/ragged-layer-shortest-path.hpp"
 using namespace std;
+#ifndef AHC028_EXACT
+#define AHC028_EXACT 1
+#endif
 #ifndef AHC028_TOUR
 #define AHC028_TOUR 0
 #endif
@@ -80,6 +83,87 @@ struct Problem {
     for(int i=0;i<int(path.size());++i)path[i]=(*layers[i])[path[i]];
     return {cost,std::move(path)};
   }
+  using Frontier=vector<int>;
+  const vector<int>& keys(int w,int k)const{return cells[word[w][k]-'A'];}
+  Frontier advance(const Frontier& prior,const vector<int>& from,const vector<int>& to)const{
+    Frontier f(to.size(),INT_MAX);
+    for(size_t i=0;i<from.size();++i)for(size_t j=0;j<to.size();++j)
+      f[j]=min(f[j],prior[i]+d[from[i]][to[j]]);
+    return f;
+  }
+  Frontier backward(const Frontier& after,const vector<int>& from,const vector<int>& to)const{
+    Frontier f(from.size(),INT_MAX);
+    for(size_t i=0;i<from.size();++i)for(size_t j=0;j<to.size();++j)
+      f[i]=min(f[i],after[j]+d[from[i]][to[j]]);
+    return f;
+  }
+  struct Frontiers{vector<Frontier> prefix,suffix;};
+  Frontiers make_frontiers(const vector<int>& order)const{
+    Frontiers f{vector<Frontier>(m+1),vector<Frontier>(m)};
+    f.prefix[0]={0};
+    const vector<int> start_key{start};
+    for(int i=0;i<m;++i){
+      auto* from=i?&keys(order[i-1],4):&start_key;
+      auto val=f.prefix[i];
+      for(int k=i?overlap[order[i-1]][order[i]]:0;k<5;++k){
+        auto& to=keys(order[i],k);
+        val=advance(val,*from,to);from=&to;
+      }
+      f.prefix[i+1]=std::move(val);
+    }
+    f.suffix[m-1].resize(keys(order.back(),4).size());
+    for(int i=m-2;i>=0;--i){
+      auto val=f.suffix[i+1];
+      int skip=overlap[order[i]][order[i+1]];
+      for(int k=3;k>=skip;--k)
+        val=backward(val,keys(order[i+1],k),keys(order[i+1],k+1));
+      f.suffix[i]=backward(val,keys(order[i],4),keys(order[i+1],skip));
+    }
+    return f;
+  }
+  int edit_score(const vector<int>& edited,const Frontiers& f,int left,int right)const{
+    // Include the first unchanged word on the right, whose incoming overlap
+    // may have changed. Once its last letter is reached, reuse its tail.
+    right=min(m-1,right+1);
+    const vector<int> start_key{start};
+    const vector<int>* from=left?&keys(edited[left-1],4):&start_key;
+    auto val=f.prefix[left];
+    for(int i=left;i<=right;++i){
+      for(int k=i?overlap[edited[i-1]][edited[i]]:0;k<5;++k){
+        auto& to=keys(edited[i],k);
+        val=advance(val,*from,to);from=&to;
+      }
+    }
+    if(right==m-1)return *min_element(val.begin(),val.end());
+    int best=INT_MAX;
+    for(size_t j=0;j<val.size();++j)best=min(best,val[j]+f.suffix[right][j]);
+    return best;
+  }
+  pair<int,vector<int>> exact_search(vector<int> order,Clock::time_point deadline)const{
+    auto best=type(order);
+    auto f=make_frontiers(order);
+    mt19937 rng(42028);
+    for(int iteration=0;iteration<18000;++iteration){
+      if((iteration&63)==0&&Clock::now()>=deadline)break;
+      int left=rng()%(m-1);
+      int right=min(m-1,left+1+int(rng()%8));
+      int mode=rng()%3;
+      auto trial=order;
+      if(mode==0)swap(trial[left],trial[right]);
+      else if(mode==1)rotate(trial.begin()+left,trial.begin()+left+1,trial.begin()+right+1);
+      else rotate(trial.begin()+left,trial.begin()+right,trial.begin()+right+1);
+      int score=edit_score(trial,f,left,right);
+#ifdef AHC028_VERIFY_FRONTIERS
+      if(iteration%11==0)assert(score==type(trial).first);
+#endif
+      if(score>=best.first)continue;
+      best=type(trial);
+      assert(best.first==score);
+      order.swap(trial);
+      f=make_frontiers(order);
+    }
+    return best;
+  }
   pair<int,vector<int>> search(vector<int> base,bool improve,Clock::time_point deadline)const{
     auto best=type(base);
     if(!improve)return best;
@@ -143,7 +227,7 @@ int main(){
   const auto deadline=Clock::now()+chrono::milliseconds(1550);
   ios::sync_with_stdio(false);cin.tie(nullptr);
   Problem p;p.read();
-  const auto [cost,path]=p.search(p.greedy(),AHC028_TOUR,deadline);
+  const auto [cost,path]=AHC028_EXACT?p.exact_search(p.greedy(),deadline):p.search(p.greedy(),AHC028_TOUR,deadline);
   for(int id:path)cout<<id/p.n<<' '<<id%p.n<<'\n';
   cerr<<"cost="<<cost<<'\n';
 }

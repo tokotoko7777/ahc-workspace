@@ -31,7 +31,10 @@ def main():
     parser=argparse.ArgumentParser(description=__doc__)
     for k in ("gen","vis","greedy","tour","csv"):
         parser.add_argument(k,type=Path)
+    parser.add_argument("--exact",action="store_true",help="use new exact-frontier seeds and labels")
     args=parser.parse_args()
+    label_new="exact" if args.exact else "tour"
+    seed_version="exact-frontiers-v1" if args.exact else "ragged-tour-v1"
     gen,vis,greedy,tour=(getattr(args,k).resolve() for k in ("gen","vis","greedy","tour"))
     with tempfile.TemporaryDirectory() as temp,args.csv.open("w",newline="") as stream:
         tmp=Path(temp)
@@ -39,14 +42,14 @@ def main():
         writer=csv.writer(stream,lineterminator="\n")
         writer.writerow(("split","seed","arm","score","cost","keys","seconds"))
         for split in ("dev","holdout"):
-            seeds=[int.from_bytes(hashlib.sha256(f"ahc028/ragged-tour-v1/{split}/{i}".encode()).digest()[:8],
+            seeds=[int.from_bytes(hashlib.sha256(f"ahc028/{seed_version}/{split}/{i}".encode()).digest()[:8],
                                   "little") for i in range(24)]
             seedfile.write_text("".join(f"{seed}\n" for seed in seeds))
             subprocess.run([gen,seedfile],cwd=tmp,check=True)
             for i,seed in enumerate(seeds):
                 inp=tmp/"in"/f"{i:04}.txt"
                 data=inp.read_bytes()
-                arms=[("greedy",greedy),("tour",tour)]
+                arms=[("greedy",greedy),(label_new,tour)]
                 paired={}
                 for label,binary in arms[::(-1 if i%2 else 1)]:
                     start=time.monotonic()
@@ -60,7 +63,7 @@ def main():
                     paired[label]=score
                     writer.writerow((split,seed,label,score,cost,keycount,f"{sec:.6f}"))
                     stream.flush()
-                assert paired["tour"]>=paired["greedy"]
+                assert paired[label_new]>=paired["greedy"]
 
 if __name__=="__main__":
     main()
