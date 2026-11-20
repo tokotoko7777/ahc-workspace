@@ -3,8 +3,8 @@
 [公式問題文](https://atcoder.jp/contests/ahc004/tasks/ahc004_a)で配布される
 ローカル用の **seed 0〜99 全100ケース**を使う。本番ケースとは別集合。
 現在の合計目標は **9,000,000,000点**。初回目標7,321,305,762点は
-達成済み。50ケースからの外挿はしない。新目標に対する比較基準は、
-追加の最適化フラグなしで検証した単一ファイルの **7,489,107,407点**。
+達成済み。50ケースからの外挿はしない。追加の最適化フラグなしで
+検証した単一ファイルの現在の最高は **7,623,943,753点**。
 
 - [公式入力ZIP](https://img.atcoder.jp/ahc004/a45fa3f18ab177158bf5961b12872f93.zip) SHA-256: `b0d1cd27284d96af3f409ee58304b661ddd2711400fbfbb37ffa60ad29d38cf9`
 - [公式ツールZIP](https://img.atcoder.jp/ahc004/222362f13a30b1342bf79d0041bd4d39.zip) SHA-256: `b17da9bf7e05231fb25cbc1733e2ef07063bb4bdb9cea13dd24e2e2227c9c4ed`
@@ -225,6 +225,18 @@ g++ -std=c++23 "$W/control.cpp" -o "$W/control"
 taskset -c "${CPU:-6}" python3 "$P/benchmark.py" "$W/heldout/in" "$W/heldout-results" \
   --vis "$VIS" --entry "standalone_geometry=$W/submission" --entry "standalone_control=$W/control"
 ```
+
+### 別の起点での再試行
+
+通常の交差配置で既存初期解を改善できなかったケースだけ、6〜10番目の候補である
+別の循環列群を起点に、4行の交差を再探索する。候補盤面の平行移動・転置による
+重複を除き、実際に収録できる語数を厳密に数えて選ぶ。
+
+追加最適化フラグなしの[単一ファイル](https://github.com/tokotoko7777/ahc-workspace/blob/ac8647239ac4872c6e052ca263cd6891d002f193/problems/ahc004/experiments/cycle_rescue/submission.single.cpp)は、
+公式配布100件で **7,623,943,753点**。前の単体版に対し+134,836,346点
+（28勝38分34敗）、新目標まで1,376,056,247点。全出力で採点一致、最長2.797313秒。
+本パスで全語を収録した15件は維持し、再試行した7件のうち4件が新たに全語を収録。
+[ケース別結果](cycle-rescue-results.csv)。
 
 ## 再現
 
