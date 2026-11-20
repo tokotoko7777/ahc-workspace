@@ -2014,3 +2014,22 @@ sort(points.begin(), points.end(), [](const Point& a, const Point& b) {
 
 `bits=10` なら各座標は `0..1023` です。厳密な最近傍順ではありませんが、空間的に
 まとまったcluster作成、query順、cache localityの改善候補を1行のkeyで作れます。
+
+## Static Slide Grid
+
+[ヘッダ](../library/static-slide-grid.hpp)・[愚直な光線走査との比較テスト](../tests/static_slide_grid_test.cpp)。
+
+固定された壁に対し、各マスから上下左右へ1マス進む先と、
+最初の障害の直前まで滑る先をまとめて前計算します。盤外も障害です。
+ハッシュ探索やBFSの辺を後から作る場合に使えます。
+壁を変更したら作り直し、前計算は盤面サイズに線形です。
+
+```cpp
+std::vector<unsigned char> walls(12);
+walls[5] = 1;  // 3行4列の盤の(1,1)
+StaticSlideGrid grid(3, 4, walls);
+int to = grid.stop[0][3];  // (0,0)から右へ、終点index 3
+```
+
+[AHC046](../problems/ahc046/main.cpp)では、ブロックを1個だけ変更した
+各候補について、BFSの移動辺と滑走辺を作ります。
