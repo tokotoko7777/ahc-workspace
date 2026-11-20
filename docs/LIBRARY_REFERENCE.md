@@ -765,6 +765,24 @@ while (!queue.empty()) {
 キーは `uint64_t` です。負数、小数、取り出したキーより小さいキーを後から
 追加する用途には使えません。その場合は通常の `priority_queue` を使います。
 
+## 小さい格子のビット並列連結成分
+
+ヘッダ: [`small-grid-bit-flood.hpp`](../library/small-grid-bit-flood.hpp)。
+`H*(W+1) <= 128` のグリッドをGCC/Clangの128bit整数で表し、4近傍成分をメモリ確保なしで列挙。
+各行の番兵bitで左右の折り返しを防ぎます。
+
+```cpp
+using Flood = SmallGridBitFlood<10, 10>;
+auto free = Flood::cell(1, 2) | Flood::cell(1, 3) | Flood::cell(3, 3);
+Flood::components(free, [&](Flood::Mask part) {
+  int size = Flood::count(part);
+  // part は成分内の全セル。到達距離は不要な場合に使う。
+});
+```
+
+[AHC015の色別成分集計](../problems/ahc015/main.cpp)と
+[4サイズの差分テスト](../tests/small_grid_bit_flood_test.cpp)を参照。
+
 ## Grid BFS
 
 ヘッダ: [`grid-bfs.hpp`](../library/grid-bfs.hpp)
