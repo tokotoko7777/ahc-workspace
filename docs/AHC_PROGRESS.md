@@ -74,9 +74,11 @@
 | [AHC062](https://atcoder.jp/contests/ahc062/tasks/ahc062_a) | 着手・本番未判定 | gazelle、得点未確認 | 新規未調整18件 平均467,170,089 | 本番100件・3秒、同一ケースの証拠なし | [問題別ブランチ](https://github.com/tokotoko7777/ahc-workspace/tree/81151ac7b6335424f69b3bbb9da842061e296fb8)、[高低2本の経路](https://github.com/tokotoko7777/ahc-workspace/tree/083860ab332b39fa278b1736e3ca1e0561dc6765) |
 | [AHC063](https://atcoder.jp/contests/ahc063/tasks/ahc063_a) | 凍結版：本番未達 | **1,985,255,142,455**（順位相対点） | **1,189,793,908,234**（本番2,000件、当時の分布を固定） | 本番2,000件、基準とseed列照合済み | [尾の移動](https://github.com/tokotoko7777/ahc-workspace/tree/4a7f7b14ee8c06d079c94d10d19acd9df9d0f139)、[次の色](https://github.com/tokotoko7777/ahc-workspace/tree/6e48e0c6aea92464d043b408df772be340c25470)、[公式比較](https://github.com/tokotoko7777/ahc-workspace/tree/f7cb5923521b00e317025fa5eb2e1e1d2622a75a) |
 | [AHC064](https://atcoder.jp/contests/ahc064/tasks/ahc064_a) | 着手・本番未判定 | chokudai、得点未確認 | 新規未調整30件 平均93.833ターン | 本番150件、同一ケースの証拠なし | [同時操作](https://github.com/tokotoko7777/ahc-workspace/tree/63185be0c9a50743d00f846f73ca5f1ffab597e7)、[搬出順](https://github.com/tokotoko7777/ahc-workspace/tree/ab9244e54098611bbb35a322da00472d9bb95527) |
-| [AHC065](https://atcoder.jp/contests/ahc065/tasks/ahc065_a) | 着手・本番未判定 | 確認中 | 開発比較中 | 確認中 | 検証中 |
-| [AHC066](https://atcoder.jp/contests/ahc066/tasks/ahc066_a) | 着手・本番未判定 | 確認中 | 開発比較中 | 確認中 | 検証中 |
-| AHC067〜074 | 未着手 | — | — | — | — |
+| [AHC065](https://atcoder.jp/contests/ahc065/tasks/ahc065_a) | 着手・本番未判定 | rabot、得点未確認 | 既定：未調整28件 149,371,055 | 本番150件・2秒、同一ケースの証拠なし | [交差ベルト](https://github.com/tokotoko7777/ahc-workspace/tree/37f1f97176dcc631de043411873fa74d279b9a1a)、[2箱先](https://github.com/tokotoko7777/ahc-workspace/tree/f531373eb2eaaee30443e6c6df6296f5a83da40a) |
+| [AHC066](https://atcoder.jp/contests/ahc066/tasks/ahc066_a) | 凍結版：本番未達 | **1,893,330,847,366**（相対点） | **1,352,700,378,901**（本番2,000件・全件合法） | 本番2,000件、ケース別最低値 | [経路](https://github.com/tokotoko7777/ahc-workspace/tree/b69f28ac27f1bdfc0e4cf829de16762ea408ae35)、[マクロ候補](https://github.com/tokotoko7777/ahc-workspace/tree/84edb3f6302d8c76beb38d494282f833eb06cc74)、[公式比較](https://github.com/tokotoko7777/ahc-workspace/tree/588082c3b7a07866a338ac201e65b2ac1887bab6) |
+| [AHC067](https://atcoder.jp/contests/ahc067/tasks/ahc067_a) | 着手・本番未判定 | udon1206、得点未確認 | 未調整28件 100,997,213 | 本番150件・2秒、同一ケースの証拠なし | [問題別ブランチ](https://github.com/tokotoko7777/ahc-workspace/tree/5799ad6db455dd0d973d5fcdea14cb56a32f98d2) |
+| [AHC068](https://atcoder.jp/contests/ahc068/tasks/ahc068_a) | 着手・本番未判定 | 確認中 | 開発比較中 | 確認中 | 検証中 |
+| AHC069〜074 | 未着手 | — | — | — | — |
 
 ### AHC001 の次の仮説
 
@@ -855,3 +857,18 @@ AHC056は[公式採点CSV](https://img.atcoder.jp/ahc_standings/ahc056/result.cs
 
 [初版](https://github.com/tokotoko7777/ahc-workspace/tree/63185be0c9a50743d00f846f73ca5f1ffab597e7)。各線路ごとの操作順と搬送内容を厳密に保ち、同時に行える非交差な操作を選ぶ。新規未調整30件の平均ターンは直列241.933、同時数最大136.333、後続の長い操作を優先128.833（対同時数全勝、中央値7減）。180出力公式・独立一致、最大0.038199秒。
 [追試](https://github.com/tokotoko7777/ahc-workspace/tree/ab9244e54098611bbb35a322da00472d9bb95527)。共通の詰め替え器で各32候補を比較し、新規未調整30件は初版125.800、順序ランダム複数93.833、誘導順序101.067。後者はランダムに1勝1分28敗。180出力が公式と独立に一致、最大0.02161秒。ランダム複数を問題別既定。次は操作数でなく、詰め替え後の実ターンで搬出順を更新する。同じ本番150件の証拠はなく未判定。
+
+### AHC065 ベルトを交差させる搬出
+
+[公式問題文](https://atcoder.jp/contests/ahc065/tasks/ahc065_a)。2秒、本番150絶対点。首位rabotの点数・同一ケースは未確認。[初版](https://github.com/tokotoko7777/ahc-workspace/tree/37f1f97176dcc631de043411873fa74d279b9a1a)は全ての縦横隣接移動を実現できる交差配置で、同じ8経路候補を次の1箱と8箱の位置で比べた。未調整28件144,695,725→149,371,055（全勝）、操作155,828→138,801。84出力公式・独立一致、最大0.046秒。
+[追試](https://github.com/tokotoko7777/ahc-workspace/tree/f531373eb2eaaee30443e6c6df6296f5a83da40a)は同じ全搬出シミュレーション8回を現在8本／現在4本と次4本に分けた。別の未調整28件148,896,314→146,429,429（勝ちなし、操作140,427→149,277）。84出力公式・独立一致、最大約0.0166秒。既定にはせず、今の候補数を減らさず上位数案だけ先を読む。
+
+### AHC066 マクロを操作経路に組み込む
+
+[初版](https://github.com/tokotoko7777/ahc-workspace/tree/b69f28ac27f1bdfc0e4cf829de16762ea408ae35)。同じマクロ候補に対し、既存の経路を置換するだけでなく、マクロを1ボタンの辺として位置・向きの経路を引き直した。未調整28件288.750→248.679ボタン（全勝、中央値−24.5）、112出力公式・独立一致、最大0.030318秒。[追試](https://github.com/tokotoko7777/ahc-workspace/tree/84edb3f6302d8c76beb38d494282f833eb06cc74)は同じ追加10候補を、経路から抽出する案と幾何的なパターンから作る案で比較。新規未調整28件226.679／221.536／212.321ボタン（18勝7分3敗、中央値3.5削減）。全168出力が公式・独立一致、最大0.070245秒。問題別既定に採用。
+
+[公式比較](https://github.com/tokotoko7777/ahc-workspace/blob/588082c3b7a07866a338ac201e65b2ac1887bab6/problems/ahc066/OFFICIAL_AUDIT.md)。公開公式seedで2,000件を生成し、file・seed・N・M・T・Wを公式アーカイブと照合。入力に出ないWは公式ジェネレータの一時コピーでstderrに出すだけとし、生成した全入力が公式版とバイト一致したことを確認、評価は公式版で行った。全件合法で公式・独立一致、ボタン合計504,280、最大0.167271秒。候補 **1,352,700,378,901**、公式首位 **1,893,330,847,366**、ケース最小値の更新0で共通基準上1,269人中472位相当、同点なし。**未達**。次はマクロ位置と配送する順番を一緒に最適化する。
+
+### AHC067 必ず通る辺からスイッチへ迂回させる
+
+[公式問題文](https://atcoder.jp/contests/ahc067/tasks/ahc067_a)。2秒、本番150件。位置と扉の状態の最短距離を長くする。首位udon1206の得点は未確認。[初版](https://github.com/tokotoko7777/ahc-workspace/tree/5799ad6db455dd0d973d5fcdea14cb56a32f98d2)は同じ開閉候補の壁に対し、必ず通る橋から側道のスイッチへ行く順序を設計。未調整28件63,940,985→100,997,213（+57.95%、全勝）、最短距離合計2,792→6,834。全84出力で公式と独立の状態BFSが一致、最大0.0403秒。問題別既定に採用。本番未判定。次は同じ数の候補削除で、ただの迷路距離より扉を置いたあとの距離を優先する。
