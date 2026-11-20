@@ -39,9 +39,10 @@
 | [AHC029](https://atcoder.jp/contests/ahc029/tasks/ahc029_a) | 着手・本番未判定 | **2,200,575,652,801**（相対点） | 基準版：未調整28件 5,802,068（最終資金合計） | 本番3,000件・2秒、公開採点列と公式seedの対応を確認 | [問題別ブランチ](https://github.com/tokotoko7777/ahc-workspace/tree/400b9b1a8b5f302c0d5eccacc48953bed87484bd)、[増資後の追試](https://github.com/tokotoko7777/ahc-workspace/tree/94c34b158aa59b9a2d75153bd452ffa67faab2bd) |
 | [AHC030](https://atcoder.jp/contests/ahc030/tasks/ahc030_a) | 凍結版：本番未達 | **2,140,937,483,257**（相対点） | **323,222,495,387**（本番3,000件・全件初回正答） | 本番3,000件・3秒、ケース別基準・公式seedを照合済み | [問題別ブランチ](https://github.com/tokotoko7777/ahc-workspace/tree/ff4f0b02b3b5d35bb7a63748604649304e7c5d15)、[公式比較](https://github.com/tokotoko7777/ahc-workspace/tree/3dfdfcce6f81b2b034351960f8d506b8cdba735b)、[試し掘り追試](https://github.com/tokotoko7777/ahc-workspace/tree/a285e872f70c776469b2fe2780c9664de40bcc2b) |
 | [AHC031](https://atcoder.jp/contests/ahc031/tasks/ahc031_a) | 着手・本番未判定 | **1,722,250,219,489**（相対点） | 横壁整列：新規未調整30件 52,948,706（低いほど良い） | 本番2,000件・3秒、ケース別基準とseed列照合済み | [問題別ブランチ](https://github.com/tokotoko7777/ahc-workspace/tree/c1d15b819b45223d0c27bc3191918083c1b18362)、[横壁整列](https://github.com/tokotoko7777/ahc-workspace/tree/fb4acc4255f313b63cc46c95b3965fc983b2d528) |
-| [AHC032](https://atcoder.jp/contests/ahc032/tasks/ahc032_a) | 着手・本番未判定 | **11,854,207,127,046**（絶対点） | 未調整16件 平均79,106,180,582.44 | 本番150件、同一ケースの証拠なし | [問題別ブランチ](https://github.com/tokotoko7777/ahc-workspace/tree/0f8a8d2946ce1c6691db7ce95eee5ffa8a51006e) |
-| [AHC033](https://atcoder.jp/contests/ahc033/tasks/ahc033_a) | 着手・本番未判定 | 確認中 | 開発比較準備中 | 本番2,000件、相対方式 | 検証中 |
-| AHC034〜074 | 未着手 | — | — | — | — |
+| [AHC032](https://atcoder.jp/contests/ahc032/tasks/ahc032_a) | 着手・本番未判定 | **11,854,207,127,046**（絶対点） | 未調整16件 平均79,106,180,582.44 | 本番150件、同一ケースの証拠なし | [問題別ブランチ](https://github.com/tokotoko7777/ahc-workspace/tree/0f8a8d2946ce1c6691db7ce95eee5ffa8a51006e)、[方向の追試](https://github.com/tokotoko7777/ahc-workspace/tree/890cee4f0a8b60a076d3c98d6d8d6bffed43099) |
+| [AHC033](https://atcoder.jp/contests/ahc033/tasks/ahc033_a) | 着手・本番未判定 | bowwowforeach、得点未確認 | 未調整32件 合計9,754ターン | 本番2,000件、相対方式 | [問題別ブランチ](https://github.com/tokotoko7777/ahc-workspace/tree/131ef411f491cc1b6ed79c905fc98a8d52ffad5d) |
+| [AHC034](https://atcoder.jp/contests/ahc034/tasks/ahc034_a) | 着手・本番未判定 | 確認中 | 開発比較準備中 | 確認中 | 検証中 |
+| AHC035〜074 | 未着手 | — | — | — | — |
 
 ### AHC001 の次の仮説
 
@@ -502,3 +503,11 @@
 ### AHC033 本番条件
 
 [公式問題文](https://atcoder.jp/contests/ahc033/tasks/ahc033_a)。5×5の搬送、3秒 / 1,024 MiB、本番2,000件。ターン数、出口順の逆転・誤配送・未配送のペナルティの和を小さくし、ケース別最小値で相対化する。大クレーンだけで順序どおり出す基準と、小クレーンが前半に並行して取り出せるよう準備する案を比較する。
+
+### AHC032 同程度の評価回数を異なる向きへ分ける
+
+[追試](https://github.com/tokotoko7777/ahc-workspace/tree/890cee4f0a8b60a076d3c98d6d8d6bffed43099)。幅3,500の1方向に対し、幅1,750ずつを対向する2方向に使い、同じ入力で候補を比較。評価回数比は未調整で平均1.00291。未調整16件の平均は79,089,863,247.81→79,109,974,914.63だが5勝2分9敗・中央値約−895万、devも平均悪化。既定は1方向。全64出力が公式・独立採点で一致し最大1.395991秒。次は終盤で手数を使い切れるよう、手数別に候補を残す。
+
+### AHC033 小クレーンで先に搬入を整える
+
+[検証と実装](https://github.com/tokotoko7777/ahc-workspace/tree/131ef411f491cc1b6ed79c905fc98a8d52ffad5d)。各行の先頭1〜2個を小クレーンで同時に作業し、大クレーンの直列搬出につなぐ。dev16件5,411→4,870、未調整32件10,813→9,754ターン（−9.79%、全件改善）。全96出力が誤配送・逆順・未配送ゼロで、公式・独立検証が一致。最大約0.0071秒。問題別既定に採用。[公式結果JSON](https://atcoder.jp/contests/ahc033/results/json)の1位はbowwowforeach。公式の得点アーカイブが未取得なので、本番相対値は未判定。次は前処理後も、小クレーンの行内作業を衝突なく大クレーンと並行させる。
