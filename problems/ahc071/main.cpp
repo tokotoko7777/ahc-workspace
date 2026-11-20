@@ -84,7 +84,7 @@ struct Problem {
             }
         }
     };
-    Mask two(Plan& plan,int y,Mask upper,Mask lower,const Kernel& k) const {
+    Mask two(Plan& plan,int y,Mask upper,Mask lower,const Kernel& k,Mask foundation=~Mask(0)) const {
         constexpr int INF=1<<28;
         int n=k.transition.size();
         std::vector<int> current(n,INF),next(n),choice(n*(W+1),-1);
@@ -97,6 +97,7 @@ struct Problem {
                 for(int j=0;j<int(trans.size());++j) {
                     const auto& t=trans[j];
                     if((t.cover&need)!=need || x+std::max(t.up,t.dn)>W) continue;
+                    if(t.dn && !((foundation>>(x+(t.dn-1)/2))&1)) continue;
                     const int score=current[i]+t.weight;
                     if(score<next[t.next]) {
                         next[t.next]=score;choice[(x+1)*n+t.next]=i*64+j;
@@ -121,6 +122,43 @@ struct Problem {
         }
         return below;
     }
+    Plan windows(Plan plan,const Kernel& k,bool staggered) const {
+        struct Row {
+            int price=0;
+            Mask used=0,centers=0;
+            std::vector<std::tuple<int,int,int>> bricks;
+            void add(int x,int y,int l,int c) {
+                used|=((Mask(1)<<l)-1)<<x;
+                centers|=Mask(1)<<(x+(l-1)/2);
+                price+=c;bricks.emplace_back(x,y,l);
+            }
+        };
+        std::vector<Row> rows(H);
+        for(auto [x,y,l]:plan.bricks) rows[y].add(x,y,l,cost[l]);
+        auto improve=[&](int y) {
+            const Mask upper=holes[y] | (y+1<H ? rows[y+1].centers : 0);
+            const Mask below=y>=2 ? rows[y-2].used : ~Mask(0);
+            Plan v;
+            two(v,y,upper,holes[y-1],k,below);
+            if(v.cost<rows[y].price+rows[y-1].price) {
+                rows[y]={};rows[y-1]={};
+                for(auto [x,z,l]:v.bricks) rows[z].add(x,z,l,cost[l]);
+            }
+        };
+        for(int pass=0;pass<4;++pass) {
+            if(staggered) {
+                for(int parity=0;parity<2;++parity)
+                    for(int y=H-1;y>=1;--y)
+                        if(y%2==(parity+pass)%2) improve(y);
+            } else for(int y=H-1;y>=1;--y) improve(y);
+        }
+        Plan out;
+        for(auto& r:rows) {
+            out.cost+=r.price;
+            out.bricks.insert(out.bricks.end(),r.bricks.begin(),r.bricks.end());
+        }
+        return out;
+    }
     Plan solve() const {
         Plan best;
         Mask support=0;
@@ -137,6 +175,11 @@ struct Problem {
             if(y==0) one(candidate,0,holes[0]|support);
             if(candidate.cost<best.cost) best=std::move(candidate);
         }
+#if defined(AHC071_SWEEP_STAGGERED)
+        best=windows(std::move(best),kernel,true);
+#elif !defined(AHC071_NO_WINDOWS)
+        best=windows(std::move(best),kernel,false);
+#endif
 #endif
         return best;
     }

@@ -25,13 +25,16 @@ int main() {
                 self(self,x+l,old|(((Mask(1)<<l)-1)<<x),centers|(Mask(1)<<(x+(l-1)/2)),cost+p.cost[l]);
         };
         enumerate(enumerate,0,0,0,0);
+        Mask foundation=(rep%2) ? ~Mask(0) : ~(Mask(1)<<(rng()%p.W));
         int expected=1<<30;
         for(const Row& a:rows) if((a.occupied&need_a)==need_a)
-            for(const Row& b:rows) if(((need_b|a.centers)&b.occupied)==(need_b|a.centers))
+            for(const Row& b:rows) if((b.centers&foundation)==b.centers &&
+                                      ((need_b|a.centers)&b.occupied)==(need_b|a.centers))
                 expected=std::min(expected,a.cost+b.cost);
+        if(expected==(1<<30)) continue;
         Plan actual;
         Problem::Kernel kernel(p.cost);
-        const Mask below=p.two(actual,1,need_a,need_b,kernel);
+        const Mask below=p.two(actual,1,need_a,need_b,kernel,foundation);
         Mask covers[2]{},support[2]{};
         int cost=0;
         for(auto [x,y,l]:actual.bricks) {
@@ -44,6 +47,6 @@ int main() {
         }
         assert((covers[1]&need_a)==need_a);
         assert((covers[0]&(need_b|support[1]))==(need_b|support[1]));
-        assert(below==support[0] && cost==expected && actual.cost==expected);
+        assert((below&foundation)==below && below==support[0] && cost==expected && actual.cost==expected);
     }
 }
