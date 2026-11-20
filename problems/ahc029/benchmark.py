@@ -9,7 +9,7 @@ import time
 from pathlib import Path
 
 
-def score(case,transcript):
+def score(case,transcript,level_turns=None):
     tokens=iter(map(int,case.read_text().split()))
     n,m,k,t=(next(tokens) for _ in range(4))
     projects=[[next(tokens),next(tokens)] for _ in range(m)]
@@ -35,6 +35,8 @@ def score(case,transcript):
             raise ValueError("global card requires target zero")
         if typ==4:
             level+=1
+            if level_turns is not None:
+                level_turns.append(day+1)
             if level>20:
                 raise ValueError("capital increase cap")
         else:
@@ -64,10 +66,14 @@ def main():
         parser.add_argument(key, type=Path)
     parser.add_argument("--candidate-label",default="forecast")
     parser.add_argument("--rank-only",type=Path)
+    parser.add_argument("--secondary",type=Path)
+    parser.add_argument("--secondary-label",default="secondary")
     a = parser.parse_args()
     cases = sorted(a.inputs.resolve().glob("*.txt"))
     out, tester = a.out.resolve(), a.tester.resolve()
     solvers = [("baseline", a.baseline.resolve()), (a.candidate_label, a.candidate.resolve())]
+    if a.secondary is not None:
+        solvers.append((a.secondary_label,a.secondary.resolve()))
     if a.rank_only is not None:
         solvers.append(("rank-only",a.rank_only.resolve()))
     out.mkdir(parents=True, exist_ok=True)
@@ -94,11 +100,12 @@ def main():
                 if wall > 2:
                     raise TimeoutError("execution exceeded 2 seconds including tester")
                 actions = run.stdout.decode("ascii").strip()
-                s, level, m, k = score(case,actions)
+                level_turns = []
+                s, level, m, k = score(case,actions,level_turns)
                 match = re.fullmatch(r"Score = (\d+)\s*",run.stderr.decode("ascii"))
                 if match is None or int(match[1]) != s:
                     raise ValueError(f"official disagreement: {case} {s}, {run.stderr!r}")
-                row = {"score":s,"wall":wall,"level":level,"m":m,"k":k}
+                row = {"score":s,"wall":wall,"level":level,"m":m,"k":k,"level_turns":level_turns}
                 tmp = p.with_suffix(".tmp")
                 tmp.write_text(json.dumps(row)+"\n")
                 tmp.rename(p)
@@ -111,6 +118,9 @@ def main():
                           "max_wall":max(r["wall"] for r in rows)}
     summary["candidate_wins"] = sum(results[a.candidate_label,c.name]["score"] >
                                     results["baseline",c.name]["score"] for c in cases)
+    if a.secondary is not None:
+        summary["secondary_wins"] = sum(results[a.secondary_label,c.name]["score"] >
+                                        results["baseline",c.name]["score"] for c in cases)
     if a.rank_only is not None:
         summary["candidate_vs_rank_only_wins"] = sum(results[a.candidate_label,c.name]["score"]<
                                                      results["rank-only",c.name]["score"] for c in cases)

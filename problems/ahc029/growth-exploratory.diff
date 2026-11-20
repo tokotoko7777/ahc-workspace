@@ -1,0 +1,31 @@
+--- refined-main.cpp
++++ exploratory-main.cpp
+@@ -35,2 +34,0 @@
+-        auto abandon=[&](const Project& q) {
+-            if(remaining<4) return -1e20;
+@@ -38,8 +36,8 @@
+-            if(remaining>=30 && birth[&q-p.data()]<level) {
+-                // Old projects with short remaining work are still cheap to finish.
+-                const double h=q.work/scale,v=q.value/scale;
+-                if(h>=9 && v<=h+7)
+-                    return scale*(9.+std::min(18.,.34*h)-.26*v);
+-            }
+-#endif
+-            return q.work>80*scale && q.value<.91*q.work?10.*scale:-8.*scale;
++        auto abandon=[&](const Project& q) {
++            if(remaining<30 || birth[&q-p.data()]>=level) return -8.*scale;
++            // Old projects with short remaining work are still cheap to finish.
++            const double h=q.work/scale,v=q.value/scale;
++            if(h<9 || v>h+7) return -8.*scale;
++            // Replace stale slots once scaled labor is available. Global
++            // cancellation deducts this same cost on healthy slots.
++            return scale*(9.+std::min(18.,.34*h)-.26*v);
+@@ -46,0 +45 @@
++#endif
+@@ -51,0 +51,6 @@
++#if !defined(AHC029_TURNOVER) && !defined(AHC029_GROWTH_RESERVE)
++        auto abandon=[&](const Project& q) {
++            if(remaining<4) return -1e20;
++            return q.work>80*scale && q.value<.91*q.work?10.*scale:-8.*scale;
++        };
++#endif

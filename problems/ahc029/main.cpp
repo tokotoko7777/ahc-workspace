@@ -13,6 +13,9 @@ struct Policy {
     int level=0;
     double market_rate=18.;
     std::vector<Project> p;
+#if defined(AHC029_TURNOVER) || defined(AHC029_GROWTH_RESERVE)
+    std::vector<int> birth;
+#endif
     long long unit() const {return 1LL<<level;}
 
     void observe(const std::vector<Card>& offers) {
@@ -29,14 +32,22 @@ struct Policy {
         if(c.type==4) return level<20?1e30:-1e30;
 #ifndef AHC029_MARKET_FORECAST
         (void)money;
+        auto abandon=[&](const Project& q) {
+            if(remaining<4) return -1e20;
+#if defined(AHC029_TURNOVER) || defined(AHC029_GROWTH_RESERVE)
+            if(remaining>=30 && birth[&q-p.data()]<level) {
+                // Old projects with short remaining work are still cheap to finish.
+                const double h=q.work/scale,v=q.value/scale;
+                if(h>=9 && v<=h+7)
+                    return scale*(9.+std::min(18.,.34*h)-.26*v);
+            }
+#endif
+            return q.work>80*scale && q.value<.91*q.work?10.*scale:-8.*scale;
+        };
         auto work=[&](const Project& q) {
             if(q.work<=c.work) return double(q.value);
             if(remaining==1) return 0.;
             return double(q.value)*c.work/q.work;
-        };
-        auto abandon=[&](const Project& q) {
-            if(remaining<4) return -1e20;
-            return q.work>80*scale && q.value<.91*q.work?10.*scale:-8.*scale;
         };
 #else
         const double tau=std::max(3.,std::min(remaining,4)*std::max(8.,market_rate))*scale;
@@ -88,6 +99,9 @@ int main() {
     Policy policy;
     std::vector<Card> hand(n),offer(k);
     policy.p.resize(m);
+#if defined(AHC029_TURNOVER) || defined(AHC029_GROWTH_RESERVE)
+    policy.birth.resize(m);
+#endif
     for(auto& x:hand) std::cin>>x.type>>x.work;
     for(auto& p:policy.p) std::cin>>p.work>>p.value;
     Money money=0;
@@ -97,12 +111,25 @@ int main() {
         double best=-1e100;
         for(int i=0;i<n;++i) {
             auto [value,where]=policy.target_for(hand[i],rem,money);
+#if defined(AHC029_TURNOVER) || defined(AHC029_GROWTH_RESERVE)
+            if(policy.level && rem>30 && hand[i].type<2 && hand[i].work*4<policy.unit()*10)
+                value+=4.*policy.unit(); // recycle weak labor, unless a stronger payoff wins
+#endif
             if(value>best) c=i,j=where,best=value;
         }
         if(hand[c].type==4) {
             if(policy.level>=20) return 1;
             ++policy.level;
         }
+#if defined(AHC029_TURNOVER) || defined(AHC029_GROWTH_RESERVE)
+        const Card used=hand[c];
+        for(int i=0;i<m;++i) {
+            const bool touched=used.type==1||used.type==3||i==j;
+            const bool replaced=((used.type==2||used.type==3)||
+                                 (used.type<2&&policy.p[i].work<=used.work));
+            if(touched && replaced) policy.birth[i]=policy.level;
+        }
+#endif
         std::cout<<c<<' '<<j<<'\n'<<std::flush;
         for(auto& p:policy.p) if(!(std::cin>>p.work>>p.value)) return 1;
         if(!(std::cin>>money)) return 1;
@@ -116,6 +143,10 @@ int main() {
             const auto& x=offer[i];
             if(x.price>money) continue;
             if(x.type==4&&(rem<140||policy.level+queued>=20)) continue;
+#ifdef AHC029_GROWTH_RESERVE
+            // Reserve 5 units at the new level, not 5 at the current level.
+            if(x.type==4 && money-x.price<10*policy.unit()) continue;
+#endif
             auto [value,where]=policy.target_for(x,rem-1,money);
             (void)where;
             double net=value-x.price;
