@@ -1,5 +1,6 @@
 #pragma GCC optimize("O3")
 #include <algorithm>
+#include <cassert>
 #include <chrono>
 #include <cmath>
 #include <cstdint>
@@ -51,7 +52,8 @@ struct Problem {
         path.push_back(finish);
         return path;
     }
-    std::vector<int> improve(std::vector<int> route,Clock::time_point deadline) const {
+    std::vector<int> improve(std::vector<int> route,Clock::time_point deadline,
+                             bool extra=false,bool blocks=false) const {
         const auto d=[&](int a,int b){return dist[a][b];};
         const auto measure=[&](const auto& path) {
             int v=0;
@@ -61,16 +63,50 @@ struct Problem {
         auto best=route;
         int current=measure(route),record=current;
         RNG rand;
-        std::vector<int> work,classes,stack;
-        work.reserve(c+2);classes.reserve(c+2);stack.reserve(c/2);
+        if(extra) rand.x=66518751;
+        std::vector<int> work,classes,stack,block;
+        work.reserve(c+2);classes.reserve(c+2);stack.reserve(c/2);block.reserve(c);
         constexpr int iterations=20000;
         double temp=4;
         for(int it=0;it<iterations;++it) {
             if(it%64==0) {
                 if(Clock::now() >= deadline) break;
-                temp=4*std::pow(.07,double(it)/iterations);
+                temp=(extra ? 2. : 4.)*std::pow(.07,double(it)/iterations);
             }
             int a=rand.get()%c,b=match[a];
+            if(blocks && it%4==0) {
+                int l=1;
+                while(route[l]!=a && route[l]!=b) ++l;
+                int r=l+1;
+                while(route[r]!=a && route[r]!=b) ++r;
+                if(r-l>1) {
+                    // The matching endpoints enclose a complete balanced word.
+                    // Removing it leaves a complete word; any gap can host it.
+                    block.assign(route.begin()+l,route.begin()+r+1);
+                    work.assign(route.begin(),route.begin()+l);
+                    work.insert(work.end(),route.begin()+r+1,route.end());
+                    const int cut=d(route[l-1],route[r+1])-d(route[l-1],route[l])-d(route[r],route[r+1]);
+                    auto insert_cost=[&](int g,bool reverse) {
+                        return d(work[g-1],reverse?block.back():block.front())
+                              +d(reverse?block.front():block.back(),work[g])-d(work[g-1],work[g]);
+                    };
+                    int gap=1+rand.get()%(work.size()-1);
+                    bool reverse=rand.get()%2;
+                    int delta=insert_cost(gap,reverse);
+                    if(rand.get()%5)
+                        for(int g=1;g<int(work.size());++g) for(bool rev:{false,true}) {
+                            int dd=insert_cost(g,rev);
+                            if(dd<delta) delta=dd,gap=g,reverse=rev;
+                        }
+                    const int next=current+cut+delta;
+                    if(next>current && (rand.get()+.5)/4294967296.0>=std::exp((current-next)/temp)) continue;
+                    if(reverse) std::reverse(block.begin(),block.end());
+                    work.insert(work.begin()+gap,block.begin(),block.end());
+                    current=next;route.swap(work);
+                    if(next<record) record=next,best=route;
+                    continue;
+                }
+            }
             work.clear();classes.clear();stack.clear();
             work.push_back(start);classes.push_back(0);
             int reduced=0;
@@ -110,6 +146,7 @@ struct Problem {
             route.swap(work);
             if(next<record) record=next,best=route;
         }
+        assert(measure(best)==record);
         return best;
     }
     void emit(const std::vector<int>& route) const {
@@ -134,5 +171,12 @@ int main() {
     std::cin.tie(nullptr);std::ios::sync_with_stdio(false);
     auto deadline=Clock::now()+std::chrono::milliseconds(1550);
     Problem problem;
-    if(problem.read()) problem.emit(problem.improve(problem.greedy(),deadline));
+    if(!problem.read()) return 0;
+    auto route=problem.improve(problem.greedy(),deadline);
+#if defined(AHC059_EXTRA_PAIR)
+    route=problem.improve(std::move(route),deadline,true,false);
+#elif !defined(AHC059_ADJACENT) && !defined(AHC059_NO_EXTRA)
+    route=problem.improve(std::move(route),deadline,true,true);
+#endif
+    problem.emit(route);
 }
