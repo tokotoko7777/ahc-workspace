@@ -765,6 +765,23 @@ while (!queue.empty()) {
 キーは `uint64_t` です。負数、小数、取り出したキーより小さいキーを後から
 追加する用途には使えません。その場合は通常の `priority_queue` を使います。
 
+## 正方格子の8方向の点・区間
+
+ヘッダ: [`square-lattice-line-bits.hpp`](../library/square-lattice-line-bits.hpp)。
+64×64以下の正方格子で、8方向の最近傍点・途中に点があるか・線分の正長重複をビット演算で求めます。
+方向番号は E, NE, N, NW, W, SW, S, SE。点と単位辺には別インスタンスを使います。
+
+```cpp
+SquareLatticeLineBits marks(16), edges(16);
+marks.mark(4, 3);
+assert(marks.nearest_steps(1, 3, 0) == 3);
+edges.add_segment(1, 3, 0, 3);
+assert(!edges.overlaps_segment(4, 3, 0, 2)); // 端点共有だけ
+```
+
+[AHC014](../problems/ahc014/main.cpp)で長方形の候補列挙・重複判定に使用。
+[差分テスト](../tests/square_lattice_line_bits_test.cpp)では各方向を1マスずつ歩く参照と比較します。
+
 ## Grid BFS
 
 ヘッダ: [`grid-bfs.hpp`](../library/grid-bfs.hpp)
