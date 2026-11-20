@@ -2014,3 +2014,21 @@ sort(points.begin(), points.end(), [](const Point& a, const Point& b) {
 
 `bits=10` なら各座標は `0..1023` です。厳密な最近傍順ではありませんが、空間的に
 まとまったcluster作成、query順、cache localityの改善候補を1行のkeyで作れます。
+
+## Masked BFS workspace
+
+ヘッダ: [`masked-bfs-workspace.hpp`](../library/masked-bfs-workspace.hpp)
+
+同じ整数頂点グラフに対し、通行可能な頂点集合を変えながら BFS を繰り返す場合向け。
+距離・親・キューを保持し、世代番号で古い訪問結果を無効化します。
+
+```cpp
+MaskedBfsWorkspace bfs(graph.size());
+bfs.run(graph, goal, [&](int v) { return !blocked[v]; });
+int d = bfs.distance(start);  // 未到達なら -1
+int next = bfs.parent(start); // 逆向きに探索したので goal 方向の一歩
+```
+
+追加メモリ O(頂点数)。各探索は、訪問した頂点とその出辺に比例します（世代巻き戻し時の初期化を除く）。
+[AHC054の逐次経路建設](../problems/ahc054/main.cpp) と
+[素朴なBFSとの比較](../tests/masked_bfs_workspace_test.cpp)。
