@@ -2014,3 +2014,24 @@ sort(points.begin(), points.end(), [](const Point& a, const Point& b) {
 
 `bits=10` なら各座標は `0..1023` です。厳密な最近傍順ではありませんが、空間的に
 まとまったcluster作成、query順、cache localityの改善候補を1行のkeyで作れます。
+
+## Load-aware Route Summary
+
+[ヘッダ](../library/load-aware-route.hpp)・[愚直な走査との差分テスト](../tests/load_aware_route_test.cpp)。
+
+各訪問位置の荷量変化が決まっているとき、区間の連結・反転に対して、
+移動距離、荷量×距離、荷量の最小・最大prefixをまとめます。距離は
+位置IDの対から返し、反転する場合は対称である必要があります。
+
+```cpp
+auto dist = [](int a, int b) { return abs(a - b); };
+auto left = LoadAwareRoute::at(0, +12);
+auto right = LoadAwareRoute::at(3, -12);
+auto route = join_load_routes(left, right, dist);
+bool ok = route.feasible();                 // true
+long long cost = route.travel_cost(100);    // (100+12)*3
+bool reverse_ok = route.reversed().feasible(); // false
+```
+
+[AHC034](../problems/ahc034/main.cpp)の経路焼きなましでは区間木に
+この要約を格納し、荷崩れ（負の積荷）のない近傍だけを高速に評価します。
