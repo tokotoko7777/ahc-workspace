@@ -29,8 +29,9 @@
 | [AHC019](https://atcoder.jp/contests/ahc019/tasks/ahc019_a) | 着手・本番未判定 | **1,886,240,066,109**（相対点） | 新規未調整 30 件 30,684,752,148（絶対点・低い方が良い） | 本番公開 2,000 件、6 秒、ケース別基準が必要 | [問題別ブランチ](https://github.com/tokotoko7777/ahc-workspace/tree/7252e85e2d8a5d75038c0680f4ba43b4a43b3f05)、[部分再構築](https://github.com/tokotoko7777/ahc-workspace/tree/79fa2df9de9de4de4d658ea3f374ff983d7e4753) |
 | [AHC020](https://atcoder.jp/contests/ahc020/tasks/ahc020_a) | 着手・本番未判定 | **504,832,157**（絶対点） | 未調整16件 平均1,687,384.19 | 本番 300 件・2 秒、同一ケースの証拠なし | [問題別ブランチ](https://github.com/tokotoko7777/ahc-workspace/tree/96a97144e57022f452ce216eddf9c2d76adc3b32)、[配線費の共同評価](https://github.com/tokotoko7777/ahc-workspace/tree/411425e2f761d00f879c4965b8eee3b9e959e56a) |
 | [AHC021](https://atcoder.jp/contests/ahc021/tasks/ahc021_a) | 着手・本番未判定 | **13,589,420**（絶対点） | 交換削除：新規未調整20件 1,814,625 | 本番150件・2秒、同一ケースの証拠なし | [問題別ブランチ](https://github.com/tokotoko7777/ahc-workspace/tree/9306c3d973e9b622e3a35431363f5f7f6ab64225)、[交換削除](https://github.com/tokotoko7777/ahc-workspace/tree/ce5987e9b2769010a4568b3442108f2e02e29909) |
-| [AHC022](https://atcoder.jp/contests/ahc022/tasks/ahc022_a) | 着手・本番未判定 | [公式順位](https://atcoder.jp/contests/ahc022/standings) 要ログイン、1位点未確認 | 開発比較準備中 | 本番3,000件・4秒、相対方式 | 検証中 |
-| AHC023〜074 | 未着手 | — | — | — | — |
+| [AHC022](https://atcoder.jp/contests/ahc022/tasks/ahc022_a) | 着手・本番未判定 | [公式順位](https://atcoder.jp/contests/ahc022/standings) 要ログイン、1位点未確認 | 未調整30件すべて誤対応0、29勝（絶対点平均は低下） | 本番3,000件・4秒、相対方式 | [問題別ブランチ](https://github.com/tokotoko7777/ahc-workspace/tree/d255c7a5ce936552a98346c8d2bf764f78add849) |
+| [AHC023](https://atcoder.jp/contests/ahc023/tasks/asprocon10_a) | 着手・本番未判定 | [公式順位](https://atcoder.jp/contests/ahc023/standings) 要ログイン、1位点未確認 | 開発比較準備中 | 本番公開2,000件・2秒、絶対点 | 検証中 |
+| AHC024〜074 | 未着手 | — | — | — | — |
 
 ### AHC001 の次の仮説
 
@@ -329,3 +330,11 @@
 ### AHC021 後続の置換を使った不要交換の削除
 
 [追試](https://github.com/tokotoko7777/ahc-workspace/blob/ce5987e9b2769010a4568b3442108f2e02e29909/problems/ahc021/README.md)。同じ既存ビームの出力から、後続の交換により最後に影響する2頂点を特定し、ヒープ条件を維持できる操作だけを削除した。新規dev12件22,341→22,332交換、未調整20件37,088→37,075交換（10件改善、+65点、悪化なし）。64出力の公式点は独立再生と一致し全件完成、最大0.431秒。枝の既定に採用。次は2つの交換を同時に削除する近傍を調べる。
+
+### AHC022 複数方向の温度を符号にする
+
+[検証と実装](https://github.com/tokotoko7777/ahc-workspace/blob/d255c7a5ce936552a98346c8d2bf764f78add849/problems/ahc022/README.md)。温度1点の反復測定を対照に、複数方向の温度と曖昧な位置への追加測定を使用。dev・holdout各30件（ノイズ30段階）で対応誤りゼロ。holdoutでは30件中29件で改善したが、最小ノイズ1件の悪化が大きく単純平均は11,857,279.70→9,850,827.03。相対点は未計測。120出力は公式テスタと独立再生が一致、候補最大0.059609秒・5,477測定。問題別ブランチのみ採用。次は盤面の温度差を減らして配置費を下げつつ、誤対応増加を避ける。
+
+### AHC023 本番条件
+
+[公式問題文](https://atcoder.jp/contests/ahc023/tasks/asprocon10_a)。2秒 / 1,024 MiB。収穫した作物の期間和を `1e6/(HWT)` 倍した絶対点の合計（本番2,000件）。[公式本番seed](https://img.atcoder.jp/ahc023/seeds.txt)は2,000件でハッシュ `0c2ffe8037c0c232ed9775b89a892fc1f68709a1582c83fd6bb609244cefcf32` を照合。1位点は未確認。通路を木で確保し葉に植える基準との比較で、子孫の植付・収穫日に干渉しない期間を探して内部マスも使う。
