@@ -9,6 +9,13 @@
 #include <tuple>
 #include <vector>
 #include "../../library/orthogonal-slide-grid.hpp"
+#if !defined(AHC050_GREEDY_ONLY) && !defined(AHC050_LOOKAHEAD_ONLY) && \
+    !defined(AHC050_LOCAL_SWAP) && !defined(AHC050_INITIAL_ROUTE_ONLY) && !defined(AHC050_SUFFIX_SWAP)
+#define AHC050_SUFFIX_SWAP
+#endif
+#if defined(AHC050_SUFFIX_SWAP) || defined(AHC050_LOCAL_SWAP)
+#include "suffix_swap.hpp"
+#endif
 
 using Clock=std::chrono::steady_clock;
 struct Answer {
@@ -105,6 +112,21 @@ int main() {
     if(candidate.placements.size()==answer.placements.size() && candidate.expected>answer.expected)
         answer=std::move(candidate);
 #endif
+#endif
+#if defined(AHC050_SUFFIX_SWAP) || defined(AHC050_LOCAL_SWAP)
+    auto placements=answer.placements;
+    for(int pass=0;pass<5 && Clock::now()<deadline;++pass) {
+        auto changed=suffix_swap::sweep(n,wall,placements,pass%2,
+#ifdef AHC050_LOCAL_SWAP
+                                       false,
+#else
+                                       true,
+#endif
+                                       deadline);
+        if(changed.path.empty()) break;
+        placements=std::move(changed.path);
+        if(changed.expected>answer.expected) answer={changed.expected,placements};
+    }
 #endif
     for(int v:answer.placements) std::cout<<v/n<<' '<<v%n<<'\n';
     std::cerr<<"Model = "<<std::llround(1e6*answer.expected/(n*n-m-1))<<'\n';
