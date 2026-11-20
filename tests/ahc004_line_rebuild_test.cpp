@@ -51,7 +51,7 @@ int main(){
         }
         Timer t;
         double before=p.score(orig);
-        p.rebuild_line(orig,row,t,1000,stats);
+        p.rebuild_line(orig,row,t,1000,stats,it%3);
         assert(p.score(orig)>=before);
         const auto full=p.make_state(orig.board);
         assert(full.coverage.counts==orig.coverage.counts && p.score(full)==p.score(orig));

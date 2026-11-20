@@ -10,6 +10,10 @@
 #define AHC_CONTIG_SEED
 #endif
 
+#ifdef AHC_ANCHOR_GEOMETRY
+#include "anchor-congruence.hpp"
+#endif
+
 #include <bits/stdc++.h>
 #include "../../library/time-based-simulated-annealing.hpp"
 #include "../../library/aho-corasick.hpp"
@@ -91,6 +95,9 @@ struct GenomeProblem {
 #ifdef AHC004_FAST_PLACEMENT
     vector<array<uint64_t,20>> rotated_code, rotated_empty;
 #endif
+#ifdef AHC004_SOURCE_HOTPATH
+    char packed_board[400]{};
+#endif
     int empty = 0;
   };
   // TODO: 1近傍で変更する場所と変更後の値を書く（評価時にはStateを触らない）。
@@ -109,6 +116,30 @@ struct GenomeProblem {
   vector<int> changed_lines;
   vector<vector<int>> next_hits;
   int next_covered = 0, next_empty = 0;
+#ifdef AHC004_SOURCE_HOTPATH
+  struct FlatNode { int next[8],first,last; };
+  struct FlatOutput { int id,length; };
+  vector<FlatNode> flat_nodes;
+  vector<FlatOutput> flat_output;
+  char trial_board[400]{};
+  void scan_flat(const char* board,int line,vector<int>& hits)const{
+    hits.clear();
+    const auto* nodes=flat_nodes.data();
+    const auto* output=flat_output.data();
+    const int step=line<n?1:n;
+    const char* first=board+(line<n?line*n:line-n);
+    const int stop=n+max_length-1;
+    int state=0,k=0;
+    for(int p=0;p<stop;++p){
+      const char c=first[k*step];
+      if(++k==n)k=0;
+      if(c=='.'){state=0;continue;}
+      state=nodes[state].next[c-'A'];
+      for(int t=nodes[state].first;t<nodes[state].last;++t)
+        if(p+1-output[t].length<n)hits.push_back(output[t].id);
+    }
+  }
+#endif
 
   static vector<int> coverage_weights(const vector<Target>& targets) {
     vector<int> weights;
@@ -126,6 +157,18 @@ struct GenomeProblem {
       max_length = max(max_length, (int)symbols.size());
     }
     matcher.build();
+#ifdef AHC004_SOURCE_HOTPATH
+    assert(n<=20);
+    flat_nodes.reserve(matcher.nodes.size());
+    for(const auto& node:matcher.nodes){
+      FlatNode flat{};
+      copy(node.next.begin(),node.next.end(),flat.next);
+      flat.first=int(flat_output.size());
+      for(int id:node.output)flat_output.push_back({id,int(targets[id].text.size())});
+      flat.last=int(flat_output.size());
+      flat_nodes.push_back(flat);
+    }
+#endif
     for (int line = 0; line < 2*n; ++line) {
       for (int p = 0; p < n + max_length - 1; ++p) {
         line_cells[line].push_back(line < n ? line*n+p%n : (p%n)*n+line-n);
@@ -195,6 +238,9 @@ struct GenomeProblem {
     state.rotated_empty.resize(2*n);
 #endif
     state.coverage = coverage.make_state();
+#ifdef AHC004_SOURCE_HOTPATH
+    for(int r=0;r<n;++r)memcpy(state.packed_board+r*n,state.board[r].data(),n);
+#endif
     for (int line = 0; line < 2*n; ++line) {
       encode_line(state, line);
       scan_line(state.board, line, state.line_hits[line]);
@@ -219,7 +265,18 @@ struct GenomeProblem {
 #endif
   optional<Move> propose_move(const State& state, mt19937_64& rng, double) {
     auto random_int = [&](int upper) {
+#if defined(AHC004_SOURCE_HOTPATH) && defined(__SIZEOF_INT128__) && defined(__GLIBCXX__)
+      // The same full-width Lemire reduction used by current libstdc++ for
+      // mt19937_64. Keep the standard distribution on other implementations.
+      const uint64_t bound=upper;
+      for(;;){
+        const __uint128_t product=__uint128_t(rng())*bound;
+        const uint64_t low=uint64_t(product);
+        if(low>=bound || low>=uint64_t(-bound)%bound)return int(product>>64);
+      }
+#else
       return uniform_int_distribution<int>(0, upper-1)(rng);
+#endif
     };
     if (state.coverage.covered_weight == m) {
       const int cell = random_int(n*n);
@@ -245,15 +302,30 @@ struct GenomeProblem {
     int best_quality = INT_MIN, best_line = 0, best_start = 0, ties = 0;
 #ifdef AHC004_EXACT_PLACEMENT
     const bool rerank = (rng() & 3) == 0;
+#ifdef AHC004_SOURCE_HOTPATH
+    int line_quality[40],line_start[40],line_ties[40]{};
+    if(rerank)for(int i=0;i<2*n;++i)line_quality[i]=INT_MIN;
+#else
     array<int,40> line_quality, line_start, line_ties{};
     if (rerank) line_quality.fill(INT_MIN);
+#endif
 #endif
 #ifdef AHC004_FAST_PLACEMENT
     const int length = int(text.size());
     const uint64_t low_bits = ((1ULL << (3*length))-1)/7;
+#ifdef AHC004_SOURCE_HOTPATH
+    const auto* code_lanes=state.rotated_code.data();
+    const auto* empty_lanes=state.rotated_empty.data();
+    for(int line=0;line<2*n;++line){
+     const uint64_t* codes=code_lanes[line].data(),*empties=empty_lanes[line].data();
+     for(int start=0;start<n;++start){
+      const uint64_t empty=empties[start]&low_bits;
+      const uint64_t diff=codes[start]^word;
+#else
     for (int line = 0; line < 2*n; ++line) for (int start = 0; start < n; ++start) {
       const uint64_t empty = state.rotated_empty[line][start] & low_bits;
       const uint64_t diff = state.rotated_code[line][start] ^ word;
+#endif
       const uint64_t mismatch = (diff | (diff>>1) | (diff>>2) | empty) & low_bits;
       const int quality = 1250*(length - __builtin_popcountll(mismatch))
                          + 330*__builtin_popcountll(empty) - 250*length;
@@ -278,6 +350,9 @@ struct GenomeProblem {
         best_line = line; best_start = start;
       }
     }
+#if defined(AHC004_FAST_PLACEMENT) && defined(AHC004_SOURCE_HOTPATH)
+    }
+#endif
     auto build = [&](int line, int start) {
       Move move;
       move.changes.reserve(text.size());
@@ -295,8 +370,13 @@ struct GenomeProblem {
       // The geometric pass is only a filter. Compare alternatives on other
       // lines using exactly the same coverage delta that SA will accept.
       for (int alternative = 0; alternative < 3; ++alternative) {
+#ifdef AHC004_SOURCE_HOTPATH
+        int line=0;
+        for(int i=1;i<2*n;++i)if(line_quality[i]>line_quality[line])line=i;
+#else
         const int line = max_element(line_quality.begin(), line_quality.begin()+2*n)
                          - line_quality.begin();
+#endif
         if (line_quality[line] < best_quality-2500) break;
         line_quality[line] = INT_MIN;
         Move next = build(line, line_start[line]);
@@ -348,12 +428,21 @@ struct GenomeProblem {
   optional<Score> evaluate_move(const State& state, const Move& move, double threshold) {
     (void)threshold;
     coverage.clear_delta();
+#ifdef AHC004_SOURCE_HOTPATH
+    memcpy(trial_board,state.packed_board,n*n);
+#else
     scratch = state.board;
+#endif
     next_empty = state.empty;
     uint64_t line_mask = 0;
     for (auto [cell, c] : move.changes) {
+#ifdef AHC004_SOURCE_HOTPATH
+      next_empty+=(c=='.')-(trial_board[cell]=='.');
+      trial_board[cell]=c;
+#else
       next_empty += (c == '.') - (scratch[cell/n][cell%n] == '.');
       scratch[cell/n][cell%n] = c;
+#endif
       line_mask |= (1ULL << (cell/n)) | (1ULL << (n+cell%n));
     }
     if(move.invariant_line>=0)line_mask &= ~(1ULL << move.invariant_line);
@@ -364,13 +453,20 @@ struct GenomeProblem {
       line_mask &= line_mask - 1;
       changed_lines.push_back(line);
       for (int id : state.line_hits[line]) coverage.add_delta(id, -1);
+#ifdef AHC004_SOURCE_HOTPATH
+      scan_flat(trial_board,line,next_hits[line]);
+#else
       scan_line(scratch, line, next_hits[line]);
+#endif
       for (int id : next_hits[line]) coverage.add_delta(id, 1);
     }
     next_covered = state.coverage.covered_weight + coverage.score_delta(state.coverage);
     return score(next_covered, next_empty) - score(state);
   }
 
+#if (defined(AHC004_LINE_BROAD) || defined(AHC004_LINE_BROAD_SA_CONTROL)) && !defined(AHC004_LINE_REBUILD)
+#error "A post-rebuild tail requires AHC004_LINE_REBUILD"
+#endif
 #ifdef AHC004_LINE_REBUILD
   struct RebuildStats { int lines=0, checked=0, accepted=0; };
   // The orthogonal estimate may count the same newly available target
@@ -395,7 +491,8 @@ struct GenomeProblem {
     }
     return rewards;
   }
-  bool rebuild_line(State& current,int line,const Timer& timer,double deadline,RebuildStats& stats){
+  bool rebuild_line(State& current,int line,const Timer& timer,double deadline,RebuildStats& stats,
+                    int broad=0){
     if(timer.elapsed_ms()>=deadline)return false;
     ++stats.lines;
     assert(n<=20);
@@ -412,7 +509,11 @@ struct GenomeProblem {
     }
     struct Frag{int id,value,loss,agreement;uint64_t bits,mask;};
     vector<Frag> pool;
-    auto merit=[](const Frag& a){return 32*(a.value-a.loss)+a.agreement;};
+    // Diversified passes emphasize packet weight, then orthogonal support.
+    const int word_price=broad==1?48:broad==2?24:32;
+    const int orth_price=32;
+    const int agree_price=broad==1?-1:1;
+    auto merit=[&](const Frag& a){return word_price*a.value-orth_price*a.loss+agree_price*a.agreement;};
     for(int id=0;id<int(targets.size());++id)if(!blank.coverage.counts[id]){
       if((id&63)==0 && timer.elapsed_ms()>=deadline)break;
       vector<int> contained;
@@ -436,10 +537,11 @@ struct GenomeProblem {
         placements.push_back({id,weight,loss,agreement,bits,mask});
       }
       stable_sort(placements.begin(),placements.end(),[&](const Frag& a,const Frag& b){return merit(a)>merit(b);});
-      pool.insert(pool.end(),placements.begin(),placements.begin()+min(4,n));
+      pool.insert(pool.end(),placements.begin(),placements.begin()+min(broad?8:4,n));
     }
     stable_sort(pool.begin(),pool.end(),[&](const Frag& a,const Frag& b){return merit(a)>merit(b);});
-    if(pool.size()>96)pool.resize(96);
+    const size_t pool_limit=broad?224:96,beam_limit=broad?48:24;
+    if(pool.size()>pool_limit)pool.resize(pool_limit);
     struct Beam{uint64_t bits=0,mask=0;array<int,3> ids{-1,-1,-1};int reward=0,loss=0,agreement=0;};
     vector<Beam> beam(1);
     Move best_move;
@@ -475,14 +577,15 @@ struct GenomeProblem {
         }
         next.push_back(v);
       }
-      stable_sort(next.begin(),next.end(),[](const Beam& a,const Beam& b){
-        return 32*(a.reward-a.loss)+a.agreement>32*(b.reward-b.loss)+b.agreement;
+      auto beam_merit=[&](const Beam& v){return word_price*v.reward-orth_price*v.loss+agree_price*v.agreement;};
+      stable_sort(next.begin(),next.end(),[&](const Beam& a,const Beam& b){
+        return beam_merit(a)>beam_merit(b);
       });
       beam.clear();
       for(const auto& v:next){
         if(any_of(beam.begin(),beam.end(),[&](const Beam& b){return b.mask==v.mask && b.bits==v.bits;}))continue;
         beam.push_back(v);evaluate(v);
-        if(beam.size()==24 || timer.elapsed_ms()>=deadline)break;
+        if(beam.size()==beam_limit || timer.elapsed_ms()>=deadline)break;
       }
       if(beam.empty())break;
     }
@@ -497,7 +600,12 @@ struct GenomeProblem {
   // 不採用なら呼ばれないので、rollbackは不要。
   void apply_move(State& state, Move& move) {
     coverage.apply_delta(state.coverage);
+#ifdef AHC004_SOURCE_HOTPATH
+    memcpy(state.packed_board,trial_board,n*n);
+    for(auto [cell,c]:move.changes)state.board[cell/n][cell%n]=c;
+#else
     state.board.swap(scratch);
+#endif
     for (int line : changed_lines) {
       state.line_hits[line].swap(next_hits[line]);
       encode_line(state, line);
@@ -680,11 +788,7 @@ int main() {
   pair<int, int> best_score{-1, -1};
   int attempt = 0;
 
-  do {
-    Board board(n, string(n, '.'));
-#ifdef AHC_CONTIG_SEED
-    if(attempt%3==1)board=seed_from_contigs(n,targets,maximal_indices,random,4+(attempt/3)%3);
-#endif
+  const auto fill_words = [&](Board& board, int attempt) {
     vector<int> order = maximal_indices;
     vector<uint64_t> priority(target_count);
     for (int index : order) {
@@ -790,6 +894,40 @@ int main() {
       }
     }
 
+  };
+
+#ifdef AHC004_LINE_REBUILD
+  const char* checkpoint_in=getenv("AHC004_LINE_CHECKPOINT_IN");
+  const char* checkpoint_out=getenv("AHC004_LINE_CHECKPOINT_OUT");
+  if(checkpoint_in && checkpoint_out)return 2;
+  double checkpoint_spare=0;
+  vector<int> checkpoint_lines;
+  if(checkpoint_in){
+    ifstream file(checkpoint_in);
+    string magic;
+    uint64_t hash=0;
+    int dimension=0;
+    if(!(file>>magic>>hash>>dimension>>checkpoint_spare) || magic!="AHC004_LINE_V1" ||
+       hash!=input_hash || dimension!=n || !isfinite(checkpoint_spare) ||
+       checkpoint_spare<0 || checkpoint_spare>300.0)return 2;
+    for(string& row:best_board){
+      if(!(file>>row) || int(row.size())!=n ||
+         row.find_first_not_of(".ABCDEFGH")!=string::npos)return 2;
+    }
+    checkpoint_lines.resize(2*n);
+    for(int& v:checkpoint_lines)if(!(file>>v))return 2;
+    auto sorted=checkpoint_lines;ranges::sort(sorted);
+    for(int i=0;i<2*n;++i)if(sorted[i]!=i)return 2;
+    if(!(file>>random.engine))return 2;
+  }
+  if(!checkpoint_in)
+#endif
+  do {
+    Board board(n, string(n, '.'));
+#ifdef AHC_CONTIG_SEED
+    if(attempt%3==1)board=seed_from_contigs(n,targets,maximal_indices,random,4+(attempt/3)%3);
+#endif
+    fill_words(board, attempt);
     const pair<int, int> score = count_score(board);
     if (score > best_score) {
       best_score = score;
@@ -798,6 +936,85 @@ int main() {
     ++attempt;
   } while (timer.elapsed_ms() < GREEDY_END_MS);
 
+#ifdef AHC_ANCHOR_GEOMETRY
+#ifdef AHC004_LINE_REBUILD
+  if (!checkpoint_in) {
+#endif
+  // First finish and score the original starts above. Geometry then spends
+  // part of the existing wall-clock allowance, never replacing a better seed.
+  const auto ordinary_key = best_score;
+  constexpr double GEOMETRY_END_MS = 1000.0;
+  const auto past_geometry = [&] { return timer.elapsed_ms() >= GEOMETRY_END_MS; };
+  vector<string> words;
+  vector<int> weights;
+  for (const auto& target : targets) {
+    words.push_back(target.text);
+    weights.push_back(target.frequency);
+  }
+  const double extraction_end = timer.elapsed_ms() + 12.0;
+  auto closed = ahc004::observed_cycles(n, words, weights, 28000,
+      [&] { return past_geometry() || timer.elapsed_ms() >= extraction_end; });
+  // Beyond 42 cycles, do not let false positives make the distinct matching
+  // lower bound impossible. The evidence ranking already prefers read support.
+  if (closed.cycles.size() > 40) closed.cycles.resize(40);
+  int sweep_visits=0, fourth_visits=0, realized=0, kept_rows=0, kept_cols=0;
+  bool sweep_cap=false, fourth_cap=false;
+  pair<int,int> raw{-1,-1}, filled_key{-1,-1};
+  int supported_reads=0;
+  if (closed.cycles.size() >= 28) {
+    vector<bool> seen(target_count);
+    for (const auto& c : closed.cycles) for (int id : c.words) seen[id]=true;
+    for (int id=0; id<target_count; ++id) if (seen[id]) supported_reads+=weights[id];
+  }
+  if (closed.cycles.size() >= 28 && 4*supported_reads >= 3*m && !past_geometry()) {
+    const double triple_end = min(GEOMETRY_END_MS-50.0, timer.elapsed_ms()+175.0);
+    auto anchors = ahc004::three_parallel_anchors(closed.cycles, 1368000,
+         [&] {return timer.elapsed_ms() >= triple_end;}, 768);
+    const double four_end = GEOMETRY_END_MS-60.0;
+    auto fourth = ahc004::fourth_row_extensions(closed.cycles, anchors.layouts,
+         15000000, [&] {return timer.elapsed_ms() >= four_end;});
+    sweep_visits=anchors.examined;
+    fourth_visits=fourth.examined;
+    sweep_cap=anchors.capped;
+    fourth_cap=fourth.capped;
+    for (const auto& f : fourth.ranked) {
+      if (realized>=4 || past_geometry()) break;
+      auto geometry=ahc004::realize_anchor(closed.cycles,anchors.layouts[f.parent],f,past_geometry);
+      if (geometry.board.empty()) continue;
+      ++realized;
+      raw=max(raw,count_score(geometry.board));
+      if(past_geometry()) break;
+      fill_words(geometry.board, attempt+realized);
+      auto key=count_score(geometry.board);
+      if(key>filled_key) {
+        filled_key=key;
+        kept_rows=geometry.rows;
+        kept_cols=geometry.columns;
+      }
+      if(key>best_score) {
+        best_score=key;
+        best_board=move(geometry.board);
+      }
+    }
+  }
+  cerr << "geometry_cycles=" << closed.cycles.size()
+       << " geometry_extraction_capped=" << closed.capped
+       << " geometry_supported=" << supported_reads << " geometry_words=" << m
+       << " geometry_sweep_visits=" << sweep_visits
+       << " geometry_sweep_cap=" << sweep_cap
+       << " geometry_fourth_visits=" << fourth_visits
+       << " geometry_fourth_cap=" << fourth_cap
+       << " geometry_realized=" << realized
+       << " geometry_rows=" << kept_rows << " geometry_cols=" << kept_cols
+       << " geometry_regular=" << ordinary_key.first << " geometry_regular_empty=" << ordinary_key.second
+       << " geometry_raw=" << raw.first << " geometry_raw_empty=" << raw.second
+       << " geometry_filled=" << filled_key.first << " geometry_filled_empty=" << filled_key.second
+       << " geometry_selected=" << (best_score>ordinary_key)
+       << " geometry_ms=" << timer.elapsed_ms() << '\n';
+#ifdef AHC004_LINE_REBUILD
+  }
+#endif
+#endif
   GenomeProblem problem(n, m, targets);
   auto initial = problem.make_state(best_board);
   const double initial_score = problem.score(initial);
@@ -807,7 +1024,11 @@ int main() {
   constexpr double ANNEAL_END_MS = SEARCH_END_MS;
 #endif
   const double remaining_ms = ANNEAL_END_MS - timer.elapsed_ms();
-  if (remaining_ms > 0) {
+  if (remaining_ms > 0
+#ifdef AHC004_LINE_REBUILD
+      && !checkpoint_in
+#endif
+      ) {
     TimeBasedAnnealingRunner<GenomeProblem> runner(
         problem, std::move(initial), initial_score, remaining_ms, 6.0, 0.03,
         input_hash, 32);
@@ -821,7 +1042,8 @@ int main() {
   const auto pre=problem.score(pol);
   GenomeProblem::RebuildStats stats;
   vector<int> lines(2*n);iota(lines.begin(),lines.end(),0);
-  for(int round=0;round<4 && timer.elapsed_ms()<SEARCH_END_MS;++round){
+  if(checkpoint_in)lines=checkpoint_lines;
+  for(int round=0;!checkpoint_in && round<4 && timer.elapsed_ms()<SEARCH_END_MS;++round){
     shuffle(lines.begin(),lines.end(),random.engine);
     int old=stats.accepted;
     for(int line:lines){
@@ -832,7 +1054,54 @@ int main() {
   }
   cerr<<"line_rebuild lines="<<stats.lines<<" exact="<<stats.checked<<" accepted="<<stats.accepted
       <<" initial="<<pre<<" final="<<problem.score(pol)<<'\n';
+  const double saved_spare=max(0.,SEARCH_END_MS-timer.elapsed_ms());
+  if(checkpoint_out){
+    ofstream file(checkpoint_out);
+    file<<"AHC004_LINE_V1 "<<input_hash<<' '<<n<<' '<<setprecision(17)<<saved_spare<<'\n';
+    for(const string& row:pol.board)file<<row<<'\n';
+    for(int v:lines)file<<v<<' ';
+    file<<'\n'<<random.engine<<'\n';
+    if(!file)return 2;
+  }
+#if defined(AHC004_LINE_BROAD) && defined(AHC004_LINE_BROAD_SA_CONTROL)
+#error "Select a single post-rebuild tail"
+#endif
+#if defined(AHC004_LINE_BROAD) || defined(AHC004_LINE_BROAD_SA_CONTROL)
+  const double tail_pre=problem.score(pol);
+  const double tail_start=timer.elapsed_ms();
+  const double tail_end=checkpoint_in?tail_start+checkpoint_spare:SEARCH_END_MS;
+#ifdef AHC004_LINE_BROAD
+  GenomeProblem::RebuildStats wide;
+  for(int sweep=0;sweep<8 && timer.elapsed_ms()<tail_end;++sweep){
+    shuffle(lines.begin(),lines.end(),random.engine);
+    for(int line:lines){
+      if(timer.elapsed_ms()>=tail_end)break;
+      problem.rebuild_line(pol,line,timer,tail_end,wide,1+sweep%2);
+    }
+  }
+  cerr<<"line_tail broad lines="<<wide.lines<<" exact="<<wide.checked<<" accepted="<<wide.accepted
+      <<" start_ms="<<tail_start<<" end_ms="<<timer.elapsed_ms()<<" initial="<<tail_pre
+      <<" final="<<problem.score(pol)<<'\n';
   best_board=std::move(pol.board);
+#else
+  const double spare=tail_end-tail_start;
+  if(spare>0){
+    TimeBasedAnnealingRunner<GenomeProblem> tail(problem,std::move(pol),tail_pre,spare,0.10,0.012,
+                                                 input_hash^0xc288746dULL,32);
+    tail.run();
+    cerr<<"line_tail sa iterations="<<tail.iterations()<<" start_ms="<<tail_start
+        <<" end_ms="<<timer.elapsed_ms()<<" initial="<<tail_pre
+        <<" final="<<problem.score(tail.best_state())<<'\n';
+    best_board=tail.best_state().board;
+  }else{
+    cerr<<"line_tail sa iterations=0 start_ms="<<tail_start<<" end_ms="<<timer.elapsed_ms()
+        <<" initial="<<tail_pre<<" final="<<tail_pre<<'\n';
+    best_board=std::move(pol.board);
+  }
+#endif
+#else
+  best_board=std::move(pol.board);
+#endif
 #elif defined(AHC004_LINE_REBUILD_SA_CONTROL)
   auto pol=problem.make_state(best_board);
   const auto pre=problem.score(pol);

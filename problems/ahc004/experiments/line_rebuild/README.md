@@ -44,3 +44,36 @@ g++ -std=gnu++23 tests/ahc004_line_rebuild_test.cpp -o /tmp/ahc004-line-unit
 The source carries the existing GCC O3 pragma. The synthetic unit test
 checks both axes and cyclic orthogonal reward against naive matching,
 exact monotonicity, and cached count/window reconstruction after application.
+
+## Optional post-rebuild tail
+
+Use `-DAHC004_LINE_REBUILD` and exactly one of these additional flags:
+
+- `-DAHC004_LINE_BROAD`: broaden pool from 96 to 224 and beam from 24 to
+  48, retain up to eight placements for each fragment rather than four,
+  alternate fragment-weight and orthogonal-reward biases, and rank by exact
+  score at every depth. Even after one unproductive broad sweep the next
+  bias is tried, up to eight sweeps or the deadline.
+- `-DAHC004_LINE_BROAD_SA_CONTROL`: use remaining time from the exact
+  post-narrow incumbent for rebased cached placement SA, at temperatures
+  0.10 to 0.012. This differs from the earlier
+  `-DAHC004_LINE_REBUILD_SA_CONTROL` (which omits the narrow phase).
+
+Use `-DAHC004_FAST_PLACEMENT` in both arms; optional
+`-DAHC004_EXACT_PLACEMENT` can be enabled in both as an identical upstream
+setting. With no environment variables, complete runs keep the 2,780 ms
+target. Read `line_rebuild` then `line_tail broad/sa` logs for initial/final
+scores, deadline/timing, and actual proposals or evaluations.
+
+For an **identical-incumbent** mechanism comparison, run any
+`-DAHC004_LINE_REBUILD` executable on the input with
+`AHC004_LINE_CHECKPOINT_OUT=/tmp/case.state`. The snapshot contains the
+exact post-narrow board, pending time, line permutation, random state, and
+input fingerprint. Then run both tail executables on the same official
+input with `AHC004_LINE_CHECKPOINT_IN=/tmp/case.state`. Both rebuild the
+same caches and get the same saved time **starting at the tail**; compare
+solver outputs via the official tool. Do not mistake standalone tail wall
+for the normal end-to-end time, and do not use checkpoint files in
+production runs. Cold timed prefixes in full independent runs can still
+end at different boards, so record this separate diagnostic when needed.
+No official comparison was launched for this change.
