@@ -12,7 +12,7 @@
 | [AHC002](https://atcoder.jp/contests/ahc002/tasks/ahc002_a) | 既存版から着手・未判定 | **6,255,977** 点（[AtCoder 提供の順位データ](https://huggingface.co/datasets/SakanaAI/ALE-Bench/blob/main/ahc002.zip)） | V10（未調整 20 件 1,254,587） | 本番 100 件。通常配布の 0–99 は別ケース | [codex/ahc002-corridor-repair-20261120](https://github.com/tokotoko7777/ahc-workspace/tree/codex/ahc002-corridor-repair-20261120) |
 | [AHC003](https://atcoder.jp/contests/ahc003/tasks/ahc003_a) | 本番 3,000 件を評価中・未判定 | **2,926,767,743,437** 点（[AtCoder 提供の順位データ](https://huggingface.co/datasets/SakanaAI/ALE-Bench/blob/main/ahc003.zip)） | 既存版を凍結 | 公式対話テスタ、本番公開シード 3,000 件、2 秒 | [codex/ahc003-probe-design-20261120](https://github.com/tokotoko7777/ahc-workspace/tree/codex/ahc003-probe-design-20261120) |
 | [AHC004](https://atcoder.jp/contests/ahc004/tasks/ahc004_a) | ローカル改善・本番未判定 | **7,321,305,762** 点（[AtCoder 提供の順位データ](https://huggingface.co/datasets/SakanaAI/ALE-Bench/blob/main/ahc004.zip)） | 周期パターン初期化: 未調整 10 件 681,224,023（旧 662,753,350） | 本番 100 件。通常配布の 0–99 は別ケース | [codex/ahc004-contig-seed-20261120](https://github.com/tokotoko7777/ahc-workspace/tree/codex/ahc004-contig-seed-20261120) |
-| AHC005 | 着手・未判定 | 確認中 | — | — | 検証中 |
+| [AHC005](https://atcoder.jp/contests/ahc005/tasks/ahc005_a) | ローカル比較・本番未判定 | **22,318,770** 点（[AtCoder 提供の順位データ](https://huggingface.co/datasets/SakanaAI/ALE-Bench/blob/main/ahc005.zip)） | 既存版: 未調整 8 件 1,761,160 | 通常配布の 0–99 は本番 100 件と別 | [codex/ahc005-route-splice-20261120](https://github.com/tokotoko7777/ahc-workspace/tree/codex/ahc005-route-splice-20261120) |
 | AHC006〜074 | 未着手 | — | — | — | — |
 
 ### AHC001 の次の仮説
@@ -91,3 +91,10 @@
 
 - [実装・再現手順](https://github.com/tokotoko7777/ahc-workspace/blob/88dfd64092fbefe29c5d2e8770d08813ee522452/problems/ahc004/experiments/line_cycle/README.md) を別の問題ブランチに保存。行や列を一つ回転、または同方向の二本を交換し、平行方向の部分列集合を維持。直交方向だけを差分更新する。
 - 新規開発 8 件、周期初期化版の同一盤面から両方 105 ms の追加探索で比較。既存操作の追加探索を対照とし、平均 +140,634 点、3 勝 5 分。最長 2.894019 秒（初期解込み・ローカル）。全 24 出力で公式採点と独立検査が一致し、ランダムな差分検査 70 盤面 × 各 100 操作と C++23 ビルドを通した。固定開始の診断だけで、通常版は変更しない。本番比較は未判定。
+
+### AHC005 経路の短縮と観測区間の強制性
+
+- [実装と再現手順](https://github.com/tokotoko7777/ahc-workspace/blob/b684d67d0286d48bd4a34fb7c9136a7a8cab2d40/problems/ahc005/README.md)。実際の歩行列を短い経路に差し替えたときも、各道路セルが縦か横のどちらかの訪問区間で観測されるかを差分更新する。
+- 開発 8 件の合計 1,884,887 → 1,889,028、独立確認 8 件は 1,761,160 → 1,750,812。経路差し替えそのものが短縮した例は 0/16、既定は既存のまま。全 32 出力で完全観測、公式採点と独立の視線検査が一致、最大 2.638180 秒。C++23 単一ファイル、被覆・巻き戻しの乱択照合を通過。
+- 縦・横区間から観測する集合を二部グラフで調べたところ、16 件すべてで全長区間が単独観測セルまたは出発地により実質必須だった。この実験に対して安い被覆集合を選ぶだけの案は打ち切り。次は区間に専用の立ち寄り点を置くのではなく、順序探索中から経由する最短経路上の観測を組み込む。
+- [公式問題文](https://atcoder.jp/contests/ahc005/tasks/ahc005_a) は 100 ケース・3 秒、通常配布の 0–99 と本番は別。順位 `standings_scores.csv` の 1 位は 22,318,770 点。配布元と同じ SHA-256 `2d223bee36c1499c98f1e9e927766bbf135f5d8a7f4e05890b4df044d790b484` の公開順位アーカイブを参照した。本番比較は未判定。
