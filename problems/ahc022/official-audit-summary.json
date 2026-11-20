@@ -1,0 +1,29 @@
+{
+  "case_count": 3000,
+  "ordered_case_bytes_sha256": "a7de90d18b5cb76627acdb032a038d37d29713726a0017d01bae03b3f5f150a9",
+  "generator_mode": "published seed file only; no parameter overrides",
+  "sources_sha256": {
+    "seeds": "2154215b63e063812cf2bb0ee2370c5193ae4682a3f7ce260e82a52a07663206",
+    "inputs": "144726d1aed0310736ffcdc74be1ebddc0e712e45bba355d861bb728f6e095cd",
+    "scores": "5864a1b7c0699e66db295ed12611c53567e944f5bbd8965621ac8648b34e2cf1"
+  },
+  "generator_sha256": "1e36f815fd95fbdb15631b81d52099a135ac3afb3440124f0b051a9617453099",
+  "tester_sha256": "742564ffc05e18d2c647d51b77adbf7c3398b72f300bbb948e8d16f811ad32f3",
+  "solver_sha256": "e63bb52c04a147a0225fd14663483d192deee76b0dd07e3c4a4994e67e3e23dd",
+  "archived_first_user": "Jirotech",
+  "archived_first_score": 2808216532758,
+  "own_cases": 3000,
+  "errors": {
+    "0": 3000
+  },
+  "max_wall_seconds": 0.2246369190106634,
+  "total_absolute_score": 37578375772,
+  "own_over_historical_case_max": 0,
+  "own_fixed_historical_baseline": 271023954031,
+  "own_combined_baseline": 271023954031,
+  "archived_first_combined_baseline": 2808216532758,
+  "best_historical_user_after_combining": "Jirotech",
+  "best_historical_score_after_combining": 2808216532758,
+  "new_rank": 307,
+  "tied_archived_participants": 0
+}

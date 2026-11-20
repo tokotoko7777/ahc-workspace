@@ -2,7 +2,7 @@
 
 - [公式問題文](https://atcoder.jp/contests/ahc022/tasks/ahc022_a)・[公式順位表](https://atcoder.jp/contests/ahc022/standings)・[公式対話テスタ等](https://img.atcoder.jp/ahc022/u4u4grds7n.zip)
 - 絶対点は `ceil(10^14 × 0.8^誤答数 / (配置費+計測費+10^5))`。ケース相対点は `round(10^9 × 自分の絶対点 / 順位対象中の最高絶対点)`、本番3000ケースを合計。4秒、1024MiB、計測は最大10,000回。
-- 最終1位の相対点は**未確認**。公式順位表は未ログインで開けず、[ALE-Bench](https://huggingface.co/datasets/SakanaAI/ALE-Bench/tree/main)に `ahc022.zip` がない。[本番システムseed](https://img.atcoder.jp/ahc022/seeds.txt)のSHA-256は `2154215b63e063812cf2bb0ee2370c5193ae4682a3f7ce260e82a52a07663206`。本番seed・相対基準値を使っていないので **未判定**。
+- 最終1位は **2,808,216,532,758**（Jirotech）。[公式アーカイブのケース別得点](https://img.atcoder.jp/ahc_standings/ahc022/result.csv)から再構成し、[公式順位](https://atcoder.jp/contests/ahc022/results/json)と照合した。[本番3000ケースの照合・検証](OFFICIAL_AUDIT.md)を参照。下記の開発・holdoutは本番ケースと別。
 
 ## 解法
 
