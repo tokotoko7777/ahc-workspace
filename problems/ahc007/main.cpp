@@ -42,6 +42,83 @@ int play_then_complete(Dsu dsu, int first, int end,
 }
 #endif
 
+#ifdef AHC_MATCHED_REPLACEMENT
+struct PrefixPlay {
+    Dsu tree;
+    int cost=0;
+};
+struct SuffixTree {
+    int cost=0;
+    std::vector<Edge> selected;
+};
+PrefixPlay play_prefix(Dsu dsu,int first,int end,const std::vector<Edge>& edges,
+                       const std::vector<Edge>& mean_order,const std::array<int,M>& weights) {
+    PrefixPlay out{std::move(dsu),0};
+    Dsu scratch(N);
+    for(int i=first;i<end;++i) {
+        const auto& e=edges[i];
+        if(out.tree.same(e.from,e.to)) continue;
+        scratch=out.tree;
+        const auto limit=kruskal_path_bottleneck(scratch,mean_order,e.from,e.to,
+            [i](const Edge& other){return other.id>i;});
+        if(!limit || weights[i]<=*limit) out.tree.unite(e.from,e.to),out.cost+=weights[i];
+    }
+    return out;
+}
+SuffixTree suffix(const PrefixPlay& prefix,int first,const std::vector<Edge>& sample) {
+    Dsu tree=prefix.tree;
+    SuffixTree out{prefix.cost,{}};
+    for(const auto& e:sample) {
+        if(tree.component_count()==1) break;
+        if(e.id>=first && tree.unite(e.from,e.to)) out.cost+=e.cost,out.selected.push_back(e);
+    }
+    if(tree.component_count()!=1) out.cost=-1;
+    return out;
+}
+// The final release on the unique sampled replacement path under contraction.
+int final_release(Dsu contracted,const std::vector<Edge>& tree,int a,int b) {
+    a=contracted.leader(a);b=contracted.leader(b);
+    if(a==b) return -1;
+    std::array<int,N> head,seen,queue;
+    head.fill(-1);seen.fill(-2);
+    int num=0;
+    std::array<int,2*N> to,next,id;
+    auto add=[&](int x,int y,int e) {
+        to[num]=y;next[num]=head[x];id[num]=e;head[x]=num++;
+    };
+    for(auto e:tree) {
+        int u=contracted.leader(e.from),v=contracted.leader(e.to);
+        add(u,v,e.id);add(v,u,e.id);
+    }
+    int cur=0,last=1;queue[0]=a;seen[a]=-1;
+    while(cur<last) {
+        int x=queue[cur++];
+        if(x==b) return seen[x];
+        for(int i=head[x];i>=0;i=next[i]) if(seen[to[i]]==-2) {
+            seen[to[i]]=std::max(seen[x],id[i]);
+            queue[last++]=to[i];
+        }
+    }
+    return -1;
+}
+int can_accept_at_release(const PrefixPlay& prefix,const SuffixTree& offline,int release,
+                          const std::vector<Edge>& mean_order,const std::vector<Edge>& sample) {
+    const auto e=std::find_if(offline.selected.begin(),offline.selected.end(),
+                              [release](const Edge& x){return x.id==release;});
+    if(e==offline.selected.end()) return offline.cost;
+    PrefixPlay before=prefix;
+    for(const auto& x:offline.selected) if(x.id<release && before.tree.unite(x.from,x.to))
+        before.cost+=x.cost;
+    Dsu scratch=before.tree;
+    const auto threshold=kruskal_path_bottleneck(scratch,mean_order,e->from,e->to,
+        [release](const Edge& x){return x.id>release;});
+    if(!threshold || e->cost<=*threshold) return offline.cost;
+    const auto late=suffix(before,release+1,sample);
+    if(late.cost<0) return offline.cost;
+    return std::max(offline.cost,late.cost);
+}
+#endif
+
 int main() {
 #ifdef AHC_PAIRED_ROLLOUT
     const auto started = std::chrono::steady_clock::now();
@@ -49,6 +126,9 @@ int main() {
     const auto rollout_deadline = started + std::chrono::milliseconds(1350);
     const auto scenario_deadline = started + std::chrono::milliseconds(1550);
     int rollouts = 0, changes = 0;
+#ifdef AHC_MATCHED_REPLACEMENT
+    int targeted=0, late_changes=0;
+#endif
 #endif
     std::ios::sync_with_stdio(false);
     std::cin.tie(nullptr);
@@ -142,6 +222,26 @@ int main() {
                     const int k = (i + s * 4) % scenarios;
                     int yes = play_then_complete(accepted, i+1, end, edges, mean_order, weights[k], orders[k]);
                     int no = play_then_complete(tree, i+1, end, edges, mean_order, weights[k], orders[k]);
+#ifdef AHC_MATCHED_REPLACEMENT
+                    const int short_end=end-1;
+                    const auto pre_yes=play_prefix(accepted,i+1,short_end,edges,mean_order,weights[k]);
+                    const auto pre_no=play_prefix(tree,i+1,short_end,edges,mean_order,weights[k]);
+                    const auto suffix_no=suffix(pre_no,short_end,orders[k]);
+                    int release=suffix_no.cost<0 ? -1 : final_release(pre_no.tree,suffix_no.selected,e.from,e.to);
+                    if(release>=end) {
+                        const auto suffix_yes=suffix(pre_yes,short_end,orders[k]);
+                        if(suffix_yes.cost>=0) {
+                            const int new_yes=can_accept_at_release(pre_yes,suffix_yes,release,mean_order,orders[k]);
+                            const int new_no=can_accept_at_release(pre_no,suffix_no,release,mean_order,orders[k]);
+                            ++targeted;
+                            late_changes+=(new_yes!=suffix_yes.cost || new_no!=suffix_no.cost);
+#ifdef AHC_USE_REPLACEMENT
+                            yes=new_yes;
+                            no=new_no;
+#endif
+                        }
+                    }
+#endif
                     if (yes < 0 || no < 0) break;
                     correction += yes - no + cutoffs[k];
                     ++sampled;
@@ -160,7 +260,11 @@ int main() {
         std::cout << take << '\n' << std::flush;
     }
 #ifdef AHC_PAIRED_ROLLOUT
-    std::cerr << "paired_probes=" << rollouts << " revised_actions=" << changes << '\n';
+    std::cerr << "paired_probes=" << rollouts << " revised_actions=" << changes;
+#ifdef AHC_MATCHED_REPLACEMENT
+    std::cerr << " late_checked=" << targeted << " late_rejections=" << late_changes;
+#endif
+    std::cerr << '\n';
 #endif
     return tree.component_count() == 1 ? 0 : 1;
 }

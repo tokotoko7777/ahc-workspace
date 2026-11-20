@@ -66,7 +66,7 @@ def run(case, binary, vis, out):
     cpu0 = cpu_used()
     start = time.perf_counter()
     with subprocess.Popen([binary], stdin=subprocess.PIPE, stdout=subprocess.PIPE,
-                          stderr=subprocess.DEVNULL, bufsize=0) as proc:
+                          stderr=subprocess.PIPE, bufsize=0) as proc:
         try:
             def send(data):
                 pending = memoryview(data)
@@ -95,6 +95,7 @@ def run(case, binary, vis, out):
                 answers.append(ans+b"\n")
             proc.stdin.close()
             exit_code = proc.wait(timeout=max(0.001, 2.0-(time.perf_counter()-start)))
+            diagnostics=proc.stderr.read().decode("ascii",errors="replace")
             if exit_code or pending or proc.stdout.read(1):
                 raise ValueError("bad exit or trailing output")
         except Exception:
@@ -113,7 +114,9 @@ def run(case, binary, vis, out):
     match = re.fullmatch(r"Score = (\d+)\s*", scored.stdout)
     if match is None or int(match[1]) != score:
         raise ValueError(f"official disagreement: {score}, {scored.stdout!r}")
-    return {"score":score, "wall":wall, "cpu":cpu}
+    return {"score":score, "wall":wall, "cpu":cpu,
+            "decisions":hashlib.sha256(b"".join(answers)).hexdigest(),
+            "diagnostics":{k:int(v) for k,v in re.findall(r"(\w+)=(\d+)",diagnostics)}}
 
 
 def sha(path):
@@ -154,9 +157,13 @@ def main():
         rows = [results[name,c.name] for c in cases]
         summary[name] = { "valid":len(rows), "total":sum(r["score"] for r in rows),
                           "max_wall":max(r["wall"] for r in rows),
-                          "max_cpu":max(r["cpu"] for r in rows) }
+                          "max_cpu":max(r["cpu"] for r in rows),
+                          "diagnostics":{k:sum(r["diagnostics"].get(k,0) for r in rows)
+                               for k in sorted({x for r in rows for x in r["diagnostics"]})} }
     summary["candidate_wins"] = sum(results["scenario",c.name]["score"] >
                                     results["baseline",c.name]["score"] for c in cases)
+    summary["identical_decisions"]=sum(results["scenario",c.name]["decisions"] ==
+                                           results["baseline",c.name]["decisions"] for c in cases)
     (out/"summary.json").write_text(json.dumps(summary,indent=2)+"\n")
     print(json.dumps(summary))
 
