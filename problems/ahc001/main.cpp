@@ -4,6 +4,9 @@
 #define AHC_VARIANT 64
 #endif
 #include <bits/stdc++.h>
+#ifdef AHC_FACE_SLIDE
+#include "../../library/coordinate-face-slide.hpp"
+#endif
 using namespace std;
 
 struct RNG {
@@ -886,6 +889,72 @@ struct Solver {
             for(int attempt=0;attempt<12;++attempt) change(i,global_candidate(i),1e-8,true);
         }
     }
+#ifdef AHC_FACE_SLIDE
+    void face_slide_polish(chrono::steady_clock::time_point deadline) {
+        copy(best,best+n,state);
+        auto get=[&](int i,int d){return state[i].q[d];};
+        auto extra=[&](int i,int d) {
+            const int point=(d&1)?y[i]:x[i];
+            return d<2 ? pair{0,point} : pair{point+1,10000};
+        };
+        int moves=0,sweeps=0;
+        for(;sweeps<25;++sweeps) {
+            const int prev=moves;
+            for(int axis=0;axis<2;++axis) {
+                auto groups=coordinate_face_slide::build(n,axis,get);
+                for(int k=int(groups.size())-1;k>=1;--k) swap(groups[k],groups[rng.integer(k+1)]);
+                vector<unsigned char> membership;
+                for(const auto& g:groups) {
+                    if(chrono::steady_clock::now()>=deadline) goto finish;
+                    const auto [lo,hi]=coordinate_face_slide::limits(n,axis,get,extra,g,0,10000,membership);
+                    if(lo>=hi) continue;
+                    const int old=get(g.front()/4,g.front()%4);
+                    auto sum=[&](int line) {
+                        double total=0;
+                        for(int face:g) {
+                            int id=face/4,d=face%4,t=axis^1;
+                            const int width=d<2?get(id,d+2)-line:line-get(id,d-2);
+                            total+=quality(width*(get(id,t+2)-get(id,t)),desired[id]);
+                        }
+                        return total;
+                    };
+                    int pos=old;
+                    double score=sum(old);
+                    auto consider=[&](int at) {
+                        const double q=sum(at);
+                        if(q>score+1e-13) {score=q;pos=at;}
+                        return q;
+                    };
+                    for(int f:g) {
+                        const int id=f/4,d=f%4,t=axis^1;
+                        const int width=get(id,t+2)-get(id,t);
+                        const double exact=(d<2?get(id,d+2):get(id,d-2))+(d<2?-1:1)*double(desired[id])/width;
+                        consider(clamp(int(floor(exact)),lo,hi));
+                        consider(clamp(int(ceil(exact)),lo,hi));
+                    }
+                    for(int k=0;k<=8;++k) consider(lo+(hi-lo)*k/8);
+                    int l=max(lo,pos-max(1,(hi-lo)/8)),r=min(hi,pos+max(1,(hi-lo)/8));
+                    while(r-l>8) {
+                        const int a=l+(r-l)/3,b=r-(r-l)/3;
+                        if(consider(a)<consider(b)) l=a+1;else r=b-1;
+                    }
+                    for(int k=l;k<=r;++k) consider(k);
+                    if(pos!=old) {
+                        for(int f:g) state[f/4].q[f%4]=pos;
+                        ++moves;
+                    }
+                }
+            }
+            if(moves==prev) break;
+        }
+        finish:
+        const double before=best_value;
+        value=0;for(int i=0;i<n;++i) value+=quality(state[i].area(),desired[i]);
+        remember();
+        cerr<<"face_slide_moves="<<moves<<" sweeps="<<sweeps
+            <<" face_slide_gain="<<llround((best_value-before)/n*1e9)<<' ';
+    }
+#endif
     void solve(double seconds, int selected_variant) {
 #ifdef AHC_VARIANT
         if(selected_variant!=variant) throw invalid_argument("binary was compiled for a different variant");
@@ -919,6 +988,9 @@ struct Solver {
         bool directed=(variant>=12 && variant<=15) || variant==17 || variant>=19;
         int phases=variant==24 || variant==43 ? 2 : variant>=25 ? 1 : variant>=19 ? 4 : 1,phase=0;
         double polish_time=variant==27 ? seconds*.075 : variant==36 ? seconds*.025 : 0;
+#ifdef AHC_FACE_SLIDE
+        if(variant==64) polish_time=min(seconds*.05,.14);
+#endif
         double phase_seconds=(seconds-preliminary-polish_time)/phases;
         for (;; ++iterations) {
             if ((iterations & 1023) == 0) {
@@ -1042,6 +1114,12 @@ struct Solver {
             else if(repair) repaired_change(i,c,temperature);
             else change(i, c, temperature, (variant >= 4 && variant<6) || (variant != 2 && (rng.next()&3) == 0));
         }
+#ifdef AHC_FACE_SLIDE
+        if(variant==64 && polish_time>0) {
+            face_slide_polish(start+chrono::duration_cast<chrono::steady_clock::duration>(
+                chrono::duration<double>(seconds-.005)));
+        } else
+#endif
         if(polish_time>0) {
             copy(best,best+n,state);value=best_value;scale=1;
             refresh_targets();
@@ -1068,7 +1146,10 @@ struct Solver {
 };
 int main(int argc, char** argv) {
     ios::sync_with_stdio(false); cin.tie(nullptr);
-    double seconds = argc > 1 ? stod(argv[1]) : 4.9;
+#ifndef AHC_DEFAULT_SECONDS
+#define AHC_DEFAULT_SECONDS 4.9
+#endif
+    double seconds = argc > 1 ? stod(argv[1]) : AHC_DEFAULT_SECONDS;
     uint64_t seed = argc > 2 ? stoull(argv[2]) : 0;
     int variant = argc > 3 ? stoi(argv[3]) :
 #ifdef AHC_VARIANT

@@ -15,7 +15,7 @@
 | グラフ・経路・割当 | [Graph BFS](#graph-bfs)、[Dijkstra](#dijkstra)、[Max Flow](#max-flow)、[Hungarian Algorithm](#hungarian-algorithm) |
 | 数学・文字列・列 | [StaticModInt](#staticmodint)、[Matrix](#matrix)、[Rolling Hash](#rolling-hash)、[最長増加部分列](#longest-increasing-subsequence) |
 | 差分更新・巻き戻し・ビーム | [RollbackArray](#rollbackarray)、[更新の検査](#差分更新とapplyrevertの検査)、[PrefixReplay](#行動列を途中からだけ再生する)、[SimpleBeamSearch](#simplebeamsearch)、[TreeBeamSearch](#treebeamsearch) |
-| 幾何・配置 | [Point2D](#point2d)、[AxisAlignedRectangle](#axisalignedrectangle)、[最大の空き長方形](#指定セルを含む最大の空き長方形)、[Convex Hull](#convex-hull) |
+| 幾何・配置 | [Point2D](#point2d)、[AxisAlignedRectangle](#axisalignedrectangle)、[長方形の共有境界移動](#長方形の共有境界移動)、[最大の空き長方形](#指定セルを含む最大の空き長方形)、[Convex Hull](#convex-hull) |
 | 重複を含む被覆・確率的な行動列評価 | [CoverageCounter](#coveragecounter)、[ForwardBackwardDP](#forwardbackwarddp) |
 | 追加の探索・補助部品 | [ActionBeam・LNS・ILS・Chokudai・MCTS・照合・計測](#追加の探索補助部品) |
 
@@ -2014,3 +2014,33 @@ sort(points.begin(), points.end(), [](const Point& a, const Point& b) {
 
 `bits=10` なら各座標は `0..1023` です。厳密な最近傍順ではありませんが、空間的に
 まとまったcluster作成、query順、cache localityの改善候補を1行のkeyで作れます。
+
+## 長方形の共有境界移動
+
+ヘッダ: [coordinate-face-slide.hpp](../library/coordinate-face-slide.hpp)
+
+半開長方形について、接触する対向面の連結成分を作り、成分全体を
+同時に動かせる座標の閉区間を求めます。入力は整数座標で、点を含む等の
+追加条件は面ごとの区間で渡します。移動が採点上有利かどうかは呼び出し側で決めます。
+座標は int の正負端から十分離して使います。
+
+```cpp
+auto get = [&](int i, int d) { return rectangles[i][d]; };
+auto extra = [&](int i, int d) {
+  int p = must_contain[i][d % 2];
+  return d < 2 ? std::pair{0, p} : std::pair{p + 1, width};
+};
+int axis = 0;
+auto groups = coordinate_face_slide::build(n, axis, get);
+std::vector<unsigned char> scratch;
+for (const auto& group : groups) {
+  auto [lo, hi] = coordinate_face_slide::limits(n, axis, get, extra, group, 0, width, scratch);
+  int next = choose_coordinate(lo, hi);
+  for (int face : group) rectangles[face / 4][face % 4] = next;
+}
+```
+
+面番号の順番は x 下限、y 下限、x 上限、y 上限。axis は x なら 0、y なら 1。
+build は二乗走査なので、毎反復ではなく一周ごとに再構築して使います。
+[AHC001の終盤改善](../problems/ahc001/main.cpp)と
+[愚直な衝突判定と照合するテスト](../tests/coordinate_face_slide_test.cpp)。
