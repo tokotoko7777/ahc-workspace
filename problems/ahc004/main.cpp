@@ -1,6 +1,14 @@
 // AHC_SOURCE: examples/search/ahc004_genome_sa.cpp
 // Source repository: https://github.com/tokotoko7777/ahc-workspace
 // GCC提出用の最適化。診断時は -DAHC_DISABLE_GCC_OPTIMIZE で無効化。
+#if defined(AHC_CYCLE_SCOUT) || defined(AHC_CYCLE_SCOUT_CONTROL)
+#define AHC_CYCLE_SEED
+#define AHC_CYCLE_PAIRED_SCOUT
+#endif
+#if defined(AHC_CYCLE_SCOUT) && defined(AHC_CYCLE_SCOUT_CONTROL)
+#error Select just one matched scouting arm.
+#endif
+
 #if defined(__GNUC__) && !defined(__clang__) && !defined(AHC_DISABLE_GCC_OPTIMIZE)
 #pragma GCC optimize("O3")
 #endif
@@ -558,6 +566,13 @@ int main() {
   Board best_board(n, string(n, '.'));
   pair<int, int> best_score{-1, -1};
   int attempt = 0;
+#ifdef AHC_CYCLE_PAIRED_SCOUT
+  struct Seed {
+    pair<int,int> key{-1,-1};
+    Board board;
+  };
+  Seed regular_first, regular_second, structural;
+#endif
 #ifdef AHC_CYCLE_SEED
   ahc004::CycleCatalogue catalogue;
   int cycle_attempts = 0, cycle_incumbents = 0;
@@ -696,6 +711,16 @@ int main() {
     }
 
     const pair<int, int> score = count_score(board);
+#ifdef AHC_CYCLE_PAIRED_SCOUT
+    if (used_cycles) {
+      if (score > structural.key) structural = {score, board};
+    } else if (score > regular_first.key) {
+      regular_second = std::move(regular_first);
+      regular_first = {score, board};
+    } else if (board != regular_first.board && score > regular_second.key) {
+      regular_second = {score, board};
+    }
+#endif
     if (score > best_score) {
 #ifdef AHC_CYCLE_SEED
       cycle_incumbents += used_cycles;
@@ -713,6 +738,53 @@ int main() {
        << " cycle_incumbents=" << cycle_incumbents << '\n';
 #endif
   GenomeProblem problem(n, m, targets);
+#ifdef AHC_CYCLE_PAIRED_SCOUT
+  // The two executable arms construct and retain the same classes of seeds;
+  // only the second short anneal's starting class differs. Reserve equal time
+  // for both slots and use an identical RNG stream and cooling profile.
+  constexpr double SCOUT_MS = 120.0;
+  constexpr uint64_t SCOUT_SALT = 0x9E3779B97F4A7C15ULL;
+#ifdef AHC_CYCLE_SCOUT_CONTROL
+  // The unscouted structural seed is measured but is not in the control pool.
+  best_board = regular_first.board;
+#endif
+  const Seed& alternate = regular_second.key.first >= 0 ? regular_second : regular_first;
+  const Seed* second = &alternate;
+#ifdef AHC_CYCLE_SCOUT
+  if (structural.key.first >= 0) second = &structural;
+#endif
+  cerr << "scout_start_regular=" << regular_first.key.first
+       << " scout_start_alternate=" << alternate.key.first
+       << " scout_start_cycle=" << structural.key.first
+       << " scout_cycle_slot=" << (second == &structural)
+       << " scout_start_empty_regular=" << regular_first.key.second
+       << " scout_start_empty_alternate=" << alternate.key.second
+       << " scout_start_empty_cycle=" << structural.key.second;
+  int scout_winner = -1;
+  if (timer.elapsed_ms() + 2 * SCOUT_MS + 20.0 < SEARCH_END_MS) {
+    auto best_ref = problem.make_state(best_board);
+    double best_exact = problem.score(best_ref);
+    const array<const Seed*,2> starts{&regular_first, second};
+    for (int slot = 0; slot < 2; ++slot) {
+      auto state = problem.make_state(starts[slot]->board);
+      const double score = problem.score(state);
+      TimeBasedAnnealingRunner<GenomeProblem> scout(
+          problem, std::move(state), score, SCOUT_MS, 6.0, 0.03,
+          input_hash ^ SCOUT_SALT, 32);
+      scout.run();
+      const auto& result = scout.best_state();
+      if (scout.best_score() > best_exact) {
+        best_exact = scout.best_score();
+        best_board = result.board;
+        scout_winner = slot;
+      }
+      cerr << " scout_post_" << slot << '=' << result.coverage.covered_weight
+           << " scout_post_empty_" << slot << '=' << result.empty
+           << " scout_iterations_" << slot << '=' << scout.iterations();
+    }
+  }
+  cerr << " scout_winner=" << scout_winner << '\n';
+#endif
   auto initial = problem.make_state(best_board);
   const double initial_score = problem.score(initial);
   const double remaining_ms = SEARCH_END_MS - timer.elapsed_ms();
