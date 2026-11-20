@@ -21,7 +21,7 @@
 | [AHC011](https://atcoder.jp/contests/ahc011/tasks/ahc011_a) | ローカル改善・本番未判定 | **2,691,447,336** 点（[AtCoder 提供の順位データ](https://huggingface.co/datasets/SakanaAI/ALE-Bench/blob/main/ahc011.zip)） | 局所回転追加: 未調整 15 件 6,060,235 | 本番公開 3,000 シード、3 秒 | ローカル保存・公開確認待ち |
 | [AHC012](https://atcoder.jp/contests/ahc012/tasks/ahc012_a) | ローカル比較・本番未判定 | **99,781,619** 点（[AtCoder 提供の順位データ](https://huggingface.co/datasets/SakanaAI/ALE-Bench/blob/main/ahc012.zip)） | 格子版: 未調整 8 件平均 972,456.375 | 本番 100 件・3 秒。同一性未確認 | [問題別ブランチ](https://github.com/tokotoko7777/ahc-workspace/tree/dc1a18935430728a5dbca82c14f8bc84c57145e1) |
 | [AHC013](https://atcoder.jp/contests/ahc013/tasks/ahc013_a) | ローカル改善・本番の自己得点を評価中 | [公式順位](https://atcoder.jp/contests/ahc013/standings) 要ログイン。1 位の点数未確認 | 隣接移動版: 未調整 20 件 64,679 | 本番公開 2,000 シード、3 秒 | [問題別ブランチ](https://github.com/tokotoko7777/ahc-workspace/tree/7526fecad74457ce05f786e5127c4e45c0357203) |
-| [AHC014](https://atcoder.jp/contests/ahc014/tasks/ahc014_a) | 開発比較準備中・未判定 | **3,122,399,998** 点（[AtCoder 提供の順位データ](https://huggingface.co/datasets/SakanaAI/ALE-Bench/blob/main/ahc014.zip)） | 貪欲構築・接頭辞巻き戻しを比較 | 本番公開 2,000 シード、5 秒 | 検証中 |
+| [AHC014](https://atcoder.jp/contests/ahc014/tasks/ahc014_a) | ローカル改善・本番未判定 | **3,122,399,998** 点（[AtCoder 提供の順位データ](https://huggingface.co/datasets/SakanaAI/ALE-Bench/blob/main/ahc014.zip)） | 再成長版: 未調整 6 件平均 880,722.83 | 本番公開 2,000 シード、5 秒 | [問題別ブランチ](https://github.com/tokotoko7777/ahc-workspace/tree/25c2dea8a3d5f9b07432ee1a2b239cf4bd820cff) |
 | AHC015〜074 | 未着手 | — | — | — | — |
 
 ### AHC001 の次の仮説
@@ -218,3 +218,10 @@
 - [実装と再現手順](https://github.com/tokotoko7777/ahc-workspace/blob/7526fecad74457ce05f786e5127c4e45c0357203/problems/ahc013/README.md)。移動なしの線分連結を基準に、同型の端点が並ぶ短い隣接移動を試し、移動と配線の残予算を守って配線案を再構築。開発 12 件 7,294 → 37,991、未調整 20 件 11,377 → 64,679（全 32 勝）。基準は最大約 5 ms、新版は最大 0.840538 秒で、比較は同一入力だが使った時間は異なる。
 - 全 64 出力で公式採点と独立検査が一致。C++23、一ファイルおよび四方向視界部品の対照テストを通過。研究ブランチの既定に保存。
 - 有効な本番公開 2,000 シードを SHA-256 `0a50dccf4689292f69a36be0ea1a99767de055434b854f2b0bc7f1fd40f9033e` で確認し、100 分類に各 20 件で生成。凍結版で公式の自己得点を計測中。順位表の 1 位得点が未取得なので、完走後も直ちに順位を判定しない。次は離れた成分をつなぐ複数移動を検討。
+
+### AHC014 最良手順の接頭辞から再成長する
+
+- [実装・再現手順](https://github.com/tokotoko7777/ahc-workspace/blob/25c2dea8a3d5f9b07432ee1a2b239cf4bd820cff/problems/ahc014/README.md)。貪欲ランダム再始動と、最良手順の途中から別の長方形を追加し直す方法を同一時間予算で比較。
+- 開発 6 件平均 788,064.17 → 810,083.17（5 勝 1 敗）、未調整 6 件 862,623.67 → 880,722.83（4 勝 2 敗）。全 24 出力で公式と独立線分検査が一致、最長 4.564538 秒（5 秒制限）。C++23 単一ファイルを含めて検証し、研究ブランチの既定に保存。
+- 本番 1 位 3,122,399,998 点、平均約 156 万。順位データ SHA-256 `43624bb9c24795ef1e792bace66bfeb59787265b025750b8708bee692c2e5021` を照合した。公開本番 2,000 件は今の版では未評価。本番比較は未判定。
+- 次は手順の末尾を全消去せず、一つの長方形と、それに依存する後続手だけを除き、無関係なほかの手を維持する。
