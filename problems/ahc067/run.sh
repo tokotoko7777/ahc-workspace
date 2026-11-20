@@ -11,11 +11,11 @@ mkdir -p "$out"
 exec 9>"$out/experiment.lock"
 flock -n 9
 "${pin[@]}" g++ -std=c++23 -O3 -DAHC067_STATIC problems/ahc067/main.cpp -o "$out/static"
-"${pin[@]}" g++ -std=c++23 -O3 problems/ahc067/main.cpp -o "$out/moving"
+"${pin[@]}" g++ -std=c++23 -O3 -DAHC067_NO_EXCHANGE problems/ahc067/main.cpp -o "$out/moving"
 "${pin[@]}" g++ -std=c++23 -O3 tests/undirected_bridges_test.cpp -o "$out/test"
 "${pin[@]}" "$out/test"
 python3 scripts/bundle.py problems/ahc067/main.cpp -o "$out/submission.cpp"
-"${pin[@]}" g++ -std=c++23 -O3 "$out/submission.cpp" -o "$out/bundled"
+"${pin[@]}" g++ -std=c++23 -O3 -DAHC067_NO_EXCHANGE "$out/submission.cpp" -o "$out/bundled"
 for suite in dev holdout; do
     mkdir -p "$out/$suite"
     (cd "$out/$suite"; "${pin[@]}" "$gen" "$root/problems/ahc067/$suite-seeds.txt")

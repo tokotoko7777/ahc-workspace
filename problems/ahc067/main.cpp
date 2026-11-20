@@ -161,21 +161,59 @@ struct Problem {
         }
         return out;
     }
+    Layout exchange(Layout record,std::vector<bool> closed,bool optimize_detours,
+                    Clock::time_point stop) const {
+        RNG rng{34164481};
+        int current=optimize_detours ? forced(closed).steps : plain(closed).steps;
+        for(int turn=0;turn<36 && Clock::now()<stop;++turn) {
+            std::vector<int> occupied;
+            for(int e=0;e<int(edges.size());++e) if(closed[e]) occupied.push_back(e);
+            if(occupied.empty()) break;
+            int open=occupied[rng.next()%occupied.size()];
+            closed[open]=false;
+            auto on_path=path(bfs(0,closed,true));
+            auto mandatory=bridges(closed);
+            std::vector<int> options;
+            for(int e:on_path) if(e!=open && !mandatory[e]) options.push_back(e);
+            if(options.empty() || rng.next()%3==0) {
+                options.clear();
+                for(int e=0;e<int(edges.size());++e)
+                    if(e!=open && !closed[e] && !mandatory[e]) options.push_back(e);
+            }
+            if(options.empty()) {
+                closed[open]=true;continue;
+            }
+            int close=options[rng.next()%options.size()];
+            closed[close]=true;
+            Layout trial=forced(closed);
+            int value=optimize_detours ? trial.steps : plain(closed).steps;
+            if(trial.steps>record.steps) record=std::move(trial);
+            if(value>=current) current=value;
+            else closed[close]=false,closed[open]=true;
+        }
+        return record;
+    }
     Layout solve() const {
         auto stop=Clock::now()+std::chrono::milliseconds(1500);
-        Layout best=plain(std::vector<bool>(edges.size()));
+        std::vector<bool> best_closed(edges.size());
+        Layout best=plain(best_closed);
         for(int trial=0;trial<7 && Clock::now()<stop;++trial) {
             RNG rng{8478347u+734321u*unsigned(trial)};
             std::vector<bool> closed(edges.size());
             thin(closed,M-K+1,rng,stop);
 #ifndef AHC067_STATIC
             Layout trial_gate=forced(closed);
-            if(trial_gate.steps>best.steps) best=std::move(trial_gate);
+            if(trial_gate.steps>best.steps) best=std::move(trial_gate),best_closed=closed;
 #endif
             thin(closed,M,rng,stop);
             Layout p=plain(closed);
-            if(p.steps>best.steps) best=std::move(p);
+            if(p.steps>best.steps) best=std::move(p),best_closed=closed;
         }
+#if defined(AHC067_SWAP_STATIC)
+        best=exchange(std::move(best),std::move(best_closed),false,stop);
+#elif !defined(AHC067_STATIC) && !defined(AHC067_NO_EXCHANGE)
+        best=exchange(std::move(best),std::move(best_closed),true,stop);
+#endif
         return best;
     }
     void print(const Layout& p) const {
