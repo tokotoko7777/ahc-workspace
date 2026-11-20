@@ -58,6 +58,9 @@ def main():
     ap=argparse.ArgumentParser(description=__doc__)
     for name in ("gen","tester","base","candidate","csv"):
         ap.add_argument(name,type=Path)
+    ap.add_argument("--tag",default="stencil-v1")
+    ap.add_argument("--control-label",default="scalar")
+    ap.add_argument("--candidate-label",default="stencil")
     a=ap.parse_args()
     gen,tester,base,candidate=(x.resolve() for x in (a.gen,a.tester,a.base,a.candidate))
     with tempfile.TemporaryDirectory() as d,a.csv.open("w",newline="") as f:
@@ -67,14 +70,14 @@ def main():
         w.writerow(("split","seed","arm","score","errors","placement","measure_cost",
                     "queries","l","n","s","seconds"))
         for split in ("dev","holdout"):
-            seeds=[(int.from_bytes(hashlib.sha256(f"ahc022/stencil-v1/{split}/{i}".encode())
+            seeds=[(int.from_bytes(hashlib.sha256(f"ahc022/{a.tag}/{split}/{i}".encode())
                                    .digest()[:8],"little"),i*i) for i in range(1,31)]
             seedfile.write_text("".join(f"{seed} 0 0 {s}\n" for seed,s in seeds))
             subprocess.run([gen,seedfile],cwd=work,check=True)
             for i,(seed,s) in enumerate(seeds):
                 inp=work/"in"/f"{i:04}.txt"
                 case=inp.read_bytes()
-                arms=[("scalar",base),("stencil",candidate)]
+                arms=[(a.control_label,base),(a.candidate_label,candidate)]
                 for label,cmd in (arms if i%2==0 else arms[::-1]):
                     out,observed,elapsed=run(tester,cmd,case)
                     result=validate(case,out)

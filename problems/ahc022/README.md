@@ -29,7 +29,7 @@ tools_dir=/path/to/extracted/tools
 work=$(mktemp -d)
 python scripts/bundle.py problems/ahc022/main.cpp -o "$work/submission.cpp"
 g++ -std=c++23 -O3 -DAHC022_STENCIL=0 "$work/submission.cpp" -o "$work/base"
-g++ -std=c++23 -O3 "$work/submission.cpp" -o "$work/stencil"
+g++ -std=c++23 -O3 -DAHC022_LOW_ENERGY=0 "$work/submission.cpp" -o "$work/stencil"
 python problems/ahc022/benchmark.py "$tools_dir/target/release/gen" "$tools_dir/target/release/tester" "$work/base" "$work/stencil" "$work/results.csv"
 g++ -std=c++23 -O3 tests/rounded_clipped_normal_test.cpp -o "$work/test"
 "$work/test"
@@ -40,3 +40,27 @@ g++ -std=c++23 -O3 tests/rounded_clipped_normal_test.cpp -o "$work/test"
 ### 次の仮説
 
 符号版は誤答0でも、特に中・高Sで配置費が測定費を大きく上回る。配置選択で符号距離だけでなく実テンション費を目的に入れ、固定するセルを減らして残りを平滑化する。低い配置費を追加観測費で補えるか、同じ配置とノイズ上で尤度差・誤答率・両費用を分けて計測する。
+
+## 追試: 符号距離を保って配置費を下げる
+
+同じ最初の符号語・温度振幅・計測方策から、固定セルを一つずつ反転する。近接する固定点の不一致に対する局所配置費代理を下げるよう最大16,000手試し、最小ハミング距離を元以上に保つ。全ペアの距離逆二乗和は初期の104.5%以内。反転で変わる符号語を逆引きし、関係するペアだけ差分計算する。平滑化後の**実配置費**が増えたら元に戻す。計測され得るオフセット集合は変えない。
+
+| 分割 | 件数 | 元の平均絶対点 | 低配置費版の平均絶対点 | ケース別得点比の平均 | 配置費比の平均 |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| dev | 30 | 8,876,858.60 | 10,525,048.97 | 1.6860 | 0.5647 |
+| holdout | 30 | 11,375,786.20 | 13,250,363.83 | 1.6660 | 0.5673 |
+
+holdoutをSで分けたケース別得点比の平均は、S≤49で1.338倍（7件）、64〜225で1.691倍（8件）、256〜900で1.806倍（15件）。**全60ケースで両版の誤答は0件、低配置費版が全勝**。平均計測回数はholdoutで2,007.47→2,033.40。全120出力公式と独立採点一致、最長0.081582秒・最大5,909計測。問題ブランチの既定を低配置費版にした。これはケース比であって、本番基準を使った相対得点ではない。
+
+[追試CSV](energy-results.csv)は初回と別のSHA-256系列から各Sを1件ずつ生成。同じ対話入力の真の対応・順序付きノイズを両版で用いるが、追加観測の選び方が違えば同じノイズ番号は別の計測に対応し得る。[1,400件の距離差分テスト](../../tests/ahc022_energy_delta_test.cpp)では変更された全符号語ペアの再計算と一致を確認した。
+
+```sh
+# 上の再現手順で tools_dir と work を設定
+g++ -std=c++23 -O3 -DAHC022_LOW_ENERGY=0 "$work/submission.cpp" -o "$work/stencil"
+g++ -std=c++23 -O3 "$work/submission.cpp" -o "$work/energy"
+python problems/ahc022/benchmark.py --tag energy-v1 --control-label stencil --candidate-label energy "$tools_dir/target/release/gen" "$tools_dir/target/release/tester" "$work/stencil" "$work/energy" "$work/results.csv"
+g++ -std=c++23 -O3 tests/ahc022_energy_delta_test.cpp -o "$work/energy-test"
+"$work/energy-test"
+```
+
+次は振幅と追加観測費の交換を調べる。設計ごとの符号距離と残り計測枠に基づいて振幅を変え、最初の少数の観測で対応が十分離れた入口へは追加せず、区別できない交換ペアに計測を集中する。配置費・計測費・誤答数をSごとに分離して検証する。

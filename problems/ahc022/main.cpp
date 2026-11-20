@@ -6,6 +6,9 @@ using namespace std;
 #ifndef AHC022_STENCIL
 #define AHC022_STENCIL 1
 #endif
+#ifndef AHC022_LOW_ENERGY
+#define AHC022_LOW_ENERGY 1
+#endif
 
 namespace {
 using Clock=chrono::steady_clock;
@@ -14,6 +17,10 @@ struct Rng {
   uint64_t x=0x22a8ee4b521;
   unsigned next(){x^=x<<13;x^=x>>7;x^=x<<17;return x>>19;}
 };
+
+#if AHC022_LOW_ENERGY || defined(AHC022_ENERGY_TEST)
+#include "low-energy.hpp"
+#endif
 
 struct Puzzle {
   int l,n,s,used=0;
@@ -119,8 +126,25 @@ struct Puzzle {
     }
     assert(!pattern.empty());
     const int delta=clamp(int(1.85*s),6,500);
-    for(int i=0;i<l*l;++i)if(fixed[i])temp[i]=500+(pattern[i]?delta:-delta);
-    smooth(fixed);
+    const auto layout=[&](const vector<char>& bits){
+      fill(temp.begin(),temp.end(),500);
+      for(int i=0;i<l*l;++i)if(fixed[i])temp[i]=500+(bits[i]?delta:-delta);
+      smooth(fixed);
+      long long cost=0;
+      for(int y=0;y<l;++y)for(int x=0;x<l;++x){
+        long long a=temp[cell(y,x)]-temp[cell(y+1,x)];
+        long long b=temp[cell(y,x)]-temp[cell(y,x+1)];
+        cost+=a*a+b*b;
+      }
+      return cost;
+    };
+    const auto before=layout(pattern);
+#if AHC022_LOW_ENERGY
+    const auto previous_grid=temp;
+    const auto previous_code=code;
+    reduce_energy(l,fixed,location,pattern,code,min(deadline,Clock::now()+chrono::milliseconds(620)));
+    if(layout(pattern)>before)temp=previous_grid,code=previous_code;
+#endif
     placement();
     vector<double> odds(MAXTEMP+1);
     for(int z=0;z<=MAXTEMP;++z)
