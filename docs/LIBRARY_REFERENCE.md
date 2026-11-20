@@ -2014,3 +2014,17 @@ sort(points.begin(), points.end(), [](const Point& a, const Point& b) {
 
 `bits=10` なら各座標は `0..1023` です。厳密な最近傍順ではありませんが、空間的に
 まとまったcluster作成、query順、cache localityの改善候補を1行のkeyで作れます。
+
+## 根付き木の端点部分木
+
+[`rooted-terminal-tree.hpp`](../library/rooted-terminal-tree.hpp)。
+親が子より先に並ぶ順序を与え、根と指定端点を結ぶ親辺をO(N)で抽出する。根の親は自分。
+
+```cpp
+vector<int> order = {0,1,2,3}, parent = {0,0,0,1};
+vector<unsigned char> used;
+rooted_terminal_tree(order, parent, [&](int v){ return v==3; }, used);
+// 1 と 3 の親辺が必要。2の親辺は不要。
+```
+
+[AHC020](../problems/ahc020/main.cpp)・[親経路との比較テスト](../tests/rooted_terminal_tree_test.cpp)。
