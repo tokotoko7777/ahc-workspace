@@ -12,6 +12,9 @@
 
 #ifdef AHC_ANCHOR_GEOMETRY
 #include "anchor-congruence.hpp"
+#ifdef AHC004_MERGED_CYCLES
+#include "partial-lines.hpp"
+#endif
 #endif
 
 #include <bits/stdc++.h>
@@ -966,6 +969,50 @@ int main() {
     for (const auto& c : closed.cycles) for (int id : c.words) seen[id]=true;
     for (int id=0; id<target_count; ++id) if (seen[id]) supported_reads+=weights[id];
   }
+#ifdef AHC004_MERGED_CYCLES
+  int merged_new_lines=0;
+  const int orig_cycle_count=closed.cycles.size(), orig_supported=supported_reads;
+  int longest_word=0;
+  for(const auto& w:words)longest_word=max(longest_word,int(w.size()));
+  if ((orig_cycle_count < 28 || 4*orig_supported < 3*m) &&
+      longest_word >= 9 && !past_geometry()) {
+    const double merge_end=min(GEOMETRY_END_MS-60.0,timer.elapsed_ms()+18.0);
+    const auto past_merge=[&] {return timer.elapsed_ms()>=merge_end;};
+    const auto partial=ahc004::partial_assembled_lines(n,words,5,past_merge);
+    std::set<std::string> unique_lines;
+    for(const auto& c:closed.cycles) unique_lines.insert(c.letters);
+    auto candidates=closed.cycles;
+    for(const auto& line:partial) {
+      if(past_merge())break;
+      if(line.known!=n)break;
+      if(!unique_lines.insert(line.letters).second)continue;
+      ahc004::Cycle cycle{line.letters,{},0};
+      const std::string wrapped=cycle.letters+cycle.letters.substr(0,n-1);
+      for(int i=0;i<int(words.size());++i) {
+        if(wrapped.find(words[i])>=size_t(n))continue;
+        cycle.words.push_back(i);
+        const int len=words[i].size();
+        cycle.evidence+=(len-1)*(len-1)*min(3,weights[i]);
+      }
+      candidates.push_back(std::move(cycle));
+      ++merged_new_lines;
+    }
+    if(!past_merge() && candidates.size()>=28) {
+      std::sort(candidates.begin(),candidates.end(),[](const auto& a,const auto& b){
+        return a.evidence!=b.evidence?a.evidence>b.evidence:a.letters<b.letters;
+      });
+      if(candidates.size()>40)candidates.resize(40);
+      std::vector<bool> seen(target_count);
+      for(const auto& c:candidates)for(int id:c.words)seen[id]=true;
+      int after=0;
+      for(int i=0;i<target_count;++i)if(seen[i])after+=weights[i];
+      if(4*after>=3*m) {
+        closed.cycles=std::move(candidates);
+        supported_reads=after;
+      }
+    }
+  }
+#endif
   if (closed.cycles.size() >= 28 && 4*supported_reads >= 3*m && !past_geometry()) {
     const double triple_end = min(GEOMETRY_END_MS-50.0, timer.elapsed_ms()+175.0);
     auto anchors = ahc004::three_parallel_anchors(closed.cycles, 1368000,
@@ -1003,7 +1050,13 @@ int main() {
   // anchors; retry with a disjoint high-evidence quintet rather than widen
   // compatibility or allow a worse seed.
   int rescue_sweep=0, rescue_fourth=0, rescue_realized=0, rescue_unique=0;
-  if (sweep_visits && best_score==ordinary_key) {
+  // The additive arm leaves the merged-bank solve unchanged and never
+  // applies alternate-anchor rescue when the original bank failed its gate.
+  if (sweep_visits && best_score==ordinary_key
+#ifdef AHC004_MERGED_CYCLES
+      && orig_cycle_count>=28 && 4*orig_supported>=3*m
+#endif
+  ) {
     constexpr double rescue_end=1550.0;
     const auto deadline=[&] { return timer.elapsed_ms()>=rescue_end; };
     const double three_stop=min(rescue_end-260.0,timer.elapsed_ms()+175.0);
@@ -1064,6 +1117,12 @@ int main() {
         <<" geometry_rescue_selected="<<(best_score>ordinary_key)<<'\n';
   }
 #endif
+#ifdef AHC004_MERGED_CYCLES
+  cerr << "partial_original=" << orig_cycle_count
+       << " partial_original_support=" << orig_supported
+       << " partial_novel=" << merged_new_lines << '\n';
+#endif
+
 #ifdef AHC004_LINE_REBUILD
   }
 #endif
