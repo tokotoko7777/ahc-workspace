@@ -46,6 +46,10 @@ Cut make_cut(const Rect& active, int axis, int line, int side, int turn) {
   return cut;
 }
 
+#if defined(AHC008_PARALLEL_PENS)
+#include "parallel-pens.hpp"
+#endif
+
 class Game {
  public:
   void read() {
@@ -66,6 +70,9 @@ class Game {
   }
 
   string plan(int turn) {
+#ifdef AHC008_PARALLEL_PENS
+    return pens.plan(humans, pets, walls);
+#endif
     string command(humans.size(), '.');
     if (!cut && AHC008_ADAPTIVE && turn < 270) cut = choose_cut(turn);
     if (!cut) return command;
@@ -182,6 +189,9 @@ class Game {
     return selected;
   }
 
+#ifdef AHC008_PARALLEL_PENS
+  ParallelPens pens;
+#endif
   Rect active;
   optional<Cut> cut;
   vector<int> humans, pets;

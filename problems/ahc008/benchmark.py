@@ -98,8 +98,8 @@ def replay(case, trace, commands):
     return score, values[0][0], values[0][1], len(blocked)
 
 
-def seeds(split):
-    return [int.from_bytes(hashlib.sha256(f"ahc008/cuts-v1/{split}/{i}".encode())
+def seeds(split, tag="cuts-v1"):
+    return [int.from_bytes(hashlib.sha256(f"ahc008/{tag}/{split}/{i}".encode())
                           .digest()[:8], "little") for i in range(24)]
 
 
@@ -107,6 +107,8 @@ def main():
     p = argparse.ArgumentParser(description=__doc__)
     for name in ("gen", "tester", "base", "adaptive", "csv"):
         p.add_argument(name, type=Path)
+    p.add_argument("--tag", default="cuts-v1")
+    p.add_argument("--candidate-label", default="adaptive")
     args = p.parse_args()
     gen, tester, base, adaptive = (x.resolve() for x in
                                    (args.gen, args.tester, args.base, args.adaptive))
@@ -119,11 +121,11 @@ def main():
         writer.writerow(("split", "seed", "mode", "score", "h0_area", "h0_pets",
                          "walls", "direct_seconds", "relay_seconds"))
         for split in ("dev", "holdout"):
-            seedfile.write_text("".join(f"{s}\n" for s in seeds(split)))
+            seedfile.write_text("".join(f"{s}\n" for s in seeds(split, args.tag)))
             subprocess.run([gen, seedfile], cwd=work, check=True)
-            for i, seed in enumerate(seeds(split)):
+            for i, seed in enumerate(seeds(split, args.tag)):
                 case = (work / "in" / f"{i:04}.txt").read_bytes()
-                modes = [("base", base), ("adaptive", adaptive)]
+                modes = [("base", base), (args.candidate_label, adaptive)]
                 for mode, binary in (modes if i % 2 == 0 else modes[::-1]):
                     before = time.monotonic()
                     plain = subprocess.run([tester, binary], input=case, capture_output=True,
