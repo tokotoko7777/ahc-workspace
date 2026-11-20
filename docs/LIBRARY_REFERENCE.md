@@ -2014,3 +2014,21 @@ sort(points.begin(), points.end(), [](const Point& a, const Point& b) {
 
 `bits=10` なら各座標は `0..1023` です。厳密な最近傍順ではありませんが、空間的に
 まとまったcluster作成、query順、cache localityの改善候補を1行のkeyで作れます。
+
+## Sorted bottleneck assignment
+
+ヘッダ: [`sorted-bottleneck-assignment.hpp`](../library/sorted-bottleneck-assignment.hpp)
+
+ソート済みの目標列をソート済みの値の部分列と1対1で対応づけ、
+絶対差の最大値を最小化します。同点なら絶対差の総和が最小の対応を返します。
+既存の正方ハンガリアン法では、余りのある対応の最大誤差を先に扱えなかったため追加しました。
+
+```cpp
+auto idx = sorted_bottleneck_assignment(
+    vector<long long>{1, 4}, vector<long long>{0, 2, 5});
+// idx は {0, 2} など。最大差1、総差2。
+```
+
+時間・復元用メモリは O(目標数×候補数)。
+[AHC053の残差割当](../problems/ahc053/main.cpp) と
+[対象順も自由にした全割当との比較テスト](../tests/sorted_bottleneck_assignment_test.cpp)。
