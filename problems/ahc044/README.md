@@ -60,10 +60,55 @@ From repository root, `ATCODER_TOOLS` is the official `target/release`
 after `cargo build --release --locked`.
 
     g++ -std=c++23 -O3 -DAHC044_ANNEAL=0 problems/ahc044/main.cpp -o /tmp/ahc044-greedy
-    g++ -std=c++23 -O3 problems/ahc044/main.cpp -o /tmp/ahc044-refine
+    g++ -std=c++23 -O3 -DAHC044_OPT=0 problems/ahc044/main.cpp -o /tmp/ahc044-refine
     python problems/ahc044/benchmark.py "$ATCODER_TOOLS/gen" "$ATCODER_TOOLS/vis" /tmp/ahc044-greedy /tmp/ahc044-refine /tmp/ahc044.csv
     python scripts/bundle.py problems/ahc044/main.cpp -o /tmp/ahc044-single.cpp
     g++ -std=c++23 -O3 /tmp/ahc044-single.cpp -o /tmp/ahc044-single
 
 Use `-DAHC044_VERIFY` to check residual updates against full recomputation
 during search. Do not include that flag in the timed solver.
+
+## Stationary response continuation
+
+The fixed cycle remains intact; both variants start from the exact same
+frozen annealed graph. Treat the two out-edges as equal conditional
+transition probabilities. Replacing one free destination changes one
+column of the stationary linear system. Invert the old system once
+with a normalization row; then apply the rank-one response formula
+for each candidate redirect. Rank by predicted true count (actual
+incumbent visit count + stationary count difference). This correction
+allows the rotor and finite length to change actual results; only the
+full 500,000-step simulation accepts an update.
+
+The alternative ranks the same redirects by the previous immediate
+residual. Both do precisely eight batches of 28 full simulations on
+these sets. If a batch has no true improvement, continue down the
+same ranking rather than spend another batch on the same candidates.
+A winning change resets the ranking. Both keep the incumbent fallback.
+
+| 24 fresh cases each | Frozen error | Residual-ranked | Response-ranked |
+|---|---:|---:|---:|
+| Development | 43,298.17 | 31,147.50 | 16,573.08 |
+| Untouched holdout | 43,737.92 | 30,581.00 | 19,313.83 |
+
+Response beat residual 23/24 times with one tie in each split. Holdout
+median error reduction 8162 and paired ratio 0.70496. Median holdout
+wall 0.366 s residual vs 0.431 s response for the same exact evaluation
+budget. All 144 scores match independent simulation and official score;
+max 0.679490 s. It is still far from the historical first-place average
+error (1281.01, not the same cases). Changes are branch-only; exact rank
+comparison remains unknown. [Data](response-results.csv).
+
+Use [dense matrix inverse](../../library/dense-matrix-inverse.hpp):
+the existing matrix header didn't supply inversion. Debug independently
+re-inverts selected changed graphs to check the rank-one prediction.
+Next change the fixed cycle itself while maintaining reachability:
+construct several cycles that separate tiny target nodes from large
+incoming assignments, then run the same matched exact-update budget
+and retain only truly lower-error solutions.
+
+    g++ -std=c++23 -O3 problems/ahc044/main.cpp -o /tmp/ahc044-response
+    g++ -std=c++23 -O3 -DAHC044_OPT=2 problems/ahc044/main.cpp -o /tmp/ahc044-residual
+    python problems/ahc044/benchmark.py "$ATCODER_TOOLS/gen" "$ATCODER_TOOLS/vis" /tmp/ahc044-refine /tmp/ahc044-response /tmp/ahc044-response.csv --residual-control /tmp/ahc044-residual
+    g++ -std=c++23 -O2 tests/dense_matrix_inverse_test.cpp -o /tmp/ahc044-invert-test
+    /tmp/ahc044-invert-test

@@ -1,5 +1,9 @@
 #include <bits/stdc++.h>
+#include "../../library/dense-matrix-inverse.hpp"
 using namespace std;
+#ifndef AHC044_OPT
+#define AHC044_OPT 1
+#endif
 #ifndef AHC044_ANNEAL
 #define AHC044_ANNEAL 1
 #endif
@@ -12,10 +16,14 @@ struct Problem{
   int L;
   Counts target;
   void read(){int n;cin>>n>>L;assert(n==N);for(int& x:target)cin>>x;}
-  int error(const Plan& p)const{
+  Counts visits(const Plan& p)const{
     Counts count{};
     int at=0;
     for(int t=0;t<L;++t)at=(++count[at]&1)?p.a[at]:p.b[at];
+    return count;
+  }
+  int error(const Plan& p)const{
+    auto count=visits(p);
     int e=0;
     for(int i=0;i<N;++i)e+=abs(count[i]-target[i]);
     return e;
@@ -87,6 +95,67 @@ struct Problem{
     }
     return best;
   }
+  using Matrix=array<array<double,N>,N>;
+  Matrix influence(const Plan& p)const{
+    Matrix a{};
+    for(int j=0;j<N;++j){a[j][j]=1.;a[p.a[j]][j]-=.5;a[p.b[j]][j]-=.5;}
+    a.back().fill(1.);
+    auto b=dense_matrix_inverse(a,1e-14);
+    assert(b);
+    return *b;
+  }
+  Plan local(Plan plan,int& best_error,Clock::time_point deadline,int& trials)const{
+    int batch=0;
+    for(int pass=0;pass<8&&Clock::now()<deadline;++pass){
+      auto r=residual(plan);
+      auto current=visits(plan);
+      Matrix response{};
+      if(AHC044_OPT==1){
+        auto inv=influence(plan);
+        for(int i=0;i<N;++i)for(int j=0;j<N;++j)response[i][j]=inv[j][i];
+      }
+      vector<tuple<double,int,int>> candidates;
+      for(int u=0;u<N;++u)for(int v=0;v<N;++v){
+        int old=plan.b[u];
+        if(v==old)continue;
+        double expected=0.;
+        if(AHC044_OPT==1){
+          auto z=[&](int k){return .5*((old==N-1?0:response[old][k])-(v==N-1?0:response[v][k]));};
+          double denom=1+z(u);
+          if(abs(denom)<1e-12)continue;
+          double factor=-response[N-1][u]*L/denom;
+          for(int k=0;k<N;++k)expected+=abs(current[k]-target[k]+factor*z(k));
+#ifdef AHC044_VERIFY
+          if(u==pass&&v==17){
+            Plan check=plan;check.b[u]=v;
+            auto direct=influence(check);
+            for(int k=0;k<N;++k)
+              assert(abs(direct[k][N-1]*L-(response[N-1][k]*L+factor*z(k)))<1e-4);
+          }
+#endif
+        }else{
+          auto proxy=[&](int v,int k){return abs(v)+.5*double(v)*v/(target[k]+1250);};
+          int t=target[u];
+          expected=proxy(r[old]-t,old)+proxy(r[v]+t,v)-proxy(r[old],old)-proxy(r[v],v);
+        }
+        candidates.emplace_back(expected,u,v);
+      }
+      const int Q=28;
+      partial_sort(candidates.begin(),candidates.begin()+(batch+1)*Q,candidates.end());
+      Plan winner=plan;
+      int before=best_error;
+      for(int i=batch*Q;i<(batch+1)*Q&&Clock::now()<deadline;++i){
+        auto [value,u,v]=candidates[i];
+        auto q=plan;q.b[u]=v;
+        int e=error(q);++trials;
+        if(e<best_error){winner=q;best_error=e;}
+      }
+      if(best_error==before)++batch;
+      else{plan=winner;batch=0;}
+    }
+    return plan;
+  }
+
 };
 }
 int main(){
@@ -97,7 +166,9 @@ int main(){
   const int start=p.error(q);
   int e=start;
   if(AHC044_ANNEAL)q=p.refine(q,e,deadline);
+  int refined=e,trials=0;
+  if(AHC044_ANNEAL&&AHC044_OPT)q=p.local(q,e,deadline,trials);
   assert(e==p.error(q));
-  cerr<<"start="<<start<<" error="<<e<<'\n';
+  cerr<<"start="<<start<<" error="<<e<<" refined="<<refined<<" trials="<<trials<<'\n';
   for(int i=0;i<N;++i)cout<<q.a[i]<<' '<<q.b[i]<<'\n';
 }

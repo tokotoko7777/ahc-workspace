@@ -2014,3 +2014,18 @@ sort(points.begin(), points.end(), [](const Point& a, const Point& b) {
 
 `bits=10` なら各座標は `0..1023` です。厳密な最近傍順ではありませんが、空間的に
 まとまったcluster作成、query順、cache localityの改善候補を1行のkeyで作れます。
+
+## Dense Matrix Inverse
+
+[ヘッダ](../library/dense-matrix-inverse.hpp)・[恒等行列との比較テスト](../tests/dense_matrix_inverse_test.cpp)。
+固定サイズの浮動小数点正方行列を、部分ピボット付きGauss–Jordan法で逆転します。
+指定した絶対ピボット下限以下なら `std::nullopt` を返します。
+スケールが大きく違う問題は下限を選び直してください。
+
+```cpp
+std::array a{std::array{2.0, 1.0}, std::array{0.0, 3.0}};
+auto inverse = dense_matrix_inverse(a, 1e-12);
+```
+
+[AHC044](../problems/ahc044/main.cpp)では定常方程式の逆行列を一回求め、
+参照先変更ごとのランク1応答を比較します。
