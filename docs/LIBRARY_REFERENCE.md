@@ -2014,3 +2014,23 @@ sort(points.begin(), points.end(), [](const Point& a, const Point& b) {
 
 `bits=10` なら各座標は `0..1023` です。厳密な最近傍順ではありませんが、空間的に
 まとまったcluster作成、query順、cache localityの改善候補を1行のkeyで作れます。
+
+## Packed Line Shift
+
+[ヘッダ](../library/packed-line-shift.hpp)・[盤全体との差分テスト](../tests/ahc042_shift_test.cpp)。
+
+32以下の正方盤を行ごとのビット集合にして、行・列を取り出したり、変えたりします。
+`shifted` は添字の増加側または減少側へ指定距離ずらし、外に出たビットを捨てます。
+ラップアラウンドはしません。駒の種類が複数なら、別々のビット盤に置きます。
+
+```cpp
+using Packed = PackedLineShift<20>;
+Packed::Board board{};
+board[3] = 1u << 10;
+auto row = Packed::get(board, false, 3);
+Packed::put(board, false, 3, Packed::shifted(row, 2, true));
+// (3,10) -> (3,12)
+```
+
+[AHC042](../problems/ahc042/main.cpp)では、鬼と福を別のビット盤で持ち、
+追い出しと逆向き操作をまとめて計算します。
