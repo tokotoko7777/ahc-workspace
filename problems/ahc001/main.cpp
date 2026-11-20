@@ -1007,6 +1007,133 @@ struct Solver {
             for(int attempt=0;attempt<12;++attempt) change(i,global_candidate(i),1e-8,true);
         }
     }
+#ifdef AHC_EARLY_CORRIDOR
+    int early_candidates=0,early_biaxis=0,early_pairs=0,early_admitted=0;
+    double early_initial_gain=0;
+    vector<array<int,3>> early_axes;
+    void early_corridor_initialization() {
+        const uint64_t initial_rng=rng.s;
+        ordered_initialization();
+        Rect original[205], original_best[205];
+        copy(state,state+n,original);
+        copy(best,best+n,original_best);
+        const double original_value=value, original_best_value=best_value;
+        const uint64_t original_rng=rng.s, original_accepted=accepted;
+        reset_points(); refresh_targets();
+        rng.s=initial_rng;
+        vector<tuple<double,int,int>> pairs;
+        for(int i=0;i<n;++i) for(int j=i+1;j<n;++j) {
+            if(empty_boxes[i].empty() || empty_boxes[j].empty()) continue;
+            const Rect& a=empty_boxes[i][0]; const Rect& b=empty_boxes[j][0];
+            if(!overlap(a,b)) continue;
+            int shared=(min(a.q[2],b.q[2])-max(a.q[0],b.q[0]))
+                      *(min(a.q[3],b.q[3])-max(a.q[1],b.q[1]));
+            if(shared<min(desired[i],desired[j])/12 || abs(x[i]-x[j])+abs(y[i]-y[j])>2800) continue;
+            double weight=double(shared)/min(a.area(),b.area())*min(desired[i],desired[j]);
+            pairs.emplace_back(weight,i,j);
+        }
+        sort(pairs.rbegin(),pairs.rend());
+        fill(movable,movable+n,true);
+        int examined=0;
+        for(auto [weight,i,j]:pairs) {
+            if(early_pairs==6 || examined==18) break;
+            if(!movable[i] || !movable[j]) continue;
+            ++examined; ++early_candidates;
+            double highest=-1; int selected_axis=-1;
+            Rect selected_i{},selected_j{};
+            bool each[2]{};
+            int anchors[2][2]{{x[i],y[i]},{x[j],y[j]}};
+            auto future_box=[&](int id,Rect b, const vector<int>& locked) {
+                for(int k:locked) if(overlap(b,state[k])) {
+                    Rect chosen{}; int best_area=0;
+                    for(int d=0;d<4;++d) {
+                        Rect cut=b; cut.q[d]=state[k].q[d^2];
+                        if(valid(id,cut) && cut.area()>best_area) chosen=cut,best_area=cut.area();
+                    }
+                    if(!best_area) return state[id];
+                    b=chosen;
+                }
+                return b;
+            };
+            vector<int> locked;
+            for(int k=0;k<n;++k) if(!movable[k]) locked.push_back(k);
+            for(int axis=0;axis<2;++axis) {
+                int a=anchors[0][axis],b=anchors[1][axis];
+                if(a==b) continue;
+                for(int part=1;part<=3;++part) {
+                    int seam=min(a,b)+1+(abs(a-b)-1)*part/4;
+                    Rect fitted[2]{};
+                    double joint=0;
+                    for(int t=0;t<2;++t) {
+                        int id=t?j:i; double best_rank=-1, chosen_quality=0;
+                        for(int u=0;u<min(5,int(empty_boxes[id].size()));++u) {
+                            Rect box=empty_boxes[id][u];
+                            if(anchors[t][axis]<seam) box.q[axis+2]=min(box.q[axis+2],seam);
+                            else box.q[axis]=max(box.q[axis],seam);
+                            box=future_box(id,box,locked);
+                            if(!valid(id,box)) continue;
+                            int target=min(box.area(),max(1,int(lround(scaled_target[id]))));
+                            int width=clamp(int(lround(sqrt(double(target)*box.w()/box.h()))),
+                                            (target+box.h()-1)/box.h(),min(target,box.w()));
+                            int height=clamp(int(lround(double(target)/width)),1,box.h());
+                            int l=clamp(x[id]-width/2,max(box.q[0],x[id]-width+1),min(x[id],box.q[2]-width));
+                            int bot=clamp(y[id]-height/2,max(box.q[1],y[id]-height+1),min(y[id],box.q[3]-height));
+                            Rect candidate{{l,bot,l+width,bot+height}};
+                            double q=scaled_quality(id,candidate.area());
+                            double capacity=min(1.,double(box.area())/desired[id]);
+                            double rank=q+.20*capacity;
+                            if(rank>best_rank) fitted[t]=candidate,best_rank=rank,chosen_quality=q;
+                        }
+                        if(best_rank<0 || chosen_quality<.80) {joint=-1;break;}
+                        joint+=best_rank;
+                    }
+                    if(joint<0) continue;
+                    each[axis]=true;
+                    if(joint>highest) highest=joint,selected_axis=axis,selected_i=fitted[0],selected_j=fitted[1];
+                }
+            }
+            early_biaxis+=each[0]&&each[1];
+            if(selected_axis<0) continue;
+            assert(valid(i,selected_i) && valid(j,selected_j) && !overlap(selected_i,selected_j));
+            for(int k=0;k<n;++k) if(k!=i && k!=j)
+                assert(!overlap(selected_i,state[k]) && !overlap(selected_j,state[k]));
+            value+=quality(selected_i.area(),desired[i])+quality(selected_j.area(),desired[j])
+                   -quality(state[i].area(),desired[i])-quality(state[j].area(),desired[j]);
+            state[i]=selected_i;state[j]=selected_j;
+            movable[i]=movable[j]=false;
+            early_axes.push_back({i,j,selected_axis});
+            ++early_pairs;
+        }
+        // Preserve the committed orientations throughout the ordinary first fill.
+        local_search=true;
+        vector<pair<double,int>> order;
+        for(int i=0;i<n;++i) order.emplace_back(desired[i]*(.75+.5*rng.real()),i);
+        sort(order.rbegin(),order.rend());
+        refresh_targets();
+        for(auto [p,i]:order) if(movable[i])
+            for(int k=0;k<12;++k) change(i,global_candidate(i),1e-8,true);
+        local_search=false;
+        double exact=0;
+        for(int i=0;i<n;++i) exact+=quality(state[i].area(),desired[i]);
+        assert(abs(exact-value)<1e-8);
+        early_initial_gain=exact-original_value;
+        if(early_pairs>0 && exact>original_value+1e-9) {
+            ++early_admitted; value=exact; remember();
+        } else {
+            copy(original,original+n,state);value=original_value;rng.s=original_rng;
+            copy(original_best,original_best+n,best);best_value=original_best_value;accepted=original_accepted;
+        }
+        refresh_targets();
+    }
+    int early_survivors() const {
+        int survivors=0;
+        if(early_admitted) for(auto [i,j,a]:early_axes) {
+            auto apart=[&](int k){return best[i].q[k+2]<=best[j].q[k] || best[j].q[k+2]<=best[i].q[k];};
+            survivors+=apart(a) && !apart(a^1);
+        }
+        return survivors;
+    }
+#endif
 #ifdef AHC_FACE_SLIDE
     void face_slide_polish(chrono::steady_clock::time_point deadline) {
         copy(best,best+n,state);
@@ -1173,6 +1300,9 @@ struct Solver {
             partition_search(seconds*(variant==6 ? .15 : variant==7 ? .4 : .98));
             preliminary=chrono::duration<double>(chrono::steady_clock::now()-start).count();
         }
+#ifdef AHC_EARLY_CORRIDOR
+        if(variant==64) early_corridor_initialization(); else
+#endif
         if(variant>=21 && variant!=26) ordered_initialization();
         double progress = 0, temperature = .004;
         bool directed=(variant>=12 && variant<=15) || variant==17 || variant>=19;
@@ -1348,6 +1478,11 @@ struct Solver {
         cerr << "score=" << llround(best_value/n*1e9) << " iterations=" << iterations
              << " accepted=" << accepted << " all_anchors_bound=" << llround(empty_box_bound/n*1e9) << '\n';
         if(variant>=60) cerr<<"regional_trials="<<regional_trials<<" regional_improvements="<<regional_improvements<<'\n';
+#ifdef AHC_EARLY_CORRIDOR
+        cerr<<"early_candidates="<<early_candidates<<" biaxis="<<early_biaxis<<" pairs="<<early_pairs
+            <<" admitted="<<early_admitted<<" exclusive_survivors="<<early_survivors()
+            <<" initial_gain="<<llround(early_initial_gain/n*1e9)<<'\n';
+#endif
 #ifdef AHC_FORCED_TWIST
         cerr<<"twist_attempts="<<twist_attempts<<" feasible="<<twist_feasible
             <<" retained="<<twist_retained<<" retained_gain="<<llround(twist_gain/n*1e9)<<'\n';

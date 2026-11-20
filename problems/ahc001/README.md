@@ -154,3 +154,6 @@ python3 problems/ahc001/benchmark.py mincut-headroom/in bench-mincut-headroom --
 [局所軸修復診断](experiments/local_precedence_v3/README.md) も行いました。
 開発・未調整の計12開始配置で、両軸とも完全同点で、一度も改善が
 得られなかったため、こちらも既定版に組み込みません。
+
+既存の初期化を戻せる形で温存し、初期配置の前に空き領域を
+競う長方形を選んだ[初期軸順序の比較](experiments/early_corridor_v4/README.md)も参照。
