@@ -4,6 +4,9 @@ using namespace std;
 #ifndef AHC066_REPLAN
 #define AHC066_REPLAN 1
 #endif
+#ifndef AHC066_TEMPLATES
+#define AHC066_TEMPLATES 2
+#endif
 namespace {
 using Clock=chrono::steady_clock;
 using Edge=UnitLexicographicBfs::Edge;
@@ -80,7 +83,7 @@ struct Robot{
       rank.emplace_back((cnt-1)*(int(pattern.size())-1),pattern);
     ranges::sort(rank,greater{});
     vector<string> result;
-    for(int i=0;i<min(10,int(rank.size()));++i)result.push_back(rank[i].second);
+    for(int i=0;i<min(20,int(rank.size()));++i)result.push_back(rank[i].second);
     return result;
   }
   string compress(const string& s,const string& macro)const{
@@ -92,15 +95,21 @@ struct Robot{
     }
     return result;
   }
-  pair<string,int> reroute(const Trace& trace,const string& macro)const{
-    const int begin=trace.commands.find(macro),len=macro.size();
+  vector<string> geometry_macros()const{
+    return {"FFFF","FFFFFF",string(max(7,n/2),'F'),string(n-1,'F'),
+            "FFRFFF","FFLFFF","FFRFFL","FFLFFR","FFFRFFFL","FFFLFFFR"};
+  }
+  pair<string,int> reroute(const Trace& trace,const string& macro,int prefix=-1)const{
+    const int begin=prefix<0?int(trace.commands.find(macro)):prefix,len=macro.size();
     string out=trace.commands.substr(0,begin)+"M"+macro+"M";
     int here=0,completed=0,expanded=begin+len;
-    for(int i=0;i<expanded;++i){
-      char c=trace.commands[i];
+    if(expanded>T)return {{},expanded};
+    auto play_basic=[&](char c){
       if(c=='S')++completed;
       else here=pose[here][labels.find(c)].to;
-    }
+    };
+    for(int i=0;i<begin;++i)play_basic(trace.commands[i]);
+    for(char c:macro)play_basic(c);
     auto g=pose;
     for(int v=0;v<int(pose.size());++v){
       int u=v;
@@ -127,22 +136,36 @@ struct Robot{
     }
     const int literal=start.commands.size();
     auto list=macros(start.commands);
+    const int common=min(10,int(list.size()));
     string best=start.commands;
     int expanded=literal;
-    for(const auto& macro:list){
-      auto next=compress(start.commands,macro);
+    for(int i=0;i<common;++i){
+      auto next=compress(start.commands,list[i]);
       if(next.size()<best.size())best=move(next);
     }
     const int base=best.size();
-    if(AHC066_REPLAN)for(const auto& macro:list){
+    auto accept=[&](pair<string,int> result){
+      auto& [route,cost]=result;
+      if(!route.empty()&&route.size()<best.size()){best=move(route);expanded=cost;}
+    };
+    if(AHC066_REPLAN)for(int i=0;i<common&&Clock::now()<deadline;++i)
+      accept(reroute(start,list[i]));
+    const int frozen=best.size();
+    int trials=0;
+    if(AHC066_TEMPLATES==1)for(int i=0;i<10&&Clock::now()<deadline;++i){
+      // If the trace has fewer than twenty candidates repeat a prior trial, so
+      // the control never gets a smaller evaluation budget than the variant.
+      if(!list.empty())accept(reroute(start,list[(i+10)%list.size()]));
+      ++trials;
+    }
+    if(AHC066_TEMPLATES==2)for(const auto& macro:geometry_macros()){
       if(Clock::now()>=deadline)break;
-      auto [route,cost]=reroute(start,macro);
-      if(!route.empty()&&route.size()<best.size()){
-        best=move(route);expanded=cost;
-      }
+      accept(reroute(start,macro,0));++trials;
     }
     assert(int(best.size())<=T&&expanded<=T);
-    cerr<<"literal="<<literal<<" base="<<base<<" score="<<best.size()<<" expanded="<<expanded<<'\n';
+    cerr<<"literal="<<literal<<" base="<<base<<" score="<<best.size()<<" expanded="<<expanded;
+    if(AHC066_TEMPLATES)cerr<<" frozen="<<frozen<<" trials="<<trials;
+    cerr<<'\n';
     for(char c:best)cout<<c<<'\n';
   }
 };

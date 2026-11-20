@@ -67,11 +67,43 @@ then alternatively optimize ball order on macro-aware pose distances.
 ```sh
 p=problems/ahc066
 d=$(mktemp -d)
-g++ -std=c++23 -O3 -DAHC066_REPLAN=0 "$p/main.cpp" -o "$d/trace"
+g++ -std=c++23 -O3 -DAHC066_TEMPLATES=0 -DAHC066_REPLAN=0 "$p/main.cpp" -o "$d/trace"
 python scripts/bundle.py "$p/main.cpp" -o "$d/submission.cpp"
-g++ -std=c++23 -O3 "$d/submission.cpp" -o "$d/reroute"
+g++ -std=c++23 -O3 -DAHC066_TEMPLATES=0 "$d/submission.cpp" -o "$d/reroute"
 python "$p/benchmark.py" /path/to/gen /path/to/vis \
   "$d/trace" "$d/reroute" "$d/results.csv"
 g++ -std=c++23 -O3 tests/unit_lexicographic_bfs_test.cpp -o "$d/bfs-test"
 "$d/bfs-test"
+```
+
+## Follow-up: geometric macro templates
+
+Both arms preserve the frozen plan and evaluate ten additional one-macro
+options. Control tries more substrings of the literal route. Variant
+registers a predetermined choice of ten straight or turning templates
+at the starting pose; its recorded actions execute immediately. It
+then reconstructs the same waypoint order with that single selected
+macro. All plans still have both printed and expanded costs capped by T.
+
+| Fresh cases | Frozen buttons ↓ | More substrings ↓ | Templates ↓ | Templates vs more |
+|---|---:|---:|---:|---:|
+| Dev (28) | 259.464 | 255.143 | 248.286 | 17 / 6 / 5 |
+| Holdout (28) | 226.679 | 221.536 | 212.321 | 18 / 7 / 3 |
+
+The holdout median paired improvement is 3.5 buttons vs extra substrings.
+All 168 complete solutions agreed with official vis and independent
+replay. Max measured solver 0.070245 s; held-out median .0121 s vs .0134 s.
+Keep templates as branch default. [Logs](benchmark-template-results.csv).
+Next optimize ball order on macro-aware orientation distances at the same
+macro candidate count, or compare a second legal re-registration phase
+against spending the same exact work on one-macro route order.
+
+```sh
+p=problems/ahc066
+d=$(mktemp -d)
+for i in 0 1 2; do
+  g++ -std=c++23 -O3 -DAHC066_TEMPLATES=$i "$p/main.cpp" -o "$d/arm$i"
+done
+python "$p/benchmark_macros.py" /path/to/gen /path/to/vis \
+  "$d/arm0" "$d/arm1" "$d/arm2" "$d/results.csv"
 ```
