@@ -1,0 +1,26 @@
+{
+  "cases_match": 3000,
+  "generator_mode": "untouched official seed list",
+  "ordered_cases_sha256": "f834e7ca41ecd1b0b2a1c8a2731361bf261c51f69605d9f58832a1edbc391351",
+  "sources_sha256": {
+    "seeds": "45933552af3c557ff53d4e1397ef9fe10cedea89f10fe8140ceb489569dacea2",
+    "inputs": "57f4e664d458d14dc1feab9f24f5fc43e522eab3dab763066f5d47b8be075752",
+    "scores": "2ba001dcd7955e7f3607e9eb5e53737dbfa5d61e3e35d34c984ed9e4ba01f252"
+  },
+  "generator_sha256": "f897613394da1fe7f5c08d5937bd630b99b3e3f227b6cb9e16aff790ea32e06b",
+  "tester_sha256": "0982c5706bece446e6776313d8747ccb208031161400a4479402c6715e915658",
+  "binary_sha256": "32bf96ed81e00b0e4537e4311a4a2f584f30c46aac491f371767ec6a49ab1a41",
+  "historical_winner": "terry_u16",
+  "historical_winner_score": 2140937483257,
+  "valid_correct_first_attempt": 3000,
+  "max_wall_seconds": 0.06835762900300324,
+  "total_absolute_score": 196158000000,
+  "case_minima_improvement_count": 0,
+  "own_fixed_historical_baseline": 323222495387,
+  "own_combined_baseline": 323222495387,
+  "archived_first_combined_baseline": 2140937483257,
+  "best_historical_user_after_combining": "terry_u16",
+  "best_historical_score_after_combining": 2140937483257,
+  "hypothetical_rank": 171,
+  "hypothetical_ties": 0
+}

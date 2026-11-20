@@ -16,9 +16,9 @@ Final rank 1: **2,140,937,483,257 relative**, from the rank/score CSV of the
 [AtCoder official scores archived by ALE-Bench](https://huggingface.co/datasets/SakanaAI/ALE-Bench/blob/main/ahc030.zip)
 (zip SHA-256 matching the publisher LFS pointer:
 `d276d9c5f69390704a2d1692015273b0062a6b04372e9ec35c0c3cb8e05aa1c2`).
-Published final seeds alone do not provide the contest’s case-by-case
-relative reference minima. Fresh-input absolute results here **do not
-determine an official rank comparison**.
+See [the separate official audit](OFFICIAL_AUDIT.md) for a historical
+case-minima comparison of the frozen active solver. Fresh-input absolute
+results below are separate from that audit.
 
 ## Exact drilling
 
