@@ -23,7 +23,8 @@
 | [AHC013](https://atcoder.jp/contests/ahc013/tasks/ahc013_a) | ローカル改善・本番の自己得点を評価中 | [公式順位](https://atcoder.jp/contests/ahc013/standings) 要ログイン。1 位の点数未確認 | 隣接移動版: 未調整 20 件 64,679 | 本番公開 2,000 シード、3 秒 | [問題別ブランチ](https://github.com/tokotoko7777/ahc-workspace/tree/7526fecad74457ce05f786e5127c4e45c0357203) |
 | [AHC014](https://atcoder.jp/contests/ahc014/tasks/ahc014_a) | ローカル改善・本番未判定 | **3,122,399,998** 点（[AtCoder 提供の順位データ](https://huggingface.co/datasets/SakanaAI/ALE-Bench/blob/main/ahc014.zip)） | 再成長版: 未調整 6 件平均 880,722.83 | 本番公開 2,000 シード、5 秒 | [問題別ブランチ](https://github.com/tokotoko7777/ahc-workspace/tree/25c2dea8a3d5f9b07432ee1a2b239cf4bd820cff) |
 | [AHC015](https://atcoder.jp/contests/ahc015/tasks/ahc015_a) | ローカル改善・本番未判定 | **161,011,437** 点（[AtCoder 提供の順位データ](https://huggingface.co/datasets/SakanaAI/ALE-Bench/blob/main/ahc015.zip)） | 6 手先: 未調整 24 件平均 663,091.75 | 本番 200 件、2 秒。公開入力との同一性未確認 | [問題別ブランチ](https://github.com/tokotoko7777/ahc-workspace/tree/a2b1c24d2d58f6e42db8475e62eb7ae00ef9373e) |
-| AHC016〜074 | 未着手 | — | — | — | — |
+| AHC016 | 着手・未判定 | 確認中 | — | — | 検証中 |
+| AHC017〜074 | 未着手 | — | — | — | — |
 
 ### AHC001 の次の仮説
 
@@ -238,3 +239,9 @@
 - [実装・再現手順](https://github.com/tokotoko7777/ahc-workspace/blob/a2b1c24d2d58f6e42db8475e62eb7ae00ef9373e/problems/ahc015/README.md)。一手期待値と、将来のキャンディ位置を同じ割合・乱数で共有する 6 手先比較を、100 ターンで検証。
 - 開発 24 件平均 568,462.63 → 663,282.21（18 勝）、独立確認 24 件 600,825.08 → 663,091.75（17 勝）。全 96 出力が公式採点と独立の対話再生で一致。最大 0.204520 秒（2 秒制限）。C++23 一ファイルと汎用部品照合済み。研究ブランチの既定に保存。
 - 1 位は 161,011,437 点。順位データ SHA-256 `11293d19419acd7e8118126ffc1cfe4a0137629769108935c10a0bd3b554ce02` を照合。本番 200 件が配布入力と同一か未確認で、順位は未判定。次はシミュレーション総ステップを合わせた 6 手対 12 手を比較する。
+
+### AHC015 同じシミュレーション量で深さを比較
+
+- [追加実験の再現手順](https://github.com/tokotoko7777/ahc-workspace/blob/3cbfb52d69faa1f03318633c1289710bbb7b4ec4/problems/ahc015/README.md)。最大仮想配置数を方向あたり 156（6 手×26 対 12 手×13）に揃え、6 手先と 12 手先を比較。
+- 新規開発 24 件 640,541.50 → 607,777.38 点（9 勝）、別未調整 24 件 617,989.38 → 594,117.13 点（10 勝）。長い版は不採用。全 96 出力で公式・独立一致、最長 0.246614 秒、C++23 一ファイルを確認。
+- 深さとサンプル数のどちらが主因かは未分離。次は同じ深さと本数で離れた同色成分をつなぐ評価を比較するか、両因子を独立に振る。
