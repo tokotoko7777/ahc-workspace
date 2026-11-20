@@ -33,8 +33,9 @@
 | [AHC023](https://atcoder.jp/contests/ahc023/tasks/asprocon10_a) | 着手・本番未判定 | [公式順位](https://atcoder.jp/contests/ahc023/standings) 要ログイン、1位点未確認 | 本番公開2,000件 **1,100,483,250**（全件合法） | 本番公開2,000件・2秒、絶対点 | [問題別ブランチ](https://github.com/tokotoko7777/ahc-workspace/tree/52f76e1f5e905e5f4f11f0613285760073967281)、[植付と収穫の順序](https://github.com/tokotoko7777/ahc-workspace/tree/2b4a9df1aa5ad9cdc0d435bb8271d669d1fe43a6) |
 | [AHC024](https://atcoder.jp/contests/ahc024/tasks/ahc024_a) | 着手・本番未判定 | **335,417**（絶対点） | 再始動版：新規未調整24件 平均2,065.79 | 本番150件・2秒、同一ケースの証拠なし | [問題別ブランチ](https://github.com/tokotoko7777/ahc-workspace/tree/c5b3b9f3d88b74ff5f9fa67446d16555dd509ef1)、[多様な再始動](https://github.com/tokotoko7777/ahc-workspace/tree/a0aa3ad5ff0cf55d5f3f6ea9c8714d8ca19bcfe9) |
 | [AHC025](https://atcoder.jp/contests/ahc025/tasks/ahc025_a) | 着手・本番未判定 | **492,832,027,444**（相対点） | 未調整32件 77,452,712（絶対点・低い方が良い） | 本番5,000件・2秒、各参加者のケース別結果が必要 | [問題別ブランチ](https://github.com/tokotoko7777/ahc-workspace/tree/21034a6404bafe091bac193b8315b0ffd1ed0686)、[低Q追試](https://github.com/tokotoko7777/ahc-workspace/tree/93cfb59980bf24166658b1b40f60363cd8e63cf3) |
-| [AHC026](https://atcoder.jp/contests/ahc026/tasks/ahc026_a) | 着手・本番未判定 | **1,423,183**（絶対点） | 開発比較準備中 | 本番150件・2秒、同一ケースの証拠なし | 検証中 |
-| AHC027〜074 | 未着手 | — | — | — | — |
+| [AHC026](https://atcoder.jp/contests/ahc026/tasks/ahc026_a) | 着手・本番未判定 | **1,423,183**（絶対点） | 既存法：未調整16件 平均9,344.63 | 本番150件・2秒、同一ケースの証拠なし | [問題別ブランチ](https://github.com/tokotoko7777/ahc-workspace/tree/9d10bdadaa08a7ca84e01228951b4e965082f00b) |
+| [AHC027](https://atcoder.jp/contests/ahc027/tasks/ahc027_a) | 着手・本番未判定 | **1,996,375,186,737**（相対点） | 開発比較準備中 | 本番2,000件・2秒、ケース別基準が必要 | 検証中 |
+| AHC028〜074 | 未着手 | — | — | — | — |
 
 ### AHC001 の次の仮説
 
@@ -387,3 +388,11 @@
 ### AHC025 低Q層で順位推定を優先する追試
 
 [検証](https://github.com/tokotoko7777/ahc-workspace/tree/93cfb59980bf24166658b1b40f60363cd8e63cf3)。初回の小標本で見えた仮説を、独立の低Q層30件と高Q対照6件で検証。低Qの絶対ペナルティは従来197,259,539、順位推定の余りだけで改善する版336,043,600、順位推定だけ364,972,714（低い方が良い）。新案が従来に勝ったのは2/30。高Q対照6件では変更なし。162対話の回数・絶対点は公式と独立検査で一致、最長0.038秒。新案は任意に残す。次は固定比率を変えるのでなく、不確実なグループの重さ合計に情報が集中する比較を早い段階で選ぶ。
+
+### AHC026 箱の塊を二分するビーム
+
+[比較](https://github.com/tokotoko7777/ahc-workspace/tree/9d10bdadaa08a7ca84e01228951b4e965082f00b)。既存の決定的ロールアウトを無変更で対照にし、塊を一括移動するビームと二分移動を含めたビームを追加。分割版は一括版に全32勝（未調整16件で+129.25点/件）だが、既存版の9,344.63点/件に対し9,273.06点/件。96出力が公式と独立再生で一致、分割側は全件200段完了し最大0.139015秒。既存を既定に維持。次は既存解の途中から分割操作を入れ、残りを既存ロールアウトで評価する。
+
+### AHC027 本番条件
+
+[公式問題文](https://atcoder.jp/contests/ahc027/tasks/ahc027_a)。2秒 / 1,024 MiB。全マスを訪れ原点に戻る長さ10万以下の閉路を繰り返したときの平均汚れを丸めた絶対値を最小化。本番2,000件の相対点は当時のケース別最小値に依存し、その値は未取得。1位1,996,375,186,737は[AtCoder提供の順位・得点データ](https://huggingface.co/datasets/SakanaAI/ALE-Bench/blob/main/ahc027.zip)で確認（SHA-256 `f557d24377e00d105d6d2a0c5c5413166b6fe87662bdea5b4f163e0b64f21e1b`）。DFS周回を基準に、立ち寄り追加・削除と経路の反転を実際の訪問間隔で比べる。
