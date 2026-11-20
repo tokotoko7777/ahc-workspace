@@ -2014,3 +2014,21 @@ sort(points.begin(), points.end(), [](const Point& a, const Point& b) {
 
 `bits=10` なら各座標は `0..1023` です。厳密な最近傍順ではありませんが、空間的に
 まとまったcluster作成、query順、cache localityの改善候補を1行のkeyで作れます。
+
+## Incremental Manhattan distance
+
+ヘッダ: [`incremental-manhattan-distance.hpp`](../library/incremental-manhattan-distance.hpp)
+
+壁・折り返しのない長方形グリッドで、追加され続ける点集合への最近傍距離を管理します。
+要素削除は非対応です。
+
+```cpp
+IncrementalManhattanDistance field(height, width);
+field.add(row * width + column);
+int distance_to_source = field.distance(query_id);
+```
+
+最初は全セルの距離が `height+width`。同じ点は再追加されません。
+各追加は厳密に距離が小さくなるセルだけを更新し、距離取得は O(1)。
+[AHC070のお札の配置](../problems/ahc070/main.cpp) と
+[全追加点を照合するテスト](../tests/incremental_manhattan_distance_test.cpp)。
