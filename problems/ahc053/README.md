@@ -51,11 +51,55 @@ Validate on fresh seeds.
 ```sh
 p=problems/ahc053
 d=$(mktemp -d)
-g++ -std=c++23 -O3 "$p/main.cpp" -o "$d/base"
-g++ -std=c++23 -O3 -DAHC053_MATCH=1 "$p/main.cpp" -o "$d/match"
+g++ -std=c++23 -O3 -DAHC053_PAIR=0 "$p/main.cpp" -o "$d/base"
+g++ -std=c++23 -O3 -DAHC053_PAIR=0 -DAHC053_MATCH=1 "$p/main.cpp" -o "$d/match"
 python "$p/benchmark.py" /path/to/gen /path/to/tester "$d/base" "$d/match" "$d/results.csv"
 python scripts/bundle.py "$p/main.cpp" -o "$d/submission.cpp"
 g++ -std=c++23 -O3 "$d/submission.cpp" -o "$d/submission"
 g++ -std=c++23 -O3 tests/sorted_bottleneck_assignment_test.cpp -o "$d/test"
 "$d/test"
+```
+
+## Follow-up: sealed two-card pools
+
+The new 500-card deck uses 80 wide anchors and three independent pools of
+140 stratum-jittered denominations. All cards are deterministic functions of
+the public first line and a constant PRNG seed, emitted and flushed before
+any targets. Anchor matching is the sorted-minimax solver above. Later stages
+allocate two cards per target, which allows much higher central density via
+combinations without placing all card values in a small band. For the current
+unused pool, a two-pointer search computes the closest distinct pair for
+each unassigned target. Process the farthest-from-any-pair target first, and
+remove both selected cards. No tuning on the five fresh groups below.
+
+| Fresh group, 20 cases each | Nearest ↑ | Global matching ↑ | Paired pool ↑ |
+|---|---:|---:|---:|
+| Dev A | 383,366,768 | 383,708,766 | 596,162,551 |
+| Dev B | 382,378,844 | 383,935,909 | 598,823,574 |
+| Holdout A | 381,385,215 | 384,996,296 | 595,085,466 |
+| Holdout B | 385,073,204 | 385,560,340 | 595,636,730 |
+| Holdout C | 384,145,417 | 386,109,835 | 596,341,624 |
+
+All 100 paired-pool cases beat both controls; all 300 runs agreed with the
+official interactive tester and independent replay. The deck bytes were
+unchanged across targets within each arm. Error medians fell from the
+order of 2×10¹² to 1.1×10⁸. The paired assignment has more work per instance,
+but all three arms use the same 500-card capacity and the same 2 s wall
+limit, with the paired tester-inclusive maximum 0.0052 s. Paired pools are
+the branch default. [Raw measurements](benchmark-pair-results.csv).
+
+Next, before any new holdout, try using the 40 unallocated cards in the finest
+pool as dedicated fine grid cards instead. Compare a two-sum assignment with
+local exchange/reassignment of its interval endpoints against additional
+dedicated fine rounds at equal card capacity.
+
+```sh
+p=problems/ahc053
+d=$(mktemp -d)
+g++ -std=c++23 -O3 -DAHC053_PAIR=0 "$p/main.cpp" -o "$d/base"
+g++ -std=c++23 -O3 -DAHC053_PAIR=0 -DAHC053_MATCH=1 "$p/main.cpp" -o "$d/match"
+python scripts/bundle.py "$p/main.cpp" -o "$d/submission.cpp"
+g++ -std=c++23 -O3 "$d/submission.cpp" -o "$d/pair"
+python "$p/benchmark_pairs.py" /path/to/gen /path/to/tester \
+  "$d/base" "$d/match" "$d/pair" "$d/results.csv"
 ```
