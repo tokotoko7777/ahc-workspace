@@ -12,7 +12,7 @@
 |---|---|
 | 時間・乱数・探索の制御 | [Timer](#timer)、[Random](#random)、[焼きなまし](#タイマー内蔵の焼きなまし)、[BestKeeper](#bestkeeper)、[MultiStart](#multistart) |
 | 配列・区間・集合 | [累積和](#累積和)、[Fenwick Tree](#fenwick-tree)、[Segment Tree](#segment-tree)、[DenseIntSet](#denseintset) |
-| グラフ・経路・割当 | [Graph BFS](#graph-bfs)、[Dijkstra](#dijkstra)、[Max Flow](#max-flow)、[Hungarian Algorithm](#hungarian-algorithm) |
+| グラフ・経路・割当 | [Graph BFS](#graph-bfs)、[Dijkstra](#dijkstra)、[Max Flow](#max-flow)、[Hungarian Algorithm](#hungarian-algorithm)、[Kruskal のボトルネック](#kruskal-のボトルネック) |
 | 数学・文字列・列 | [StaticModInt](#staticmodint)、[Matrix](#matrix)、[Rolling Hash](#rolling-hash)、[最長増加部分列](#longest-increasing-subsequence) |
 | 差分更新・巻き戻し・ビーム | [RollbackArray](#rollbackarray)、[更新の検査](#差分更新とapplyrevertの検査)、[PrefixReplay](#行動列を途中からだけ再生する)、[SimpleBeamSearch](#simplebeamsearch)、[TreeBeamSearch](#treebeamsearch) |
 | 幾何・配置 | [Point2D](#point2d)、[AxisAlignedRectangle](#axisalignedrectangle)、[最大の空き長方形](#指定セルを含む最大の空き長方形)、[Convex Hull](#convex-hull) |
@@ -2014,3 +2014,19 @@ sort(points.begin(), points.end(), [](const Point& a, const Point& b) {
 
 `bits=10` なら各座標は `0..1023` です。厳密な最近傍順ではありませんが、空間的に
 まとまったcluster作成、query順、cache localityの改善候補を1行のkeyで作れます。
+
+## Kruskal のボトルネック
+
+ヘッダ: [`kruskal-bottleneck.hpp`](../library/kruskal-bottleneck.hpp)
+
+既に同じ成分に属する頂点を DSU で縮約した状態で、異なる成分にいる
+2 頂点を結ぶ経路の「辺コストの最大値」の最小値を求めます。
+`kruskal_path_bottleneck(dsu, ordered, source, target, keep)` は
+コスト昇順の辺（`from`, `to`, `cost`）を `keep` で選び、2 頂点を
+連結した時点で終了します。連結できなければ `nullopt` です。
+DSU を破壊的に更新するので、元の成分を再利用するならコピーを渡します。
+一方向 range を一度だけ走査し、重い辺の並べ替えや結果の木の生成はしません。
+
+[使用例](../examples/kruskal_bottleneck_usage.cpp)、
+[Floyd–Warshall による独立テスト](../tests/kruskal_bottleneck_test.cpp)、
+[AHC007 での使用箇所](../problems/ahc007/main.cpp)。
