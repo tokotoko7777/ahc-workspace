@@ -8,6 +8,9 @@
 #include <utility>
 #include <vector>
 #include "../../library/bounded-depth-forest.hpp"
+#ifdef AHC041_COMPOUND_REPAIR
+#include "depth_repair.hpp"
+#endif
 
 using Clock=std::chrono::steady_clock;
 struct RNG {
@@ -74,9 +77,14 @@ int main() {
             int d=s.adj[v].size();
             unsigned x=s.rng.next()%(d+1);
             int p=int(x)==d ? -1 : s.adj[v][x];
-            if(current.try_reparent(v,p,[&](long long change) {
+            auto accept=[&](long long change) {
                 return change>=0 || s.rng.unit()<std::exp(change/temp);
-            })) improve(current);
+            };
+            bool moved=current.try_reparent(v,p,accept);
+#ifdef AHC041_COMPOUND_REPAIR
+            if(!moved && rep%8==0) moved=try_depth_repair(current,s.adj,s.h,v,p,accept);
+#endif
+            if(moved) improve(current);
         }
     }
 #endif

@@ -52,6 +52,11 @@ public:
     const std::vector<int>& parents() const {return parent_;}
     const std::vector<int>& depths() const {return depth_;}
     long long score() const {return score_;}
+    template<class Function>
+    void for_each_child(int v,Function action) const {
+        assert(0<=v && v<int(parent_.size()));
+        for(int u=first_[v];u>=0;u=next_[u]) action(u);
+    }
 
     // O(size of moved subtree); rejects no-ops, cycles and excessive depth.
     // Accept receives the exact signed change only if this move is feasible.
