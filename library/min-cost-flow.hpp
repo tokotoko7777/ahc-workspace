@@ -73,6 +73,15 @@ struct MinCostFlow {
   std::pair<Capacity, Cost> flow(
       int source, int sink, Capacity flow_limit,
       Cost infinity = std::numeric_limits<Cost>::max() / 4) {
+    return flow_until(source, sink, flow_limit, [] { return false; }, infinity);
+  }
+
+  // stop() is checked between augmentations. Return a min-cost partial flow
+  // if stopped; callers requiring exact demand must check the returned flow.
+  template<class Stop>
+  std::pair<Capacity, Cost> flow_until(
+      int source, int sink, Capacity flow_limit, Stop stop,
+      Cost infinity = std::numeric_limits<Cost>::max() / 4) {
     assert(!already_run);
     already_run = true;
     assert(0 <= source && source < n && 0 <= sink && sink < n);
@@ -86,7 +95,7 @@ struct MinCostFlow {
     std::vector<int> previous_edge(n);
     using QueueEntry = std::pair<Cost, int>;
 
-    while (total_flow < flow_limit) {
+    while (total_flow < flow_limit && !stop()) {
       std::fill(distance.begin(), distance.end(), infinity);
       distance[source] = Cost{};
       std::priority_queue<QueueEntry, std::vector<QueueEntry>,

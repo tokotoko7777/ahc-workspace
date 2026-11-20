@@ -986,6 +986,21 @@ auto [sent, minimum_cost] = flow.flow(0, 3, 3);
 `Cost` には逆向き残余辺の負コストを保存するため、`long long` など符号付き型を
 使います。`flow` は1つのインスタンスに対し1回だけ呼びます。
 
+時間制限がある場合は、増加路探索の間で停止条件を確認する
+`flow_until` も使えます。途中停止時は、その時点の最小費用の部分流を返します。
+必要量が全て流れなければ、元の解を残すようにします。
+
+```cpp
+auto [sent, cost] = flow.flow_until(source, sink, demand, [&] {
+  return std::chrono::steady_clock::now() >= deadline;
+});
+if (sent != demand) use_incumbent();
+```
+
+[停止時の部分流テスト](../tests/min_cost_flow_stop_test.cpp)。
+[AHC034](../problems/ahc034/main.cpp)では、既に合法な経路を持ち、
+その経路上で荷物の分配を完全に改善できた時だけ置き換えます。
+
 ## Bipartite Matching
 
 ヘッダ: [`bipartite-matching.hpp`](../library/bipartite-matching.hpp)

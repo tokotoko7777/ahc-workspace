@@ -62,8 +62,8 @@ or exact work in candidate fixed walks.
 From repository root (`ATCODER_TOOLS` is the extracted official tools'
 `target/release` directory, built with `cargo build --release --locked`):
 
-    g++ -std=c++23 -O3 -DAHC034_ANNEAL=0 problems/ahc034/main.cpp -o /tmp/ahc034-snake
-    g++ -std=c++23 -O3 problems/ahc034/main.cpp -o /tmp/ahc034-anneal
+    g++ -std=c++23 -O3 -DAHC034_ANNEAL=0 -DAHC034_FLOW=0 problems/ahc034/main.cpp -o /tmp/ahc034-snake
+    g++ -std=c++23 -O3 -DAHC034_FLOW=0 problems/ahc034/main.cpp -o /tmp/ahc034-anneal
     python problems/ahc034/benchmark.py "$ATCODER_TOOLS/gen" "$ATCODER_TOOLS/vis" /tmp/ahc034-snake /tmp/ahc034-anneal /tmp/ahc034.csv
     g++ -std=c++23 -O2 tests/load_aware_route_test.cpp -o /tmp/ahc034-summary-test
     /tmp/ahc034-summary-test
@@ -72,3 +72,55 @@ From repository root (`ATCODER_TOOLS` is the extracted official tools'
 
 Optional `-DAHC034_VERIFY` compares every accepted move to full route
 recomputation, intended only for local diagnostics.
+
+## Fixed-walk integral flow follow-up
+
+Keep **every** emitted movement command from the two-epoch annealed
+incumbent. The truck can load/unload during a traversal of a nonzero cell,
+not just its designated visit. Each time step becomes a graph node,
+with next-step arcs of cost1 per carried unit. A positive cell connects to
+all its visits on the source side; all visits to a negative cell connect
+to its demand node. Capacities enforce exact per-cell height requirements.
+Integral flow yields legal soil quantities, with total edge cost equal
+to the carried load-distance. Movement overhead and handling are fixed.
+Only accept a lower-cost **full** flow; the time cutoff keeps the incumbent.
+
+| 24 new cases each | Same itinerary incumbent | Split flow | W/T/L | Paired travel-cost ratio |
+|---|---:|---:|---:|---:|
+| Development | 29,830,615.04 | 33,266,808.71 | 24/0/0 | 0.89379 |
+| Untouched holdout | 30,949,419.92 | 35,727,578.04 | 24/0/0 | 0.86627 |
+
+Both arms had identical motion bytes, no detours, and the same annealing
+schedule. All 96 traces were legal, completely flattened the grid, and
+matched official scoring. Maximum measured wall time 0.273714 s and
+maximum output 2523 commands. The same-itinerary comparison isolates the
+allocation effect but the extra flow uses more time; a separate run
+compares it with more iterations using a new seed split.
+
+On an independent 24+24 resource-control split, the flow variant won every
+case versus five annealing epochs (500k move proposals minus early skips, each
+arm under the same overall time limit). Holdout score averaged 31,226,877.96
+→34,773,539.50 and the median wall times were 0.152 vs 0.164 s; development
+32,179,630.42→36,336,346.83 (median 0.156 vs 0.160 s). The lengths can differ
+in this control because the longer search changes the route. Thus this is
+an approximately time-matched budget comparison, not the isolation test.
+All 96 additional outputs matched exact replay and the official scorer.
+The branch defaults to flow. See [same walk logs](fixed-flow-results.csv)
+and [resource control logs](flow-resource-results.csv).
+
+The reusable flow implementation previously could not stop before completing
+all augmentations, even when a legal incumbent already existed.
+[`flow_until`](../../library/min-cost-flow.hpp) adds a templated cooperative
+stop callback with [partial-flow tests](../../tests/min_cost_flow_stop_test.cpp).
+It polls between shortest path augmentations; AHC034 stops flow at 1.73 s.
+
+    g++ -std=c++23 -O3 problems/ahc034/main.cpp -o /tmp/ahc034-flow
+    python problems/ahc034/benchmark.py "$ATCODER_TOOLS/gen" "$ATCODER_TOOLS/vis" /tmp/ahc034-anneal /tmp/ahc034-flow /tmp/ahc034-flow.csv --flow
+    g++ -std=c++23 -O3 -DAHC034_FLOW=0 -DAHC034_EPOCHS=5 problems/ahc034/main.cpp -o /tmp/ahc034-long
+    python problems/ahc034/benchmark.py "$ATCODER_TOOLS/gen" "$ATCODER_TOOLS/vis" /tmp/ahc034-long /tmp/ahc034-flow /tmp/ahc034-control.csv --resource
+
+Next try **constructing several resource-matched short walks** optimized for
+local positive/negative exchanges rather than one snake-derived route.
+Score full fixed-walk flow only on a shortlist (the unconditional
+baseline remains a valid choice), and compare selected walks to local
+path changes that keep step count unchanged.

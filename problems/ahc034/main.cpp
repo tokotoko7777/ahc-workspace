@@ -1,7 +1,14 @@
 #include <bits/stdc++.h>
 #include "../../library/load-aware-route.hpp"
+#include "../../library/min-cost-flow.hpp"
 #include "../../library/segment-tree.hpp"
 using namespace std;
+#ifndef AHC034_FLOW
+#define AHC034_FLOW 1
+#endif
+#ifndef AHC034_EPOCHS
+#define AHC034_EPOCHS 2
+#endif
 #ifndef AHC034_ANNEAL
 #define AHC034_ANNEAL 1
 #endif
@@ -72,7 +79,7 @@ struct Problem {
     long long best_cost=cost(summarize(base));
     Route best=base;
     mt19937 rng(340034);
-    for(int epoch=0;epoch<2;++epoch){
+    for(int epoch=0;epoch<AHC034_EPOCHS;++epoch){
       Route cur=best;
       build(cur);
       long long current=cost(tree.all());
@@ -112,28 +119,88 @@ struct Problem {
     }
     return best;
   }
-  void print(const Route& order)const{
-    int pos=0,load=0;
+  struct Walk {vector<int> point,change;};
+  Walk expand(const Route& order)const{
+    Walk w{{0},{0}};
+    int pos=0;
+    auto step=[&](int inc){pos+=inc;w.point.push_back(pos);w.change.push_back(0);};
     for(int target:order){
-      while(pos/N<target/N){cout<<"D\n";pos+=N;}
-      while(pos/N>target/N){cout<<"U\n";pos-=N;}
-      while(pos%N<target%N){cout<<"R\n";++pos;}
-      while(pos%N>target%N){cout<<"L\n";--pos;}
-      int change=height[target];
-      if(change>0)cout<<'+'<<change<<'\n';
-      else cout<<change<<'\n';
-      load+=change;assert(load>=0);
+      while(pos/N<target/N)step(N);
+      while(pos/N>target/N)step(-N);
+      while(pos%N<target%N)step(1);
+      while(pos%N>target%N)step(-1);
+      w.change.back()+=height[target];
+    }
+    return w;
+  }
+  long long travel(const Walk& w)const{
+    int load=0;long long cost=0;
+    assert(w.point.size()==w.change.size());
+    for(int i=0;i<int(w.point.size());++i){
+      load+=w.change[i];assert(load>=0);
+      if(i+1<int(w.point.size())){
+        assert(dist[w.point[i]][w.point[i+1]]==1);
+        cost+=100+load;
+      }
     }
     assert(load==0);
+    return cost;
+  }
+  bool split_fixed_walk(Walk& w,Clock::time_point deadline)const{
+    if(Clock::now()>=deadline)return false;
+    const int n=int(w.point.size()),source=n+V,sink=source+1;
+    int total=0;
+    MinCostFlow<int,long long> flow(sink+1);
+    for(int v=0;v<V;++v)if(height[v]>0){
+      total+=height[v];flow.add_edge(source,n+v,height[v],0);
+    }else if(height[v]<0)flow.add_edge(n+v,sink,-height[v],0);
+    vector<int> transfer(n,-1);
+    for(int t=0;t<n;++t){
+      if(t+1<n)flow.add_edge(t,t+1,total,1);
+      const int v=w.point[t],h=height[v];
+      if(h>0)transfer[t]=flow.add_edge(n+v,t,h,0);
+      else if(h<0)transfer[t]=flow.add_edge(t,n+v,-h,0);
+    }
+    auto [sent,work]=flow.flow_until(source,sink,total,[&]{return Clock::now()>=deadline;});
+    if(sent!=total)return false;
+    Walk candidate{w.point,vector<int>(n)};
+    array<int,V> served{};
+    for(int t=0;t<n;++t)if(transfer[t]>=0){
+      const int v=w.point[t];
+      candidate.change[t]=flow.get_edge(transfer[t]).flow*(height[v]>0?1:-1);
+      served[v]+=candidate.change[t];
+    }
+    assert(served==height);
+    const long long computed=travel(candidate);
+    assert(computed==100LL*(n-1)+work);
+    if(computed>=travel(w))return false;
+    w=std::move(candidate);
+    return true;
+  }
+  void print(const Walk& w)const{
+    for(int i=0;i<int(w.point.size());++i){
+      if(i){
+        int d=w.point[i]-w.point[i-1];
+        cout<<(d==N?'D':d==-N?'U':d==1?'R':'L')<<'\n';
+      }
+      const int change=w.change[i];
+      if(change>0)cout<<'+'<<change<<'\n';
+      else if(change<0)cout<<change<<'\n';
+    }
   }
 };
 }
 int main(){
-  const auto deadline=Clock::now()+chrono::milliseconds(1550);
+  const auto begin=Clock::now();
+  const auto deadline=begin+chrono::milliseconds(1550);
   ios::sync_with_stdio(false);cin.tie(nullptr);
   Problem p;p.read();
   auto base=p.initial();
   auto answer=AHC034_ANNEAL?p.search(base,deadline):base;
-  cerr<<"start="<<p.cost(p.summarize(base))<<" move="<<p.cost(p.summarize(answer))<<'\n';
-  p.print(answer);
+  auto walk=p.expand(answer);
+  const long long fixed=p.travel(walk);
+  if(AHC034_FLOW)p.split_fixed_walk(walk,begin+chrono::milliseconds(1730));
+  cerr<<"start="<<p.cost(p.summarize(base))<<" move="<<p.travel(walk)
+      <<" fixed="<<fixed<<" walk="<<walk.point.size()-1<<'\n';
+  p.print(walk);
 }
