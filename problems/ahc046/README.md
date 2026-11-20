@@ -61,9 +61,45 @@ From the repository root, build the official tools with
 `target/release` directory.
 
     g++ -std=c++23 -O3 -DAHC046_BLOCK=0 problems/ahc046/main.cpp -o /tmp/ahc046-empty
-    g++ -std=c++23 -O3 problems/ahc046/main.cpp -o /tmp/ahc046-stops
+    g++ -std=c++23 -O3 -DAHC046_CROSS=0 problems/ahc046/main.cpp -o /tmp/ahc046-stops
     python problems/ahc046/benchmark.py "$ATCODER_TOOLS/gen" "$ATCODER_TOOLS/vis" /tmp/ahc046-empty /tmp/ahc046-stops /tmp/ahc046.csv
     g++ -std=c++23 -O2 tests/static_slide_grid_test.cpp -o /tmp/ahc046-slide-test
     /tmp/ahc046-slide-test
     python scripts/bundle.py problems/ahc046/main.cpp -o /tmp/ahc046-single.cpp
     g++ -std=c++23 -O3 /tmp/ahc046-single.cpp -o /tmp/ahc046-single
+
+## Across-leg beam
+
+After preserving the same complete two-leg incumbent, examine up to
+eight different persistent block maps after each visited target.
+For a given map, the cheapest path suffix onto the next target uses
+at most one toggle. Compare options with paid length plus an exact
+untoggled distance to the following target, group identical maps
+at each stage, and keep the best completed route. No new block
+candidate cells are added relative to the first search.
+
+The comparison control consumes a similar budget by running eight
+single-state greedy itineraries with differing future-distance weights.
+It uses identical candidate enumeration and the same initial complete
+fallback, varying only how well competing block configurations survive.
+
+| 30 fresh cases each | Prior mean turns | 8 greedy restarts | Beam8 |
+|---|---:|---:|---:|
+| Development | 236.233 | 226.167 | 217.967 |
+| Untouched holdout | 239.400 | 227.933 | 217.600 |
+
+On holdout the beam versus the eight restarts went 29/1/0 (W/T/L),
+median 10.5 turns saved. Mean candidate toggles evaluated were 3377 vs
+3484.6; median wall0.120 s vs0.132 s. This approximates, not forces,
+equal wall work. All 180 outputs were independently replayed without
+violation, stopping on all 39 targets, and matched the official score.
+Worst measured wall 0.371476s. Branch defaults to beam. [Data](cross-results.csv).
+
+Next allow several more re-usable block positions, e.g. one past
+intersections of approach lanes and upcoming checkpoints. Test them
+at equal candidate-evaluation quotas; the best current itinerary is
+always a legal fallback.
+
+    g++ -std=c++23 -O3 problems/ahc046/main.cpp -o /tmp/ahc046-cross
+    g++ -std=c++23 -O3 -DAHC046_CROSS=2 problems/ahc046/main.cpp -o /tmp/ahc046-multi
+    python problems/ahc046/benchmark.py "$ATCODER_TOOLS/gen" "$ATCODER_TOOLS/vis" /tmp/ahc046-stops /tmp/ahc046-cross /tmp/ahc046-cross.csv --multistart /tmp/ahc046-multi

@@ -46,15 +46,18 @@ def main():
     p=argparse.ArgumentParser(description=__doc__)
     for arg in ("gen","vis","base","candidate","csv"):
         p.add_argument(arg,type=Path)
+    p.add_argument("--multistart",type=Path)
     a=p.parse_args()
+    tag="cross-leg-v1" if a.multistart else "persistent-stops-v1"
+    if a.multistart:a.multistart=a.multistart.resolve()
     gen,vis,base,candidate=(getattr(a,k).resolve() for k in ("gen","vis","base","candidate"))
     with tempfile.TemporaryDirectory() as d,a.csv.open("w",newline="") as f:
         work=Path(d)
         seed,ans=work/"seeds.txt",work/"answer.txt"
         w=csv.writer(f,lineterminator="\n")
-        w.writerow(("split","seed","arm","score","turns","edits","slides","blocks_end","baseline","seconds"))
+        w.writerow(("split","seed","arm","score","turns","edits","slides","blocks_end","baseline","seconds","incumbent","checks"))
         for split in ("dev","holdout"):
-            ids=[int.from_bytes(hashlib.sha256(f"ahc046/persistent-stops-v1/{split}/{j}".encode()).digest()[:8],
+            ids=[int.from_bytes(hashlib.sha256(f"ahc046/{tag}/{split}/{j}".encode()).digest()[:8],
                                 "little") for j in range(30)]
             seed.write_text("".join(f"{s}\n" for s in ids))
             subprocess.run([gen,seed],cwd=work,check=True)
@@ -62,21 +65,25 @@ def main():
                 inp=work/"in"/f"{i:04d}.txt"
                 data=inp.read_bytes()
                 arms=[("static",base),("blocks",candidate)]
-                starts=[]
+                if a.multistart:arms=[("blocks",base),("multi",a.multistart),("beam",candidate)]
+                starts=[];incumbents=[]
                 for label,binary in arms[::(-1 if i%2 else 1)]:
                     start=time.monotonic()
                     run=subprocess.run([binary],input=data,check=True,capture_output=True,timeout=2)
                     elapsed=time.monotonic()-start
                     result=replay(data,run.stdout)
-                    found=re.fullmatch(rb"base=(\d+) turns=(\d+)\s*",run.stderr)
+                    found=re.fullmatch(rb"base=(\d+) turns=(\d+)(?: incumbent=(\d+) checks=(\d+))?\s*",run.stderr)
                     assert found and int(found[2])==result[1] and elapsed<2
                     starts.append(int(found[1]))
+                    old=int(found[3]) if found[3] else result[1]
+                    incumbents.append(old)
                     ans.write_bytes(run.stdout)
                     official=subprocess.run([vis,inp,ans],cwd=work,capture_output=True,text=True,check=True)
                     assert official.stdout.strip()==f"Score = {result[0]}",official.stdout
-                    w.writerow((split,s,label,*result,starts[-1],f"{elapsed:.6f}"))
+                    w.writerow((split,s,label,*result,starts[-1],f"{elapsed:.6f}",old,int(found[4]) if found[4] else 0))
                     f.flush()
                 assert len(set(starts))==1
+                if a.multistart:assert len(set(incumbents))==1
 
 if __name__=="__main__":
     main()
