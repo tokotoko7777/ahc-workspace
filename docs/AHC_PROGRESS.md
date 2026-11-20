@@ -22,7 +22,7 @@
 | [AHC012](https://atcoder.jp/contests/ahc012/tasks/ahc012_a) | ローカル比較・本番未判定 | **99,781,619** 点（[AtCoder 提供の順位データ](https://huggingface.co/datasets/SakanaAI/ALE-Bench/blob/main/ahc012.zip)） | 格子版: 未調整 8 件平均 972,456.375 | 本番 100 件・3 秒。同一性未確認 | [問題別ブランチ](https://github.com/tokotoko7777/ahc-workspace/tree/dc1a18935430728a5dbca82c14f8bc84c57145e1) |
 | [AHC013](https://atcoder.jp/contests/ahc013/tasks/ahc013_a) | ローカル改善・本番の自己得点を評価中 | [公式順位](https://atcoder.jp/contests/ahc013/standings) 要ログイン。1 位の点数未確認 | 隣接移動版: 未調整 20 件 64,679 | 本番公開 2,000 シード、3 秒 | [問題別ブランチ](https://github.com/tokotoko7777/ahc-workspace/tree/7526fecad74457ce05f786e5127c4e45c0357203) |
 | [AHC014](https://atcoder.jp/contests/ahc014/tasks/ahc014_a) | ローカル改善・本番未判定 | **3,122,399,998** 点（[AtCoder 提供の順位データ](https://huggingface.co/datasets/SakanaAI/ALE-Bench/blob/main/ahc014.zip)） | 再成長版: 未調整 6 件平均 880,722.83 | 本番公開 2,000 シード、5 秒 | [問題別ブランチ](https://github.com/tokotoko7777/ahc-workspace/tree/25c2dea8a3d5f9b07432ee1a2b239cf4bd820cff) |
-| AHC015 | 着手・未判定 | 確認中 | — | — | 検証中 |
+| [AHC015](https://atcoder.jp/contests/ahc015/tasks/ahc015_a) | ローカル改善・本番未判定 | **161,011,437** 点（[AtCoder 提供の順位データ](https://huggingface.co/datasets/SakanaAI/ALE-Bench/blob/main/ahc015.zip)） | 6 手先: 未調整 24 件平均 663,091.75 | 本番 200 件、2 秒。公開入力との同一性未確認 | [問題別ブランチ](https://github.com/tokotoko7777/ahc-workspace/tree/a2b1c24d2d58f6e42db8475e62eb7ae00ef9373e) |
 | AHC016〜074 | 未着手 | — | — | — | — |
 
 ### AHC001 の次の仮説
@@ -232,3 +232,9 @@
 - [固定開始からの比較・再現手順](https://github.com/tokotoko7777/ahc-workspace/blob/b56da5cc4b1c38a5cd7cc4a9a8f90e7661ddb857/problems/ahc014/README.md)。長方形の新しい頂点に依存する後続手だけを除く方式を、削除数を揃えた末尾削除と比較。凍結 4,270 ms の開始解から 1 入力 32 対を実行。
 - 開発 6 件の平均 832,521.67 → 842,875.33（5 勝 1 分）、独立確認 6 件 899,786.50 → 909,102.33（6 勝）。全 384 試行対完了、出力 36 件は公式と独立検査一致、最長 4.366745 秒。ランダム 100 盤面の依存関係と C++23 結合を検証。
 - 既定の 4,550 ms 版との等時間比較ではないため任意実験。次は同じ予算を再始動と依存削除へ配分し、通常解を対照にする。本番集計はまだ未判定。
+
+### AHC015 同じ落下シナリオによる先読み比較
+
+- [実装・再現手順](https://github.com/tokotoko7777/ahc-workspace/blob/a2b1c24d2d58f6e42db8475e62eb7ae00ef9373e/problems/ahc015/README.md)。一手期待値と、将来のキャンディ位置を同じ割合・乱数で共有する 6 手先比較を、100 ターンで検証。
+- 開発 24 件平均 568,462.63 → 663,282.21（18 勝）、独立確認 24 件 600,825.08 → 663,091.75（17 勝）。全 96 出力が公式採点と独立の対話再生で一致。最大 0.204520 秒（2 秒制限）。C++23 一ファイルと汎用部品照合済み。研究ブランチの既定に保存。
+- 1 位は 161,011,437 点。順位データ SHA-256 `11293d19419acd7e8118126ffc1cfe4a0137629769108935c10a0bd3b554ce02` を照合。本番 200 件が配布入力と同一か未確認で、順位は未判定。次はシミュレーション総ステップを合わせた 6 手対 12 手を比較する。
