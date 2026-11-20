@@ -16,8 +16,9 @@
 | [AHC006](https://atcoder.jp/contests/ahc006/tasks/ahc006_a) | ローカル比較・本番未判定 | **2,220,425** 点（[AtCoder 提供の順位データ](https://huggingface.co/datasets/SakanaAI/ALE-Bench/blob/main/ahc006.zip)） | 既存版: 未調整 10 件の合計 214,630 | 本番 100 件。配布シードとの同一性未確認 | [空間初期化の分岐](https://github.com/tokotoko7777/ahc-workspace/tree/761d6839f93d0e347820919714402360766c4ad5) |
 | [AHC007](https://atcoder.jp/contests/ahc007/tasks/ahc007_a) | 着手・未判定 | **14,241,733,941** 点（[AtCoder 提供の順位データ](https://huggingface.co/datasets/SakanaAI/ALE-Bench/blob/main/ahc007.zip)） | シナリオ版: 公開 150 件 **14,184,305,386** | 本番 150 件、2 秒。配布入力との同一性未確認 | [問題別ブランチ](https://github.com/tokotoko7777/ahc-workspace/tree/2793a9a782184c4b77376fab17482d24b353d6bd) |
 | [AHC008](https://atcoder.jp/contests/ahc008/tasks/ahc008_a) | ローカル改善・本番未判定 | **121,980,050,607** 点（[AtCoder 提供の順位データ](https://huggingface.co/datasets/SakanaAI/ALE-Bench/blob/main/ahc008.zip)） | 適応分割版: 未調整 24 件合計 53,656,251 | 公式対話テスタ、本番公開 2,000 シード、3 秒 | [問題別ブランチ](https://github.com/tokotoko7777/ahc-workspace/tree/af41b4e70a89fef3c0389c689aa09dc633fffa16) |
-| [AHC009](https://atcoder.jp/contests/ahc009/tasks/ahc009_a) | 着手・未判定 | **7,547,834,181** 点（[AtCoder 提供の順位データ](https://huggingface.co/datasets/SakanaAI/ALE-Bench/blob/main/ahc009.zip)） | 基準版を準備中 | 100 ケース、初到達の期待値を公式式で採点。2 秒。本番との同一性未確認 | 検証中 |
-| AHC010〜074 | 未着手 | — | — | — | — |
+| [AHC009](https://atcoder.jp/contests/ahc009/tasks/ahc009_a) | 着手・未判定 | **7,547,834,181** 点（[AtCoder 提供の順位データ](https://huggingface.co/datasets/SakanaAI/ALE-Bench/blob/main/ahc009.zip)） | 確率 DP 版: 公開 100 件 7,214,943,739 | 本番との同一性は未確認 | ローカル保存・公開確認待ち |
+| [AHC010](https://atcoder.jp/contests/ahc010/tasks/ahc010_a) | ローカル改善・本番未判定 | **20,218,968** 点（[AtCoder 提供の順位データ](https://huggingface.co/datasets/SakanaAI/ALE-Bench/blob/main/ahc010.zip)） | 協調回転版: 未調整 10 件平均 56,482 | 本番 100 件、2 秒。配布入力との同一性未確認 | [問題別ブランチ](https://github.com/tokotoko7777/ahc-workspace/tree/8e99892f7dc12317ba365750a15a2a7c072b3731) |
+| AHC011〜074 | 未着手 | — | — | — | — |
 
 ### AHC001 の次の仮説
 
@@ -156,3 +157,14 @@
 - [実装・再現手順](https://github.com/tokotoko7777/ahc-workspace/blob/053d05b2b80aee5da0ebd027ade3079065bbe3e7/problems/ahc008/README.md)。別々の小部屋を複数人で並行構築し、人間側の面積を大きく残す案を比較。
 - 開発 24 件の平均 2,697,270 → 1,690,023、独立確認 24 件 2,944,878 → 916,565。後者では平均面積が 121.46 → 587.00 マスに増えた一方、同じ部屋の動物が平均 2.833 → 8.333 匹になり不採用。全 96 出力で公式 v3 と独立リプレイが一致、最長 0.056420 秒。既定の適応分割は行動まで同一、公式 2,000 件は未実施。
 - 次は固定数の小部屋を増やすのではなく、既存壁付近であと 1〜3 マスで閉じられる隘路を列挙し、閉鎖したときの連結領域と得点をその場で評価する。
+
+### AHC009 初到達の期待得点を使う座標掃引
+
+- 基準は最短経路と反復の合法解。遷移確率を前後から計算し、各操作を正確に比較する。開発 16 件 298,878,713 → 1,214,896,626、未調整 32 件 324,426,392 → 2,389,017,515、公式ツール同梱の別 100 件 1,133,995,182 → 7,214,943,739。全 148 ペアで勝ち、全 296 実行で公式採点と独立実装一致、最長 0.315 秒未満。C++23 単一ファイルを検証済み。
+- 公開 100 件が本番と同じとは確認できず、1 位 7,547,834,181 点との比較は未判定。試作は既存ライブラリを利用し、既存の出典注記を残している。ローカルコミットとテストは保存、GitHub 反映は出典の扱いの確認待ち。次は隣接する二操作の同時変更を新規ケースで比較する。
+
+### AHC010 隣接タイルを協調して回転
+
+- [実装・再現手順](https://github.com/tokotoko7777/ahc-workspace/blob/8e99892f7dc12317ba365750a15a2a7c072b3731/problems/ahc010/README.md)。長い経路を閉じる方向で初期 SA を行い、隣接二枚が共有辺でつながる回転を一緒に提案する。
+- 開発 10 件の平均 46,492.4 → 53,175.2（6 勝）、未調整 10 件 33,180 → 56,482（7 勝）。全 40 出力で公式採点と独立検査が一致、最長 1.834601 秒（2 秒制限）。C++23 と汎用走査を問題別ブランチで検証し、通常候補に保存。
+- [公式問題文](https://atcoder.jp/contests/ahc010/tasks/ahc010_a) は最大二ループ長の積を 100 件集計。本番の一致を確認できず、1 位 20,218,968 点との比較は未判定。順位アーカイブ SHA-256 `8f2e83fe0b13701d1df45c938b3397a2474518751aa646adf21f1eb0169b8eb6` を配布元と照合した。次はパッチ外の経路を縮約し、2×2 回転を一括で正確に評価する。
