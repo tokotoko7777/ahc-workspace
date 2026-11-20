@@ -65,9 +65,11 @@
 | [AHC053](https://atcoder.jp/contests/ahc053/tasks/ahc053_a) | 着手・本番未判定 | yosupo、得点未確認 | 新規未調整3組×20件すべて改善（組平均約595〜596M） | 本番150件・同一ケースの証拠なし | [問題別ブランチ](https://github.com/tokotoko7777/ahc-workspace/tree/7f0257819434e8b706195937b14ee7f0b482b3ae)、[2枚組のデッキ](https://github.com/tokotoko7777/ahc-workspace/tree/2f27c9a55ccab9756b345063427fc7d0899fa92b) |
 | [AHC054](https://atcoder.jp/contests/ahc054/tasks/ahc054_a) | 凍結版：本番未達 | **2,409,003,089,874**（相対点） | **419,674,926,324**（本番3,000件・全件合法） | 本番3,000件、公式ケース別基準を取得 | [問題別ブランチ](https://github.com/tokotoko7777/ahc-workspace/tree/cc2c7b4e86abc712f7ce27bf8a992175adb45ae1)、[行き止まりを追加](https://github.com/tokotoko7777/ahc-workspace/tree/5af1506cdf04eb57d5b756440c63cd02fadc44d6)、[公式比較](https://github.com/tokotoko7777/ahc-workspace/tree/f1e7725908d680be15c2dafaa5117f8eed29a688) |
 | [AHC055](https://atcoder.jp/contests/ahc055/tasks/ahc055_a) | 着手・本番未判定 | nikaj、得点未確認 | 新規未調整28件 1,559,892（137,988手） | 本番150件・2秒、同一ケースの証拠なし | [使用回数割当](https://github.com/tokotoko7777/ahc-workspace/tree/56c542146db54bea2ac321420789e560c2706453)、[開封順の追試](https://github.com/tokotoko7777/ahc-workspace/tree/a41469d083df1817c2ff68de449305ff12ee9ba2) |
-| [AHC056](https://atcoder.jp/contests/ahc056/tasks/ahc056_a) | 着手・本番未判定 | **1,899,994,171,242**（相対点） | 開発比較中 | 本番2,000件、公式ケース別基準を取得 | 検証中 |
-| [AHC057](https://atcoder.jp/contests/ahc057/tasks/ahc057_a) | 着手・本番未判定 | yochan、得点未確認 | 開発比較中 | 本番150件・2秒、同一ケースの証拠なし | 検証中 |
-| AHC058〜074 | 未着手 | — | — | — | — |
+| [AHC056](https://atcoder.jp/contests/ahc056/tasks/ahc056_a) | 着手・本番未判定 | **1,899,994,171,242**（相対点） | 新規未調整32件 費用平均71.531 | 本番2,000件、公式ケース別基準を取得 | [規則圧縮](https://github.com/tokotoko7777/ahc-workspace/tree/76777c4e88aac27d028dfa893c47db2a540e4f05)、[最短路選択](https://github.com/tokotoko7777/ahc-workspace/tree/fbc469f215b805732151a93d4f8213cb3071663f) |
+| [AHC057](https://atcoder.jp/contests/ahc057/tasks/ahc057_a) | 着手・本番未判定 | yochan、得点未確認 | 新規未調整28件 合計130,959,921 | 本番150件・2秒、同一ケースの証拠なし | [合流時刻](https://github.com/tokotoko7777/ahc-workspace/tree/597f72f03de27400f38dd4cff9f5ee779055c0be)、[グループ交換](https://github.com/tokotoko7777/ahc-workspace/tree/743f74ba0a89e40350d866c59c3bb1ce6a036bf1) |
+| [AHC058](https://atcoder.jp/contests/ahc058/tasks/ahc058_a) | 着手・本番未判定 | fishylene、得点未確認 | 既存：未調整24件 平均5,187,704.58 | 本番150件、同一ケースの証拠なし | [問題別ブランチ](https://github.com/tokotoko7777/ahc-workspace/tree/c75e684905c14eb10a7d59da3c9e9d81d8f9ce7a) |
+| [AHC059](https://atcoder.jp/contests/ahc059/tasks/ahc059_a) | 着手・本番未判定 | chokudai、得点未確認 | 開発比較中 | 本番150件・2秒、同一ケースの証拠なし | 検証中 |
+| AHC060〜074 | 未着手 | — | — | — | — |
 
 ### AHC001 の次の仮説
 
@@ -770,3 +772,21 @@
 
 AHC056は[公式採点CSV](https://img.atcoder.jp/ahc_standings/ahc056/result.csv)（SHA-256 `1d27cbb3f26e08ec3ec8f81c2c63dae7bc7ff0a2b66945d3412591a3185c0116`）1,105人×2,000件で、最大値相対点の1位1,899,994,171,242（saharan）を再現。固定経路の各セルの行動を、時刻や色・状態を組み合わせてより少ない規則で表せるか比較する。
 [AHC057](https://atcoder.jp/contests/ahc057/tasks/ahc057_a)は2秒、本番150件の絶対点合計。首位名yochanで点数は未確認。同じ点群分割を使い、1つの時点でまとめて結合する方法と、トーラス上で点群が近づく時刻を選んで順番に結合する方法を比べる。
+
+### AHC056 同じ移動をより少ない状態・色で表す
+
+[初版](https://github.com/tokotoko7777/ahc-workspace/tree/76777c4e88aac27d028dfa893c47db2a540e4f05)。同じ最短移動列を固定し、事前に組んだ時刻の切替を使う対照と、同じ動作を起こす規則を後ろから再利用する案を比較。未調整32件の費用平均80.500→73.656（全勝、中央値7削減）、128出力が公式・独立一致、最大0.455221秒。
+[追試](https://github.com/tokotoko7777/ahc-workspace/tree/fbc469f215b805732151a93d4f8213cb3071663f)。同じ長さの経路を5本ずつ候補にし、ランダムな最短路と圧縮しやすい最短路を比較。新規未調整32件の平均は凍結72.719、ランダム72.594、圧縮71.531（対ランダム21勝10分1敗、中央値1減、時間中央値0.02462→0.02537秒）。全192出力が公式と独立で一致、最大0.4059秒。問題別既定に採用。上位との隔たりが大きいので本番未測定。次は色と状態を作った後の統合を、組み合わせて見直す。
+
+### AHC057 結合時刻とグループの両方を選ぶ
+
+[初回](https://github.com/tokotoko7777/ahc-workspace/tree/597f72f03de27400f38dd4cff9f5ee779055c0be)は同じグループに対し、トーラス上で近づく時刻に順次結合。未調整28件の得点130,360,962→130,699,166（10勝18分）、費用−0.83%、84出力公式・独立一致、最大0.1603秒。
+[追試](https://github.com/tokotoko7777/ahc-workspace/tree/743f74ba0a89e40350d866c59c3bb1ce6a036bf1)はグループのサイズを保つ32回の交換で、静止時の距離を使う案と将来の最近接を使う案を比較。新規未調整28件、初版130,487,478→静止距離130,959,921（25勝3分）、将来距離130,878,447で静止距離に4勝19敗5分。静止距離だけを問題別既定、最大約0.4312秒。次は単独の近さでなく、グループ全体の結合計画を使って、交換候補に優先順位をつける。
+
+### AHC058 既存の購入順を焦点別の初期解と比較
+
+[公式問題文](https://atcoder.jp/contests/ahc058/tasks/ahc058_a)。本番150件、最終りんご個数のlog得点を丸めて合計。首位fishyleneの点数と同一ケースは未確認。[初回](https://github.com/tokotoko7777/ahc-workspace/tree/c75e684905c14eb10a7d59da3c9e9d81d8f9ce7a)ではリポジトリ既存の購入順探索に、1つの機械を中心とした購入順の別初期解を追加し、同じ3,400提案で比較。新規dev・未調整各24件で最終個数もすべて同点。未調整平均5,187,704.58点、全96公式・独立一致、最大0.763907秒。既存を既定。次は序盤を固定し、後半の長い区間で同じ購入の集合を並べ替える。
+
+### AHC059 本番条件
+
+[公式問題文](https://atcoder.jp/contests/ahc059/tasks/ahc059_a)。20×20のカード盤面、2秒、カードを全て消去すると16,400−移動数。本番150件合計。首位chokudaiの点数と同一ケースは未確認。同じ初期経路から、ペアを隣接して入れ直す対照と、スタックの合法性を保って別々の位置に再挿入する近傍を比べる。
