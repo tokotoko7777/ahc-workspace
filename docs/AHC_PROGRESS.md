@@ -29,7 +29,7 @@
 | [AHC019](https://atcoder.jp/contests/ahc019/tasks/ahc019_a) | 着手・本番未判定 | **1,886,240,066,109**（相対点） | 新規未調整 30 件 30,684,752,148（絶対点・低い方が良い） | 本番公開 2,000 件、6 秒、ケース別基準が必要 | [問題別ブランチ](https://github.com/tokotoko7777/ahc-workspace/tree/7252e85e2d8a5d75038c0680f4ba43b4a43b3f05)、[部分再構築](https://github.com/tokotoko7777/ahc-workspace/tree/79fa2df9de9de4de4d658ea3f374ff983d7e4753) |
 | [AHC020](https://atcoder.jp/contests/ahc020/tasks/ahc020_a) | 着手・本番未判定 | **504,832,157**（絶対点） | 未調整16件 平均1,687,384.19 | 本番 300 件・2 秒、同一ケースの証拠なし | [問題別ブランチ](https://github.com/tokotoko7777/ahc-workspace/tree/96a97144e57022f452ce216eddf9c2d76adc3b32)、[配線費の共同評価](https://github.com/tokotoko7777/ahc-workspace/tree/411425e2f761d00f879c4965b8eee3b9e959e56a) |
 | [AHC021](https://atcoder.jp/contests/ahc021/tasks/ahc021_a) | 着手・本番未判定 | **13,589,420**（絶対点） | 交換削除：新規未調整20件 1,814,625 | 本番150件・2秒、同一ケースの証拠なし | [問題別ブランチ](https://github.com/tokotoko7777/ahc-workspace/tree/9306c3d973e9b622e3a35431363f5f7f6ab64225)、[交換削除](https://github.com/tokotoko7777/ahc-workspace/tree/ce5987e9b2769010a4568b3442108f2e02e29909) |
-| [AHC022](https://atcoder.jp/contests/ahc022/tasks/ahc022_a) | 着手・本番未判定 | [公式順位](https://atcoder.jp/contests/ahc022/standings) 要ログイン、1位点未確認 | 未調整30件すべて誤対応0、29勝（絶対点平均は低下） | 本番3,000件・4秒、相対方式 | [問題別ブランチ](https://github.com/tokotoko7777/ahc-workspace/tree/d255c7a5ce936552a98346c8d2bf764f78add849) |
+| [AHC022](https://atcoder.jp/contests/ahc022/tasks/ahc022_a) | 着手・本番未判定 | [公式順位](https://atcoder.jp/contests/ahc022/standings) 要ログイン、1位点未確認 | 低配置費版：新規未調整30件で誤対応0、全勝 | 本番3,000件・4秒、相対方式 | [問題別ブランチ](https://github.com/tokotoko7777/ahc-workspace/tree/d255c7a5ce936552a98346c8d2bf764f78add849)、[低配置費](https://github.com/tokotoko7777/ahc-workspace/tree/86f0b8b8dc3d75a877626672b36b2dec88da2e05) |
 | [AHC023](https://atcoder.jp/contests/ahc023/tasks/asprocon10_a) | 着手・本番未判定 | [公式順位](https://atcoder.jp/contests/ahc023/standings) 要ログイン、1位点未確認 | 開発比較準備中 | 本番公開2,000件・2秒、絶対点 | 検証中 |
 | AHC024〜074 | 未着手 | — | — | — | — |
 
@@ -338,3 +338,7 @@
 ### AHC023 本番条件
 
 [公式問題文](https://atcoder.jp/contests/ahc023/tasks/asprocon10_a)。2秒 / 1,024 MiB。収穫した作物の期間和を `1e6/(HWT)` 倍した絶対点の合計（本番2,000件）。[公式本番seed](https://img.atcoder.jp/ahc023/seeds.txt)は2,000件でハッシュ `0c2ffe8037c0c232ed9775b89a892fc1f68709a1582c83fd6bb609244cefcf32` を照合。1位点は未確認。通路を木で確保し葉に植える基準との比較で、子孫の植付・収穫日に干渉しない期間を探して内部マスも使う。
+
+### AHC022 低配置費の符号盤面
+
+[追試](https://github.com/tokotoko7777/ahc-workspace/tree/86f0b8b8dc3d75a877626672b36b2dec88da2e05)。識別用の温度を保ち、温度差が大きい辺を減らす。新規の開発30件・未調整30件は両版とも全件誤対応0、低配置費版が全60勝。未調整のケース別絶対点比は平均1.666倍、中央値1.728倍。配置費比平均0.5673、計測回数平均2,007.47→2,033.40、最長0.081582秒・最大5,909計測。全120出力公式と独立再生が一致し、問題別ブランチの既定に採用。次はノイズ段階ごとに符号の温度差と測定予算を配分する。本番相対点とは比較しない。
