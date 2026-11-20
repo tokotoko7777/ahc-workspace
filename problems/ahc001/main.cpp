@@ -801,6 +801,101 @@ struct Solver {
         for (int k = 0; k < count; ++k) state[ids[k]] = old[k];
         return false;
     }
+#ifdef AHC_FORCED_TWIST
+    int twist_attempts=0,twist_feasible=0,twist_retained=0;
+    double twist_gain=0;
+    optional<Rect> fit_seam(int id,int partner,Rect box,int old,int seam,const Rect& previous) const {
+        const int other=1-old;
+        const int point[2]={x[id],y[id]};
+        if(!valid(id,box) || seam<box.q[old] || seam>=box.q[old+2])return nullopt;
+        const int small=min(point[old],seam),large=max(point[old],seam);
+        const int min_width=large-small+1,max_width=box.q[old+2]-box.q[old];
+        const int max_height=box.q[other+2]-box.q[other];
+        const int need=desired[id];
+        const int widths[]={min_width,max_width,previous.q[old+2]-previous.q[old],
+                            int(sqrt(double(need))),int((need+max_height-1LL)/max_height),
+                            (min_width+max_width)/2};
+        optional<Rect> best;
+        double value=-1;
+        for(int w0:widths){
+            int w=clamp(w0,min_width,max_width);
+            const int left_lo=max(box.q[old],large-w+1);
+            const int left_hi=min(small,box.q[old+2]-w);
+            if(left_lo>left_hi)continue;
+            const int ideal=clamp(int(round(double(need)/w)),1,max_height);
+            for(int h:{ideal,max(1,ideal*3/4)}) {
+                if(quality(w*h,need)<=value)continue;
+                const int floor_lo=max(box.q[other],point[other]-h+1);
+                const int floor_hi=min(point[other],box.q[other+2]-h);
+                if(floor_lo>floor_hi)continue;
+                for(int a:{left_lo,left_hi,(left_lo+left_hi)/2})
+                    for(int b:{floor_lo,floor_hi,(floor_lo+floor_hi)/2}){
+                        Rect next;
+                        next.q[old]=a;next.q[old+2]=a+w;
+                        next.q[other]=b;next.q[other+2]=b+h;
+                        bool good=true;
+                        for(int j=0;j<n&&good;++j)if(j!=id&&j!=partner)good=!overlap(next,state[j]);
+                        if(good&&quality(w*h,need)>value){value=quality(w*h,need);best=next;}
+                    }
+            }
+        }
+        return best;
+    }
+    int forced_twist(int i,const vector<int>& ids,const Rect original[],
+                     chrono::steady_clock::time_point deadline){
+        vector<tuple<int,int,int>> candidates;
+        for(int j:ids)if(j!=i){
+            const auto a=original[i],b=original[j];
+            const bool independent[2]={a.q[2]<=b.q[0]||b.q[2]<=a.q[0],
+                                      a.q[3]<=b.q[1]||b.q[3]<=a.q[1]};
+            if(independent[0]==independent[1]||x[i]==x[j]||y[i]==y[j])continue;
+            const int old=independent[0]?0:1;
+            const int gap=max(a.q[old]-b.q[old+2],b.q[old]-a.q[old+2]);
+            int distance=abs(x[i]-x[j])+abs(y[i]-y[j]);
+            candidates.emplace_back(gap*8+distance,j,old);
+        }
+        ranges::sort(candidates);
+        for(int k=0;k<min(3,int(candidates.size()))&&chrono::steady_clock::now()<deadline;++k){
+            const auto [priority,j,old]=candidates[k];(void)priority;
+            ++twist_attempts;
+            const int alt=1-old;
+            auto coordinate=[&](int v,int d){return d?y[v]:x[v];};
+            const int first=coordinate(i,alt)<coordinate(j,alt)?i:j;
+            const int second=first==i?j:i;
+            const int lo=coordinate(first,alt)+1,hi=coordinate(second,alt);
+            const int projected=(coordinate(i,old)+coordinate(j,old))/2;
+            const int border=coordinate(i,old)<coordinate(j,old)?original[i].q[old+2]-1:original[j].q[old+2]-1;
+            vector<Rect> boxes;
+            for(int padding:{128,768}){
+                Rect box;
+                for(int d=0;d<2;++d){
+                    box.q[d]=max(0,min(original[i].q[d],original[j].q[d])-padding);
+                    box.q[d+2]=min(10000,max(original[i].q[d+2],original[j].q[d+2])+padding);
+                }
+                boxes.push_back(box);
+            }
+            double best_pair=quality(original[i].area(),desired[i])+quality(original[j].area(),desired[j])-.06;
+            optional<pair<Rect,Rect>> best_shapes;
+            for(auto box:boxes)for(int seam:{projected,border})for(int cut:{lo,hi,(lo+hi)/2}){
+                if(chrono::steady_clock::now()>=deadline)break;
+                Rect a=box,b=box;a.q[alt+2]=cut;b.q[alt]=cut;
+                auto u=fit_seam(first,second,a,old,seam,original[first]);
+                auto v=fit_seam(second,first,b,old,seam,original[second]);
+                if(!u||!v)continue;
+                const double score=quality(u->area(),desired[first])+quality(v->area(),desired[second]);
+                if(score>best_pair){best_pair=score;best_shapes=pair{*u,*v};}
+            }
+            if(best_shapes){
+                const auto [u,v]=*best_shapes;
+                assert(u.q[alt+2]<=v.q[alt]&&u.q[old]<v.q[old+2]&&v.q[old]<u.q[old+2]);
+                state[first]=u;state[second]=v;
+                ++twist_feasible;
+                return j;
+            }
+        }
+        return -1;
+    }
+#endif
     void regional_search(int center,chrono::steady_clock::time_point start,double seconds) {
         if(quality(state[center].area(),desired[center])>.995) return;
         ++regional_trials;double original_value=value;
@@ -833,14 +928,25 @@ struct Solver {
             state[i]=variant==62 ? fit_leaf(i,state[i],state[i].area()*(.35+.3*rng.real()))
                                 : Rect{{x[i],y[i],x[i]+1,y[i]+1}};
         }
+        int twist_partner=-1;
+#ifdef AHC_FORCED_TWIST
+        if(variant==64){
+            const auto limit=min(start+chrono::duration_cast<chrono::steady_clock::duration>(
+                    chrono::duration<double>(seconds-.015)),
+                chrono::steady_clock::now()+chrono::milliseconds(5));
+            twist_partner=forced_twist(center,ids,chosen,limit);
+        }
+#endif
         value=0;for(int i=0;i<n;++i) value+=quality(state[i].area(),desired[i]);
         scale=.75;refresh_targets();local_search=true;
         if(variant==64) {
             scale=1;refresh_targets();
-            change(center,proposed,0,true);movable[center]=false;
+            if(twist_partner<0)change(center,proposed,0,true);
+            else movable[twist_partner]=false;
+            movable[center]=false;
         }
         sort(ids.begin(),ids.end(),[&](int a,int b){return desired[a]>desired[b];});
-        for(int i:ids) if(destroyed[i] && (variant!=64 || i!=center))
+        for(int i:ids) if(destroyed[i] && (variant!=64 || (i!=center&&i!=twist_partner)))
             for(int attempt=0;attempt<10;++attempt) change(i,global_candidate(i),1e-7,true);
         if(value>chosen_value) {chosen_value=value;copy(state,state+n,chosen);}
         int steps=variant==61 || variant==64 ? 7000 : 4000;double temperature=.01;
@@ -852,7 +958,7 @@ struct Solver {
                 temperature=.01*pow(1-progress,4)+1e-7;
             }
             int i=ids[rng.integer(ids.size())],type=rng.integer(10),d=rng.integer(4);
-            if(variant==64 && i==center) continue;
+            if(variant==64 && (i==center||i==twist_partner)) continue;
             Rect c=state[i];
             int delta=1+rng.integer(1<<rng.integer(11));
             if(type<4) {
@@ -876,7 +982,12 @@ struct Solver {
             if(value>chosen_value) {chosen_value=value;copy(state,state+n,chosen);}
         }
         local_search=false;copy(chosen,chosen+n,state);value=chosen_value;scale=old_scale;refresh_targets();remember();
-        if(value>original_value+1e-9) ++regional_improvements;
+        if(value>original_value+1e-9) {
+            ++regional_improvements;
+#ifdef AHC_FORCED_TWIST
+            if(twist_partner>=0){++twist_retained;twist_gain+=value-original_value;}
+#endif
+        }
     }
     void reset_points() {
         value=0;
@@ -1237,6 +1348,10 @@ struct Solver {
         cerr << "score=" << llround(best_value/n*1e9) << " iterations=" << iterations
              << " accepted=" << accepted << " all_anchors_bound=" << llround(empty_box_bound/n*1e9) << '\n';
         if(variant>=60) cerr<<"regional_trials="<<regional_trials<<" regional_improvements="<<regional_improvements<<'\n';
+#ifdef AHC_FORCED_TWIST
+        cerr<<"twist_attempts="<<twist_attempts<<" feasible="<<twist_feasible
+            <<" retained="<<twist_retained<<" retained_gain="<<llround(twist_gain/n*1e9)<<'\n';
+#endif
     }
 };
 int main(int argc, char** argv) {

@@ -144,3 +144,8 @@ python3 problems/ahc001/benchmark.py mincut-headroom/in bench-mincut-headroom --
 
 単一ブロッカー縮小の試行は、[独立の比較診断](experiments/topology_v1/README.md)
 に再現コードと結果を保存しました。開発8件で平均+511.25点に留まり、不採用です。
+
+強制軸変更を v64 の地域再構築に組み込んだ追加比較は
+[強制軸順序変更の結果](experiments/forced_precedence_v2/README.md) を参照。
+合法な途中配置を154回得ましたが、全体改善で採用された例はなく、
+未調整8件で平均 −459,750.50点でした。既定 v64 は変更しません。
