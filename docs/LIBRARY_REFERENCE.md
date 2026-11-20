@@ -19,6 +19,23 @@
 | 重複を含む被覆・確率的な行動列評価 | [CoverageCounter](#coveragecounter)、[ForwardBackwardDP](#forwardbackwarddp) |
 | 追加の探索・補助部品 | [ActionBeam・LNS・ILS・Chokudai・MCTS・照合・計測](#追加の探索補助部品) |
 
+## サイズごとの上限付きヒストグラム
+
+ヘッダ: [`capped-size-histogram.hpp`](../library/capped-size-histogram.hpp)。
+グループのサイズ頻度 `f[d]` から `sum(min(f[d], cap[d]))` をO(1)で更新できます。
+空グループから作れるよう、サイズ0の上限は通常0にします。
+
+```cpp
+CappedSizeHistogram score({0, 2, 1});
+score.replace_size(0, 1); // 大きさ1のグループを追加
+score.replace_size(0, 2); // 大きさ2のグループを追加
+score.replace_size(2, 1); // 要素を失い、大きさ2から1へ
+assert(score.value() == 2);
+```
+
+上限が0または範囲外のサイズは記録しません。[AHC012の区画スコア](../problems/ahc012/main.cpp)で使用。
+[差分テスト](../tests/capped_size_histogram_test.cpp)で更新と取り消しを全再計算と比較します。
+
 ## CoverageCounter
 
 ヘッダ: [`coverage-counter.hpp`](../library/coverage-counter.hpp)
