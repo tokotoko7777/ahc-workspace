@@ -2014,3 +2014,18 @@ sort(points.begin(), points.end(), [](const Point& a, const Point& b) {
 
 `bits=10` なら各座標は `0..1023` です。厳密な最近傍順ではありませんが、空間的に
 まとまったcluster作成、query順、cache localityの改善候補を1行のkeyで作れます。
+
+## GridLineOccupancy64
+
+ヘッダ: [`grid-line-occupancy64.hpp`](../library/grid-line-occupancy64.hpp)
+
+縦横がともに 64 以下の盤面で、点の占有を `set(row,col,value)` で差し替え、
+`visible(row,col)` で上下左右の各方向の最初の占有セルを返します。
+入力セル自身は除き、セル番号は行優先、見つからない方向は `-1`。
+占有型や障害物の意味は呼び出し側で保持します。1 点更新・4 方向検索とも
+固定長ビット演算で O(1)、保持する索引は 128 個の 64 ビット整数です。
+`<bit>` を使用するため C++20 以降。
+
+[使用例](../examples/grid_line_occupancy64_usage.cpp)、
+[愚直な直線走査との比較](../tests/grid_line_occupancy64_test.cpp)、
+[AHC013 の配線候補生成](../problems/ahc013/main.cpp)。
