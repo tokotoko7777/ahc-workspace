@@ -15,6 +15,9 @@
 #if defined(AHC_PROBE_DESIGN) || defined(AHC_TARGET_PROBE)
 #include "../../library/gaussian-linear-information.hpp"
 #endif
+#ifdef AHC_ROUNDED_LIKELIHOOD
+#include "../../library/rounded-multiplicative-normal.hpp"
+#endif
 
 #include <algorithm>
 #include <array>
@@ -370,6 +373,23 @@ struct GaussianModel {
             for (int f : active) sum += row[f] * counts[f];
             product[i] = sum;
         }
+#ifdef AHC_ROUNDED_LIKELIHOOD
+        double latent_variance=std::max(1e-6,extra_noise*path.size());
+        for(int f:active) latent_variance+=counts[f]*product[f];
+        const auto moments=rounded_multiplicative_normal::posterior(
+            prediction,latent_variance,observed*.001,.001,.9,1.1);
+        if(moments.valid) {
+            const double inverse=1./latent_variance;
+            const double variance_change=moments.variance*inverse-1.;
+            for(int i=0;i<size;++i) {
+                const double gain=product[i]*inverse;
+                mean[i]=std::clamp(mean[i]+gain*moments.mean_shift,1.,9.);
+                double* row=covariance.data()+i*size;
+                for(int j=0;j<size;++j) row[j]+=gain*variance_change*product[j];
+            }
+            return moments.log_mass;
+        }
+#endif
         for (int f : active) variance += counts[f] * product[f];
         double residual = observed / 1000.0 - prediction;
         double inverse_variance = 1.0 / variance;

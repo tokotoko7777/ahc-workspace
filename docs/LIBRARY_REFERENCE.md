@@ -2033,3 +2033,29 @@ C++20 以降の
 [最小使用例](../examples/gaussian_linear_information_usage.cpp)、
 [密な更新との比較テスト](../tests/gaussian_linear_information_test.cpp)、
 [AHC003 の経路候補比較](../problems/ahc003/main.cpp)。
+
+### rounded-multiplicative-normal.hpp
+
+潜在量 `B` を正規分布で近似し、正の一様乗数 `U` を掛けて
+刻み `step` で丸めた値 `y` を観測したとき、`B` の条件付き
+平均の変化量・分散・対数観測確率を返します。
+丸め前が `[y-step/2, y+step/2)` に入る乗数区間の長さを使い、
+区分した積分を数値的に評価します。ガウス加法雑音の近似ではありません。
+
+```cpp
+auto m = rounded_multiplicative_normal::posterior(
+    10.0, 1.0, 10.20, 0.001, 0.9, 1.1);
+if (m.valid) {
+    double posterior_mean = 10.0 + m.mean_shift;
+    double posterior_variance = m.variance;
+}
+```
+
+分散と刻みは正、乗数範囲は `0 < low < high`、観測ビンは正
+（`y > step/2`）が前提です。評価不能なら `valid=false`。
+多変量ガウス分布で `B` が線形観測なら、外側からこの平均・分散を
+使って共分散の一階更新に適用できます。
+
+[実行できる例](../examples/rounded_multiplicative_normal_usage.cpp)、
+[独立な乗数方向の積分テスト](../tests/rounded_multiplicative_normal_test.cpp)、
+[AHC003 の経路コスト観測](../problems/ahc003/main.cpp)。
