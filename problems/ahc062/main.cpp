@@ -1,8 +1,12 @@
 #include <bits/stdc++.h>
 #include "../../library/weighted-sequence-treap.hpp"
+#include "ladder.hpp"
 using namespace std;
 #ifndef AHC062_ROTATE
 #define AHC062_ROTATE 0
+#endif
+#ifndef AHC062_LANES
+#define AHC062_LANES 1
 #endif
 namespace {
 using Clock=chrono::steady_clock;
@@ -36,6 +40,14 @@ struct Problem{
         moment+=1LL*p.size()*w[id];p.push_back(id);
       }
       if(moment>best){best=moment;order=move(p);}
+    }
+    if(AHC062_LANES&&n>=6&&n%2==0){
+      for(int flags=0;flags<16;++flags){
+        auto path=two_lane_king_path(n,w,flags);
+        long long value=0;
+        for(int i=0;i<v;++i)value+=i*1LL*w[path[i]];
+        if(value>best){best=value;order=move(path);}
+      }
     }
     return {best,move(order)};
   }
