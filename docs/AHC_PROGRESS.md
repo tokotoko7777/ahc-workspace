@@ -52,9 +52,10 @@
 | [AHC042](https://atcoder.jp/contests/ahc042/tasks/ahc042_a) | 着手・本番未判定 | **468,807**（絶対点） | 未調整32件 111.125手/件（全件完了） | 本番150件・2秒、同一ケースの証拠なし | [部分復元](https://github.com/tokotoko7777/ahc-workspace/tree/e8796e286c2e197c2f1f5324755e4fb58da8f3f5)、[垂直方向の事前操作](https://github.com/tokotoko7777/ahc-workspace/tree/98a9e65e998f57a10a8f0b3f2cf2514a0b73b4cf) |
 | [AHC043](https://atcoder.jp/contests/ahc043/tasks/ahc043_a) | 着手・本番未判定 | **1,971,352,183,368**（相対点） | 未調整24件 最終資金合計63,926,853 | 本番2,000件・3秒、基準とseed列照合済み | [問題別ブランチ](https://github.com/tokotoko7777/ahc-workspace/tree/2920bc508229a62f10b0070b68f3f1941fae75a4)、[初期ルートの追試](https://github.com/tokotoko7777/ahc-workspace/tree/46cbc1ff5548f82b99e16300ca1a5c3ca51984ca) |
 | [AHC044](https://atcoder.jp/contests/ahc044/tasks/ahc044_a) | 着手・本番未判定 | **149,807,848**（絶対点） | 新規未調整24件 平均誤差約19,314 | 本番150件・2秒、同一ケースの証拠なし | [残差探索](https://github.com/tokotoko7777/ahc-workspace/tree/95185faa94950764129d78ae2422bd9b46da73e4)、[定常分布による追試](https://github.com/tokotoko7777/ahc-workspace/tree/39c6fccc3544603af106c420abf983f84ded74b1) |
-| [AHC045](https://atcoder.jp/contests/ahc045/tasks/ahc045_a) | 着手・本番未判定 | 確認中 | 開発比較中 | 本番3,000件・2秒、相対方式 | 検証中 |
-| [AHC046](https://atcoder.jp/contests/ahc046/tasks/ahc046_a) | 着手・本番未判定 | 確認中 | 開発比較準備中 | 確認中 | 検証中 |
-| AHC047〜074 | 未着手 | — | — | — | — |
+| [AHC045](https://atcoder.jp/contests/ahc045/tasks/ahc045_a) | 着手・本番未判定 | **2,988,855,588,054**（相対点） | 未調整28件 道路長6,910,990 | 本番3,000件・2秒、基準とseed列照合済み | [順序推定](https://github.com/tokotoko7777/ahc-workspace/tree/ef908953cb79d12f7f5f71ef4aaef53d45fc4c04)、[グループ交換](https://github.com/tokotoko7777/ahc-workspace/tree/f594e37f013614a169ff675440bfcfec1e63d219) |
+| [AHC046](https://atcoder.jp/contests/ahc046/tasks/ahc046_a) | 着手・本番未判定 | **220,494**（絶対点） | 新規未調整30件 平均217.600手 | 本番150件・2秒、同一ケースの証拠なし | [停止ブロック](https://github.com/tokotoko7777/ahc-workspace/tree/00edc1ce4028926dcc2cfb8316e64994f3fe89bb)、[複数区間の探索](https://github.com/tokotoko7777/ahc-workspace/tree/8c258bffae710ee7b3764fa8f0da9e95d59a4f6d) |
+| [AHC047](https://atcoder.jp/contests/ahc047/tasks/ahc047_a) | 着手・本番未判定 | itigo、得点未確認 | 開発比較中 | 本番150件・2秒、同一ケースの証拠なし | 検証中 |
+| AHC048〜074 | 未着手 | — | — | — | — |
 
 ### AHC001 の次の仮説
 
@@ -643,3 +644,19 @@
 ### AHC045 本番条件
 
 [公式問題文](https://atcoder.jp/contests/ahc045/tasks/ahc045_a)。2秒 / 1,024 MiB、800都市を指定サイズで分け、各グループを木でつなぐ。最大400回・各2〜L頂点のMST比較を使え、実距離の切り捨て和を最小化。本番3,000件の相対方式。最初はグループと質問を揃え、既知のMST辺への割引と、非木辺／木上経路の不等式を利用する案を比較する。
+
+### AHC045 MSTの候補辺の順序を推定する
+
+[初版](https://github.com/tokotoko7777/ahc-workspace/tree/ef908953cb79d12f7f5f71ef4aaef53d45fc4c04)。グループと質問を完全に揃え、MST見積もりを比較。dev14件の道路長4,360,242→3,625,385（13勝）、未調整28件8,123,736→6,910,990（−14.93%、26勝2分）。各側の未調整質問は計7,399回、84対話の公式・独立採点が一致、テスタ込み最大0.144秒。問題別既定に採用。[公式採点CSV](https://img.atcoder.jp/ahc_standings/ahc045/result.csv)（SHA-256 `126880ede7e13358d79d5217c5c0fbcbd0d069bed868af1df62a3a93c38dcaaf`）の1位2,988,855,588,054は公式結果の上位順とも一致。初版の凍結本番比較を開始した。
+
+[追試](https://github.com/tokotoko7777/ahc-workspace/tree/f594e37f013614a169ff675440bfcfec1e63d219)は同じ問い合わせの後、グループサイズを固定した都市交換を追加。新規未調整28件7,136,780→7,224,355（16勝11敗1分だが合計悪化）。質問は各側7,795回で同一、84出力の公式点が一致、最大0.211秒。任意、既定変更なし。次は交換の価値が大きそうな境界都市を特定して比較質問の割当から変える。
+
+### AHC046 滑走の停止点を後の移動にも使う
+
+[公式問題文](https://atcoder.jp/contests/ahc046/tasks/ahc046_a)。2秒 / 1,024 MiB、指定順39地点を訪問し、1,600操作以内。全完了なら1,640−操作数。本番150件の絶対点1位220,494は[AtCoder提供の順位・得点データ](https://huggingface.co/datasets/SakanaAI/ALE-Bench/blob/main/ahc046.zip)（SHA-256 `fdca36f73112443dd16d49be36e7c7266ad7f6d7d0f1ef07d3ce0538f7dc100a`）。同じ本番入力は未確認。
+
+[初版](https://github.com/tokotoko7777/ahc-workspace/tree/00edc1ce4028926dcc2cfb8316e64994f3fe89bb)では滑走のためのブロックを後にも再利用して、未調整30件277.400→238.100手（全勝）。120出力公式と独立一致、最大0.059997秒。[追試](https://github.com/tokotoko7777/ahc-workspace/tree/8c258bffae710ee7b3764fa8f0da9e95d59a4f6d)は同じ初期解を使い、配置状態を8本保持して進める。別の未調整30件は初期239.400、8再始動227.933、状態を保持する方式217.600（対8再始動29勝1分、中央値10.5手改善、時間中央値0.120→0.132秒）。180出力すべて全39地点・公式と独立一致、最大0.371476秒。問題別既定に採用。次は途中の移動線を横切る位置にも停止ブロック候補を作る。
+
+### AHC047 本番条件
+
+[公式問題文](https://atcoder.jp/contests/ahc047/tasks/ahc047_a)。2秒 / 1,024 MiB。12状態の出力分布を提案し、長さ100万の文字列で各パターンが1回以上出る確率の加重和を丸める、150件合計。[公式結果JSON](https://atcoder.jp/contests/ahc047/results/json)の首位はitigo、得点未確認。決定的な循環と、確率遷移を変えて正確な出現確率で判定する案を比較中。
