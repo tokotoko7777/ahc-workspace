@@ -2014,3 +2014,18 @@ sort(points.begin(), points.end(), [](const Point& a, const Point& b) {
 
 `bits=10` なら各座標は `0..1023` です。厳密な最近傍順ではありませんが、空間的に
 まとまったcluster作成、query順、cache localityの改善候補を1行のkeyで作れます。
+
+## TwoSidedDagFrontier
+
+ヘッダ: [`two-sided-dag-frontier.hpp`](../library/two-sided-dag-frontier.hpp)
+
+DAG の先行・後続制約の両端から頂点を確定したい場合に使います。
+`ready(v,false)` は生存する親がない、`ready(v,true)` は生存する子がない
+場合に真です。削除された頂点はどちらにも出ません。`remove(v,high)`
+には指定した側に出ている頂点を渡し、隣接する親子の残り次数を更新します。
+選択・経路の探索は呼び出し側で行います。参照は O(1)、削除は入出次数の和、
+状態構築は O(V+E) です。
+
+[使用例](../examples/two_sided_dag_frontier_usage.cpp)、
+[1,000 個のランダムな DAG の確認](../tests/two_sided_dag_frontier_test.cpp)、
+[AHC021 の両端確定アルゴリズム](../problems/ahc021/two_ended.cpp)。
