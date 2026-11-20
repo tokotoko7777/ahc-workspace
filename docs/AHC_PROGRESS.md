@@ -23,9 +23,10 @@
 | [AHC013](https://atcoder.jp/contests/ahc013/tasks/ahc013_a) | 本番 2,000 件完走・順位未判定 | [公式順位](https://atcoder.jp/contests/ahc013/standings) 要ログイン。1 位の点数未確認 | 凍結隣接移動版: **6,951,707** 点 | 本番公開 2,000 シード、3 秒 | [問題別ブランチ](https://github.com/tokotoko7777/ahc-workspace/tree/7526fecad74457ce05f786e5127c4e45c0357203) |
 | [AHC014](https://atcoder.jp/contests/ahc014/tasks/ahc014_a) | ローカル改善・本番未判定 | **3,122,399,998** 点（[AtCoder 提供の順位データ](https://huggingface.co/datasets/SakanaAI/ALE-Bench/blob/main/ahc014.zip)） | 再成長版: 未調整 6 件平均 880,722.83 | 本番公開 2,000 シード、5 秒 | [問題別ブランチ](https://github.com/tokotoko7777/ahc-workspace/tree/25c2dea8a3d5f9b07432ee1a2b239cf4bd820cff) |
 | [AHC015](https://atcoder.jp/contests/ahc015/tasks/ahc015_a) | ローカル改善・本番未判定 | **161,011,437** 点（[AtCoder 提供の順位データ](https://huggingface.co/datasets/SakanaAI/ALE-Bench/blob/main/ahc015.zip)） | 6 手先: 未調整 24 件平均 663,091.75 | 本番 200 件、2 秒。公開入力との同一性未確認 | [問題別ブランチ](https://github.com/tokotoko7777/ahc-workspace/tree/a2b1c24d2d58f6e42db8475e62eb7ae00ef9373e) |
-| [AHC016](https://atcoder.jp/contests/ahc016/tasks/ahc016_a) | ローカル改善・本番未判定 | **1,780,676,618,015**（相対点） | 次数分布版: 未調整 40 件平均 38,032,050.10（絶対点） | 本番 2,000 件・5 秒、ケース別の当時の基準点が必要 | [問題別ブランチ](https://github.com/tokotoko7777/ahc-workspace/tree/b84d5b74efaa1410549101730df5a60c1cc3102e) |
+| [AHC016](https://atcoder.jp/contests/ahc016/tasks/ahc016_a) | ローカル改善・本番未判定 | **1,780,676,618,015**（相対点） | モデル選択版: 別の未調整 40 件平均 42,457,716.95（絶対点） | 本番 2,000 件・5 秒、ケース別の当時の基準点が必要 | [問題別ブランチ](https://github.com/tokotoko7777/ahc-workspace/tree/b84d5b74efaa1410549101730df5a60c1cc3102e) |
 | [AHC017](https://atcoder.jp/contests/ahc017/tasks/ahc017_a) | 着手・未判定 | **1,993,227,663,417**（相対点） | 開発比較準備中 | 本番 2,000 件・6 秒、ケース別基準が必要 | 検証中 |
-| AHC018〜074 | 未着手 | — | — | — | — |
+| AHC018 | 着手・未判定 | 確認中 | — | — | 検証中 |
+| AHC019〜074 | 未着手 | — | — | — | — |
 
 ### AHC001 の次の仮説
 
@@ -261,3 +262,9 @@
 
 - [公式問題文](https://atcoder.jp/contests/ahc017/tasks/ahc017_a) は、日ごと・頂点対ごとの最短路増加量を平均し整数化する絶対点を最小化。本番順位は 2,000 件で同一ケースの当時の最小絶対点を使う相対方式、制限 6 秒。
 - [順位アーカイブ](https://huggingface.co/datasets/SakanaAI/ALE-Bench/blob/main/ahc017.zip) の 1 位は 1,993,227,663,417（相対点）、SHA-256 `d0df8fa1417278e9651668acc68d3e015497d1da6b5f2ebe599be27be07efa5d`。まず同じ開発入力で、幾何・端点の分散と、標本最短路の干渉を抑える割当を比較する。
+
+### AHC016 ノイズ推定で符号グラフのサイズを選ぶ
+
+- [実装と再現手順](https://github.com/tokotoko7777/ahc-workspace/blob/17d5f04c1837c2edec06ee64e33cb56d6213f5c6/problems/ahc016/README.md)。人工的なノイズだけを使い、頂点数を変えた場合の誤りとサイズ罰を推定し、入力条件に合うサイズを選ぶ。
+- 開発 40 件平均絶対点 33,281,344.18 → 41,784,959.55（29 勝）、別の未調整 40 件 33,561,640.38 → 42,457,716.95（29 勝 11 分、敗戦なし）。未使用の平均誤答 12.825 → 6.075、高ノイズ群 34.13 → 15.73。160 出力の独立採点一致、最長 0.368434 秒、C++23 結合と決定性・期限検証を通過。研究ブランチに採用。
+- 入力・ラベル列・seed は同一でも、異なるグラフサイズでは公式テスタのノイズ乱数消費が異なる。ローカル絶対点なので本番相対順位は未判定のまま。次はサイズを固定し、次数で区別しにくい候補を帯内の残差密度で分離する。
