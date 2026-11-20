@@ -47,9 +47,10 @@
 | [AHC037](https://atcoder.jp/contests/ahc037/tasks/ahc037_a) | 着手・本番未判定 | Rafbill、得点未確認 | 未調整28件 平均35,832,854.21 | 本番150件・2秒、同一ケースの証拠なし | [中継点](https://github.com/tokotoko7777/ahc-workspace/tree/11e02827a706e05022f50a3f7956541fa388f9ea)、[親の付け替え](https://github.com/tokotoko7777/ahc-workspace/tree/38ce41a25380bb0b6d5b409da8631270b8a3f62f) |
 | [AHC038](https://atcoder.jp/contests/ahc038/tasks/ahc038_a) | 着手・本番未判定 | **1,986,808,184,140**（公式採点CSVの首位） | 既存ビーム：未調整22件 8,811ターン | 本番2,000件・相対方式 | [問題別ブランチ](https://github.com/tokotoko7777/ahc-workspace/tree/12ebdf8c71f19f11fac5b9c2053ae4267a053a18)、[初期解に利用する追試](https://github.com/tokotoko7777/ahc-workspace/tree/5cd3e84bba399d9fbccfc2c20273b840aacd02b5) |
 | [AHC039](https://atcoder.jp/contests/ahc039/tasks/ahc039_a) | 着手・本番未判定 | **566,997**（絶対点） | 隣列重複：新規未調整24件 平均3,429.67（追加探索の対照と比較） | 本番150件・2秒、同一ケースの証拠なし | [問題別ブランチ](https://github.com/tokotoko7777/ahc-workspace/tree/39ff40a8cce317a2ed00157ebb8cefefeeff0b16)、[隣列重複](https://github.com/tokotoko7777/ahc-workspace/tree/afa01fc73184f6fe316465a5c67f924057b6f4b9) |
-| [AHC040](https://atcoder.jp/contests/ahc040/tasks/ahc040_a) | 着手・本番未判定 | **2,981,293,882,216**（相対点） | 開発比較中 | 本番3,000件・3秒、公式ケース別基準を取得 | 検証中 |
-| [AHC041](https://atcoder.jp/contests/ahc041/tasks/ahc041_a) | 着手・本番未判定 | 確認中 | 開発比較準備中 | 確認中 | 検証中 |
-| AHC042〜074 | 未着手 | — | — | — | — |
+| [AHC040](https://atcoder.jp/contests/ahc040/tasks/ahc040_a) | 着手・本番未判定 | **2,981,293,882,216**（相対点） | 棚配置：未調整32件 平均1,123,661.47（低い方が良い） | 本番3,000件・3秒、公式ケース別基準を取得 | [混合配置](https://github.com/tokotoko7777/ahc-workspace/tree/c22499e74fe82e2fb3069820be96bd5ebc00b7bc)、[線形測定](https://github.com/tokotoko7777/ahc-workspace/tree/fcf1bbf603140f033820232afe5fbc5dc7c01e05) |
+| [AHC041](https://atcoder.jp/contests/ahc041/tasks/ahc041_a) | 着手・本番未判定 | hitonanode、得点未確認 | 未調整24件 11,915,002 | 本番150件・2秒、同一ケースの証拠なし | [部分木](https://github.com/tokotoko7777/ahc-workspace/tree/6e69ff15a72cc8d3b673248c4335c435bfb344be)、[複合修正](https://github.com/tokotoko7777/ahc-workspace/tree/3e6e4f9ea3ea3d9e65c0bd7e7a07e1e2fdccf908) |
+| [AHC042](https://atcoder.jp/contests/ahc042/tasks/ahc042_a) | 着手・本番未判定 | **468,807**（絶対点） | 開発比較中 | 本番150件・2秒、同一ケースの証拠なし | 検証中 |
+| AHC043〜074 | 未着手 | — | — | — | — |
 
 ### AHC001 の次の仮説
 
@@ -596,3 +597,18 @@
 ### AHC040 本番条件
 
 [公式問題文](https://atcoder.jp/contests/ahc040/tasks/ahc040_a)。3秒 / 1,024 MiB、対話でT回配置し、幅＋高さ＋未配置ペナルティの最小値。本番3,000ケースの相対点。公式[ケース得点CSV](https://img.atcoder.jp/ahc_standings/ahc040/result.csv)（SHA-256 `7e3b823a5664c0df52d6f1571914303580a4d6fd6079ad01a01a3a3f644f8af5`）から、1位2,981,293,882,216（公式結果JSONと首位一致）を再現。棚状の配置を基準に、方向を混ぜる配置を同じ試行回数で比較中。
+
+### AHC040 配置方向と計測用試行
+
+[初版](https://github.com/tokotoko7777/ahc-workspace/tree/c22499e74fe82e2fb3069820be96bd5ebc00b7bc)。試行数Tを揃えた棚配置と方向混合配置を比較。未調整32件の平均費用1,123,661.47→1,118,625.09、10勝8分14敗・費用比中央値1.0。128出力公式・独立一致、最大0.312888秒。既定は棚。
+[追試](https://github.com/tokotoko7777/ahc-workspace/tree/fcf1bbf603140f033820232afe5fbc5dc7c01e05)は別のケースで、同じ幅計測を「無視・ベイズ更新」で比べ、計測なしも含めてTを揃えた。未調整32件の平均費用は計測なし1,102,156.41、無視1,104,546.00、更新1,105,206.84。更新は無視に12勝11分9敗だが平均は悪化。192対話で公式と独立が一致、最大0.086101秒。次は計測専用の試行を使わず、完全配置で安定な接触経路から寸法を更新する。本番未測定。
+
+### AHC041 深さを制約した部分木の移動
+
+[公式問題文](https://atcoder.jp/contests/ahc041/tasks/ahc041_a)。2秒 / 1,024 MiB、深さ10以下、頂点の美しさ×（深さ+1）の和+1を最大化。本番150件。[公式結果](https://atcoder.jp/contests/ahc041/results/json)の首位名はhitonanode、点数は未確認。
+[初版](https://github.com/tokotoko7777/ahc-workspace/tree/6e69ff15a72cc8d3b673248c4335c435bfb344be)は同じ初期候補・140msで、DFS再始動に対し合法な部分木移動を焼きなまし。未調整24件11,534,138→11,915,002（+3.30%、全勝）。全72合法、公式と独立が一致、最大0.191秒。問題別既定に採用。
+[追試](https://github.com/tokotoko7777/ahc-workspace/tree/3e6e4f9ea3ea3d9e65c0bd7e7a07e1e2fdccf908)は深すぎる枝を先に短縮してから移動する案。新規未調整24件11,911,222→11,915,249（13勝、+0.034%）。同予算、72出力が公式と一致で最大0.190秒だが、差が小さく任意。次は深さが空いている接続先候補を優先し、深い枝を含めた動きの採択効率を上げる。
+
+### AHC042 本番条件
+
+[公式問題文](https://atcoder.jp/contests/ahc042/tasks/ahc042_a)。2秒、本番150件の絶対点、最大1,600操作。1位468,807は[AtCoder提供の順位・得点データ](https://huggingface.co/datasets/SakanaAI/ALE-Bench/blob/main/ahc042.zip)で確認（SHA-256 `cff8191b01d93c1790597f50ed8359c15ad172b52d82253b74d857b319d6f6ae`）。毎回完全に戻す合法な手順を基準に、途中まで・または戻さない候補をビームに追加する。
