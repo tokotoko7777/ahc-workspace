@@ -11,15 +11,17 @@ import subprocess
 import time
 
 
-def round_positive(x):
-    v=int(x)
-    return v+int(x-v>=.5)
+def exact_fee(value,area,perimeter):
+    # floor((8*V*sqrt(P) + L) / (2*L)); integer denominator
+    # permits taking the integer square root first without changing the quotient.
+    return (math.isqrt(64*value*value*area)+perimeter)//(2*perimeter)
 
 
 def replay(data,answer):
     lines=data.splitlines()
     n,m,r=lines[0].split()
-    n,m,r=int(n),int(m),float(r)
+    from decimal import Decimal
+    n,m,r=int(n),int(m),int(1000*Decimal(r.decode()))
     board=[[ch!=46 for ch in row] for row in lines[1:n+1]]
     groups=[list(map(int,line.split())) for line in lines[n+1:n+1+m]]
     if len(groups)!=m: raise ValueError("groups missing")
@@ -30,7 +32,7 @@ def replay(data,answer):
 
     def fee(j,worst):
         p,v=groups[j][3:]
-        return round_positive(v*(4*math.sqrt(p)/worst))
+        return exact_fee(v,p,worst)
 
     def region(j):
         cells=set()
@@ -82,7 +84,7 @@ def replay(data,answer):
             out=iter(coords)
             cells,perim=region(z)
             active[z]=(cells,max(active[z][1],perim))
-            revenue-=max(1,round_positive(groups[z][4]*r))
+            revenue-=max(1,(groups[z][4]*r+500)//1000)
             moves+=1
         out=remainder
         decision=next(out)
@@ -101,7 +103,7 @@ def sha(path):
     return hashlib.sha256(path.read_bytes()).hexdigest()
 
 
-def evaluate(case, tester, solver):
+def evaluate(case, tester, solver, allow_approx_internal=False):
     data=case.read_bytes()
     start=time.perf_counter()
     result=subprocess.run([tester,solver],input=data,capture_output=True,check=True,timeout=2)
@@ -111,9 +113,9 @@ def evaluate(case, tester, solver):
     independent=replay(data,result.stdout)
     official=re.findall(rb"^Score = (\d+)$",result.stderr,re.M)
     own=re.findall(rb"^Raw score = (\d+)$",result.stderr,re.M)
-    if len(official)!=1 or len(own)!=1 or int(official[0])!=independent["score"] or int(own[0])!=independent["score"]:
+    if len(official)!=1 or len(own)!=1 or int(official[0])!=independent["score"] or (not allow_approx_internal and int(own[0])!=independent["score"]):
         raise ValueError((case,solver,independent,result.stderr[-1000:]))
-    return {**independent,"wall":elapsed,
+    return {**independent,"wall":elapsed,"internal_diff":int(own[0])-independent["score"],
             "protocol":hashlib.sha256(result.stdout).hexdigest()}
 
 
