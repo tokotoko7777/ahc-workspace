@@ -16,7 +16,8 @@
 | [AHC006](https://atcoder.jp/contests/ahc006/tasks/ahc006_a) | ローカル比較・本番未判定 | **2,220,425** 点（[AtCoder 提供の順位データ](https://huggingface.co/datasets/SakanaAI/ALE-Bench/blob/main/ahc006.zip)） | 既存版: 未調整 10 件の合計 214,630 | 本番 100 件。配布シードとの同一性未確認 | [空間初期化の分岐](https://github.com/tokotoko7777/ahc-workspace/tree/761d6839f93d0e347820919714402360766c4ad5) |
 | [AHC007](https://atcoder.jp/contests/ahc007/tasks/ahc007_a) | 着手・未判定 | **14,241,733,941** 点（[AtCoder 提供の順位データ](https://huggingface.co/datasets/SakanaAI/ALE-Bench/blob/main/ahc007.zip)） | シナリオ版: 公開 150 件 **14,184,305,386** | 本番 150 件、2 秒。配布入力との同一性未確認 | [問題別ブランチ](https://github.com/tokotoko7777/ahc-workspace/tree/2793a9a782184c4b77376fab17482d24b353d6bd) |
 | [AHC008](https://atcoder.jp/contests/ahc008/tasks/ahc008_a) | ローカル改善・本番未判定 | **121,980,050,607** 点（[AtCoder 提供の順位データ](https://huggingface.co/datasets/SakanaAI/ALE-Bench/blob/main/ahc008.zip)） | 適応分割版: 未調整 24 件合計 53,656,251 | 公式対話テスタ、本番公開 2,000 シード、3 秒 | [問題別ブランチ](https://github.com/tokotoko7777/ahc-workspace/tree/af41b4e70a89fef3c0389c689aa09dc633fffa16) |
-| AHC009〜074 | 未着手 | — | — | — | — |
+| [AHC009](https://atcoder.jp/contests/ahc009/tasks/ahc009_a) | 着手・未判定 | **7,547,834,181** 点（[AtCoder 提供の順位データ](https://huggingface.co/datasets/SakanaAI/ALE-Bench/blob/main/ahc009.zip)） | 基準版を準備中 | 100 ケース、初到達の期待値を公式式で採点。2 秒。本番との同一性未確認 | 検証中 |
+| AHC010〜074 | 未着手 | — | — | — | — |
 
 ### AHC001 の次の仮説
 
@@ -149,3 +150,9 @@
 - 新規開発 24 件 6,068,929 → 79,174,426、未調整 24 件 1,650,490 → 53,656,251（平均 2,235,677）。全 48 ペアで改善し、96 実行で公式対話テスタ v3 と全ターンの独立検査一致。ローカル最長 0.049386 秒。C++23 を問題別ブランチへ保存。
 - 保てる面積が平均約 135 マスと小さく、未使用セットでも中に平均約 3.38 匹残る。現時点では本番目標に遠いので公式 2,000 ケースの評価はまだ実施しない。順位データ 1 位 121,980,050,607 点（配布元と同一 SHA-256 `7dc040eb07f4543a16ef550a198859519a98af899771237b2bf1517c8a419300`）。
 - 次は何度も人間側を縮めるのではなく、複数人で小部屋を並行に建て、動物を小部屋へ入れることで人間側の面積を残す。
+
+### AHC008 外周の小部屋を並行して建てる案
+
+- [実装・再現手順](https://github.com/tokotoko7777/ahc-workspace/blob/053d05b2b80aee5da0ebd027ade3079065bbe3e7/problems/ahc008/README.md)。別々の小部屋を複数人で並行構築し、人間側の面積を大きく残す案を比較。
+- 開発 24 件の平均 2,697,270 → 1,690,023、独立確認 24 件 2,944,878 → 916,565。後者では平均面積が 121.46 → 587.00 マスに増えた一方、同じ部屋の動物が平均 2.833 → 8.333 匹になり不採用。全 96 出力で公式 v3 と独立リプレイが一致、最長 0.056420 秒。既定の適応分割は行動まで同一、公式 2,000 件は未実施。
+- 次は固定数の小部屋を増やすのではなく、既存壁付近であと 1〜3 マスで閉じられる隘路を列挙し、閉鎖したときの連結領域と得点をその場で評価する。
