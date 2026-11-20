@@ -4,6 +4,9 @@ using namespace std;
 #ifndef AHC049_BEAM
 #define AHC049_BEAM 1
 #endif
+#ifndef AHC049_ANCHORS
+#define AHC049_ANCHORS 1
+#endif
 namespace {
 using Clock=chrono::steady_clock;
 constexpr int N=20,V=N*N,MAX_BOX=14;
@@ -15,6 +18,7 @@ struct Tour{
   int at()const{return box[size-1];}
 };
 struct Problem{
+  mutable long long probes=0;
   array<int,V> weight,dur;
   array<array<uint8_t,V>,V> distance;
   array<vector<int>,V> near;
@@ -58,7 +62,7 @@ struct Problem{
       current=pick;
     }
   }
-  Tour search(int start,const array<char,V>& available,Clock::time_point deadline)const{
+  Tour search(int start,const array<char,V>& available,Clock::time_point deadline,int width=14)const{
     auto best=greed(start,available);
     vector<Tour> layer{first(start)};
     auto rank=[](const Tour& t){
@@ -69,6 +73,7 @@ struct Problem{
     for(int depth=1;depth<MAX_BOX&&Clock::now()<deadline;++depth){
       vector<Tour> next;
       for(const auto& t:layer)for(int p:near[t.at()])if(available[p]){
+        ++probes;
         Tour q=t;
         if(!append(q,p,4))continue;
         if(q.saving>best.saving)best=q;
@@ -76,11 +81,21 @@ struct Problem{
       }
       if(next.empty())break;
       auto cmp=[&](const auto& a,const auto& b){return rank(a)>rank(b);};
-      if(int(next.size())>14){
-        nth_element(next.begin(),next.begin()+14,next.end(),cmp);next.resize(14);
+      if(int(next.size())>width){
+        nth_element(next.begin(),next.begin()+width,next.end(),cmp);next.resize(width);
       }
       layer=std::move(next);
     }
+    return best;
+  }
+  int alternate(int start,const array<char,V>& available)const{
+    int best=-1;
+    auto support=[&](int p){
+      // Favor a bottom box that can carry more future cargo all the way home.
+      return pair{dur[p]/home(p),home(p)};
+    };
+    for(int p:near[start])if(available[p]&&home(p)>=home(start)-2&&
+        (best<0||support(p)>support(best)))best=p;
     return best;
   }
   pair<int,string> solve(bool beam,Clock::time_point deadline)const{
@@ -103,7 +118,15 @@ struct Problem{
       for(int p=1;p<V;++p)if(remaining[p]&&
           (start<0||pair{home(p),dur[p]}>pair{home(start),dur[start]}))start=p;
       if(start<0)break;
-      auto trip=beam&&Clock::now()<deadline?search(start,remaining,deadline):greed(start,remaining);
+      auto trip=greed(start,remaining);
+      if(beam&&Clock::now()<deadline){
+        const int other=AHC049_ANCHORS?alternate(start,remaining):-1;
+        trip=search(start,remaining,deadline,other<0?14:7);
+        if(other>=0&&Clock::now()<deadline){
+          auto q=search(other,remaining,deadline,7);
+          if(q.saving>trip.saving)trip=q;
+        }
+      }
       for(int i=0;i<trip.size;++i){
         int p=trip.box[i];
         route(p);plan+='1';remaining[p]=false;
@@ -125,6 +148,6 @@ int main(){
     auto q=p.solve(true,deadline);
     if(q.first<answer.first)answer=std::move(q);
   }
-  cerr<<"base="<<base<<" moves="<<answer.first<<'\n';
+  cerr<<"base="<<base<<" moves="<<answer.first<<" probes="<<p.probes<<'\n';
   for(char c:answer.second)cout<<c<<'\n';
 }

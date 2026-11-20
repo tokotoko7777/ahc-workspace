@@ -73,3 +73,33 @@ after `cargo build --release --locked`. From repository root:
     /tmp/ahc049-reserve-test
     python scripts/bundle.py problems/ahc049/main.cpp -o /tmp/ahc049-single.cpp
     g++ -std=c++23 -O3 /tmp/ahc049-single.cpp -o /tmp/ahc049-single
+
+### Alternate support box at constant beam width
+
+Beam width 14 at the furthest box is the fixed control. The variant uses width
+7 from that same start and width 7 from a second available box within two
+units of the maximum origin distance, choosing the bottom box with greatest
+initial durability per unit of remaining carrying distance. It selects the
+larger legal reduction against individual-box trips. Maximum retained beam
+width per depth remains 14; actual attempted extensions and times are logged
+because the remaining sets diverge after the first different trip.
+
+Fresh SHA-256-derived development and holdout sets (28 each, different from the
+original experiment) both improved on all cases. Mean moves on development:
+5119.21 → 4887.36; holdout: 5126.57 → 4861.64, with median saving 243.
+Mean holdout extension checks were 211,110 → 173,933. All 112 official and
+independent scores agreed; maximum observed measured wall time was 0.100 s.
+Keep the two-anchor variant as branch default. This is not a comparison on
+historical cases. Next try exchanging a pickup between neighboring completed
+tours, recomputing both capacity reserves before accepting a move reduction.
+
+```sh
+p=problems/ahc049
+d=$(mktemp -d)
+g++ -std=c++23 -O3 -DAHC049_ANCHORS=0 "$p/main.cpp" -o "$d/fixed"
+g++ -std=c++23 -O3 "$p/main.cpp" -o "$d/diverse"
+python "$p/benchmark_anchors.py" /path/to/gen /path/to/vis \
+  "$d/fixed" "$d/diverse" "$d/results.csv"
+python scripts/bundle.py "$p/main.cpp" -o "$d/submission.cpp"
+g++ -std=c++23 -O3 "$d/submission.cpp" -o "$d/submission"
+```

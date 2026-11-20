@@ -72,7 +72,7 @@ def main():
                     run=subprocess.run([binary],input=data,capture_output=True,check=True,timeout=2)
                     elapsed=time.monotonic()-start
                     score=replay(data,run.stdout)
-                    detail=re.fullmatch(rb"base=(\d+) moves=(\d+)\s*",run.stderr)
+                    detail=re.fullmatch(rb"base=(\d+) moves=(\d+)(?: probes=\d+)?\s*",run.stderr)
                     assert detail and int(detail[2])==score[1] and elapsed<2
                     starts.append(int(detail[1]))
                     ans.write_bytes(run.stdout)
