@@ -67,3 +67,46 @@ python "$p/benchmark.py" /path/to/gen /path/to/vis "$d/base" "$d/fit" "$d/result
 g++ -std=c++23 -O3 tests/binary_split_fit_test.cpp -o "$d/test"
 "$d/test"
 ```
+
+## Follow-up: reconvergent splitter
+
+Start with the same frozen best of the five baseline geometries. For a splitter
+with two destinations `A` and `B`, retain the direct arc to `A` and replace
+the arc to `B` with one to an unused site `X`, then connect `X` to both
+destinations. Also try retaining `B` instead. This is acyclic because `X` has
+no previous arcs and both destinations were already descendants. Reject newly
+intersecting segments. Without changing other sorters, the effective probability
+of taking the indirect-only destination is the product of two branch
+probabilities. For each of the `2K` oriented parent types, use the affine
+library chooser to optimize the second type in O(KN), then use the exact best
+positive gain and refit/assign. Arrivals at shared vertices are summed in
+topological order. At most four grafts per case.
+
+Both extensions receive an extra time budget twice the common initialization
+time: the control spends it on more ordinary trees, including a possible
+last-tree overrun; the graft arm stops early when no further useful expansion
+is found. The hard deadline remains 1.40 s, plus at most one in-flight
+bounded calculation. Across fresh disjoint 28+28 cases:
+
+| Set | Frozen score ↓ | Restart score ↓ | Graft score ↓ | Graft vs restart |
+|---|---:|---:|---:|---:|
+| Development | 656,265,653 | 642,730,335 | 600,070,336 | 28/0/0 |
+| Holdout | 651,882,452 | 635,754,453 | 590,565,469 | 28/0/0 |
+
+Holdout median gain against control: 38,908,754; median measured walls
+0.03918 s control and 0.02371 s graft. All 168 scores matched exact replay
+and the official vis, max wall 0.282 s. Use graft as branch default.
+Next: allow both root paths to branch independently and reconverge; also try
+jointly fitting two neighboring gadgets across a shared downstream region.
+Repeated positive grafts on one edge can be contrasted with an independent
+extra path using the same placed-sorter count.
+
+```sh
+p=problems/ahc051
+d=$(mktemp -d)
+for arm in 0 1 2; do
+  g++ -std=c++23 -O3 -DAHC051_TOPOLOGY=$arm "$p/main.cpp" -o "$d/arm$arm"
+done
+python "$p/benchmark_graft.py" /path/to/gen /path/to/vis \
+  "$d/arm0" "$d/arm1" "$d/arm2" "$d/graft.csv"
+```
