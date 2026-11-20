@@ -2,15 +2,17 @@
 
 [公式問題文](https://atcoder.jp/contests/ahc004/tasks/ahc004_a)で配布される
 ローカル用の **seed 0〜99 全100ケース**を使う。本番ケースとは別集合。
-合計の目標は **7,321,305,762点**。50ケースからの外挿はしない。
+現在の合計目標は **9,000,000,000点**。初回目標7,321,305,762点は
+達成済み。50ケースからの外挿はしない。新目標に対する比較基準は、
+追加の最適化フラグなしで検証した単一ファイルの **7,489,107,407点**。
 
 - [公式入力ZIP](https://img.atcoder.jp/ahc004/a45fa3f18ab177158bf5961b12872f93.zip) SHA-256: `b0d1cd27284d96af3f409ee58304b661ddd2711400fbfbb37ffa60ad29d38cf9`
 - [公式ツールZIP](https://img.atcoder.jp/ahc004/222362f13a30b1342bf79d0041bd4d39.zip) SHA-256: `b17da9bf7e05231fb25cbc1733e2ef07063bb4bdb9cea13dd24e2e2227c9c4ed`
 - 公式 Rust `vis` と独立 Python 採点を全出力で照合。時間はソルバだけ（起動を含む）。
   同じ一論理CPUで直列実行し、ペアは先に走らせる版をケースごとに交替させる。
   壁時計で探索を打ち切るため、別マシンや負荷条件で値は変動する。
-  計測は全版で同じGNU C++23・`-O3`ビルドに揃え、提出用ファイルは
-  ソース冒頭のpragmaのみでも別途コンパイルする。
+  初期の比較はGNU C++23・`-O3`ビルド。単一ファイルの検証は
+  ソース内のpragmaを使い、追加の最適化フラグなしで行う。
 
 ## 基準の実測
 
@@ -196,6 +198,32 @@ P=problems/ahc004
 g++ -std=c++23 submission.single.cpp -o "$W/submission"
 taskset -c "${CPU:-6}" python3 "$P/benchmark.py" "$IN" "$W/local" --vis "$VIS" \
   --entry "standalone_geometry=$W/submission"
+```
+
+### 未使用の公式生成100件での対照検証
+
+公式配布100件とは別に、ソルバーを凍結してから公式genの
+seed 20000000〜20000099 を使用した。
+単一ファイルの四行交差だけを切った対照と、その他は同一、両方とも
+追加の最適化フラグなし。公式・独立採点は200出力すべて一致した。
+
+| 未使用100件 | 合計 | 最長 |
+|---|---:|---:|
+| 交差配置あり | **7,507,636,820** | 2.810818秒 |
+| 交差配置なし | 6,996,730,429 | 2.795981秒 |
+
+差は **+510,906,391点**（37勝36分27敗）。交差配置を採用した14件は
+14件とも全語を収録し、対照に全勝。これは未使用ケースでの一般化確認で、
+公式配布100件の最高点とは別。[ケース別結果](standalone-holdout-results.csv)。
+
+```sh
+mkdir -p "$W/heldout"
+seq 20000000 20000099 > "$W/heldout/seeds.txt"
+(cd "$W/heldout" && "$GEN" seeds.txt)
+sed '/^#define AHC_ANCHOR_GEOMETRY$/d' submission.single.cpp > "$W/control.cpp"
+g++ -std=c++23 "$W/control.cpp" -o "$W/control"
+taskset -c "${CPU:-6}" python3 "$P/benchmark.py" "$W/heldout/in" "$W/heldout-results" \
+  --vis "$VIS" --entry "standalone_geometry=$W/submission" --entry "standalone_control=$W/control"
 ```
 
 ## 再現

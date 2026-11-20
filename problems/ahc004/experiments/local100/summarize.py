@@ -12,6 +12,7 @@ def main():
     p.add_argument("inputs", type=Path)
     p.add_argument("csvs", nargs="+", type=Path)
     p.add_argument("--control", default="incumbent")
+    p.add_argument("--target", type=int, default=7_321_305_762)
     args = p.parse_args()
     cases = [f"{i:04d}.txt" for i in range(100)]
     if {p.name for p in args.inputs.glob("*.txt")} != set(cases):
@@ -43,7 +44,7 @@ def main():
         for case, diff in diffs.items():
             bandsum[bands[case]] = bandsum.get(bands[case], 0) + diff
         splits = ", ".join(f"{band}: {v:+,}" for band, v in sorted(bandsum.items()))
-        print(f"{name}: {total:,}; vs target {total - 7_321_305_762:+,}; "
+        print(f"{name}: {total:,}; vs target {total - args.target:+,}; "
               f"vs {args.control} {sum(diffs.values()):+,} "
               f"({sum(d>0 for d in diffs.values())}W/{sum(d==0 for d in diffs.values())}T/"
               f"{sum(d<0 for d in diffs.values())}L), "
