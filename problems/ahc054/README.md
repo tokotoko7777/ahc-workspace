@@ -72,7 +72,7 @@ corridors that do not draw the adventurer beyond their attachment point.
 p=problems/ahc054
 d=$(mktemp -d)
 for i in 0 1 2; do
-  g++ -std=c++23 -O3 -DAHC054_PLAN=$i "$p/main.cpp" -o "$d/arm$i"
+  g++ -std=c++23 -O3 -DAHC054_SPURS=0 -DAHC054_PLAN=$i "$p/main.cpp" -o "$d/arm$i"
 done
 python "$p/benchmark.py" /path/to/gen /path/to/tester \
   "$d/arm0" "$d/arm1" "$d/arm2" "$d/results.csv"
@@ -80,4 +80,38 @@ python scripts/bundle.py "$p/main.cpp" -o "$d/submission.cpp"
 g++ -std=c++23 -O3 "$d/submission.cpp" -o "$d/submission"
 g++ -std=c++23 -O3 tests/masked_bfs_workspace_test.cpp -o "$d/bfs-test"
 "$d/bfs-test"
+```
+
+## Follow-up: blind spurs
+
+Keep exactly the same 30-restart spine and grow induced side paths of
+length 4–15 with at least one bend. A new side-path cell must touch only
+its immediate predecessor among all retained cells, so excursions have
+one attachment and cannot shorten the path to the goal. The tester chooses
+whether the adventurer explores a spur. No simulated hidden priorities were
+used for candidate selection. The 60-restart spine-only control uses more
+CPU, deliberately favoring the alternative explanation (more search).
+
+| Fresh cases | Frozen spine ↑ | 60 starts ↑ | Blind spurs ↑ | Spurs vs 60 starts |
+|---|---:|---:|---:|---:|
+| Dev (24) | 469.542 | 477.125 | 1020.958 | 24 / 0 / 0 |
+| Holdout (24) | 423.000 | 429.833 | 1047.333 | 23 / 1 / 0 |
+
+Holdout median gain 201 moves versus 60 starts. Tester-inclusive median
+0.034253 s for spurs vs 0.053301 s control, and maximum 0.230074 s across
+all arms. Every run matched official and independent dynamic replay, and
+the shortest start-to-flower path stayed identical to frozen for every
+spur instance. Keep this as branch default. [Results](benchmark-spur-results.csv).
+Next test one or two long blind branches grown before general filling, or
+reserve forks for late placements that make previously attractive remote regions
+unreachable without ever breaking the protected path.
+
+```sh
+p=problems/ahc054
+d=$(mktemp -d)
+for i in 0 1 2; do
+  g++ -std=c++23 -O3 -DAHC054_SPURS=$i "$p/main.cpp" -o "$d/arm$i"
+done
+python "$p/benchmark_spurs.py" /path/to/gen /path/to/tester \
+  "$d/arm0" "$d/arm1" "$d/arm2" "$d/results.csv"
 ```

@@ -4,6 +4,9 @@ using namespace std;
 #ifndef AHC054_PLAN
 #define AHC054_PLAN 2
 #endif
+#ifndef AHC054_SPURS
+#define AHC054_SPURS 2
+#endif
 namespace {
 using Clock=chrono::steady_clock;
 struct Problem{
@@ -37,7 +40,7 @@ struct Problem{
     bfs.run(adj,goal,[&](int v){return empty[v];});
     auto best=route(start,bfs);assert(!best.empty());
     if(AHC054_PLAN<2)return best;
-    for(int epoch=0;epoch<30&&Clock::now()<cutoff;++epoch){
+    for(int epoch=0;epoch<(AHC054_SPURS==1?60:30)&&Clock::now()<cutoff;++epoch){
       auto permitted=empty;
       vector<int> current{start};
       int tail=start, heading=-1;
@@ -76,6 +79,44 @@ struct Problem{
     }
     return best;
   }
+  void spurs(const vector<int>& spine,vector<char>& saved)const{
+    // Protect a single spine attachment, then grow an induced blind side
+    // path which never touches any other cell of the growing forest.
+    vector<int> order=spine;
+    for(int v:order){
+      if(v==goal)continue;
+      vector<int> best;
+      for(int u:adj[v])if(empty[u]&&!saved[u]){
+        int count=0;for(int w:adj[u])count+=saved[w];
+        if(count!=1)continue;
+        vector<char> occupied=saved;
+        vector<int> chain{u};occupied[u]=true;
+        int prev=v;
+        bool bent=false;
+        while(chain.size()<15){
+          const int tail=chain.back();
+          int next=-1,utility=-1;
+          for(int q:adj[tail])if(empty[q]&&!occupied[q]){
+            int degree=0,exits=0;
+            for(int z:adj[q]){
+              degree+=occupied[z];
+              exits+=empty[z]&&!occupied[z];
+            }
+            if(degree!=1)continue;
+            // Prefer a bend to make cells beyond discovery rays, then room.
+            int val=10*exits+17*((q-tail)!=(tail-prev)&&!bent);
+            if(val>utility){utility=val;next=q;}
+          }
+          if(next<0)break;
+          bent|=(next-tail)!=(tail-prev);
+          prev=tail;occupied[next]=true;chain.push_back(next);
+        }
+        if(bent&&chain.size()>=4&&chain.size()>best.size())best=move(chain);
+      }
+      for(int v:best)saved[v]=true;
+    }
+  }
+
 };
 }
 int main(){
@@ -91,6 +132,7 @@ int main(){
       int deg=0;for(int u:p.adj[trail[i]])deg+=protected_cell[u];
       assert(deg==1+(i>0&&i+1<int(trail.size())));
     }
+    if(AHC054_SPURS==2)p.spurs(trail,protected_cell);
   }
   cerr<<"path="<<length<<'\n';
   vector<char> revealed(p.n*p.n);
