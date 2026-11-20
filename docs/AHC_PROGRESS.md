@@ -57,9 +57,11 @@
 | [AHC047](https://atcoder.jp/contests/ahc047/tasks/ahc047_a) | 着手・本番未判定 | itigo、得点未確認 | 新規未調整24件 得点平均26,281.33 | 本番150件・2秒、同一ケースの証拠なし | [問題別ブランチ](https://github.com/tokotoko7777/ahc-workspace/tree/e8aa0d41b813933b676a6b0cb442f1e51e7a92bc)、[共有する文字列経路](https://github.com/tokotoko7777/ahc-workspace/tree/62f3f7888cb37d53f9c45bc289e04078ccf857d2) |
 | [AHC048](https://atcoder.jp/contests/ahc048/tasks/ahc048_a) | 凍結版：本番未達 | **1,129,730,769,846**（相対点） | **121,378,823,586**（本番2,000件・全件合法） | 本番2,000件・3秒、基準とseed列照合済み | [問題別ブランチ](https://github.com/tokotoko7777/ahc-workspace/tree/ad4f7e6bcdfa76f80a9b92052ea060f72085dc06)、[容量3](https://github.com/tokotoko7777/ahc-workspace/tree/2264494b2ec7fa3fa9cc1161c9cc7d3891649bcb)、[公式比較](https://github.com/tokotoko7777/ahc-workspace/tree/bd0d1fd309af7f9ba834e6688b8391a6afa2c3af) |
 | [AHC049](https://atcoder.jp/contests/ahc049/tasks/ahc049_a) | 着手・本番未判定 | Rafbill、得点未確認 | 新規未調整28件 平均4,861.64移動 | 本番150件・2秒、同一ケースの証拠なし | [問題別ブランチ](https://github.com/tokotoko7777/ahc-workspace/tree/a4688d135b0ecabf49fe877895782ced3e0aa5ca)、[土台箱を増やす追試](https://github.com/tokotoko7777/ahc-workspace/tree/508d161add61b6185f17ab86fd2ce819d164009c) |
-| [AHC050](https://atcoder.jp/contests/ahc050/tasks/ahc050_a) | 着手・本番未判定 | yosupo、得点未確認 | 未調整20件 合計19,455,464 | 本番150件・2秒、同一ケースの証拠なし | [問題別ブランチ](https://github.com/tokotoko7777/ahc-workspace/tree/c1084c6814a6b1a98fa2b6de854a1a2941f09098) |
-| [AHC051](https://atcoder.jp/contests/ahc051/tasks/ahc051_a) | 着手・本番未判定 | **1,721,504,233,142**（相対点） | 未調整28件 混合誤差640,624,514 | 本番2,000件、公式ケース別基準を取得 | [問題別ブランチ](https://github.com/tokotoko7777/ahc-workspace/tree/c7a55c1984e3da4992f23c94bdb1a5430db232c4) |
-| AHC052〜074 | 未着手 | — | — | — | — |
+| [AHC050](https://atcoder.jp/contests/ahc050/tasks/ahc050_a) | 着手・本番未判定 | yosupo、得点未確認 | 新規未調整20件 合計19,486,823 | 本番150件・2秒、同一ケースの証拠なし | [問題別ブランチ](https://github.com/tokotoko7777/ahc-workspace/tree/c1084c6814a6b1a98fa2b6de854a1a2941f09098)、[末尾の厳密評価](https://github.com/tokotoko7777/ahc-workspace/tree/369761882afe4a63f254cb9752a8563ce55f1697) |
+| [AHC051](https://atcoder.jp/contests/ahc051/tasks/ahc051_a) | 凍結版：本番未達 | **1,721,504,233,142**（相対点） | **310,855,698,519**（本番2,000件・全件合法） | 本番2,000件、公式ケース別基準を取得 | [問題別ブランチ](https://github.com/tokotoko7777/ahc-workspace/tree/c7a55c1984e3da4992f23c94bdb1a5430db232c4)、[再合流](https://github.com/tokotoko7777/ahc-workspace/tree/15a685950c1423fb5e0dbeb864561b0f36e2e896)、[公式比較](https://github.com/tokotoko7777/ahc-workspace/tree/f5ac7efb491be927e38eaae17aeb4620a3c8a964) |
+| [AHC052](https://atcoder.jp/contests/ahc052/tasks/ahc052_a) | 着手・本番未判定 | 確認中 | 開発比較準備中 | 確認中 | 検証中 |
+| [AHC053](https://atcoder.jp/contests/ahc053/tasks/ahc053_a) | 着手・本番未判定 | 確認中 | 開発比較準備中 | 確認中 | 検証中 |
+| AHC054〜074 | 未着手 | — | — | — | — |
 
 ### AHC001 の次の仮説
 
@@ -707,3 +709,13 @@
 ### AHC051 分岐の真の確率で選別機を選ぶ
 
 [公式問題文](https://atcoder.jp/contests/ahc051/tasks/ahc051_a)。交差しない分岐を配置し、正しい処理装置に着く確率を最大化。公式[ケース点CSV](https://img.atcoder.jp/ahc_standings/ahc051/result.csv)（SHA-256 `7c1b931d4c62deb3fd63d1a3401e398e9ecba0bffdc2d3439d6f58b2bf0ec838`）1,183人×2,000件の最小値相対点で、1位1,721,504,233,142を再現し公式結果JSONとも一致。[検証と実装](https://github.com/tokotoko7777/ahc-workspace/tree/c7a55c1984e3da4992f23c94bdb1a5430db232c4)。同じ5つの合法形状を使い、平均属性で選別機を割り当てる基準と、到着確率・後段の価値で選別機を選ぶ案を比較。dev28件635,654,296→609,971,541、未調整28件675,522,621→640,624,514（27勝1分、費用比中央値0.94965）。112出力が合法で公式・独立厳密計算が一致、最大0.103215秒。問題別既定に採用。次は一部の経路を再合流させる構造も検証する。本番未測定。
+
+### AHC050 隣接交換を、その後の生存分布まで見て選ぶ
+
+[追試](https://github.com/tokotoko7777/ahc-workspace/tree/369761882afe4a63f254cb9752a8563ce55f1697)。同じ初期列と隣接ペア、各5交互スイープで、2手だけの生存率と残りの全手の確率を逆向きに計算する方式を比較。新規dev10件9,760,937→9,792,548、未調整20件19,401,191→19,486,823（全件改善、+0.44%）。60出力公式と独立が一致、最大0.437秒。問題別既定に採用。次は離れた操作間の短区間も対象にする。
+
+### AHC051 平面で再合流を許す追試と本番比較
+
+[追試](https://github.com/tokotoko7777/ahc-workspace/tree/15a685950c1423fb5e0dbeb864561b0f36e2e896)。合法な分岐木から、一部の出力先で経路を合流できる構造を追加した。同じ予算を木の再始動に使う案に対し、新規未調整28件の絶対費用は初期651,882,452、再始動635,754,453、再合流590,565,469（再始動に全28勝、差の中央値38,908,754）。全168出力で公式と独立の幾何・厳密確率が一致、中央値の時間も0.03918→0.02371秒。問題別既定に採用。
+
+[公式比較](https://github.com/tokotoko7777/ahc-workspace/blob/f5ac7efb491be927e38eaae17aeb4620a3c8a964/problems/ahc051/OFFICIAL_AUDIT.md)。再合流版を凍結し、公開seedで本番2,000件を生成してfile・seed・N・M・Kを照合。全件合法・公式と独立採点一致（全処理機に到達するのは1,997件、未到達を含む残りも合法）。最大0.242449秒。相対点は **310,855,698,519**、公式首位 **1,721,504,233,142**。最小値更新0で同じ基準、仮に追加すると1,184人中208位相当、同点なし。**未達**、main未マージ。次は機械種類の局所変更より先に、合流点と出力深さをまとめて構成する。
