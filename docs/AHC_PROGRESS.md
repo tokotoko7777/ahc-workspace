@@ -54,9 +54,10 @@
 | [AHC044](https://atcoder.jp/contests/ahc044/tasks/ahc044_a) | 着手・本番未判定 | **149,807,848**（絶対点） | 新規未調整24件 平均誤差約19,314 | 本番150件・2秒、同一ケースの証拠なし | [残差探索](https://github.com/tokotoko7777/ahc-workspace/tree/95185faa94950764129d78ae2422bd9b46da73e4)、[定常分布による追試](https://github.com/tokotoko7777/ahc-workspace/tree/39c6fccc3544603af106c420abf983f84ded74b1) |
 | [AHC045](https://atcoder.jp/contests/ahc045/tasks/ahc045_a) | 凍結版：本番未達 | **2,988,855,588,054**（相対点） | **1,809,922,568,865**（本番3,000件・全件合法） | 本番3,000件・2秒、基準とseed列照合済み | [順序推定](https://github.com/tokotoko7777/ahc-workspace/tree/ef908953cb79d12f7f5f71ef4aaef53d45fc4c04)、[グループ交換](https://github.com/tokotoko7777/ahc-workspace/tree/f594e37f013614a169ff675440bfcfec1e63d219)、[公式比較](https://github.com/tokotoko7777/ahc-workspace/tree/8d199405dc9bbdc8821997230ee282b8b4af168a) |
 | [AHC046](https://atcoder.jp/contests/ahc046/tasks/ahc046_a) | 着手・本番未判定 | **220,494**（絶対点） | 新規未調整30件 平均217.600手 | 本番150件・2秒、同一ケースの証拠なし | [停止ブロック](https://github.com/tokotoko7777/ahc-workspace/tree/00edc1ce4028926dcc2cfb8316e64994f3fe89bb)、[複数区間の探索](https://github.com/tokotoko7777/ahc-workspace/tree/8c258bffae710ee7b3764fa8f0da9e95d59a4f6d) |
-| [AHC047](https://atcoder.jp/contests/ahc047/tasks/ahc047_a) | 着手・本番未判定 | itigo、得点未確認 | 未調整24件 得点平均21,656.67 | 本番150件・2秒、同一ケースの証拠なし | [問題別ブランチ](https://github.com/tokotoko7777/ahc-workspace/tree/e8aa0d41b813933b676a6b0cb442f1e51e7a92bc) |
-| [AHC048](https://atcoder.jp/contests/ahc048/tasks/ahc048_a) | 着手・本番未判定 | 確認中 | 開発比較中 | 確認中 | 検証中 |
-| AHC049〜074 | 未着手 | — | — | — | — |
+| [AHC047](https://atcoder.jp/contests/ahc047/tasks/ahc047_a) | 着手・本番未判定 | itigo、得点未確認 | 新規未調整24件 得点平均26,281.33 | 本番150件・2秒、同一ケースの証拠なし | [問題別ブランチ](https://github.com/tokotoko7777/ahc-workspace/tree/e8aa0d41b813933b676a6b0cb442f1e51e7a92bc)、[共有する文字列経路](https://github.com/tokotoko7777/ahc-workspace/tree/62f3f7888cb37d53f9c45bc289e04078ccf857d2) |
+| [AHC048](https://atcoder.jp/contests/ahc048/tasks/ahc048_a) | 着手・本番未判定 | **1,129,730,769,846**（相対点） | 未調整28件 費用22,488,549 | 本番2,000件・3秒、基準とseed列照合済み | [問題別ブランチ](https://github.com/tokotoko7777/ahc-workspace/tree/ad4f7e6bcdfa76f80a9b92052ea060f72085dc06) |
+| [AHC049](https://atcoder.jp/contests/ahc049/tasks/ahc049_a) | 着手・本番未判定 | 確認中 | 開発比較準備中 | 確認中 | 検証中 |
+| AHC050〜074 | 未着手 | — | — | — | — |
 
 ### AHC001 の次の仮説
 
@@ -673,3 +674,11 @@
 ### AHC048 構成から着手
 
 [公式問題文](https://atcoder.jp/contests/ahc048/tasks/ahc048_a)。3秒、指定色1,000件、出力上限はケースにより4,000〜64,000操作。顔料の使用費と、提出色のCMYのユークリッド距離誤差を最小にする。2マスの井戸を固定し、毎回独立に色を作る基準と、前に残った色を使いながらチューブから足す案を比較する。
+
+### AHC047 文字列の経路を共有して初期化する
+
+[追試](https://github.com/tokotoko7777/ahc-workspace/tree/62f3f7888cb37d53f9c45bc289e04078ccf857d2)。同じ4初期解の後に、ランダムな初期解2つと、重なる文字列経路を一つの遷移グラフへ埋める初期解2つを比較。各4,500変更に固定。新規未調整24件の平均は追加なし21,549.25、ランダム22,646.17、経路共有26,281.33（対ランダム15勝6分3敗、中央値+1,131.5）。時間中央値0.088→0.087秒、最大0.114058秒。144出力公式と独立検証が一致。専用既定に採用。本番得点は未確認。次は共有パスの一部を状態の付け替えで組み換え、複数文字列の確率を同時に伸ばす。
+
+### AHC048 余った色を次の混色に利用
+
+[検証と実装](https://github.com/tokotoko7777/ahc-workspace/tree/ad4f7e6bcdfa76f80a9b92052ea060f72085dc06)。同じ2マス容量の井戸と色選択を使い、残った1gに新しい色を足せる案を追加した。dev14件15,520,443→13,428,201（13勝）、未調整28件26,983,603→22,488,549（−16.66%、26勝2分）。全84出力が公式・独立・C++内得点と一致、最大0.008秒、最大2,016操作、C++23単一ファイルでも一致。問題別既定は合法な2案の良い方。[公式採点CSV](https://img.atcoder.jp/ahc_standings/ahc048/result.csv)（SHA-256 `94707ef0dc8cdf6d2fac510234b75854a6f5b1aff78687d4210d00d9a23ab715`）1,205人×2,000件から、公式結果と整合する1位1,129,730,769,846を確認。次はより容量の大きい井戸で将来の色を見越し、凍結後に本番同一評価ができるか検証する。
