@@ -765,6 +765,24 @@ while (!queue.empty()) {
 キーは `uint64_t` です。負数、小数、取り出したキーより小さいキーを後から
 追加する用途には使えません。その場合は通常の `priority_queue` を使います。
 
+## 隣接配列を作らない複数始点 Dijkstra
+
+ヘッダ: [`implicit-multi-source-dijkstra.hpp`](../library/implicit-multi-source-dijkstra.hpp)。
+始点集合のどこかから、条件を満たす最寄りの頂点までのコストと経路を返す。
+辺コストは非負。隣接先やコストが局面で変わるときに、毎回グラフを作らずに使える。
+
+```cpp
+auto path = implicit_multi_source_dijkstra<int>(
+    n, roots, 1'000'000'000,
+    [&](int v, auto emit) {
+      for (int u : neighbors(v)) emit(u, enter_cost[u]);
+    },
+    [&](int v) { return is_goal[v]; });
+```
+
+[AHC018の通水済みセルから家への経路](../problems/ahc018/main.cpp)と、
+[明示グラフの仮想始点との比較](../tests/implicit_multi_source_dijkstra_test.cpp)を参照。
+
 ## Grid BFS
 
 ヘッダ: [`grid-bfs.hpp`](../library/grid-bfs.hpp)
