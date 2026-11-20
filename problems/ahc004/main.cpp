@@ -371,6 +371,128 @@ struct GenomeProblem {
     return score(next_covered, next_empty) - score(state);
   }
 
+#ifdef AHC004_LINE_REBUILD
+  struct RebuildStats { int lines=0, checked=0, accepted=0; };
+  // The orthogonal estimate may count the same newly available target
+  // in two perpendicular lines. It only ranks candidates, never accepts.
+  vector<array<int,9>> orthogonal_rewards(const State& state,int line,State& blank) const {
+    Board board=state.board;
+    for(int k=0;k<n;++k){const int p=line_cells[line][k];board[p/n][p%n]='.';}
+    blank=make_state(board);
+    vector<array<int,9>> rewards(n);
+    vector<int> seen(targets.size(),-1),hits;
+    int visit=0;
+    for(int k=0;k<n;++k){
+      const int p=line_cells[line][k],cross=line<n?n+p%n:p/n;
+      for(int ch=0;ch<8;++ch){
+        ++visit;board[p/n][p%n]=char('A'+ch);
+        scan_line(board,cross,hits);
+        for(int id:hits)if(!blank.coverage.counts[id] && seen[id]!=visit){
+          rewards[k][ch]+=targets[id].frequency;seen[id]=visit;
+        }
+      }
+      board[p/n][p%n]='.';
+    }
+    return rewards;
+  }
+  bool rebuild_line(State& current,int line,const Timer& timer,double deadline,RebuildStats& stats){
+    if(timer.elapsed_ms()>=deadline)return false;
+    ++stats.lines;
+    assert(n<=20);
+    State blank;
+    const auto rewards=orthogonal_rewards(current,line,blank);
+    string fill(n,'.');
+    array<int,20> upper{};
+    for(int k=0;k<n;++k){
+      const int p=line_cells[line][k];
+      const char old=current.board[p/n][p%n];
+      int best=old=='.'?8:old-'A';
+      for(int c=0;c<9;++c)if(rewards[k][c]>rewards[k][best])best=c;
+      upper[k]=rewards[k][best];fill[k]=best==8?'.':char('A'+best);
+    }
+    struct Frag{int id,value,loss,agreement;uint64_t bits,mask;};
+    vector<Frag> pool;
+    auto merit=[](const Frag& a){return 32*(a.value-a.loss)+a.agreement;};
+    for(int id=0;id<int(targets.size());++id)if(!blank.coverage.counts[id]){
+      if((id&63)==0 && timer.elapsed_ms()>=deadline)break;
+      vector<int> contained;
+      int node=0,weight=0;
+      for(char c:targets[id].text){
+        node=matcher.advance(node,c-'A');
+        for(int match:matcher.matches(node))if(!blank.coverage.counts[match])contained.push_back(match);
+      }
+      ranges::sort(contained);contained.erase(unique(contained.begin(),contained.end()),contained.end());
+      for(int x:contained)weight+=targets[x].frequency;
+      vector<Frag> placements;
+      for(int start=0;start<n;++start){
+        uint64_t bits=0,mask=0;
+        int loss=0,agreement=0;
+        for(int j=0;j<int(targets[id].text.size());++j){
+          int k=(start+j)%n,c=targets[id].text[j]-'A';
+          bits|=uint64_t(c)<<(3*k);mask|=7ULL<<(3*k);
+          loss+=upper[k]-rewards[k][c];
+          agreement+=fill[k]==targets[id].text[j];
+        }
+        placements.push_back({id,weight,loss,agreement,bits,mask});
+      }
+      stable_sort(placements.begin(),placements.end(),[&](const Frag& a,const Frag& b){return merit(a)>merit(b);});
+      pool.insert(pool.end(),placements.begin(),placements.begin()+min(4,n));
+    }
+    stable_sort(pool.begin(),pool.end(),[&](const Frag& a,const Frag& b){return merit(a)>merit(b);});
+    if(pool.size()>96)pool.resize(96);
+    struct Beam{uint64_t bits=0,mask=0;array<int,3> ids{-1,-1,-1};int reward=0,loss=0,agreement=0;};
+    vector<Beam> beam(1);
+    Move best_move;
+    double best=1e-10;
+    auto evaluate=[&](const Beam& s){
+      if(timer.elapsed_ms()>=deadline)return;
+      Move move;
+      for(int k=0;k<n;++k){
+        const int p=line_cells[line][k];
+        const char c=(s.mask>>(3*k)&7)?char('A'+(s.bits>>(3*k)&7)):fill[k];
+        if(c!=current.board[p/n][p%n])move.changes.emplace_back(p,c);
+      }
+      if(move.changes.empty())return;
+      ++stats.checked;
+      const auto change=evaluate_move(current,move,-INFINITY);
+      if(change && *change>best){best=*change;best_move=std::move(move);}
+    };
+    evaluate(beam[0]);
+    for(int depth=0;depth<3 && timer.elapsed_ms()<deadline;++depth){
+      vector<Beam> next;
+      for(const auto& b:beam)for(const auto& f:pool){
+        if(find(b.ids.begin(),b.ids.end(),f.id)!=b.ids.end() ||
+           ((b.bits^f.bits)&b.mask&f.mask) || (f.mask&~b.mask)==0)continue;
+        Beam v=b;
+        v.bits|=f.bits;v.mask|=f.mask;v.ids[depth]=f.id;v.reward+=f.value;
+        // Charge each cell once even when two compatible fragments overlap.
+        uint64_t new_letters=f.mask&~b.mask;
+        while(new_letters){
+          const int k=countr_zero(new_letters)/3,c=f.bits>>(3*k)&7;
+          new_letters&=~(7ULL<<(3*k));
+          v.loss+=upper[k]-rewards[k][c];
+          v.agreement+=fill[k]==char('A'+c);
+        }
+        next.push_back(v);
+      }
+      stable_sort(next.begin(),next.end(),[](const Beam& a,const Beam& b){
+        return 32*(a.reward-a.loss)+a.agreement>32*(b.reward-b.loss)+b.agreement;
+      });
+      beam.clear();
+      for(const auto& v:next){
+        if(any_of(beam.begin(),beam.end(),[&](const Beam& b){return b.mask==v.mask && b.bits==v.bits;}))continue;
+        beam.push_back(v);evaluate(v);
+        if(beam.size()==24 || timer.elapsed_ms()>=deadline)break;
+      }
+      if(beam.empty())break;
+    }
+    if(best_move.changes.empty())return false;
+    auto exact=evaluate_move(current,best_move,-INFINITY);
+    assert(exact && *exact>0);
+    apply_move(current,best_move);++stats.accepted;
+    return true;
+  }
+#endif
   // TODO: 採用した手だけ反映する。直前のevaluate_moveのcacheを使う。
   // 不採用なら呼ばれないので、rollbackは不要。
   void apply_move(State& state, Move& move) {
@@ -679,7 +801,12 @@ int main() {
   GenomeProblem problem(n, m, targets);
   auto initial = problem.make_state(best_board);
   const double initial_score = problem.score(initial);
-  const double remaining_ms = SEARCH_END_MS - timer.elapsed_ms();
+#if defined(AHC004_LINE_REBUILD) || defined(AHC004_LINE_REBUILD_SA_CONTROL)
+  constexpr double ANNEAL_END_MS = 2500.0;
+#else
+  constexpr double ANNEAL_END_MS = SEARCH_END_MS;
+#endif
+  const double remaining_ms = ANNEAL_END_MS - timer.elapsed_ms();
   if (remaining_ms > 0) {
     TimeBasedAnnealingRunner<GenomeProblem> runner(
         problem, std::move(initial), initial_score, remaining_ms, 6.0, 0.03,
@@ -689,6 +816,36 @@ int main() {
     cerr << "iterations=" << runner.iterations()
          << " covered=" << runner.best_state().coverage.covered_weight << "/" << m << '\n';
   }
+#ifdef AHC004_LINE_REBUILD
+  auto pol=problem.make_state(best_board);
+  const auto pre=problem.score(pol);
+  GenomeProblem::RebuildStats stats;
+  vector<int> lines(2*n);iota(lines.begin(),lines.end(),0);
+  for(int round=0;round<4 && timer.elapsed_ms()<SEARCH_END_MS;++round){
+    shuffle(lines.begin(),lines.end(),random.engine);
+    int old=stats.accepted;
+    for(int line:lines){
+      if(timer.elapsed_ms()>=SEARCH_END_MS)break;
+      problem.rebuild_line(pol,line,timer,SEARCH_END_MS,stats);
+    }
+    if(stats.accepted==old)break;
+  }
+  cerr<<"line_rebuild lines="<<stats.lines<<" exact="<<stats.checked<<" accepted="<<stats.accepted
+      <<" initial="<<pre<<" final="<<problem.score(pol)<<'\n';
+  best_board=std::move(pol.board);
+#elif defined(AHC004_LINE_REBUILD_SA_CONTROL)
+  auto pol=problem.make_state(best_board);
+  const auto pre=problem.score(pol);
+  const double spare=SEARCH_END_MS-timer.elapsed_ms();
+  if(spare>0){
+    TimeBasedAnnealingRunner<GenomeProblem> runner(problem,std::move(pol),pre,spare,0.12,0.015,
+                                                   input_hash^0x400445ddULL,32);
+    runner.run();
+    cerr<<"line_rebuild_control iterations="<<runner.iterations()<<" initial="<<pre
+        <<" final="<<problem.score(runner.best_state())<<'\n';
+    best_board=runner.best_state().board;
+  }
+#endif
   for (const string& row : best_board) cout << row << '\n';
 }
 #endif
