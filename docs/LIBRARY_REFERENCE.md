@@ -2014,3 +2014,17 @@ sort(points.begin(), points.end(), [](const Point& a, const Point& b) {
 
 `bits=10` なら各座標は `0..1023` です。厳密な最近傍順ではありませんが、空間的に
 まとまったcluster作成、query順、cache localityの改善候補を1行のkeyで作れます。
+
+### bounded-colored-path.hpp
+
+端点を固定した短い経路探索で、同じ色・タイル ID の利用を高々 1 回に制限します。
+`bounded_colored_path::maximize` に隣接頂点、色、点数、経路の外で使用済みの色、
+ゴールまでの距離下界を渡します。手数上限内を全探索し、端点を除いた最良点を
+返します。到達不能は `-1`、頂点点数は非負とします。端点の色は相異なり、
+色 ID は `[0, color_count)` を使います。距離下界が不明なら 0 を返します。
+探索中のバッファを確保し直さず使うには、経路バッファに上限分を `reserve` し、
+状態バッファを 0 で初期化します。
+
+短い例: [bounded_colored_path_usage.cpp](../examples/bounded_colored_path_usage.cpp)。
+適用例: [AHC002 の短区間再構築](../problems/ahc002/main.cpp)。
+小グラフでの愚直比較: [bounded_colored_path_test.cpp](../tests/bounded_colored_path_test.cpp)。

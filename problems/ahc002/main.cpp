@@ -7,6 +7,10 @@
 #include <iostream>
 #include <numeric>
 #include <string>
+#include <span>
+#ifdef AHC_SHORT_REPAIR
+#include "../../library/bounded-colored-path.hpp"
+#endif
 #include <vector>
 
 using Clock = std::chrono::steady_clock;
@@ -316,12 +320,72 @@ struct Solver {
         }
     }
 
+#ifdef AHC_SHORT_REPAIR
+    // Exhaust a short neighborhood at every edge, rather than sampling gaps
+    // and accepting lower-scoring states. Greedy improvements update the
+    // color inventory immediately and can open additional profitable gaps.
+    void polish_short() {
+        const int max_span = 4;
+        const auto color = [&](int v) { return tile[v]; };
+        const auto value = [&](int v) { return points[v]; };
+        const auto neighbors = [&](int v) { return std::span(adjacent[v].data(), degree[v]); };
+        std::array<int, CELLS> tile_position;
+        std::vector<int> local, prefix;
+        local.reserve(8); prefix.reserve(8);
+        std::vector<unsigned char> in_dfs(CELLS);
+        for (int sweep = 0; sweep < 3 && elapsed() < seconds; ++sweep) {
+            tile_position.fill(-1);
+            for (int i = 0; i < int(path.size()); ++i) tile_position[tile[path[i]]] = i;
+            bool changed_here = false;
+            for (int a = 0; a + 1 < int(path.size()) && elapsed() < seconds; ++a) {
+                int total = 0;
+                int best_gain = 0, best_b = -1;
+                std::array<int, 8> best_cells{};
+                int best_count = 0;
+                for (int b = a + 1; b < int(path.size()) && b <= a + max_span; ++b) {
+                    if (b > a + 1) total += points[path[b - 1]];
+                    const int goal = path[b];
+                    const auto blocked = [&](int t) {
+                        int k = tile_position[t];
+                        return k >= 0 && (k <= a || k >= b);
+                    };
+                    const auto lower_bound = [&](int v) {
+                        return std::abs(v / SIDE - goal / SIDE) + std::abs(v % SIDE - goal % SIDE);
+                    };
+                    const int gain = bounded_colored_path::maximize(
+                        path[a], goal, b - a + 2, CELLS,
+                        neighbors, color, value, blocked, lower_bound,
+                        local, prefix, in_dfs) - total;
+                    if (gain > best_gain) {
+                        best_gain = gain; best_b = b; best_count = int(local.size());
+                        std::copy(local.begin(), local.end(), best_cells.begin());
+                    }
+                }
+                if (best_b < 0) continue;
+                for (int i = a + 1; i < best_b; ++i) tile_position[tile[path[i]]] = -1;
+                path.erase(path.begin() + a + 1, path.begin() + best_b);
+                path.insert(path.begin() + a + 1, best_cells.begin(), best_cells.begin() + best_count);
+                for (int i = a + 1; i < int(path.size()); ++i) tile_position[tile[path[i]]] = i;
+                score += best_gain;
+                changed_here = true;
+            }
+            if (!changed_here) break;
+        }
+        reindex();
+        remember();
+    }
+#endif
+
     void solve() {
         extend();
         remember();
         long long iteration = 0;
         while (true) {
-            double progress = elapsed() / seconds;
+            double search_seconds = seconds;
+#ifdef AHC_SHORT_REPAIR
+            search_seconds -= std::min(0.025, seconds * 0.05);
+#endif
+            double progress = elapsed() / search_seconds;
             if (progress >= 1) break;
             double temperature = 180.0 * (1 - progress) + 5.0;
             if (variant == 2 || variant == 4) temperature = 90.0 * (1 - progress) + 2.0;
@@ -345,6 +409,11 @@ struct Solver {
             remember();
             ++iteration;
         }
+#ifdef AHC_SHORT_REPAIR
+        path = best_path;
+        score = best_score;
+        polish_short();
+#endif
         std::string answer;
         for (int i = 1; i < int(best_path.size()); ++i) {
             int delta = best_path[i] - best_path[i - 1];
