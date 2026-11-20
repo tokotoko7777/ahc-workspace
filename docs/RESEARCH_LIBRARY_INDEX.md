@@ -1,6 +1,6 @@
 # AHC研究ライブラリ: 用途別索引
 
-「何をしたいか」からC++部品を探す索引です。[進捗](https://github.com/tokotoko7777/ahc-workspace/blob/d52289db3c63865dc09f2f979634f54267e20b54/docs/AHC_PROGRESS.md)と[利用時の不便メモ](https://github.com/tokotoko7777/ahc-workspace/blob/d52289db3c63865dc09f2f979634f54267e20b54/docs/LIBRARY_FEEDBACK.md)で言及された公開部品を中心に、ヘッダと検証先を版固定で掲載しています。AHC番号は用途の由来で、本番採用・順位・別問題での性能を示すものではありません。
+「何をしたいか」からC++部品を探す索引です。[進捗](AHC_PROGRESS.md)と[利用時の不便メモ](LIBRARY_FEEDBACK.md)で言及された公開部品51点を、ヘッダと検証先を版固定で掲載しています。AHC番号は用途の由来で、本番採用・順位・別問題での性能を示すものではありません。
 
 ## 取得と出典の残し方
 
