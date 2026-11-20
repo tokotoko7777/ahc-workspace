@@ -2,6 +2,8 @@
 #include <algorithm>
 #include <array>
 #include <cassert>
+#include <chrono>
+#include <limits>
 #include <cstdint>
 #include <cstdlib>
 #include <iostream>
@@ -146,6 +148,105 @@ struct Network {
         return true;
     }
 };
+#if defined(AHC043_SEED_PORTFOLIO) || defined(AHC043_GEOMETRY_CONTROL)
+using Clock=std::chrono::steady_clock;
+struct Start {int a,b,rate,dist;long long base;};
+
+static std::vector<Start> seeds(const Network& model,const std::vector<int>& home,
+                                const std::vector<int>& office,const std::vector<Money>& fare) {
+    const int n2=model.size;
+    std::vector<int> earns(n2*n2);
+    for(int i=0;i<int(home.size());++i)
+        for(int a:model.area[home[i]]) for(int b:model.area[office[i]])
+            earns[std::min(a,b)*n2+std::max(a,b)]+=fare[i];
+    std::vector<Start> possible;
+    for(int a=0;a<n2;++a) for(int b=a+1;b<n2;++b) {
+        const int rate=earns[a*n2+b];
+        if(!rate) continue;
+        const int d=model.dist(a,b),cost=10000+100*(d-1);
+        if(cost>model.cash || d+1>model.t) continue;
+        long long base=1LL*rate*(model.t-d)-cost;
+        if(base>0) possible.push_back({a,b,rate,d,base});
+    }
+    if(possible.empty()) return {};
+    std::vector<long long> exposure(n2);
+    for(int p=0;p<n2;++p)
+        for(int e:model.coverage[p]) exposure[p]+=fare[e/2];
+
+    auto top=[&](int profile,const std::vector<Start>& prior,bool spatial) {
+        int idx=-1;
+        long long value=std::numeric_limits<long long>::lowest();
+        for(int i=0;i<int(possible.size());++i) {
+            const auto& s=possible[i];
+            if(spatial && std::any_of(prior.begin(),prior.end(),[&](const Start& q){
+                const int match=std::min(model.dist(s.a,q.a)+model.dist(s.b,q.b),
+                                         model.dist(s.a,q.b)+model.dist(s.b,q.a));
+                return match<6;
+            })) continue;
+            const auto cost=10000+100*(s.dist-1);
+            const auto saved=model.cash-cost;
+            const auto lag=std::max(0LL,5000-saved-s.rate);
+            auto wait=(lag+s.rate-1)/s.rate;
+            const int delay=s.dist+1+std::min<Money>(1000,wait);
+            const auto breadth=exposure[s.a]+exposure[s.b];
+            const auto uncovered=std::max(0LL,breadth-2LL*s.rate);
+            long long merit=s.base;
+            switch(profile) {
+                case 1: merit=1'000'000LL*s.rate/(16+delay);break;
+                case 2: merit-=5'000LL*delay;break;
+                case 3: merit+=200*uncovered;break;
+                case 4: merit+=500*uncovered;break;
+                case 5: merit+=500*uncovered-3'000LL*delay;break;
+                case 6: merit+=300*std::min(exposure[s.a],exposure[s.b]);break;
+            }
+            if(merit>value) value=merit,idx=i;
+        }
+        return idx;
+    };
+    const auto first=possible[top(0,{},false)];
+    std::vector<Start> result{first,first};
+    for(int p=1;p<=6;++p) {
+        const int idx=top(p,result,true);
+        result.push_back(idx>=0 ? possible[idx] : first);
+    }
+    return result;
+}
+static std::vector<int> initial_path(Network& model,const Start& s,int shape) {
+    if(shape==0) return model.shortest_first(s.a,s.b);
+    if(shape==1) {
+        auto path=model.shortest_first(s.b,s.a);
+        std::reverse(path.begin(),path.end());
+        return path;
+    }
+    // All paths remain Manhattan-shortest; score reachable minor station
+    // upgrades along a partial ordering of the rectangle between the ends.
+    model.fares.add(model.coverage[s.a]);
+    model.fares.add(model.coverage[s.b]);
+    const int n=model.n;
+    const int r0=s.a/n,c0=s.a%n,r1=s.b/n,c1=s.b%n;
+    const int h=std::abs(r1-r0)+1,w=std::abs(c1-c0)+1;
+    const int sr=r1>=r0?1:-1,sc=c1>=c0?1:-1;
+    std::vector<long long> dp(h*w);
+    std::vector<int> trace(h*w,-1);
+    auto cell=[&](int i,int j){return (r0+i*sr)*n+c0+j*sc;};
+    for(int i=0;i<h;++i) for(int j=0;j<w;++j) {
+        if(!i && !j) continue;
+        const int p=cell(i,j),q=i*w+j;
+        const Money upside=model.fares.delta(model.coverage[p]);
+        const auto x=uint32_t(p*77411U+shape*31157U);
+        const auto noise=((x^(x>>13))*0x9e3779b9U)>>27;
+        const long long bonus=(8-shape)*upside+(shape-1)*noise;
+        int from=(i>0 && (!j || dp[q-w]>dp[q-1])) ? q-w : q-1;
+        dp[q]=dp[from]+bonus;
+        trace[q]=from;
+    }
+    std::vector<int> path;
+    for(int q=h*w-1;q>=0;q=trace[q]) path.push_back(cell(q/w,q%w));
+    std::reverse(path.begin(),path.end());
+    return path;
+}
+#endif
+
 int main() {
     std::ios::sync_with_stdio(false);std::cin.tie(nullptr);
     int n,m,t;Money initial;
@@ -158,6 +259,32 @@ int main() {
         fares[i]=std::abs(a-c)+std::abs(b-d);
     }
     Network model(n,t,initial,home,office,fares);
+    Money value;
+    std::vector<Transfer> output;
+#if defined(AHC043_SEED_PORTFOLIO) || defined(AHC043_GEOMETRY_CONTROL)
+    const auto limit=Clock::now()+std::chrono::milliseconds(2450);
+    auto starts=seeds(model,home,office,fares);
+    value=initial;
+    output.assign(t,{-1,-1});
+    for(int i=0;i<int(starts.size()) && Clock::now()<limit;++i) {
+        const auto& x=starts[
+#if defined(AHC043_SEED_PORTFOLIO)
+            i
+#else
+            0
+#endif
+        ];
+        Network empty=model;
+        auto path=initial_path(empty,x,i);
+        Network attempt=model;
+        attempt.step(0,x.a);
+        attempt.build(path);
+        assert(attempt.fares.value()==x.rate);
+        while(Clock::now()<limit && attempt.extend()) {}
+        while(int(attempt.actions.size())<t) attempt.step();
+        if(attempt.cash>value) value=attempt.cash,output=std::move(attempt.actions);
+    }
+#else
     bool started=model.start(home,office,fares);
 #ifndef AHC043_ONE_LINE
     if(started) while(model.extend()) {}
@@ -165,9 +292,12 @@ int main() {
     (void)started;
 #endif
     while(int(model.actions.size())<t) model.step();
-    for(auto [a,c]:model.actions) {
+    value=model.cash;
+    output=std::move(model.actions);
+#endif
+    for(auto [a,c]:output) {
         if(a<0) std::cout<<"-1\n";
         else std::cout<<a<<' '<<c/n<<' '<<c%n<<'\n';
     }
-    std::cerr<<"Model = "<<model.cash<<'\n';
+    std::cerr<<"Model = "<<value<<'\n';
 }
