@@ -107,3 +107,8 @@ done
 python "$p/benchmark_macros.py" /path/to/gen /path/to/vis \
   "$d/arm0" "$d/arm1" "$d/arm2" "$d/results.csv"
 ```
+
+[Joint one-macro / delivery-order follow-up](experiments/joint_order_v2/README.md):
+six equal graph-build trials per arm; the joint candidate improved the
+untouched mean only from 224.375 to 223.500 keys against the fixed-order
+control. It remains opt-in and did not repeat the historical audit.
