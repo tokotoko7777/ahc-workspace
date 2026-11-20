@@ -357,6 +357,26 @@ struct GaussianModel {
     }
 #endif
 
+#ifdef AHC_REVERSIBLE_ENSEMBLE
+    double predictive_evidence(const std::vector<int>& path,int observed) const {
+        std::vector<int> counts(size),active;
+        for(int e:path) {
+            int f=feature[e];
+            if(!counts[f]++) active.push_back(f);
+        }
+        double prediction=0.;
+        for(int f:active) prediction+=counts[f]*mean[f];
+        double variance=std::max(1.,prediction*prediction/300.+extra_noise*path.size());
+        for(int i:active) {
+            double row_sum=0.;
+            for(int j:active) row_sum+=covariance[i*size+j]*counts[j];
+            variance+=counts[i]*row_sum;
+        }
+        const double residual=observed/1000.-prediction;
+        return -.5*(std::log(variance)+residual*residual/variance);
+    }
+#endif
+
     double update(const std::vector<int> &path, int observed) {
         std::vector<int> counts(size), active;
         active.reserve(path.size());
@@ -605,6 +625,10 @@ int main(int argc, char **argv) {
     if (mixture) split_model = std::make_unique<GaussianModel>(split_bins, exploration, extra_noise, 2);
     double model_log_odds = 0;
     int locked = 0, locked_at = -1;
+#ifdef AHC_REVERSIBLE_ENSEMBLE
+    int changed_dominant=0,paired_checks=0;
+    double confidence_sum=0.;
+#endif
     EdgeCosts edge_costs;
     std::unique_ptr<PiecewiseModel> piecewise;
     if (piecewise_mode) piecewise = std::make_unique<PiecewiseModel>(piecewise_mode == 4 ? 1.0 : piecewise_mode == 5 ? 0.2 : 0.5);
@@ -622,11 +646,32 @@ int main(int argc, char **argv) {
         if (mixture) {
             if (locked != 1) split_model->prepare(turn);
             double probability = locked ? double(locked == 1) : 1.0 / (1.0 + std::exp(-model_log_odds));
+#ifdef AHC_REVERSIBLE_ENSEMBLE
+            if(locked) {
+                const int from=sr*SIDE+sc,to=tr*SIDE+tc;
+                double l1=1e100,l2=1e100;
+                for(bool horizontal:{false,true}) {
+                    const auto reference=grid.one_bend_route(from,to,horizontal);
+                    double a=0.,b=0.;
+                    for(int e:reference.second) {
+                        a+=model.mean[model.feature[e]];
+                        b+=split_model->mean[split_model->feature[e]];
+                    }
+                    l1=std::min(l1,a);l2=std::min(l2,b);
+                }
+                // Linearize the loss 1-A/B around a route scale A≈B for each
+                // model: derivative is 1/B. This retains one Dijkstra.
+                const double odds=model_log_odds+std::log(std::max(1e-9,l2)/std::max(1e-9,l1));
+                probability=1./(1.+std::exp(-odds));
+                confidence_sum+=std::abs(2*probability-1.);
+            }
+#endif
             double optimism = exploration * std::exp(-turn / 200.0) + exploration_floor;
             for (int edge = 0; edge < EDGES; ++edge) {
                 int i = model.feature[edge], j = split_model->feature[edge];
                 double piecewise_weight = piecewise ? std::clamp((turn - 150) / 250.0, 0.0, 1.0) : 0;
                 if (piecewise_mode == 2) piecewise_weight *= 0.6;
+#ifndef AHC_REVERSIBLE_ENSEMBLE
                 if (locked == 1) {
                     double variance = model.covariance[i * model.size + i];
                     if (piecewise_uncertainty && piecewise) variance += piecewise_weight * (piecewise->uncertainty(edge) - variance);
@@ -635,6 +680,7 @@ int main(int argc, char **argv) {
                     edge_costs.values[edge] = std::clamp(value, 0.8, 9.0);
                     continue;
                 }
+#endif
                 double first = model.mean[i], second = split_model->mean[j];
                 if (piecewise_weight && local_constant_prior == 0) {
                     if (soft_type && piecewise->constant_lines) first += piecewise_weight * (piecewise->predict(edge) - first);
@@ -751,10 +797,23 @@ int main(int argc, char **argv) {
         std::cout << moves << '\n' << std::flush;
         int observed;
         if (!(std::cin >> observed)) return 1;
+#ifdef AHC_REVERSIBLE_ENSEMBLE
+        if(mixture && locked) {
+            const double first=locked==1 ? model.update(edges,observed) : model.predictive_evidence(edges,observed);
+            const double second=locked==2 ? split_model->update(edges,observed) : split_model->predictive_evidence(edges,observed);
+            model_log_odds=std::clamp(model_log_odds+.5*(first-second),-20.,20.);
+            int next=model_log_odds>=0. ? 1 : 2;
+            changed_dominant+=(next!=locked);
+            locked=next;
+            ++paired_checks;
+        } else
+#endif
+        {
         double evidence = locked != 2 ? model.update(edges, observed) : 0;
         if (mixture && locked != 1) {
             double split_evidence = split_model->update(edges, observed);
             if (!locked) model_log_odds = std::clamp(model_log_odds + 0.5 * (evidence - split_evidence), -20.0, 20.0);
+        }
         }
         if (mixture && !locked && lock_after && turn + 1 >= lock_after && std::abs(model_log_odds) > lock_threshold) {
             locked = model_log_odds > 0 ? 1 : 2;
@@ -780,6 +839,10 @@ int main(int argc, char **argv) {
 #ifdef AHC_FUTURE_EXPERIMENT
               << ",\"gap_shots\":" << gap_bank.shots << ",\"future_targets\":" << gap_bank.total_bank
               << ",\"changed_queries\":" << gap_bank.changed << ",\"future_signal\":" << gap_bank.future_signal
+#endif
+#ifdef AHC_REVERSIBLE_ENSEMBLE
+              << ",\"reversible_switches\":" << changed_dominant << ",\"paired_checks\":" << paired_checks
+              << ",\"ensemble_confidence_sum\":" << confidence_sum
 #endif
               << ",\"cpu_seconds\":" << double(std::clock() - cpu_start) / CLOCKS_PER_SEC
               << ",\"wall_seconds\":" << std::chrono::duration<double>(std::chrono::steady_clock::now() - start).count()
