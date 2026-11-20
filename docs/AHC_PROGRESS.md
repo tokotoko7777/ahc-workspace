@@ -10,7 +10,7 @@
 |---|---|---|---|---|---|
 | [AHC001](https://atcoder.jp/contests/ahc001/tasks/ahc001_a) | 本番 1,000 件完走・未達 | **993,823,071,683** 点（[AtCoder 提供の順位データ](https://huggingface.co/datasets/SakanaAI/ALE-Bench/blob/main/ahc001.zip)） | 凍結 v64: **993,411,282,631** 点 | 本番公開シード全 1,000 件・公式採点。最長 4.838 秒（ローカル） | [codex/ahc001-coordinate-slide-20261120](https://github.com/tokotoko7777/ahc-workspace/tree/codex/ahc001-coordinate-slide-20261120) |
 | [AHC002](https://atcoder.jp/contests/ahc002/tasks/ahc002_a) | 既存版から着手・未判定 | **6,255,977** 点（[AtCoder 提供の順位データ](https://huggingface.co/datasets/SakanaAI/ALE-Bench/blob/main/ahc002.zip)） | V10（未調整 20 件 1,254,587） | 本番 100 件。通常配布の 0–99 は別ケース | [codex/ahc002-corridor-repair-20261120](https://github.com/tokotoko7777/ahc-workspace/tree/codex/ahc002-corridor-repair-20261120) |
-| [AHC003](https://atcoder.jp/contests/ahc003/tasks/ahc003_a) | 本番 3,000 件を評価中・未判定 | **2,926,767,743,437** 点（[AtCoder 提供の順位データ](https://huggingface.co/datasets/SakanaAI/ALE-Bench/blob/main/ahc003.zip)） | 既存版を凍結 | 公式対話テスタ、本番公開シード 3,000 件、2 秒 | [codex/ahc003-probe-design-20261120](https://github.com/tokotoko7777/ahc-workspace/tree/codex/ahc003-probe-design-20261120) |
+| [AHC003](https://atcoder.jp/contests/ahc003/tasks/ahc003_a) | 本番 3,000 件完走・未達 | **2,926,767,743,437** 点（[AtCoder 提供の順位データ](https://huggingface.co/datasets/SakanaAI/ALE-Bench/blob/main/ahc003.zip)） | 凍結既存版: **2,925,781,453,112** 点 | 本番公開シード全 3,000 件・公式対話テスタ・最大ローカル 0.897 秒 | [codex/ahc003-probe-design-20261120](https://github.com/tokotoko7777/ahc-workspace/tree/codex/ahc003-probe-design-20261120) |
 | [AHC004](https://atcoder.jp/contests/ahc004/tasks/ahc004_a) | ローカル改善・本番未判定 | **7,321,305,762** 点（[AtCoder 提供の順位データ](https://huggingface.co/datasets/SakanaAI/ALE-Bench/blob/main/ahc004.zip)） | 周期パターン初期化: 未調整 10 件 681,224,023（旧 662,753,350） | 本番 100 件。通常配布の 0–99 は別ケース | [codex/ahc004-contig-seed-20261120](https://github.com/tokotoko7777/ahc-workspace/tree/codex/ahc004-contig-seed-20261120) |
 | [AHC005](https://atcoder.jp/contests/ahc005/tasks/ahc005_a) | ローカル比較・本番未判定 | **22,318,770** 点（[AtCoder 提供の順位データ](https://huggingface.co/datasets/SakanaAI/ALE-Bench/blob/main/ahc005.zip)） | 既存版: 未調整 8 件 1,761,160 | 通常配布の 0–99 は本番 100 件と別 | [codex/ahc005-route-splice-20261120](https://github.com/tokotoko7777/ahc-workspace/tree/codex/ahc005-route-splice-20261120) |
 | AHC006 | 着手・未判定 | 確認中 | — | — | 検証中 |
@@ -79,7 +79,7 @@
 
 - [実験と再現手順](https://github.com/tokotoko7777/ahc-workspace/blob/0d42d1839a9ff4a1f35b2830ea4b2e2eeba682c4/problems/ahc003/README.md)。既存の経路より少し高い程度の候補に限定して、観測から推定がどれだけ進むかも評価した。
 - スコア差（候補−既存）: 開発 16 件 −10,833,676、未調整 24 件 +51,063,960、追加の独立確認 24 件 −21,549,158。判定閾値を変えず追加確認は不合格、既存解を保持。128 出力すべてで対話テスタと独立検査が一致。C++23、単一ファイル、汎用部品の乱択 1,000 件比較を通過。
-- 既存解を凍結し、同じ公式対話テスタと本番公開シード 3,000 件で評価中。凍結バイナリ SHA-256 `a78c04bdaae066bee7b5e6458106b044e79179e606f607152adb11b4ad76e539`。本番結果は開発には使わない。AHC004 の着手準備も開始。
+- 既存解を凍結し、同じ公式対話テスタと本番公開シード 3,000 件で全件評価した。凍結バイナリ SHA-256 `a78c04bdaae066bee7b5e6458106b044e79179e606f607152adb11b4ad76e539`。本番結果は開発には使わない。AHC004 の着手準備も開始。
 
 ### AHC004 周期付き文字列の重なりから初期配置を作る
 
@@ -105,3 +105,9 @@
 - [追加実験](https://github.com/tokotoko7777/ahc-workspace/blob/a6b60ce8c6779c638c162ef63c65a4d484dc6dad/problems/ahc005/README.md) を別ブランチに保存。各立ち寄り間の有向最短経路が観測する縦・横区間をキャッシュし、同一開始順から、削除のみと隣接点の移設＋削除を比較。完全観測を維持する場合だけ短縮を採用する。
 - 新規開発 8 件はいずれの近傍でも合法な短縮なし。最長 2.652082 秒、公式点と独立視線計算が一致。100×30 回の差分検査と提出用単一ファイルの C++23 ビルドを通過。既定版は変更しない。
 - 次は調整終盤だけではなく、主探索中に経由点数の変化と一時的な距離増を許す。また、等距離最短路を一つ固定する代わりに、被覆が薄い区間を観測する経路を優先する。
+
+### AHC003 本番公開 3,000 件の結果（2026-11-20）
+
+- 既存版を凍結し、[実験と採点の再現手順](https://github.com/tokotoko7777/ahc-workspace/blob/0d42d1839a9ff4a1f35b2830ea4b2e2eeba682c4/problems/ahc003/README.md) に沿って公式対話テスタで実行。全 3,000 件が有効。ソルバとテスタを合わせた最大ローカル実測 0.896979 秒、ソルバ最大 CPU 0.825624 秒（制限 2 秒）。
+- 合計 2,925,781,453,112 点、1 位 2,926,767,743,437 点に対し −986,290,325 点（0.033699%）。本番公開シードを用いたローカル再現で、提出はしていない。ケース記録の合計と全 3,000 入力ハッシュを独立確認。未達のため main へのマージなし。
+- 本番ケース別結果は調整に使わない。次は「全パラメータの平均分散」ではなく、同程度の候補経路の所要コスト差の不確実性だけを減らす観測を、独立開発用ケースで比較する。
