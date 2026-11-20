@@ -20,8 +20,9 @@
 | [AHC010](https://atcoder.jp/contests/ahc010/tasks/ahc010_a) | ローカル改善・本番未判定 | **20,218,968** 点（[AtCoder 提供の順位データ](https://huggingface.co/datasets/SakanaAI/ALE-Bench/blob/main/ahc010.zip)） | 協調回転版: 未調整 10 件平均 56,482 | 本番 100 件、2 秒。配布入力との同一性未確認 | [問題別ブランチ](https://github.com/tokotoko7777/ahc-workspace/tree/8e99892f7dc12317ba365750a15a2a7c072b3731) |
 | [AHC011](https://atcoder.jp/contests/ahc011/tasks/ahc011_a) | ローカル改善・本番未判定 | **2,691,447,336** 点（[AtCoder 提供の順位データ](https://huggingface.co/datasets/SakanaAI/ALE-Bench/blob/main/ahc011.zip)） | 局所回転追加: 未調整 15 件 6,060,235 | 本番公開 3,000 シード、3 秒 | ローカル保存・公開確認待ち |
 | [AHC012](https://atcoder.jp/contests/ahc012/tasks/ahc012_a) | ローカル比較・本番未判定 | **99,781,619** 点（[AtCoder 提供の順位データ](https://huggingface.co/datasets/SakanaAI/ALE-Bench/blob/main/ahc012.zip)） | 格子版: 未調整 8 件平均 972,456.375 | 本番 100 件・3 秒。同一性未確認 | [問題別ブランチ](https://github.com/tokotoko7777/ahc-workspace/tree/dc1a18935430728a5dbca82c14f8bc84c57145e1) |
-| AHC013 | 着手・未判定 | 確認中 | — | — | 検証中 |
-| AHC014〜074 | 未着手 | — | — | — | — |
+| [AHC013](https://atcoder.jp/contests/ahc013/tasks/ahc013_a) | ローカル比較中・本番未判定 | [公式順位](https://atcoder.jp/contests/ahc013/standings) 要ログイン。1 位の点数未確認 | 静的接続と隣接移動を比較 | 本番公開 2,000 シード、3 秒 | 検証中 |
+| AHC014 | 着手・未判定 | 確認中 | — | — | 検証中 |
+| AHC015〜074 | 未着手 | — | — | — | — |
 
 ### AHC001 の次の仮説
 
@@ -205,3 +206,9 @@
 - [実装と再現手順](https://github.com/tokotoko7777/ahc-workspace/blob/dc1a18935430728a5dbca82c14f8bc84c57145e1/problems/ahc012/README.md)。水平・垂直格子と、斜めを含む方向の候補を同じ予算で比較。開発 8 件平均 988,686.50 → 986,318.875、未調整 8 件平均 972,456.375 → 968,873.75。斜めは不採用。全 32 出力が公式と独立採点一致、最長 2.730955 秒（3 秒制限）。
 - 本番 100 件が入手できたローカルケースと同一とは未確認。AtCoder 提供の順位データで 1 位 99,781,619 点、理論上限は 100,000,000 点（1 件 1,000,000 点）。開発 1 件で単件上限を確認したが、順位は未判定。
 - 次は余ったカットを使い、不足サイズを狙って一回だけ任意方向に切り出す。符号ごとの領域分割と他領域への影響を正確に集計する。
+
+### AHC012 不足サイズを狙う追加カット
+
+- [実装と再現手順](https://github.com/tokotoko7777/ahc-workspace/blob/247becac000d9343c3d98fa15ce6062d845566df/problems/ahc012/README.md)。凍結格子解へ、24 個の整数法線の全オフセットから 1 本だけ加える。分割で新旧サイズの充足数がどれだけ変わるかを差分で厳密評価。
+- 新規開発 8 件中 2 件で 1 人ずつ改善、別の 8 件は全同点。不採用・任意機能として保存。3 種の全 48 出力で公式採点と独立線分判定が一致、最大 2.727876 秒。C++23 と汎用 [capped-partition-sweep.hpp](https://github.com/tokotoko7777/ahc-workspace/blob/247becac000d9343c3d98fa15ce6062d845566df/library/capped-partition-sweep.hpp) の 800 比較を通過。
+- 次は一つの既存カットを外してから置き換え、異なる既存区画の統合と再分割を同時に許す。
