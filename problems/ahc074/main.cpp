@@ -38,7 +38,7 @@ struct Problem {
         }
         return true;
     }
-    void make_design() {
+    std::vector<std::vector<int>> initial_templates() const {
         std::vector<std::vector<int>> templates(N);
 #ifndef AHC074_BIT_ONLY
         const int from=N/2,len=N-from,extras=K-2*N;
@@ -66,6 +66,12 @@ struct Problem {
             for(int p=0;p<P;++p) covered[p]=std::max<int>(covered[p],length[index+p]-offset);
         }
 #endif
+        return templates;
+    }
+    void install(const std::vector<std::vector<int>>& templates) {
+        papers.clear();
+        lifted.clear();
+        for(auto& stack:group) stack.clear();
         auto add=[&](int j,Mask printed,Mask ink) {
             group[j].push_back(papers.size());papers.push_back({printed,ink});
         };
@@ -153,6 +159,54 @@ struct Problem {
         assert(ops.size()<=2*size_t(K));
 #endif
         return ops;
+    }
+    int catalogue_surrogate(const std::vector<std::vector<int>>& t) const {
+        std::vector<int> cover(P);
+        for(int j=0;j<N;++j) for(unsigned r=0;r<t[j].size();++r)
+            for(int item=0;item<P;++item)
+                cover[item]=std::max(cover[item],match(catalogue[item],catalogue[t[j][r]],j)-7-int(r));
+        return std::accumulate(cover.begin(),cover.end(),0);
+    }
+    int exact_training(const std::vector<std::vector<int>>& t,const std::vector<int>& sequence) {
+        install(t);
+        int turns=0;
+        for(int item:sequence) turns+=query(catalogue[item]).size();
+        return turns;
+    }
+    void make_design() {
+        auto t=initial_templates();
+#if defined(AHC074_REFINE_PROXY) || defined(AHC074_REFINE_EXACT)
+        const auto stop=Clock::now()+std::chrono::milliseconds(900);
+        uint32_t state=74134481;
+        auto next=[&]() {
+            state^=state<<13;state^=state>>17;state^=state<<5;
+            return state;
+        };
+        std::vector<int> training(P);
+        std::iota(training.begin(),training.end(),0);
+        for(int i=P-1;i>0;--i) std::swap(training[i],training[next()%(i+1)]);
+        std::vector<std::pair<int,int>> slots;
+        for(int j=0;j<N;++j)
+            for(int r=0;r<int(t[j].size());++r)
+                slots.push_back({j,r});
+        int exact=exact_training(t,training),proxy=catalogue_surrogate(t);
+        for(int trial=0;trial<64 && !slots.empty() && Clock::now()<stop;++trial) {
+            auto [a,r]=slots[next()%slots.size()];
+            int old=t[a][r],item=next()%P;
+            while(std::find(t[a].begin(),t[a].end(),item)!=t[a].end()) item=(item+1)%P;
+            t[a][r]=item;
+            const int ex=exact_training(t,training),pr=catalogue_surrogate(t);
+            assert(ex>=0 && pr>=0);
+#ifdef AHC074_REFINE_PROXY
+            if(pr>proxy) exact=ex,proxy=pr;
+#else
+            if(ex<exact) exact=ex,proxy=pr;
+#endif
+            else t[a][r]=old;
+        }
+        assert(exact>=0 && proxy>=0);
+#endif
+        install(t);
     }
     void solve() {
         make_design();
