@@ -63,3 +63,5 @@ python3 problems/ahc004/benchmark.py INPUTS_DIR holdout --start 60 --end 70 --vi
 行/列の回転・交換は [同一盤面からの追加探索の診断](experiments/line_cycle/README.md)
 に保存しました。新規8件では従来の追加探索に対し3勝5分、平均+140,634.375点。
 差分評価のテストを追加し、既定の探索方針は変更していません。
+
+現在の比較対象は [公式配布100ケースでの継続研究](experiments/local100/README.md)。

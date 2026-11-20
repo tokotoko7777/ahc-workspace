@@ -88,6 +88,9 @@ struct GenomeProblem {
     vector<vector<int>> line_hits;
     CoverageCounter<int>::State coverage;
     vector<uint64_t> line_code, line_empty;
+#ifdef AHC004_FAST_PLACEMENT
+    vector<array<uint64_t,20>> rotated_code, rotated_empty;
+#endif
     int empty = 0;
   };
   // TODO: 1近傍で変更する場所と変更後の値を書く（評価時にはStateを触らない）。
@@ -156,6 +159,13 @@ struct GenomeProblem {
     }
     state.line_code[line] = code;
     state.line_empty[line] = empty;
+#ifdef AHC004_FAST_PLACEMENT
+    for (int start = 0; start < n; ++start) {
+      const int sh = 3*start, inv = 3*(n-start);
+      state.rotated_code[line][start] = (code >> sh) | (code << inv);
+      state.rotated_empty[line][start] = (empty >> sh) | (empty << inv);
+    }
+#endif
   }
 
   // 3bit/文字。XOR後の各3bitを1bitへ畳み、popcountで一致数を数える。
@@ -179,6 +189,11 @@ struct GenomeProblem {
     state.line_hits.resize(2*n);
     state.line_code.resize(2*n);
     state.line_empty.resize(2*n);
+#ifdef AHC004_FAST_PLACEMENT
+    assert(n<=20);
+    state.rotated_code.resize(2*n);
+    state.rotated_empty.resize(2*n);
+#endif
     state.coverage = coverage.make_state();
     for (int line = 0; line < 2*n; ++line) {
       encode_line(state, line);
@@ -197,6 +212,11 @@ struct GenomeProblem {
 
   // TODO: 問題に合う近傍を1つ生成する。nulloptなら今回の試行はスキップ。
   // ここでは未収録語を重なりのよい場所へ上書きする。
+#if defined(AHC004_FAST_PLACEMENT) && defined(__GNUC__) && !defined(__clang__) && \
+    (defined(__x86_64__) || defined(__i386__))
+  // GCC dispatches after checking the host feature; generic builds stay safe.
+  __attribute__((target_clones("popcnt","default")))
+#endif
   optional<Move> propose_move(const State& state, mt19937_64& rng, double) {
     auto random_int = [&](int upper) {
       return uniform_int_distribution<int>(0, upper-1)(rng);
@@ -223,9 +243,34 @@ struct GenomeProblem {
     uint64_t word = 0;
     for (int k = 0; k < (int)text.size(); ++k) word |= uint64_t(text[k]-'A') << (3*k);
     int best_quality = INT_MIN, best_line = 0, best_start = 0, ties = 0;
+#ifdef AHC004_EXACT_PLACEMENT
+    const bool rerank = (rng() & 3) == 0;
+    array<int,40> line_quality, line_start, line_ties{};
+    if (rerank) line_quality.fill(INT_MIN);
+#endif
+#ifdef AHC004_FAST_PLACEMENT
+    const int length = int(text.size());
+    const uint64_t low_bits = ((1ULL << (3*length))-1)/7;
+    for (int line = 0; line < 2*n; ++line) for (int start = 0; start < n; ++start) {
+      const uint64_t empty = state.rotated_empty[line][start] & low_bits;
+      const uint64_t diff = state.rotated_code[line][start] ^ word;
+      const uint64_t mismatch = (diff | (diff>>1) | (diff>>2) | empty) & low_bits;
+      const int quality = 1250*(length - __builtin_popcountll(mismatch))
+                         + 330*__builtin_popcountll(empty) - 250*length;
+#else
     for (int trial = 0; trial < 2*n*n; ++trial) {
       const int line = trial/n, start = trial%n;
       const int quality = placement_quality(state, line, start, word, (int)text.size());
+#endif
+#ifdef AHC004_EXACT_PLACEMENT
+      if (rerank) {
+        if (quality > line_quality[line]) {
+          line_quality[line] = quality; line_start[line] = start; line_ties[line] = 1;
+        } else if (quality == line_quality[line] && random_int(++line_ties[line]) == 0) {
+          line_start[line] = start;
+        }
+      }
+#endif
       // 同点を1/2で置換すると走査末尾に偏る。k個目は1/kで置換する。
       if (quality > best_quality) {
         best_quality = quality; best_line = line; best_start = start; ties = 1;
@@ -233,12 +278,38 @@ struct GenomeProblem {
         best_line = line; best_start = start;
       }
     }
-    Move move;
-    move.changes.reserve(text.size());
-    for (int k = 0; k < (int)text.size(); ++k) {
-      int cell = line_cells[best_line][best_start+k];
-      if (state.board[cell/n][cell%n] != text[k]) move.changes.emplace_back(cell, text[k]);
+    auto build = [&](int line, int start) {
+      Move move;
+      move.changes.reserve(text.size());
+      for (int k = 0; k < (int)text.size(); ++k) {
+        int cell = line_cells[line][start+k];
+        if (state.board[cell/n][cell%n] != text[k]) move.changes.emplace_back(cell, text[k]);
+      }
+      return move;
+    };
+    Move move = build(best_line, best_start);
+#ifdef AHC004_EXACT_PLACEMENT
+    if (rerank && !move.changes.empty()) {
+      Score best_exact = *evaluate_move(state, move, -INFINITY);
+      line_quality[best_line] = INT_MIN;
+      // The geometric pass is only a filter. Compare alternatives on other
+      // lines using exactly the same coverage delta that SA will accept.
+      for (int alternative = 0; alternative < 3; ++alternative) {
+        const int line = max_element(line_quality.begin(), line_quality.begin()+2*n)
+                         - line_quality.begin();
+        if (line_quality[line] < best_quality-2500) break;
+        line_quality[line] = INT_MIN;
+        Move next = build(line, line_start[line]);
+        if (next.changes.empty()) continue;
+        const Score exact = *evaluate_move(state, next, -INFINITY);
+        if (exact > best_exact ||
+            (exact == best_exact && next.changes.size() < move.changes.size())) {
+          best_exact = exact;
+          move = std::move(next);
+        }
+      }
     }
+#endif
     if (move.changes.empty()) return nullopt;
     return move;
   }

@@ -22,6 +22,9 @@ int main(){
             int line=rng()%(2*n);
             auto move=i%3==0?problem.line_swap(state,line,line/n*n+int(rng()%n)):
                       problem.line_cycle(state,line,1+int(rng()%(n-1)));
+#if defined(AHC004_EXACT_PLACEMENT) || defined(AHC004_FAST_PLACEMENT)
+            if(i%7==2)move=problem.propose_move(state,rng,0.0);
+#endif
             if(i%5==0)move=GenomeProblem::Move{{{int(rng()%(n*n)),'.'}}};
             if(!move)continue;
             auto old=problem.score(state);
@@ -32,6 +35,19 @@ int main(){
             assert(state.coverage.counts==full.coverage.counts);
             assert(state.coverage.covered_weight==full.coverage.covered_weight);
             assert(state.line_code==full.line_code && state.line_empty==full.line_empty);
+#ifdef AHC004_FAST_PLACEMENT
+            assert(state.rotated_code==full.rotated_code && state.rotated_empty==full.rotated_empty);
+            for(int k=0;k<5;++k) {
+                const int q=rng()%(2*n), start=rng()%n, len=1+rng()%std::min(n,12);
+                const uint64_t word=rng()&((1ULL<<(3*len))-1);
+                const uint64_t mask=((1ULL<<(3*len))-1)/7;
+                const uint64_t holes=state.rotated_empty[q][start]&mask;
+                const uint64_t diff=state.rotated_code[q][start]^word;
+                const int score=1250*(len-__builtin_popcountll((diff|(diff>>1)|(diff>>2)|holes)&mask))
+                               +330*__builtin_popcountll(holes)-250*len;
+                assert(score==problem.placement_quality(state,q,start,word,len));
+            }
+#endif
             assert(state.empty==full.empty);
             assert(std::abs(old+*delta-problem.score(full))<1e-10);
             if(i%8==0) {
