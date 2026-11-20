@@ -28,15 +28,18 @@ def main():
     p=argparse.ArgumentParser(description=__doc__)
     for k in ("gen","vis","control","candidate","csv"):
         p.add_argument(k,type=Path)
+    p.add_argument("--reparent-control",type=Path)
     a=p.parse_args()
+    tag="reparent-prune-v1" if a.reparent_control else "bottom-left-joins-v1"
+    if a.reparent_control:a.reparent_control=a.reparent_control.resolve()
     gen,vis,control,candidate=(getattr(a,k).resolve() for k in ("gen","vis","control","candidate"))
     with tempfile.TemporaryDirectory() as d,a.csv.open("w",newline="") as f:
         work=Path(d)
         sf,answer=work/"seeds.txt",work/"answer.txt"
         writer=csv.writer(f,lineterminator="\n")
-        writer.writerow(("split","seed","arm","score","cost","operations","junctions","seconds"))
+        writer.writerow(("split","seed","arm","score","cost","operations","junctions","seconds","initial_join_cost"))
         for split in ("dev","holdout"):
-            seeds=[int.from_bytes(hashlib.sha256(f"ahc037/bottom-left-joins-v1/{split}/{i}".encode()).digest()[:8],
+            seeds=[int.from_bytes(hashlib.sha256(f"ahc037/{tag}/{split}/{i}".encode()).digest()[:8],
                                 "little") for i in range(28)]
             sf.write_text("".join(f"{x}\n" for x in seeds))
             subprocess.run([gen,sf],cwd=work,check=True)
@@ -44,22 +47,28 @@ def main():
                 inp=work/"in"/f"{i:04d}.txt"
                 data=inp.read_bytes()
                 arms=[("terminal",control),("join",candidate)]
+                if a.reparent_control:
+                    arms=[("join",control),("terminals",a.reparent_control),("reparent",candidate)]
                 paired={}
                 for label,binary in arms[::(-1 if i%2 else 1)]:
                     start=time.monotonic()
                     run=subprocess.run([binary],input=data,capture_output=True,check=True,timeout=2)
                     elapsed=time.monotonic()-start
                     score,cost,count,junctions=validate(data,run.stdout)
-                    m=re.fullmatch(rb"base=(\d+) cost=(\d+)\s*",run.stderr)
-                    assert m and int(m[2])==cost and elapsed<2
+                    m=re.fullmatch(rb"base=(\d+)(?: joined=(\d+))? cost=(\d+)\s*",run.stderr)
+                    assert m and int(m[3])==cost and elapsed<2
                     answer.write_bytes(run.stdout)
                     official=subprocess.run([vis,inp,answer],cwd=work,capture_output=True,text=True,check=True)
                     assert official.stdout.strip()==f"Score = {score}",(score,official.stdout)
-                    paired[label]=int(m[1]),cost
-                    writer.writerow((split,seed,label,score,cost,count,junctions,f"{elapsed:.6f}"))
+                    joined=int(m[2]) if m[2] else cost
+                    paired[label]=int(m[1]),cost,joined
+                    writer.writerow((split,seed,label,score,cost,count,junctions,f"{elapsed:.6f}",joined))
                     f.flush()
-                assert paired["terminal"][0]==paired["join"][0]
-                assert paired["terminal"][1]>=paired["join"][1]
+                if a.reparent_control:
+                    assert len({x[2] for x in paired.values()})==1
+                else:
+                    assert paired["terminal"][0]==paired["join"][0]
+                    assert paired["terminal"][1]>=paired["join"][1]
 
 if __name__=="__main__":
     main()

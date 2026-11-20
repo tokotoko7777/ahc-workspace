@@ -67,3 +67,36 @@ From the repository root (build the official tools with
     /tmp/ahc037-merge-test
     python scripts/bundle.py problems/ahc037/main.cpp -o /tmp/ahc037-single.cpp
     g++ -std=c++23 -O3 /tmp/ahc037-single.cpp -o /tmp/ahc037-single
+
+## Optional matched-set reparent/prune
+
+Rebuild parents on the exact same unique terminal-plus-junction set:
+initially retain the existing cheapest incoming edge, then search earlier
+nodes in coordinate-sum order for a higher-sum dominating parent. Compare
+two ways of scanning the same set: allow newly assigned parents only
+from terminals, or also allow synthetic junctions. Both use the same
+parent check and same downstream passes: remove auxiliary leaves and
+contract single-child auxiliary nodes. The original unmodified merge
+result is the third control and a nonworsening fallback.
+
+All three tied on all **28 development and 28 untouched holdout** cases,
+with scores 35,801,010.18 and 35,988,519.46 respectively. Holdout median
+wall times 0.2354 / 0.2350 / 0.2481 s (frozen / terminal parent search /
+all parent search); max 0.460654 s. All 168 official scores agreed with
+independent replay. The operation and junction counts did not change.
+No default change; [reparent trace](reparent-results.csv).
+
+This plateau is consistent with the original max-meet order already
+selecting strong parents among nodes it made: a cheaper existing node
+dominated by a child would offer a high-priority meet with that child
+before it disappears in a more expensive merge. Do not conclude that
+the junction set itself is optimal. Try pooling junctions from
+different merge priorities (e.g. perturb relative coordinate weights)
+or synthesizing candidates outside that one tree, so the reparenting
+actually accesses new options. No public/final test seeds used.
+
+    g++ -std=c++23 -O3 -DAHC037_REPARENT=1 problems/ahc037/main.cpp -o /tmp/ahc037-reparent
+    g++ -std=c++23 -O3 -DAHC037_REPARENT=2 problems/ahc037/main.cpp -o /tmp/ahc037-terminal-parents
+    python problems/ahc037/benchmark.py "$ATCODER_TOOLS/gen" "$ATCODER_TOOLS/vis" /tmp/ahc037-join /tmp/ahc037-reparent /tmp/ahc037-reparent.csv --reparent-control /tmp/ahc037-terminal-parents
+    g++ -std=c++23 -O2 tests/ahc037_reparent_test.cpp -o /tmp/ahc037-reparent-test
+    /tmp/ahc037-reparent-test
