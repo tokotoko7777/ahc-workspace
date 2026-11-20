@@ -25,9 +25,10 @@
 | [AHC015](https://atcoder.jp/contests/ahc015/tasks/ahc015_a) | ローカル改善・本番未判定 | **161,011,437** 点（[AtCoder 提供の順位データ](https://huggingface.co/datasets/SakanaAI/ALE-Bench/blob/main/ahc015.zip)） | 6 手先: 未調整 24 件平均 663,091.75 | 本番 200 件、2 秒。公開入力との同一性未確認 | [問題別ブランチ](https://github.com/tokotoko7777/ahc-workspace/tree/a2b1c24d2d58f6e42db8475e62eb7ae00ef9373e) |
 | [AHC016](https://atcoder.jp/contests/ahc016/tasks/ahc016_a) | ローカル改善・本番未判定 | **1,780,676,618,015**（相対点） | モデル選択版: 別の未調整 40 件平均 42,457,716.95（絶対点） | 本番 2,000 件・5 秒、ケース別の当時の基準点が必要 | [問題別ブランチ](https://github.com/tokotoko7777/ahc-workspace/tree/b84d5b74efaa1410549101730df5a60c1cc3102e) |
 | [AHC017](https://atcoder.jp/contests/ahc017/tasks/ahc017_a) | 着手・未判定 | **1,993,227,663,417**（相対点） | 未調整 14 件 189,307,900（絶対点） | 本番 2,000 件・6 秒、ケース別基準が必要 | [問題別ブランチ](https://github.com/tokotoko7777/ahc-workspace/tree/6078ab465ffd5a225a464187bd443e4b62fcd38b) |
-| [AHC018](https://atcoder.jp/contests/ahc018/tasks/ahc018_a) | ローカル比較・本番未判定 | [公式順位](https://atcoder.jp/contests/ahc018/standings) 要ログイン。1 位の点数未確認 | 平坦経路版: 未調整 32 件平均 220,242.63 | 本番公開 3,000 件、5 秒、相対方式 | [問題別ブランチ](https://github.com/tokotoko7777/ahc-workspace/tree/ff72f9a9577cff6a5ce466081ef959cdde836522) |
-| [AHC019](https://atcoder.jp/contests/ahc019/tasks/ahc019_a) | 着手・本番未判定 | **1,886,240,066,109**（相対点） | 開発比較準備中 | 本番公開 2,000 件、6 秒、ケース別基準が必要 | 検証中 |
-| AHC020〜074 | 未着手 | — | — | — | — |
+| [AHC018](https://atcoder.jp/contests/ahc018/tasks/ahc018_a) | ローカル比較・本番未判定 | [公式順位](https://atcoder.jp/contests/ahc018/standings) 要ログイン。1 位の点数未確認 | 別の未調整 32 件で経路限定試掘／一様の比: 平均 0.9202、25 勝 | 本番公開 3,000 件、5 秒、相対方式 | [問題別ブランチ](https://github.com/tokotoko7777/ahc-workspace/tree/ff72f9a9577cff6a5ce466081ef959cdde836522)、[経路試掘](https://github.com/tokotoko7777/ahc-workspace/tree/0cca8b704bae33b8ad70a32d5db6ae139fb5c054) |
+| [AHC019](https://atcoder.jp/contests/ahc019/tasks/ahc019_a) | 着手・本番未判定 | **1,886,240,066,109**（相対点） | 未調整 20 件 38,523,747,247（絶対点・低い方が良い） | 本番公開 2,000 件、6 秒、ケース別基準が必要 | [問題別ブランチ](https://github.com/tokotoko7777/ahc-workspace/tree/7252e85e2d8a5d75038c0680f4ba43b4a43b3f05) |
+| [AHC020](https://atcoder.jp/contests/ahc020/tasks/ahc020_a) | 着手・本番未判定 | **504,832,157**（絶対点） | 開発比較準備中 | 本番 300 件・2 秒、同一ケースの証拠なし | 検証中 |
+| AHC021〜074 | 未着手 | — | — | — | — |
 
 ### AHC001 の次の仮説
 
@@ -286,3 +287,15 @@
 
 - [公式問題文](https://atcoder.jp/contests/ahc019/tasks/ahc019_a) 通り両投影を一致させ、ブロックは面連結、共有 ID は平行移動と回転のみで一致（鏡映なし）。6 秒、本番公開 2,000 件（D=5〜14 各 200）。順位は当時のケース別最小値からの相対点。
 - 1 位 1,886,240,066,109（相対点）、[順位データ](https://huggingface.co/datasets/SakanaAI/ALE-Bench/blob/main/ahc019.zip) SHA-256 `0d6fcdb3d26939918d3a5b49a81ced6e042b8351e667121e51396a00fd60efe8` 照合。単位ブロックを基準にし、両側で同じ連結ブロックを増やす案を比較する。
+
+### AHC018 経路に限定した試掘と再計画
+
+[追試](https://github.com/tokotoko7777/ahc-workspace/tree/0cca8b704bae33b8ad70a32d5db6ae139fb5c054)。新規 dev/holdout 各32件で一様経路・再計画のみ・経路試掘を比較。holdout では一様に対し試掘が25勝7敗（費用比平均0.9202、中央値0.8278、最悪2.2002倍）。再計画だけに対して18勝14敗（費用比平均0.9674）。192対話で公式と独立再生が一致、最大0.217050秒。最悪ケースが大きく二案とも任意。次は予定経路を外れて調べる価値と場所を、不確実性と迂回費の推定から選ぶ。
+
+### AHC019 共通ブロックの配置
+
+[初版](https://github.com/tokotoko7777/ahc-workspace/tree/7252e85e2d8a5d75038c0680f4ba43b4a43b3f05)。2つの立体で共通化できる形を24通りの正回転で探し、連結なブロックを置く。単位立方体だけの基準版に対し、dev10件 529,000,000,000→10,885,395,414、未調整20件 1,071,000,000,000→38,523,747,247（すべて改善、絶対ペナルティ −96.4%）。公式採点と独立の投影・面連結・正回転チェックは60出力で一致。最大約0.056秒、C++23の単一ファイルでも得点再現。ケース別基準がないため本番相対点は未判定。次は終盤に専用部品が残った例を、既存2〜3ブロックの部分再構築で修復し、同予算の再始動と比べる。
+
+### AHC020 本番条件
+
+[公式問題文](https://atcoder.jp/contests/ahc020/tasks/ahc020_a)。本番300ケースの絶対点を集計（各ケースで丸め）、2秒 / 1,024 MiB。1位504,832,157は[AtCoder提供の順位・得点データ](https://huggingface.co/datasets/SakanaAI/ALE-Bench/blob/main/ahc020.zip)で確認（SHA-256 `5cdc8b811a4c6062f059beda557c49df3458948c979d2ef65eb69ccd75600866`）。公開ジェネレータを本番と同じケースとみなさない。まず送信半径を固定し、枝刈りした全域木と、送信局だけを順に最短経路で結ぶ方式を比較する。
