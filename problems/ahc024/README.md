@@ -26,7 +26,7 @@ tools_dir=/path/to/extracted/tools
 (cd "$tools_dir" && cargo build --locked --release)
 work=$(mktemp -d)
 python scripts/bundle.py problems/ahc024/main.cpp -o "$work/submission.cpp"
-g++ -std=c++23 -O3 -DAHC024_DIAGNOSTIC "$work/submission.cpp" -o "$work/diagnostic"
+g++ -std=c++23 -O3 -DAHC024_DIAGNOSTIC -DAHC024_RESTARTS=0 "$work/submission.cpp" -o "$work/diagnostic"
 python problems/ahc024/benchmark.py "$tools_dir/target/release/gen" "$tools_dir/target/release/vis" "$work/diagnostic" "$work/results.csv"
 g++ -std=c++23 -O3 tests/bounded_layer_shortest_path_test.cpp -o "$work/test"
 "$work/test"
@@ -37,3 +37,25 @@ g++ -std=c++23 -O3 tests/bounded_layer_shortest_path_test.cpp -o "$work/test"
 ### 次の仮説
 
 失敗する切断の大半が希少な色ペアの唯一の接触や、色の細い連結箇所を切るなら、DP前に関節点や接触の証拠辺を保護することで、同じ時間で有望な経路を増やせる。さらに向き・初期縮小順の違う再スタートを複数比較する。合法候補率と1手で抜けた面積を、同一開始盤で基準と比較する。
+
+## 追試: 波状削除の開始盤を変える
+
+両版は同じ既定の1回目を保存してから、乱数列を変えた波状削除を追加で10回まで試す。対照 `-DAHC024_RESTARTS=1` は毎回同じ直線削除後の盤面から始める。比較版 `-DAHC024_RESTARTS=2` は初期盤に戻り、直線削除の候補順をシャッフルしてから同じ波状削除を行う。波状部分には各開始ごとに共通の乱数初期値を与える。どちらも1,810ms締切、10回上限。同数の試行で、盤のサイズや途中状態の違いにより実時間は異なる。
+
+| 分割 | 件数 | 同じ開始盤の平均 | 多様な開始盤の平均 | 多様化の勝 / 分 / 負 |
+| --- | ---: | ---: | ---: | ---: |
+| dev | 24 | 2,052.25 | 2,061.17 | 14 / 2 / 8 |
+| holdout | 24 | 2,048.33 | 2,065.79 | 18 / 1 / 5 |
+
+全ペアで1回目の得点が同一で、どちらも10追加試行を完了した。holdoutで開始盤の内容は固定版1種類、多様版平均9.96種類、得点差中央値+18.5点。[追試CSV](restart-results.csv)の全96出力で公式採点と独立検証が一致し、最長0.327639秒。問題ブランチの既定は多様版とする。`-DAHC024_RESTARTS=0` で初回の単発版に戻せる。
+
+```sh
+# 上の再現手順で tools_dir と work を設定
+g++ -std=c++23 -O3 -DAHC024_RESTART_STATS -DAHC024_RESTARTS=1 "$work/submission.cpp" -o "$work/same"
+g++ -std=c++23 -O3 -DAHC024_RESTART_STATS -DAHC024_RESTARTS=2 "$work/submission.cpp" -o "$work/diverse"
+python problems/ahc024/restart-benchmark.py "$tools_dir/target/release/gen" "$tools_dir/target/release/vis" "$work/same" "$work/diverse" "$work/restarts.csv"
+g++ -std=c++23 -O3 tests/ahc024_restart_test.cpp -o "$work/test"
+"$work/test"
+```
+
+本番1位の平均約2,236点との差に対し、再スタートで得られた追加改善は小さい。次は外部を含む希少な色ペアの接触辺を候補ごとの「証拠」とし、DPで切断を避ける。個々の色の関節点・接触を把握し、全検証で拒否された理由（接触消失・新規接触・非連結）を先に分解して、最も多い原因を保護する。

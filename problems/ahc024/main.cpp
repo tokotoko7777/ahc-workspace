@@ -4,6 +4,9 @@ using namespace std;
 #ifndef AHC024_WAVY
 #define AHC024_WAVY 1
 #endif
+#ifndef AHC024_RESTARTS
+#define AHC024_RESTARTS 2
+#endif
 namespace {
 using Clock=chrono::steady_clock;
 constexpr int C=101;
@@ -74,11 +77,20 @@ struct Topology {
     return true;
   }
 };
-void straight(Board& b,const Topology& topo,Clock::time_point stop){
+void straight(Board& b,const Topology& topo,Clock::time_point stop,mt19937* permute=nullptr){
   for(bool changed=true;changed&&Clock::now()<stop;){
     changed=false;
     for(int axis=0;axis<2;++axis){
-      if(b.w>1)for(int x=0;x<b.w && Clock::now()<stop;++x){
+      if(b.w>1 && permute){
+        vector<int> order(b.w);
+        iota(order.begin(),order.end(),0);
+        shuffle(order.begin(),order.end(),*permute);
+        for(int x:order){
+          if(Clock::now()>=stop)break;
+          auto cut=b.cut(vector<int>(b.h,x));
+          if(topo.valid(cut)){b=std::move(cut);changed=true;break;}
+        }
+      }else if(b.w>1)for(int x=0;x<b.w && Clock::now()<stop;++x){
         auto cut=b.cut(vector<int>(b.h,x));
         if(topo.valid(cut)){b=std::move(cut);changed=true;break;}
       }
@@ -138,8 +150,8 @@ optional<vector<int>> wavy(const Board& b,const Topology& topo,
   return std::move(path->states);
 }
 
-int carve(Board& b,const Topology& topo,Clock::time_point stop){
-  mt19937 rng(240818);
+int carve(Board& b,const Topology& topo,Clock::time_point stop,uint32_t seed=240818){
+  mt19937 rng(seed);
   int accepted=0;
   for(int misses=0;misses<160 && Clock::now()<stop;++misses){
     if(b.w>2)if(auto seam=wavy(b,topo,rng,misses)){
@@ -155,6 +167,32 @@ int carve(Board& b,const Topology& topo,Clock::time_point stop){
   }
   return accepted;
 }
+struct Restarts { int completed=0; int distinct=0; };
+
+Restarts multistart(const Board& initial,const Board& frozen,const Topology& topo,
+                   Board& chosen,Clock::time_point stop,bool diverse) {
+  set<vector<int>> distinct;
+  Restarts info{};
+  mt19937 rest(245081);
+  constexpr int count=10;
+  for(int j=0;j<count && Clock::now()<stop;++j){
+    auto b=frozen;
+    uint32_t seam_seed=rest();
+    if(diverse){
+      b=initial;
+      mt19937 order(seam_seed^0xa42cd31u);
+      straight(b,topo,stop,&order);
+    }
+    distinct.insert(b.v);
+    carve(b,topo,stop,seam_seed);
+    erode(b,topo,stop);
+    if(b.colored()<chosen.colored())chosen=std::move(b);
+    if(Clock::now()<stop)++info.completed;
+  }
+  info.distinct=int(distinct.size());
+  return info;
+}
+
 void print(ostream& os,const Board& b,int n){
   for(int y=0;y<n;++y){
     for(int x=0;x<n;++x)os<<(x?" ":"")<<b.get(y,x);
@@ -184,6 +222,13 @@ int main(){
   carved=carve(variant,topo,start+chrono::milliseconds(1450));
   erode(variant,topo,start+chrono::milliseconds(1820));
   if(variant.colored()<out.colored())out=std::move(variant);
+#endif
+#if AHC024_RESTARTS || defined(AHC024_RESTART_STATS)
+  int first_score=n*n-out.colored()+1;
+  auto rest=multistart(initial,frozen,topo,out,start+chrono::milliseconds(1810),AHC024_RESTARTS==2);
+#ifdef AHC024_RESTART_STATS
+  cerr<<"first="<<first_score<<" restarts="<<rest.completed<<" roots="<<rest.distinct<<'\n';
+#endif
 #endif
   assert(topo.valid(out));
 #ifdef AHC024_DIAGNOSTIC
