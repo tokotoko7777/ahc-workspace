@@ -6,6 +6,9 @@ using namespace std;
 #ifndef AHC020_STEINER
 #define AHC020_STEINER 1
 #endif
+#ifndef AHC020_JOINT
+#define AHC020_JOINT 0
+#endif
 namespace {
 using Clock=chrono::steady_clock;
 constexpr int MAXN=100;
@@ -107,7 +110,9 @@ struct Radio {
     while(end[v]>i)--covered[order[--end[v]].second];
   }
 };
-vector<int> find_power(const Instance& in,Clock::time_point stop) {
+template<class NetworkCost>
+vector<int> find_power(const Instance& in,Clock::time_point stop,NetworkCost network_cost,
+                       int& steps,int& legal_moves) {
   Radio s(in);
   vector<int> nearest(in.n);
   for(int j=0;j<in.k;++j){
@@ -119,8 +124,7 @@ vector<int> find_power(const Instance& in,Clock::time_point stop) {
     nearest[v]=max(nearest[v],in.radius[v][j]);
   }
   for(int i=0;i<in.n;++i)s.set(i,nearest[i]);
-  vector<unsigned char> tree;
-  Int current=in.mst(s.power,tree)+s.cost,best=current;
+  Int current=network_cost(s.power)+s.cost,best=current;
   vector<int> answer=s.power;
   mt19937 rng(204323);
   vector<pair<int,int>> undo;
@@ -129,8 +133,9 @@ vector<int> find_power(const Instance& in,Clock::time_point stop) {
   constexpr int iters=12000;
   double temp=1e6;
   for(int it=0;it<iters;++it){
+    if((AHC020_JOINT || (it&31)==0) && Clock::now()>=stop)break;
+    ++steps;
     if((it&31)==0){
-      if(Clock::now()>=stop)break;
       temp=1e6*pow(0.004,it/double(iters));
     }
     const int v=rng()%in.n, old=s.power[v], oldend=s.end[v];
@@ -165,7 +170,8 @@ vector<int> find_power(const Instance& in,Clock::time_point stop) {
       edit(pick,in.radius[pick][j]);
     }
     if(legal){
-      const Int q=s.cost+in.mst(s.power,tree);
+      ++legal_moves;
+      const Int q=s.cost+network_cost(s.power);
       if(q<=current || generate_canonical<double,32>(rng)<exp((current-q)/temp)){
         current=q;
         if(q<best)best=q,answer=s.power;
@@ -215,6 +221,39 @@ vector<int> steiner(const Instance& in,const vector<int>& power,
   }
   return best;
 }
+struct TerminalKey {
+  uint64_t lo=0,hi=0;
+  bool operator==(const TerminalKey&) const=default;
+};
+struct TerminalHash {
+  size_t operator()(const TerminalKey& k) const {
+    return hash<uint64_t>{}(k.lo ^ (0x9e3779b97f4a7c15ULL * (k.hi+1)));
+  }
+};
+struct JointCost {
+  const Instance& in;
+  vector<unsigned char> scratch;
+  unordered_map<TerminalKey,Int,TerminalHash> cost;
+  int calls=0,misses=0;
+  Int operator()(const vector<int>& p){
+    ++calls;
+    TerminalKey key;
+    for(int v=1;v<in.n;++v)if(p[v]>0)
+      (v<64?key.lo:key.hi)|=uint64_t(1)<<(v%64);
+    if(auto it=cost.find(key);it!=cost.end())return it->second;
+
+    ++misses;
+    vector<int> fallback;
+    Int base=in.mst(p,scratch,&fallback);
+    // The exact cost is for the best generated wiring, not global Steiner optimality.
+    auto wire=steiner(in,p,fallback,base,Clock::time_point::max());
+    Int value=0;
+    for(int e=0;e<in.m;++e)if(wire[e])value+=in.edges[e].w;
+    cost.emplace(key,value);
+    return value;
+  }
+};
+
 void print(ostream& out,const vector<int>& a){
   for(int i=0;i<int(a.size());++i)out<<(i?" ":"")<<a[i];
   out<<'\n';
@@ -228,17 +267,34 @@ int main(){
   cin.tie(nullptr);
   Instance in{};
   in.initialize();
-  auto power=find_power(in,start+chrono::milliseconds(1770));
-  vector<int> baseline,ans;
   vector<unsigned char> scratch;
+  vector<int> power;
+  int steps=0,legal=0,misses=0;
+#if AHC020_JOINT
+  in.shortest_paths();
+  JointCost joint{in};
+  joint.cost.reserve(4096);
+  power=find_power(in,start+chrono::milliseconds(1770),
+                   [&](const auto& p){return joint(p);},steps,legal);
+  misses=joint.misses;
+#else
+  power=find_power(in,start+chrono::milliseconds(1770),
+                   [&](const auto& p){return in.mst(p,scratch);},steps,legal);
+#endif
+  vector<int> baseline,ans;
   Int c=in.mst(power,scratch,&baseline);
   ans=baseline;
-#if AHC020_STEINER || defined(AHC020_DIAGNOSTIC)
+#if AHC020_STEINER || AHC020_JOINT || defined(AHC020_DIAGNOSTIC)
+#if !AHC020_JOINT
   in.shortest_paths();
+#endif
   ans=steiner(in,power,baseline,c,start+chrono::milliseconds(1880));
 #endif
 #ifdef AHC020_DIAGNOSTIC
   print(cerr,baseline);
+#endif
+#ifdef AHC020_STATS
+  cerr<<"steps="<<steps<<" legal="<<legal<<" misses="<<misses<<'\n';
 #endif
   print(cout,power);
   print(cout,ans);

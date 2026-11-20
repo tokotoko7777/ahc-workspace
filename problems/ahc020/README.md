@@ -35,3 +35,26 @@ done
 ```
 
 dev/holdoutは別のSHA-256系列から公式生成。診断版は半径1行と配線2種を出し、それぞれ採点する。次は半径のSA中にも発信局ビットマスクごとの再接続費をキャッシュして使い、同一初期解・同一試行数でMST枝費を使う版と比べる。発信局の違い・出力二乗費・配線費を別々に記録する。
+
+## 追試: 半径のSAにも再配線費を入れる
+
+`-DAHC020_JOINT=1` は近傍の評価時に、仮の発信局を端点とした再配線を実際に作り、選んだ辺の総額を使う。これは**生成した配線の正確な費用**であり、全Steiner木の厳密最適値ではない。端点集合を2つの64bitに保存し、活動局が変わらなければ同じ費用を再利用する。対照と候補は、同一の最寄り局初期解・乱数初期値・12,000試行上限・SA締切1,770ms、終了後に同じ再配線を使う。実際に両群すべて12,000反復を完了し、異なる受理により訪れる局集合は変わった。
+
+| 分割 | 件数 | 後処理だけの平均 | 共同評価の平均 | 共同評価の勝 / 負 | 改善の中央値 |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| dev | 16 | 1,662,880.00 | 1,669,044.13 | 7 / 9 | -706 |
+| holdout | 16 | 1,654,711.81 | 1,665,150.44 | 12 / 4 | +10,253 |
+
+[追試CSV](joint-results.csv)は初回と異なるdev/holdoutの公式生成seed。全64出力が合法で全員受信し、公式採点と独立再生が一致した。最長0.340581秒。holdoutで有効近傍平均3,859回のうち、端点集合の未キャッシュは平均1,010回。活動局はholdout全16件で変わり、配線費は平均35,633,895→35,043,396、出力費は平均108,478,224→106,613,160だった。一方、devでは半数以上が悪化したため、通常は後処理だけ、共同評価は任意フラグのままにした。
+
+```sh
+# 上の再現手順で tools_dir と work を設定
+python scripts/bundle.py problems/ahc020/main.cpp -o "$work/submission.cpp"
+g++ -std=c++23 -O3 -DAHC020_STATS "$work/submission.cpp" -o "$work/after"
+g++ -std=c++23 -O3 -DAHC020_STATS -DAHC020_JOINT=1 "$work/submission.cpp" -o "$work/joint"
+python problems/ahc020/joint-benchmark.py "$tools_dir/target/release/gen" "$tools_dir/target/release/vis" "$work/after" "$work/joint" "$work/joint.csv"
+g++ -std=c++23 -O3 tests/ahc020_joint_network_test.cpp -o "$work/network-test"
+"$work/network-test"
+```
+
+[差分テスト](../../tests/ahc020_joint_network_test.cpp)では80ランダムグラフ×20端点集合で、キャッシュ費用と実配線の総額・活動局の連結性を比較し、半径だけ変えたときにキャッシュが利用されることを確認した。次は時間余裕を使って両探索を走らせ、実際により安い解だけを残す。追加の探索を同じ長さの再スタートだけに使う場合とも、等時間で比較する。
