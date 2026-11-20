@@ -314,6 +314,46 @@ struct GaussianModel {
     }
 #endif
 
+#ifdef AHC_FUTURE_EXPERIMENT
+    using SparseGap = std::vector<std::pair<int,int>>;
+    SparseGap route_gap(const std::vector<int>& a,const std::vector<int>& b) const {
+        std::vector<int> counts(size);
+        for(int e:a) ++counts[feature[e]];
+        for(int e:b) --counts[feature[e]];
+        SparseGap out;
+        for(int i=0;i<size;++i) if(counts[i]) out.emplace_back(i,counts[i]);
+        return out;
+    }
+    struct Projection {
+        std::vector<double> cov;
+        double inverse_sd;
+        double benefit(const SparseGap& target,double gap) const {
+            double cross=0.;
+            for(auto [i,c]:target) cross+=c*cov[i];
+            const double sd=std::abs(cross)*inverse_sd;
+            if(sd<1e-10) return 0.;
+            const double z=std::abs(gap)/sd;
+            if(z>8.) return 0.;
+            return std::max(0.,sd*std::exp(-.5*z*z)*.3989422804014327
+                               -std::abs(gap)*.5*std::erfc(.7071067811865475*z));
+        }
+    };
+    Projection projected_observation(const std::vector<int>& path) const {
+        const auto obs=route_gap(path,{});
+        Projection out{std::vector<double>(size),0.};
+        double predicted=0.;
+        for(auto [i,c]:obs) {
+            predicted+=c*mean[i];
+            const double* row=covariance.data()+i*size;
+            for(int j=0;j<size;++j) out.cov[j]+=row[j]*c;
+        }
+        double variance=std::max(1.,predicted*predicted/300.+extra_noise*path.size());
+        for(auto [i,c]:obs) variance+=c*out.cov[i];
+        out.inverse_sd=1/std::sqrt(std::max(1e-9,variance));
+        return out;
+    }
+#endif
+
     double update(const std::vector<int> &path, int observed) {
         std::vector<int> counts(size), active;
         active.reserve(path.size());
@@ -421,6 +461,102 @@ struct EdgeCosts {
     double cost(int edge) const { return values[edge]; }
 };
 
+#ifdef AHC_FUTURE_EXPERIMENT
+using Path=std::pair<std::string,std::vector<int>>;
+struct RoutingGap {
+    GaussianModel::SparseGap coarse,split;
+    double gap=0.,scale=1.;
+};
+struct GapBank {
+    std::vector<std::pair<int,int>> history;
+    std::vector<RoutingGap> targets;
+    unsigned shots=0,total_bank=0,changed=0;
+    double future_signal=0.;
+    static double cost(const Path& p,const EdgeCosts& ec) {
+        double sum=0.;
+        for(int e:p.second) sum+=ec.cost(e);
+        return sum;
+    }
+    static RoutingGap describe(const Path& better,const Path& alternate,const EdgeCosts& ec,
+                               const GaussianModel& model,const GaussianModel* split) {
+        const double mean=cost(better,ec);
+        return {model.route_gap(alternate.second,better.second),
+                split ? split->route_gap(alternate.second,better.second) : GaussianModel::SparseGap{},
+                std::max(0.,cost(alternate,ec)-mean),std::max(1.,mean)};
+    }
+    void refresh(const Grid& grid,const EdgeCosts& mean,
+                 const GaussianModel& model,const GaussianModel* split,int turn) {
+        targets.clear();
+        const int recent=std::min<int>(64,history.size());
+        for(int j=0;j<8 && j<recent;++j) {
+            // Uniformly spread strata over known endpoints, with a rotating offset.
+            int offset=(j*recent/8+turn/6)%recent;
+            auto [s,t]=history[history.size()-recent+offset];
+            Path best=grid.route(s,t,mean);
+            EdgeCosts penalized=mean;
+            for(int e:best.second) penalized.values[e]+=.35;
+            Path alt=grid.route(s,t,penalized);
+            if(best.first!=alt.first) targets.push_back(describe(best,alt,mean,model,split));
+        }
+    }
+    void choose(int start,int target,const Grid& grid,Path& incumbent,
+                const GaussianModel& model,const GaussianModel* split,double p,int turn) {
+        EdgeCosts mean,explore;
+        for(int e=0;e<int(mean.values.size());++e) {
+            const int a=model.feature[e],b=split ? split->feature[e] : a;
+            const double u=model.mean[a],v=split ? split->mean[b] : u;
+            const double v1=model.covariance[a*model.size+a];
+            const double v2=split ? split->covariance[b*split->size+b] : v1;
+            mean.values[e]=std::clamp(p*u+(1-p)*v,.8,9.);
+            const double variance=p*v1+(1-p)*v2+p*(1-p)*(u-v)*(u-v);
+            explore.values[e]=std::clamp(mean.values[e]-2.25*std::sqrt(std::max(0.,variance)),.8,9.);
+        }
+        if(shots%3==0) refresh(grid,mean,model,split,turn);
+        ++shots;total_bank+=targets.size();
+        std::array<Path,3> routes{incumbent,grid.route(start,target,mean),grid.route(start,target,explore)};
+        std::vector<RoutingGap> local;
+        for(int j:{0,2}) if(routes[j].first!=routes[1].first && (j==0 || routes[j].first!=routes[0].first))
+            local.push_back(describe(routes[1],routes[j],mean,model,split));
+        std::array<double,3> gains{},predicted{};
+        for(int i=0;i<3;++i) {
+            predicted[i]=cost(routes[i],mean);
+            int duplicate=-1;
+            for(int j=0;j<i;++j) if(routes[i].first==routes[j].first) duplicate=j;
+            if(duplicate>=0) {
+                gains[i]=gains[duplicate];continue;
+            }
+            const auto a=model.projected_observation(routes[i].second);
+            GaussianModel::Projection b;
+            if(split) b=split->projected_observation(routes[i].second);
+            const auto effect=[&](const std::vector<RoutingGap>& bank) {
+                double value=0.;
+                for(const auto& item:bank) {
+                    double v=p*a.benefit(item.coarse,item.gap);
+                    if(split) v+=(1-p)*b.benefit(item.split,item.gap);
+                    value+=v/item.scale;
+                }
+                return bank.empty() ? 0. : value/bank.size();
+            };
+            const double recent=effect(targets),here=effect(local);
+            future_signal+=recent;
+#ifdef AHC_FUTURE_GAPS
+            gains[i]=targets.empty() ? here : .25*here+.75*recent;
+#else
+            gains[i]=here;
+#endif
+        }
+        const double weight=8.*predicted[0];
+        int best=0;
+        for(int i=1;i<3;++i) {
+            if(predicted[i]>1.02*predicted[0] || gains[i]<=gains[0]+1e-5) continue;
+            if(predicted[i]-weight*gains[i]<predicted[best]-weight*gains[best]) best=i;
+        }
+        changed+=(routes[best].first!=incumbent.first);
+        incumbent=std::move(routes[best]);
+    }
+};
+#endif
+
 #ifndef AHC_TEST
 int main(int argc, char **argv) {
     std::ios::sync_with_stdio(false);
@@ -455,6 +591,10 @@ int main(int argc, char **argv) {
     if (piecewise) piecewise->adaptation = adaptation;
     if (piecewise) piecewise->local_constant_prior = local_constant_prior;
     Grid grid;
+#ifdef AHC_FUTURE_EXPERIMENT
+    GapBank gap_bank;
+    gap_bank.history.reserve(256);
+#endif
     for (int turn = 0; turn < 1000; ++turn) {
         int sr, sc, tr, tc;
         if (!(std::cin >> sr >> sc >> tr >> tc)) return 1;
@@ -564,6 +704,17 @@ int main(int argc, char **argv) {
             edges = std::move(routes[best].second);
         }
 #endif
+#ifdef AHC_FUTURE_EXPERIMENT
+        if(turn>=16 && turn<232 && (turn-16)%6==0 && turn>=straight_start &&
+           std::chrono::steady_clock::now()-start<std::chrono::milliseconds(600)) {
+            const double p=mixture
+                ? (locked ? double(locked==1) : 1./(1.+std::exp(-model_log_odds))) : 1.;
+            Path path{std::move(moves),std::move(edges)};
+            gap_bank.choose(sr*SIDE+sc,tr*SIDE+tc,grid,path,model,split_model.get(),p,turn);
+            moves=std::move(path.first);edges=std::move(path.second);
+        }
+        if(turn<232) gap_bank.history.emplace_back(sr*SIDE+sc,tr*SIDE+tc);
+#endif
         if (turn < straight_start) {
             double best = 1e100;
             for (bool horizontal_first : {false, true}) {
@@ -606,6 +757,10 @@ int main(int argc, char **argv) {
               << ",\"soft_type\":" << soft_type
               << ",\"local_constant_prior\":" << local_constant_prior
               << ",\"straight_start\":" << straight_start
+#ifdef AHC_FUTURE_EXPERIMENT
+              << ",\"gap_shots\":" << gap_bank.shots << ",\"future_targets\":" << gap_bank.total_bank
+              << ",\"changed_queries\":" << gap_bank.changed << ",\"future_signal\":" << gap_bank.future_signal
+#endif
               << ",\"cpu_seconds\":" << double(std::clock() - cpu_start) / CLOCKS_PER_SEC
               << ",\"wall_seconds\":" << std::chrono::duration<double>(std::chrono::steady_clock::now() - start).count()
               << "}\n";
