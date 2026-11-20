@@ -2014,3 +2014,22 @@ sort(points.begin(), points.end(), [](const Point& a, const Point& b) {
 
 `bits=10` なら各座標は `0..1023` です。厳密な最近傍順ではありませんが、空間的に
 まとまったcluster作成、query順、cache localityの改善候補を1行のkeyで作れます。
+
+## Manhattan Max Transform
+
+[ヘッダ](../library/manhattan-max-transform.hpp)・[全候補との比較テスト](../tests/manhattan_max_transform_test.cpp)。
+
+2次元配列に対し、「元の値−係数×マンハッタン距離」の最大値と出発IDを
+全マスについて線形時間で求めます。各軸は昇順なら等間隔でなくても構いません。
+出発IDが負のマスは未到達とします。距離係数は非負です。
+
+```cpp
+std::vector<int> xs{0, 2}, ys{0, 3};
+std::vector<long long> best{10, 0, 0, 0};
+std::vector<int> origin{0, -1, -1, -1};
+manhattan_max_transform(xs, ys, 1LL, best, origin);
+// best = {10, 7, 8, 5}; origin = {0, 0, 0, 0}
+```
+
+[AHC039](../problems/ahc039/main.cpp)では両端点の変化量を周長に加える
+列DPで、状態間の全ペア比較をこの変換に置き換えます。
