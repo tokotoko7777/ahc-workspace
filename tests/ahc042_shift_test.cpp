@@ -14,6 +14,16 @@ int main(){
       if(k==0){b.x[y]|=1u<<x;g[y][x]='x';}
       if(k==1){b.o[y]|=1u<<x;g[y][x]='o';}
     }
+    const auto bits=[](const auto& rows){
+      int n=0;for(auto x:rows)n+=popcount(x);return n;
+    };
+    preps(b,[&](Choice choice,int removed,const Board& after){
+      auto semi=apply(b,choice.prep);
+      assert(bits(semi.x)==bits(b.x)&&bits(semi.o)==bits(b.o));
+      assert(bits(after.o)==bits(b.o));
+      assert(bits(b.x)-bits(after.x)==removed&&removed>0);
+      assert(apply(semi,choice.eject)==after);
+    });
     Macro m{uint8_t(rng()%2),uint8_t(rng()%2),uint8_t(rng()%N),uint8_t(1+rng()%N),0};
     m.back=rng()%(m.out+1);
     auto move=[&](bool sign){

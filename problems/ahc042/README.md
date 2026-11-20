@@ -70,3 +70,38 @@ From repository root, build the official tools using
     /tmp/ahc042-test
     python scripts/bundle.py problems/ahc042/main.cpp -o /tmp/ahc042-single.cpp
     g++ -std=c++23 -O3 /tmp/ahc042-single.cpp -o /tmp/ahc042-single
+
+## Optional perpendicular preparation
+
+Before ejecting, look for an Oni within seven steps in a ray with exactly
+one blocking Fuku. Move that blocker perpendicular by one square,
+requiring an empty exit so that no piece is removed by preparation.
+Immediately eject one or more Oni in the original ray and choose a
+return distance as before. Check the final position has no inadmissible
+rays and remains fully solvable by direct returns. Group preparation plus
+ejection into a single beam transition: every step still decreases
+remaining Oni. At most 16 constructive preps per parent.
+
+| 32 new cases each | Direct width22 | Direct width30 | Prep width22 |
+|---|---:|---:|---:|
+| Development mean moves | 112.750 | 111.531 | 109.531 |
+| Untouched holdout mean moves | 108.219 | 106.594 | 105.156 |
+
+Compared with wider direct beam, prep went 18/4/10 in dev and 17/3/12
+on holdout, with median improvement one step on each. Holdout wall
+medians were 0.064/0.099/0.077 s; mean generated candidate checks for
+width30 vs prep were 127,100 vs 104,056. The wider direct arm is a
+conservative higher-work control, not an identical number of children.
+All 192 boards finished perfectly and matched official and independent
+scores; worst wall 0.223740 s. An improvement in mean, but magnitude
+modest and many regressions; keep the first variant default and this
+one optional. [Data](prep-results.csv).
+
+Next retain cheaper late game by trying a small two-ray lookahead
+for ejection/return decisions. Rank a change using exact safe cleanup
+from the reached board and allow setup shifts that help several remaining
+Oni, with the same complete incumbent and a fresh split.
+
+    g++ -std=c++23 -O3 -DAHC042_PREP=1 problems/ahc042/main.cpp -o /tmp/ahc042-prep
+    g++ -std=c++23 -O3 -DAHC042_WIDTH=30 problems/ahc042/main.cpp -o /tmp/ahc042-wide
+    python problems/ahc042/benchmark.py "$ATCODER_TOOLS/gen" "$ATCODER_TOOLS/vis" /tmp/ahc042-beam /tmp/ahc042-prep /tmp/ahc042-prep.csv --extra-control /tmp/ahc042-wide

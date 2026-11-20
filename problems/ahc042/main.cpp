@@ -1,6 +1,12 @@
 #include <bits/stdc++.h>
 #include "../../library/packed-line-shift.hpp"
 using namespace std;
+#ifndef AHC042_PREP
+#define AHC042_PREP 0
+#endif
+#ifndef AHC042_WIDTH
+#define AHC042_WIDTH 22
+#endif
 #ifndef AHC042_BEAM
 #define AHC042_BEAM 1
 #endif
@@ -16,6 +22,7 @@ struct Macro{
   uint8_t axis=0,sign=0,line=0,out=0,back=0;
 };
 using Plan=vector<Macro>;
+struct Choice{Macro prep{},eject{};};
 Board apply(const Board& b,Macro m){
   Board c=b;
   auto f=[&](auto& rows){
@@ -43,6 +50,35 @@ void moves(const Board& b,bool partial,Visit visit){
           m.back=0;visit(m,removed);
           if(d>1){m.back=d/2;visit(m,removed);}
         }
+      }
+    }
+  }
+}
+template<class Visit>
+void preps(const Board& b,Visit visit){
+  int count=0;
+  for(int axis=0;axis<2;++axis)for(int i=0;i<N;++i){
+    uint32_t x=Packed::get(b.x,axis,i),o=Packed::get(b.o,axis,i);
+    for(int sign=0;sign<2;++sign)for(int d=2;d<=7;++d){
+      const int k=sign?N-d:d-1;
+      if(!(x>>k&1u))continue;
+      const uint32_t removed=sign?Packed::mask^((1u<<k)-1u):(1u<<(k+1))-1u;
+      const uint32_t blockers=o&removed;
+      if(popcount(blockers)!=1)continue;
+      const int line_id=countr_zero(blockers);
+      for(int t=0;t<2;++t){
+        uint32_t at_exit=1u<<(t?N-1:0);
+        if((Packed::get(b.x,!axis,line_id)|Packed::get(b.o,!axis,line_id))&at_exit)continue;
+        const Macro prep{uint8_t(!axis),uint8_t(t),uint8_t(line_id),1,0};
+        auto p=apply(b,prep);
+        uint32_t newo=Packed::get(p.o,axis,i),newx=Packed::get(p.x,axis,i);
+        if(newo&removed || !(newx&removed))continue;
+        const int kills=popcount(newx&removed);
+        for(int back:{0,d/2,d}){
+          const Macro eject{uint8_t(axis),uint8_t(sign),uint8_t(i),uint8_t(d),uint8_t(back)};
+          visit(Choice{prep,eject},kills,apply(p,eject));
+        }
+        if(++count>=16)return;
       }
     }
   }
@@ -87,12 +123,12 @@ Plan greedy(Board b){
   return out;
 }
 int total(const Plan& p){int s=0;for(auto m:p)s+=m.out+m.back;return s;}
-Plan beam(const Board& board,Plan best,Clock::time_point deadline){
-  struct State{Board board;array<Macro,ONI> seq;int length=0,spent=0,rank=0;};
+Plan beam(const Board& board,Plan best,Clock::time_point deadline,int& checks){
+  struct State{Board board;array<Choice,ONI> seq;int length=0,spent=0,rank=0;};
   array<vector<State>,ONI+1> bucket;
   bucket[ONI].push_back({board,{}});
   int limit=total(best);
-  constexpr int Width=22;
+  constexpr int Width=AHC042_WIDTH;
   auto ranked=[](const State& a,const State& b){return pair{a.rank,a.spent}<pair{b.rank,b.spent};};
   for(int remain=ONI;remain>0;--remain){
     auto& vec=bucket[remain];
@@ -103,14 +139,16 @@ Plan beam(const Board& board,Plan best,Clock::time_point deadline){
       if(int(used.size())>=Width)break;
       if(any_of(used.begin(),used.end(),[&](auto q){return q->board==state.board;}))continue;
       used.push_back(&state);
-      moves(state.board,true,[&](Macro m,int removed){
-        const int cost=state.spent+m.out+m.back,left=remain-removed;
+      auto enter=[&](Choice m,int removed,const Board& next){
+        const int cost=state.spent+m.prep.out+m.eject.out+m.eject.back,left=remain-removed;
+        ++checks;
         if(cost>=limit)return;
         if(!left){
-          limit=cost;best.assign(state.seq.begin(),state.seq.begin()+state.length);
-          best.push_back(m);return;
+          auto append=[&](Choice c){if(c.prep.out)best.push_back(c.prep);best.push_back(c.eject);};
+          limit=cost;best.clear();
+          for(int i=0;i<state.length;++i)append(state.seq[i]);
+          append(m);return;
         }
-        Board next=apply(state.board,m);
         int p=projection(next);
         if(p<0)return; // Keep a certified restore-only completion.
         State q{next,state.seq,state.length+1,cost,8*cost+9*p};
@@ -121,7 +159,9 @@ Plan beam(const Board& board,Plan best,Clock::time_point deadline){
           nth_element(v.begin(),v.begin()+12*Width,v.end(),ranked);
           v.resize(12*Width);
         }
-      });
+      };
+      moves(state.board,true,[&](Macro m,int removed){enter(Choice{{},m},removed,apply(state.board,m));});
+      if(AHC042_PREP)preps(state.board,enter);
     }
     vector<State>().swap(vec);
   }
@@ -143,8 +183,9 @@ int main(){
     }
   }
   auto plan=greedy(b);int base=total(plan);
-  if(AHC042_BEAM)plan=beam(b,std::move(plan),deadline);
-  cerr<<"base="<<base<<" turns="<<total(plan)<<'\n';
+  int checks=0;
+  if(AHC042_BEAM)plan=beam(b,std::move(plan),deadline,checks);
+  cerr<<"base="<<base<<" turns="<<total(plan)<<" checks="<<checks<<'\n';
   for(auto m:plan){
     for(int k=0;k<m.out;++k)cout<<(m.axis?(m.sign?'D':'U'):(m.sign?'R':'L'))<<' '<<int(m.line)<<'\n';
     for(int k=0;k<m.back;++k)cout<<(m.axis?(m.sign?'U':'D'):(m.sign?'L':'R'))<<' '<<int(m.line)<<'\n';

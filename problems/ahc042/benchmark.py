@@ -36,15 +36,18 @@ def main():
     p=argparse.ArgumentParser(description=__doc__)
     for k in ("gen","vis","base","candidate","csv"):
         p.add_argument(k,type=Path)
+    p.add_argument("--extra-control",type=Path)
     a=p.parse_args()
+    tag="perpendicular-prep-v1" if a.extra_control else "partial-restore-v1"
+    if a.extra_control:a.extra_control=a.extra_control.resolve()
     gen,vis,base,candidate=(getattr(a,k).resolve() for k in ("gen","vis","base","candidate"))
     with tempfile.TemporaryDirectory() as d,a.csv.open("w",newline="") as file:
         work=Path(d)
         seeds,output=work/"seeds.txt",work/"answer.txt"
         w=csv.writer(file,lineterminator="\n")
-        w.writerow(("split","seed","arm","score","turns","left","lost","start","seconds"))
+        w.writerow(("split","seed","arm","score","turns","left","lost","start","seconds","candidate_checks"))
         for split in ("dev","holdout"):
-            ids=[int.from_bytes(hashlib.sha256(f"ahc042/partial-restore-v1/{split}/{i}".encode()).digest()[:8],
+            ids=[int.from_bytes(hashlib.sha256(f"ahc042/{tag}/{split}/{i}".encode()).digest()[:8],
                                 "little") for i in range(32)]
             seeds.write_text("".join(f"{x}\n" for x in ids))
             subprocess.run([gen,seeds],cwd=work,check=True)
@@ -52,21 +55,22 @@ def main():
                 inp=work/"in"/f"{i:04d}.txt"
                 data=inp.read_bytes()
                 arms=[("restore",base),("partial",candidate)]
+                if a.extra_control:arms=[("partial",base),("wide",a.extra_control),("prep",candidate)]
                 starts=[]
                 for name,binary in arms[::(-1 if i%2 else 1)]:
                     start=time.monotonic()
                     run=subprocess.run([binary],input=data,check=True,capture_output=True,timeout=2)
                     seconds=time.monotonic()-start
                     result=validate(data,run.stdout)
-                    m=re.fullmatch(rb"base=(\d+) turns=(\d+)\s*",run.stderr)
+                    m=re.fullmatch(rb"base=(\d+) turns=(\d+)(?: checks=(\d+))?\s*",run.stderr)
                     assert m and int(m[2])==result[1] and result[2:]==(0,0)
                     starts.append(int(m[1]))
                     output.write_bytes(run.stdout)
                     check=subprocess.run([vis,inp,output],cwd=work,check=True,capture_output=True,text=True)
                     assert check.stdout.strip()==f"Score = {result[0]}" and seconds<2
-                    w.writerow((split,seed,name,*result,int(m[1]),f"{seconds:.6f}"))
+                    w.writerow((split,seed,name,*result,int(m[1]),f"{seconds:.6f}",int(m[3]) if m[3] else 0))
                     file.flush()
-                assert starts[0]==starts[1]
+                assert len(set(starts))==1
 
 if __name__=="__main__":
     main()
