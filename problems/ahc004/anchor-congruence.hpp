@@ -49,10 +49,14 @@ inline int match_columns(const std::array<uint64_t,20>& domains,
 inline AnchorSearch three_parallel_anchors(
     const std::vector<Cycle>& bank, int visit_cap=1368000,
     const std::function<bool()>& deadline=[] { return false; },
-    int shortlist_cap=128) {
+    int shortlist_cap=128, std::array<int,5> anchor_ids={0,1,2,3,4}) {
   AnchorSearch out;
   const int n=std::min<int>(64,bank.size());
   if (n<24 || shortlist_cap<=0 || visit_cap<=0) return out;
+  auto sorted_ids=anchor_ids;
+  std::sort(sorted_ids.begin(),sorted_ids.end());
+  if (sorted_ids.front()<0 || sorted_ids.back()>=n ||
+      std::adjacent_find(sorted_ids.begin(),sorted_ids.end())!=sorted_ids.end()) return out;
   const auto quality=[](const AnchorLayout& t) {
     return std::tuple{t.matched,t.eligible,t.distinct};
   };
@@ -70,8 +74,9 @@ inline AnchorSearch three_parallel_anchors(
     std::array<uint64_t,512> signatures{};
     for(int id=0;id<n;++id) for(int p=0;p<20;++p)
       signatures[(digits[id][p]<<6)|(digits[id][p+r1]<<3)|digits[id][p+r2]] |= uint64_t(1)<<id;
-    for(int a=0;a<5;++a) for(int b=a+1;b<5;++b) for(int c=b+1;c<5;++c)
+    for(int aa=0;aa<5;++aa) for(int bb=aa+1;bb<5;++bb) for(int cc=bb+1;cc<5;++cc)
     for(int swap_lanes=0;swap_lanes<2;++swap_lanes) {
+      const int a=anchor_ids[aa], b=anchor_ids[bb], c=anchor_ids[cc];
       const int x=swap_lanes?r2:r1, y=swap_lanes?r1:r2;
       const int j=swap_lanes?c:b, k=swap_lanes?b:c;
       const uint64_t barred=(uint64_t(1)<<a)|(uint64_t(1)<<b)|(uint64_t(1)<<c);
@@ -136,9 +141,13 @@ struct FourthSearch {
 // extension per triple; do not mistake a high crossing count for identity.
 inline FourthSearch fourth_row_extensions(
     const std::vector<Cycle>& bank, const std::vector<AnchorLayout>& layouts,
-    int budget=2000000, const std::function<bool()>& deadline=[] { return false; }) {
+    int budget=2000000, const std::function<bool()>& deadline=[] { return false; },
+    bool packed_input=false) {
   FourthSearch out;
   const int n=std::min<int>(64,bank.size());
+  unsigned char digit[64][40]{};
+  if (packed_input) for (int id=0; id<n; ++id) for(int p=0;p<40;++p)
+    digit[id][p]=bank[id].letters[p%20]-'A';
   for(int at=0; at<int(layouts.size()); ++at) {
     if(deadline()) {out.capped=true;break;}
     const auto& t=layouts[at];
@@ -153,10 +162,11 @@ inline FourthSearch fourth_row_extensions(
         for(int phase=0;phase<20;++phase) {
           bool match=true;
           for(int j=0;j<3;++j)
-            if(bank[id].letters[(phase+t.lane[j])%20] !=
-               bank[t.id[j]].letters[(col+t.phase[j])%20]) {match=false;break;}
+            if(packed_input ? digit[id][phase+t.lane[j]] != digit[t.id[j]][col+t.phase[j]]
+                            : bank[id].letters[(phase+t.lane[j])%20] !=
+                              bank[t.id[j]].letters[(col+t.phase[j])%20]) {match=false;break;}
           if(match) for(int r=0;r<20;++r)
-            domains[r][col][bank[id].letters[(phase+r)%20]-'A']|=uint64_t(1)<<id;
+            domains[r][col][packed_input ? digit[id][phase+r] : bank[id].letters[(phase+r)%20]-'A']|=uint64_t(1)<<id;
         }
       }
     }
@@ -172,7 +182,7 @@ inline FourthSearch fourth_row_extensions(
       int count=0;
       const int needed=std::max(n-23,best.matched);
       for(int col=0;col<20;++col) {
-        mask[col]=domains[r][col][bank[id].letters[(phase+col)%20]-'A'] & ~(uint64_t(1)<<id);
+        mask[col]=domains[r][col][packed_input ? digit[id][phase+col] : bank[id].letters[(phase+col)%20]-'A'] & ~(uint64_t(1)<<id);
         count+=mask[col]!=0;
         if(count+19-col<needed) break;
       }
@@ -189,6 +199,30 @@ done4:
     return std::pair{a.matched,a.eligible}>std::pair{b.matched,b.eligible};
   });
   return out;
+}
+// Equality under global shifts and transposition, which preserve the
+// problem's two forward directions (reversal is not a symmetry).
+inline std::string geometry_shape_key(const std::vector<std::string>& board) {
+  constexpr int N=20;
+  if (board.size()!=N) return {};
+  char best[N*N];
+  bool have=false;
+  for(int transpose=0;transpose<2;++transpose) {
+    char doubled[N][2*N];
+    for(int y=0;y<N;++y)for(int x=0;x<N;++x)
+      doubled[y][x]=doubled[y][x+N]=transpose?board[x][y]:board[y][x];
+    for(int y=0;y<N;++y)for(int x=0;x<N;++x) {
+      int cmp=have?0:-1;
+      for(int i=0;i<N && cmp==0;++i)
+        cmp=std::char_traits<char>::compare(doubled[(y+i)%N]+x,best+i*N,N);
+      if(cmp<0) {
+        for(int i=0;i<N;++i)
+          std::char_traits<char>::copy(best+i*N,doubled[(y+i)%N]+x,N);
+        have=true;
+      }
+    }
+  }
+  return {best,N*N};
 }
 struct RealizedAnchor {
   std::vector<std::string> board;

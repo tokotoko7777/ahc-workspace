@@ -997,6 +997,52 @@ int main() {
       }
     }
   }
+#ifdef AHC004_ANCHOR_RESCUE
+  // Existing complete-cycle initialization always goes first. A failed pass
+  // can be caused by an orientation split among false-positive top-ranked
+  // anchors; retry with a disjoint high-evidence quintet rather than widen
+  // compatibility or allow a worse seed.
+  int rescue_sweep=0, rescue_fourth=0, rescue_realized=0, rescue_unique=0;
+  if (sweep_visits && best_score==ordinary_key) {
+    constexpr double rescue_end=1550.0;
+    const auto deadline=[&] { return timer.elapsed_ms()>=rescue_end; };
+    const double three_stop=min(rescue_end-260.0,timer.elapsed_ms()+175.0);
+    auto retry=ahc004::three_parallel_anchors(closed.cycles,1368000,
+        [&] {return timer.elapsed_ms()>=three_stop;},640,{5,6,7,8,9});
+    auto refine=ahc004::fourth_row_extensions(closed.cycles,retry.layouts,8500000,
+        [&] { return timer.elapsed_ms()>=rescue_end-150.0; },true);
+    rescue_sweep=retry.examined;
+    rescue_fourth=refine.examined;
+    vector<pair<pair<int,int>,Board>> ranked_boards;
+    vector<string> seen_keys;
+    for(const auto& f:refine.ranked) {
+      if(rescue_realized>=32 || timer.elapsed_ms()>=rescue_end-90.0)break;
+      auto geo=ahc004::realize_anchor(closed.cycles,retry.layouts[f.parent],f,deadline);
+      if(geo.board.empty())continue;
+      ++rescue_realized;
+      auto key=ahc004::geometry_shape_key(geo.board);
+      if(find(seen_keys.begin(),seen_keys.end(),key)!=seen_keys.end())continue;
+      seen_keys.push_back(move(key));
+      ranked_boards.emplace_back(count_score(geo.board),move(geo.board));
+    }
+    rescue_unique=ranked_boards.size();
+    stable_sort(ranked_boards.begin(),ranked_boards.end(),[](const auto& a,const auto& b) {
+      return a.first>b.first;
+    });
+    const auto rng_before_rescue=random.engine;
+    for(int i=0;i<min<int>(4,ranked_boards.size()) && !deadline();++i){
+      auto& b=ranked_boards[i].second;
+      fill_words(b,attempt+realized+i+1);
+      auto key=count_score(b);
+      if(key>best_score) {
+        best_score=key;
+        best_board=move(b);
+      }
+      if(best_score.first==m)break;
+    }
+    if(best_score==ordinary_key) random.engine=rng_before_rescue;
+  }
+#endif
   cerr << "geometry_cycles=" << closed.cycles.size()
        << " geometry_extraction_capped=" << closed.capped
        << " geometry_supported=" << supported_reads << " geometry_words=" << m
@@ -1011,6 +1057,13 @@ int main() {
        << " geometry_filled=" << filled_key.first << " geometry_filled_empty=" << filled_key.second
        << " geometry_selected=" << (best_score>ordinary_key)
        << " geometry_ms=" << timer.elapsed_ms() << '\n';
+#ifdef AHC004_ANCHOR_RESCUE
+  if(rescue_sweep) {
+    cerr<<"geometry_rescue_sweep="<<rescue_sweep<<" geometry_rescue_fourth="<<rescue_fourth
+        <<" geometry_rescue_realized="<<rescue_realized<<" geometry_rescue_unique="<<rescue_unique
+        <<" geometry_rescue_selected="<<(best_score>ordinary_key)<<'\n';
+  }
+#endif
 #ifdef AHC004_LINE_REBUILD
   }
 #endif
