@@ -1,6 +1,6 @@
 # AHC研究ライブラリ: 用途別索引
 
-「何をしたいか」からC++部品を探す索引です。[進捗](AHC_PROGRESS.md)と[利用時の不便メモ](LIBRARY_FEEDBACK.md)で言及された公開部品51点を、ヘッダと検証先を版固定で掲載しています。AHC番号は用途の由来で、本番採用・順位・別問題での性能を示すものではありません。
+「何をしたいか」からC++部品を探す索引です。[進捗](AHC_PROGRESS.md)と[利用時の不便メモ](LIBRARY_FEEDBACK.md)で言及された公開部品54点を、ヘッダと検証先を版固定で掲載しています。AHC番号は用途の由来で、本番採用・順位・別問題での性能を示すものではありません。
 
 ## 取得と出典の残し方
 
@@ -25,6 +25,7 @@
 | 辺を重み順に試し、次数2以下で閉路のないパス群を作る | [`greedy-path-forest.hpp`](https://github.com/tokotoko7777/ahc-workspace/blob/fb26d23b729e0e30e19da4d6181bd0421588196e/library/greedy-path-forest.hpp)（依存: [`dsu.hpp`](https://github.com/tokotoko7777/ahc-workspace/blob/fb26d23b729e0e30e19da4d6181bd0421588196e/library/dsu.hpp)） · AHC036 | [例](https://github.com/tokotoko7777/ahc-workspace/blob/fb26d23b729e0e30e19da4d6181bd0421588196e/examples/greedy_path_forest_usage.cpp) / [テスト](https://github.com/tokotoko7777/ahc-workspace/blob/fb26d23b729e0e30e19da4d6181bd0421588196e/tests/greedy_path_forest_test.cpp) |
 | 深さ上限付きで部分木を付け替え、差分評価する | [`bounded-depth-forest.hpp`](https://github.com/tokotoko7777/ahc-workspace/blob/3e6e4f9ea3ea3d9e65c0bd7e7a07e1e2fdccf908/library/bounded-depth-forest.hpp) · AHC041 | [例](https://github.com/tokotoko7777/ahc-workspace/blob/3e6e4f9ea3ea3d9e65c0bd7e7a07e1e2fdccf908/examples/bounded_depth_forest_usage.cpp) / [テスト](https://github.com/tokotoko7777/ahc-workspace/blob/3e6e4f9ea3ea3d9e65c0bd7e7a07e1e2fdccf908/tests/bounded_depth_forest_test.cpp) |
 | 通行マスクを差し替えながら作業領域を再利用してBFSする | [`masked-bfs-workspace.hpp`](https://github.com/tokotoko7777/ahc-workspace/blob/cc2c7b4e86abc712f7ce27bf8a992175adb45ae1/library/masked-bfs-workspace.hpp) · AHC054 | [テスト](https://github.com/tokotoko7777/ahc-workspace/blob/cc2c7b4e86abc712f7ce27bf8a992175adb45ae1/tests/masked_bfs_workspace_test.cpp) / [仕様](https://github.com/tokotoko7777/ahc-workspace/blob/cc2c7b4e86abc712f7ce27bf8a992175adb45ae1/docs/LIBRARY_REFERENCE.md) |
+| 直前の頂点へ戻れないグラフの最短経路を求める | [`nonbacktracking-path.hpp`](https://github.com/tokotoko7777/ahc-workspace/blob/204933bff927c6bac159926766888181897cc748/library/nonbacktracking-path.hpp) · AHC060 | [テスト](https://github.com/tokotoko7777/ahc-workspace/blob/204933bff927c6bac159926766888181897cc748/tests/nonbacktracking_path_test.cpp) / [仕様と使い方](https://github.com/tokotoko7777/ahc-workspace/blob/204933bff927c6bac159926766888181897cc748/docs/LIBRARY_REFERENCE.md) |
 
 ## 格子・幾何・対称変換
 
@@ -39,6 +40,7 @@
 | ビット盤面から行・列を抽出してずらし、端から出た値を返す | [`packed-line-shift.hpp`](https://github.com/tokotoko7777/ahc-workspace/blob/e8796e286c2e197c2f1f5324755e4fb58da8f3f5/library/packed-line-shift.hpp) · AHC042 | [テスト](https://github.com/tokotoko7777/ahc-workspace/blob/e8796e286c2e197c2f1f5324755e4fb58da8f3f5/tests/ahc042_shift_test.cpp) / [仕様](https://github.com/tokotoko7777/ahc-workspace/blob/e8796e286c2e197c2f1f5324755e4fb58da8f3f5/docs/LIBRARY_REFERENCE.md) |
 | 固定の壁配置で4方向の滑走停止点を前計算する | [`static-slide-grid.hpp`](https://github.com/tokotoko7777/ahc-workspace/blob/00edc1ce4028926dcc2cfb8316e64994f3fe89bb/library/static-slide-grid.hpp) · AHC046 | [テスト](https://github.com/tokotoko7777/ahc-workspace/blob/00edc1ce4028926dcc2cfb8316e64994f3fe89bb/tests/static_slide_grid_test.cpp) / [仕様](https://github.com/tokotoko7777/ahc-workspace/blob/00edc1ce4028926dcc2cfb8316e64994f3fe89bb/docs/LIBRARY_REFERENCE.md) |
 | 壁の追加・削除後に4方向の滑走停止点を更新する | [`orthogonal-slide-grid.hpp`](https://github.com/tokotoko7777/ahc-workspace/blob/c1084c6814a6b1a98fa2b6de854a1a2941f09098/library/orthogonal-slide-grid.hpp) · AHC050 | [例](https://github.com/tokotoko7777/ahc-workspace/blob/c1084c6814a6b1a98fa2b6de854a1a2941f09098/examples/orthogonal_slide_grid_usage.cpp) / [テスト](https://github.com/tokotoko7777/ahc-workspace/blob/c1084c6814a6b1a98fa2b6de854a1a2941f09098/tests/orthogonal_slide_grid_test.cpp) |
+| 周期境界上の等速運動で、整数時刻の最近接を求める | [`periodic-closest-approach.hpp`](https://github.com/tokotoko7777/ahc-workspace/blob/597f72f03de27400f38dd4cff9f5ee779055c0be/library/periodic-closest-approach.hpp) · AHC057 | [テスト](https://github.com/tokotoko7777/ahc-workspace/blob/597f72f03de27400f38dd4cff9f5ee779055c0be/tests/periodic_closest_approach_test.cpp) / [仕様と使い方](https://github.com/tokotoko7777/ahc-workspace/blob/597f72f03de27400f38dd4cff9f5ee779055c0be/docs/LIBRARY_REFERENCE.md) |
 
 ## 割当・区間最適化
 
@@ -71,6 +73,7 @@
 | 併合候補を安定IDと遅延削除ヒープで管理する | [`agglomerative-pair-merge.hpp`](https://github.com/tokotoko7777/ahc-workspace/blob/11e02827a706e05022f50a3f7956541fa388f9ea/library/agglomerative-pair-merge.hpp) · AHC037 | [テスト](https://github.com/tokotoko7777/ahc-workspace/blob/11e02827a706e05022f50a3f7956541fa388f9ea/tests/agglomerative_pair_merge_test.cpp) / [仕様](https://github.com/tokotoko7777/ahc-workspace/blob/11e02827a706e05022f50a3f7956541fa388f9ea/docs/LIBRARY_REFERENCE.md) |
 | ペアの両端が揃った場合だけ加点し、被覆変更を差分管理する | [`paired-coverage-reward.hpp`](https://github.com/tokotoko7777/ahc-workspace/blob/2920bc508229a62f10b0070b68f3f1941fae75a4/library/paired-coverage-reward.hpp) · AHC043 | [例](https://github.com/tokotoko7777/ahc-workspace/blob/2920bc508229a62f10b0070b68f3f1941fae75a4/examples/paired_coverage_reward_usage.cpp) / [テスト](https://github.com/tokotoko7777/ahc-workspace/blob/2920bc508229a62f10b0070b68f3f1941fae75a4/tests/paired_coverage_reward_test.cpp) |
 | 積荷の現在の耐久余裕と、荷物追加後の移動可能距離を計算する | [`stack-durability-reserve.hpp`](https://github.com/tokotoko7777/ahc-workspace/blob/a4688d135b0ecabf49fe877895782ced3e0aa5ca/library/stack-durability-reserve.hpp) · AHC049 | [テスト](https://github.com/tokotoko7777/ahc-workspace/blob/a4688d135b0ecabf49fe877895782ced3e0aa5ca/tests/stack_durability_reserve_test.cpp) / [仕様](https://github.com/tokotoko7777/ahc-workspace/blob/a4688d135b0ecabf49fe877895782ced3e0aa5ca/docs/LIBRARY_REFERENCE.md) |
+| 同じ分類などの制約を守って、2点を挿入する位置を比較する | [`class-constrained-pair-insertion.hpp`](https://github.com/tokotoko7777/ahc-workspace/blob/4848abd431bd612b8ab15199f2f5562fe1598974/library/class-constrained-pair-insertion.hpp) · AHC059 | [テスト](https://github.com/tokotoko7777/ahc-workspace/blob/4848abd431bd612b8ab15199f2f5562fe1598974/tests/class_constrained_pair_insertion_test.cpp) / [仕様と使い方](https://github.com/tokotoko7777/ahc-workspace/blob/4848abd431bd612b8ab15199f2f5562fe1598974/docs/LIBRARY_REFERENCE.md) |
 
 ## 確率・統計・数値計算
 
