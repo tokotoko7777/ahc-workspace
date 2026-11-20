@@ -56,9 +56,10 @@
 | [AHC046](https://atcoder.jp/contests/ahc046/tasks/ahc046_a) | 着手・本番未判定 | **220,494**（絶対点） | 新規未調整30件 平均217.600手 | 本番150件・2秒、同一ケースの証拠なし | [停止ブロック](https://github.com/tokotoko7777/ahc-workspace/tree/00edc1ce4028926dcc2cfb8316e64994f3fe89bb)、[複数区間の探索](https://github.com/tokotoko7777/ahc-workspace/tree/8c258bffae710ee7b3764fa8f0da9e95d59a4f6d) |
 | [AHC047](https://atcoder.jp/contests/ahc047/tasks/ahc047_a) | 着手・本番未判定 | itigo、得点未確認 | 新規未調整24件 得点平均26,281.33 | 本番150件・2秒、同一ケースの証拠なし | [問題別ブランチ](https://github.com/tokotoko7777/ahc-workspace/tree/e8aa0d41b813933b676a6b0cb442f1e51e7a92bc)、[共有する文字列経路](https://github.com/tokotoko7777/ahc-workspace/tree/62f3f7888cb37d53f9c45bc289e04078ccf857d2) |
 | [AHC048](https://atcoder.jp/contests/ahc048/tasks/ahc048_a) | 凍結版：本番未達 | **1,129,730,769,846**（相対点） | **121,378,823,586**（本番2,000件・全件合法） | 本番2,000件・3秒、基準とseed列照合済み | [問題別ブランチ](https://github.com/tokotoko7777/ahc-workspace/tree/ad4f7e6bcdfa76f80a9b92052ea060f72085dc06)、[容量3](https://github.com/tokotoko7777/ahc-workspace/tree/2264494b2ec7fa3fa9cc1161c9cc7d3891649bcb)、[公式比較](https://github.com/tokotoko7777/ahc-workspace/tree/bd0d1fd309af7f9ba834e6688b8391a6afa2c3af) |
-| [AHC049](https://atcoder.jp/contests/ahc049/tasks/ahc049_a) | 着手・本番未判定 | Rafbill、得点未確認 | 未調整28件 平均5,167.64移動 | 本番150件・2秒、同一ケースの証拠なし | [問題別ブランチ](https://github.com/tokotoko7777/ahc-workspace/tree/a4688d135b0ecabf49fe877895782ced3e0aa5ca) |
-| [AHC050](https://atcoder.jp/contests/ahc050/tasks/ahc050_a) | 着手・本番未判定 | 確認中 | 開発比較準備中 | 確認中 | 検証中 |
-| AHC051〜074 | 未着手 | — | — | — | — |
+| [AHC049](https://atcoder.jp/contests/ahc049/tasks/ahc049_a) | 着手・本番未判定 | Rafbill、得点未確認 | 新規未調整28件 平均4,861.64移動 | 本番150件・2秒、同一ケースの証拠なし | [問題別ブランチ](https://github.com/tokotoko7777/ahc-workspace/tree/a4688d135b0ecabf49fe877895782ced3e0aa5ca)、[土台箱を増やす追試](https://github.com/tokotoko7777/ahc-workspace/tree/508d161add61b6185f17ab86fd2ce819d164009c) |
+| [AHC050](https://atcoder.jp/contests/ahc050/tasks/ahc050_a) | 着手・本番未判定 | yosupo、得点未確認 | 未調整20件 合計19,455,464 | 本番150件・2秒、同一ケースの証拠なし | [問題別ブランチ](https://github.com/tokotoko7777/ahc-workspace/tree/c1084c6814a6b1a98fa2b6de854a1a2941f09098) |
+| [AHC051](https://atcoder.jp/contests/ahc051/tasks/ahc051_a) | 着手・本番未判定 | **1,721,504,233,142**（相対点） | 未調整28件 混合誤差640,624,514 | 本番2,000件、公式ケース別基準を取得 | [問題別ブランチ](https://github.com/tokotoko7777/ahc-workspace/tree/c7a55c1984e3da4992f23c94bdb1a5430db232c4) |
+| AHC052〜074 | 未着手 | — | — | — | — |
 
 ### AHC001 の次の仮説
 
@@ -694,3 +695,15 @@
 
 [公式問題文](https://atcoder.jp/contests/ahc049/tasks/ahc049_a)。2秒 / 1,024 MiB、操作は16,000以下で耐久値を正に保つ。全搬出なら16,400−移動数の絶対点、本番150件。公式結果JSONの首位はRafbill、得点と同一ケースは未確認。
 [検証と実装](https://github.com/tokotoko7777/ahc-workspace/tree/a4688d135b0ecabf49fe877895782ced3e0aa5ca)。最短方向だけの積み方に対し、箱の追加と帰路の耐久性を毎回厳密にチェックして、少し離れた箱も幅14のビームで検討。dev28件6,426.14→5,077.00移動/件、未調整28件6,482.50→5,167.64（全56件改善、未調整中央値1,357移動短縮）。全112出力で公式・独立が一致し完了、最低耐久1・最大7,319操作・0.131841秒。問題別既定に採用。次は運搬の土台に選ぶ箱の候補を同予算で増やす。
+
+### AHC049 最下段の箱を複数候補から選ぶ
+
+[追試](https://github.com/tokotoko7777/ahc-workspace/tree/508d161add61b6185f17ab86fd2ce819d164009c)。各深さの幅14を1種類の土台箱に使う対照と、距離が異なる2種類に7ずつ使う案を比較。新規dev・未調整各28件すべて改善。未調整平均5,126.57→4,861.64移動、中央値243移動短縮、実際の評価回数も211,110→173,933。112出力で公式と独立が一致、最大0.099297秒。問題別既定に採用。次は2回の運搬の間で箱を入れ替え、両方の耐久余裕を厳密に確認する。
+
+### AHC050 岩を置いた後の生存率を3手先まで評価
+
+[公式問題文](https://atcoder.jp/contests/ahc050/tasks/ahc050_a)。40×40、2秒 / 1,024 MiB。方向を等確率で選び滑走し、岩に当たったときの脱落を含む期待生存長を最大化。絶対点150件合計、公式結果JSONの首位yosupoの値と同一ケースは未確認。[検証と実装](https://github.com/tokotoko7777/ahc-workspace/tree/c1084c6814a6b1a98fa2b6de854a1a2941f09098)。直近の脱落確率が最低になる岩の順序に対し、少数候補を3回分シミュレート。dev10件9,156,386→9,704,786、未調整20件18,411,827→19,455,464（全勝、+5.67%）。全60出力の公式・独立・C++内評価が一致、最大0.220秒未満。専用既定採用。次はすでに固定した岩の順序を一部交換し、後半の期待値がどこまで変わるかを逆向きに計算する。
+
+### AHC051 分岐の真の確率で選別機を選ぶ
+
+[公式問題文](https://atcoder.jp/contests/ahc051/tasks/ahc051_a)。交差しない分岐を配置し、正しい処理装置に着く確率を最大化。公式[ケース点CSV](https://img.atcoder.jp/ahc_standings/ahc051/result.csv)（SHA-256 `7c1b931d4c62deb3fd63d1a3401e398e9ecba0bffdc2d3439d6f58b2bf0ec838`）1,183人×2,000件の最小値相対点で、1位1,721,504,233,142を再現し公式結果JSONとも一致。[検証と実装](https://github.com/tokotoko7777/ahc-workspace/tree/c7a55c1984e3da4992f23c94bdb1a5430db232c4)。同じ5つの合法形状を使い、平均属性で選別機を割り当てる基準と、到着確率・後段の価値で選別機を選ぶ案を比較。dev28件635,654,296→609,971,541、未調整28件675,522,621→640,624,514（27勝1分、費用比中央値0.94965）。112出力が合法で公式・独立厳密計算が一致、最大0.103215秒。問題別既定に採用。次は一部の経路を再合流させる構造も検証する。本番未測定。
