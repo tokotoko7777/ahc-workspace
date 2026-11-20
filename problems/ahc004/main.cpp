@@ -1,6 +1,9 @@
 // AHC_SOURCE: examples/search/ahc004_genome_sa.cpp
 // Source repository: https://github.com/tokotoko7777/ahc-workspace
 // GCC提出用の最適化。診断時は -DAHC_DISABLE_GCC_OPTIMIZE で無効化。
+#if defined(AHC_ANCHOR_GEOMETRY) && (defined(AHC_CYCLE_SEED) || defined(AHC_CYCLE_SCOUT) || defined(AHC_CYCLE_SCOUT_CONTROL))
+#error Geometry alone: use unchanged regular startup for its fallback.
+#endif
 #if defined(AHC_CYCLE_SCOUT) || defined(AHC_CYCLE_SCOUT_CONTROL)
 #define AHC_CYCLE_SEED
 #define AHC_CYCLE_PAIRED_SCOUT
@@ -325,6 +328,9 @@ struct GenomeProblem {
 };
 // ===== ここまでが問題依存。時計・温度・採否・最良解保存はRunnerへ任せる =====
 
+#ifdef AHC_ANCHOR_GEOMETRY
+#include "anchor-congruence.hpp"
+#endif
 #ifdef AHC_CYCLE_SEED
 #include "observed-cycles.hpp"
 #endif
@@ -578,33 +584,7 @@ int main() {
   int cycle_attempts = 0, cycle_incumbents = 0;
 #endif
 
-  do {
-#ifdef AHC_CYCLE_SEED
-    bool used_cycles = false;
-#endif
-    Board board(n, string(n, '.'));
-#ifdef AHC_CONTIG_SEED
-    if(attempt%3==1)board=seed_from_contigs(n,targets,maximal_indices,random,4+(attempt/3)%3);
-#endif
-#ifdef AHC_CYCLE_SEED
-    if (attempt == 1 && timer.elapsed_ms() < GREEDY_END_MS - 18.0) {
-      const double deadline = timer.elapsed_ms() + 8.0;
-      vector<string> words;
-      vector<int> weights;
-      for (const auto& word : targets) {
-        words.push_back(word.text);
-        weights.push_back(word.frequency);
-      }
-      catalogue = ahc004::observed_cycles(n, words, weights,
-          20000, [&] { return timer.elapsed_ms() >= deadline; });
-    }
-    if (attempt % 3 == 2 && !catalogue.cycles.empty()) {
-      used_cycles = true;
-      ++cycle_attempts;
-      board = seed_from_cycles(n, target_count, catalogue.cycles, attempt / 3, timer,
-          min(GREEDY_END_MS, timer.elapsed_ms() + 6.0));
-    }
-#endif
+  const auto fill_words = [&](Board& board, int attempt) {
     vector<int> order = maximal_indices;
     vector<uint64_t> priority(target_count);
     for (int index : order) {
@@ -710,6 +690,36 @@ int main() {
       }
     }
 
+  };
+
+  do {
+#ifdef AHC_CYCLE_SEED
+    bool used_cycles = false;
+#endif
+    Board board(n, string(n, '.'));
+#ifdef AHC_CONTIG_SEED
+    if(attempt%3==1)board=seed_from_contigs(n,targets,maximal_indices,random,4+(attempt/3)%3);
+#endif
+#ifdef AHC_CYCLE_SEED
+    if (attempt == 1 && timer.elapsed_ms() < GREEDY_END_MS - 18.0) {
+      const double deadline = timer.elapsed_ms() + 8.0;
+      vector<string> words;
+      vector<int> weights;
+      for (const auto& word : targets) {
+        words.push_back(word.text);
+        weights.push_back(word.frequency);
+      }
+      catalogue = ahc004::observed_cycles(n, words, weights,
+          20000, [&] { return timer.elapsed_ms() >= deadline; });
+    }
+    if (attempt % 3 == 2 && !catalogue.cycles.empty()) {
+      used_cycles = true;
+      ++cycle_attempts;
+      board = seed_from_cycles(n, target_count, catalogue.cycles, attempt / 3, timer,
+          min(GREEDY_END_MS, timer.elapsed_ms() + 6.0));
+    }
+#endif
+    fill_words(board, attempt);
     const pair<int, int> score = count_score(board);
 #ifdef AHC_CYCLE_PAIRED_SCOUT
     if (used_cycles) {
@@ -736,6 +746,80 @@ int main() {
        << " cycle_visits=" << catalogue.visits << " cycle_capped=" << catalogue.capped
        << " cycle_attempts=" << cycle_attempts
        << " cycle_incumbents=" << cycle_incumbents << '\n';
+#endif
+
+#ifdef AHC_ANCHOR_GEOMETRY
+  // First finish and score the original starts above. Geometry then spends
+  // part of the existing wall-clock allowance, never replacing a better seed.
+  const auto ordinary_key = best_score;
+  constexpr double GEOMETRY_END_MS = 1000.0;
+  const auto past_geometry = [&] { return timer.elapsed_ms() >= GEOMETRY_END_MS; };
+  vector<string> words;
+  vector<int> weights;
+  for (const auto& target : targets) {
+    words.push_back(target.text);
+    weights.push_back(target.frequency);
+  }
+  const double extraction_end = timer.elapsed_ms() + 12.0;
+  auto closed = ahc004::observed_cycles(n, words, weights, 28000,
+      [&] { return past_geometry() || timer.elapsed_ms() >= extraction_end; });
+  // Beyond 42 cycles, do not let false positives make the distinct matching
+  // lower bound impossible. The evidence ranking already prefers read support.
+  if (closed.cycles.size() > 40) closed.cycles.resize(40);
+  int sweep_visits=0, fourth_visits=0, realized=0, kept_rows=0, kept_cols=0;
+  bool sweep_cap=false, fourth_cap=false;
+  pair<int,int> raw{-1,-1}, filled_key{-1,-1};
+  int supported_reads=0;
+  if (closed.cycles.size() >= 28) {
+    vector<bool> seen(target_count);
+    for (const auto& c : closed.cycles) for (int id : c.words) seen[id]=true;
+    for (int id=0; id<target_count; ++id) if (seen[id]) supported_reads+=weights[id];
+  }
+  if (closed.cycles.size() >= 28 && 4*supported_reads >= 3*m && !past_geometry()) {
+    const double triple_end = min(GEOMETRY_END_MS-50.0, timer.elapsed_ms()+175.0);
+    auto anchors = ahc004::three_parallel_anchors(closed.cycles, 1368000,
+         [&] {return timer.elapsed_ms() >= triple_end;}, 768);
+    const double four_end = GEOMETRY_END_MS-60.0;
+    auto fourth = ahc004::fourth_row_extensions(closed.cycles, anchors.layouts,
+         15000000, [&] {return timer.elapsed_ms() >= four_end;});
+    sweep_visits=anchors.examined;
+    fourth_visits=fourth.examined;
+    sweep_cap=anchors.capped;
+    fourth_cap=fourth.capped;
+    for (const auto& f : fourth.ranked) {
+      if (realized>=4 || past_geometry()) break;
+      auto geometry=ahc004::realize_anchor(closed.cycles,anchors.layouts[f.parent],f,past_geometry);
+      if (geometry.board.empty()) continue;
+      ++realized;
+      raw=max(raw,count_score(geometry.board));
+      if(past_geometry()) break;
+      fill_words(geometry.board, attempt+realized);
+      auto key=count_score(geometry.board);
+      if(key>filled_key) {
+        filled_key=key;
+        kept_rows=geometry.rows;
+        kept_cols=geometry.columns;
+      }
+      if(key>best_score) {
+        best_score=key;
+        best_board=move(geometry.board);
+      }
+    }
+  }
+  cerr << "geometry_cycles=" << closed.cycles.size()
+       << " geometry_extraction_capped=" << closed.capped
+       << " geometry_supported=" << supported_reads << " geometry_words=" << m
+       << " geometry_sweep_visits=" << sweep_visits
+       << " geometry_sweep_cap=" << sweep_cap
+       << " geometry_fourth_visits=" << fourth_visits
+       << " geometry_fourth_cap=" << fourth_cap
+       << " geometry_realized=" << realized
+       << " geometry_rows=" << kept_rows << " geometry_cols=" << kept_cols
+       << " geometry_regular=" << ordinary_key.first << " geometry_regular_empty=" << ordinary_key.second
+       << " geometry_raw=" << raw.first << " geometry_raw_empty=" << raw.second
+       << " geometry_filled=" << filled_key.first << " geometry_filled_empty=" << filled_key.second
+       << " geometry_selected=" << (best_score>ordinary_key)
+       << " geometry_ms=" << timer.elapsed_ms() << '\n';
 #endif
   GenomeProblem problem(n, m, targets);
 #ifdef AHC_CYCLE_PAIRED_SCOUT
