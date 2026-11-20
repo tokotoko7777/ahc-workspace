@@ -4,6 +4,9 @@ using namespace std;
 #ifndef AHC064_PACK
 #define AHC064_PACK 2
 #endif
+#ifndef AHC064_ORDER
+#define AHC064_ORDER 1
+#endif
 namespace {
 constexpr int R=10;
 struct Move{int type,i,j,k;};
@@ -27,17 +30,30 @@ struct Solver{
     }
     work.push_back({type,i,j,k});
   }
-  void build(){
+  void build(int policy=0,int trial=0){
+    mt19937 rng(649011+trial);
+    array<int,R> target{},door_load{},yard_load{};
     for(int i=0;i<R;++i)add(0,i,i,10);
-    for(int goal=0;goal<R;++goal){
-      int value=10*goal;
-      while(value<10*goal+10){
-        int j=-1,block=-1;
+    for(int finished=0;finished<100;){
+      int goal=-1,j=-1,block=-1;
+      int best=INT_MIN;
+      for(int i=0;i<R;++i)if(target[i]<10){
+        int value=10*i+target[i];
         for(int z=0;z<R;++z){
-          auto p=ranges::find(side[z],value);
-          if(p!=side[z].end()){j=z;block=p-side[z].begin();break;}
+          const auto it=ranges::find(side[z],value);
+          if(it==side[z].end())continue;
+          const int blocked=it-side[z].begin();
+          int chain=1;
+          while(chain<side[z].end()-it&&target[i]+chain<10&&it[chain]==value+chain)++chain;
+          int quality=policy?int(rng()%109):-i;
+          if(policy==2)quality+=(-10-(trial%4)*7)*blocked+45*chain
+              -((trial/4)%3)*yard_load[z]-((trial/12)%3)*door_load[i];
+          if(quality>best){best=quality;goal=i;j=z;block=blocked;}
+          break;
         }
-        assert(j>=0);
+      }
+      assert(goal>=0&&j>=0);
+      int value=10*goal+target[goal];
         vector<pair<int,int>> buffer;
         for(int k=0;k<R&&block>0;++k){
           // Favor dep near this siding to leave shorter crossing spans.
@@ -50,9 +66,9 @@ struct Solver{
         assert(!side[j].empty()&&side[j][0]==value);
         int k=1;
         while(k<int(side[j].size())&&value+k<10*goal+10&&side[j][k]==value+k)++k;
-        add(1,goal,j,k);value+=k;
+        add(1,goal,j,k);target[goal]+=k;finished+=k;
+        yard_load[j]+=1+2*int(buffer.size());++door_load[goal];
         for(auto [i,take]:buffer|views::reverse)add(0,i,j,take);
-      }
     }
     for(int i=0;i<R;++i){
       assert(dep[i].size()==10&&side[i].empty());
@@ -100,6 +116,37 @@ struct Solver{
     }
     return result;
   }
+  Schedule completed()const{
+    auto first=pack(false),second=pack(true);
+    return second.size()<first.size()?move(second):move(first);
+  }
+  void portfolio(){
+    Solver incumbent=*this;
+    incumbent.build();
+    auto ans=incumbent.completed();
+    const int frozen=ans.size();
+    int chosen_ops=incumbent.work.size(), candidates=0;
+    for(int trial=0;trial<32;++trial){
+      Solver alternate=*this;
+      alternate.build(AHC064_ORDER,trial);
+      auto next=alternate.completed();
+      if(next.size()<ans.size()){
+        ans=move(next);
+        chosen_ops=alternate.work.size();
+      }
+      ++candidates;
+    }
+    cerr<<"frozen="<<frozen<<" ops="<<chosen_ops<<" trials="<<candidates<<" turns="<<ans.size()<<'\n';
+    output(ans);
+  }
+  static void output(const Schedule& ans){
+    assert(ans.size()<=4000);
+    cout<<ans.size()<<'\n';
+    for(const auto& group:ans){
+      cout<<group.size()<<'\n';
+      for(auto [t,i,j,k]:group)cout<<t<<' '<<i<<' '<<j<<' '<<k<<'\n';
+    }
+  }
   void print(){
     auto baseline=serial(),ans=baseline;
     int cardinal=0,critical=0;
@@ -114,15 +161,13 @@ struct Solver{
     assert(ans.size()<=4000);
     cerr<<"base="<<baseline.size()<<" ops="<<work.size()<<" card="<<cardinal
         <<" critical="<<critical<<" turns="<<ans.size()<<'\n';
-    cout<<ans.size()<<'\n';
-    for(const auto& group:ans){
-      cout<<group.size()<<'\n';
-      for(auto [t,i,j,k]:group)cout<<t<<' '<<i<<' '<<j<<' '<<k<<'\n';
-    }
+    output(ans);
   }
 };
 }
 int main(){
   ios::sync_with_stdio(false);cin.tie(nullptr);
-  Solver game;game.read();game.build();game.print();
+  Solver game;game.read();
+  if(AHC064_ORDER)game.portfolio();
+  else{game.build();game.print();}
 }

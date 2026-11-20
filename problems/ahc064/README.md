@@ -59,7 +59,7 @@ as an explicit control.
 p=problems/ahc064
 d=$(mktemp -d)
 for i in 0 1 2; do
-  g++ -std=c++23 -O3 -DAHC064_PACK=$i "$p/main.cpp" -o "$d/arm$i"
+  g++ -std=c++23 -O3 -DAHC064_ORDER=0 -DAHC064_PACK=$i "$p/main.cpp" -o "$d/arm$i"
 done
 python "$p/benchmark.py" /path/to/gen /path/to/vis \
   "$d/arm0" "$d/arm1" "$d/arm2" "$d/results.csv"
@@ -67,4 +67,43 @@ python scripts/bundle.py "$p/main.cpp" -o "$d/submission.cpp"
 g++ -std=c++23 -O3 "$d/submission.cpp" -o "$d/submission"
 g++ -std=c++23 -O3 tests/noncrossing_matching_test.cpp -o "$d/match-test"
 "$d/match-test"
+```
+
+## Follow-up: change the extraction order before packing
+
+Interleave the next requested car from each unfinished departure. The
+fixed control remains the original departure-major extraction order.
+The two search arms each construct 32 additional full schedules and
+score each with the unchanged exact cardinality/critical-path packers.
+One arm picks a pending departure uniformly from maximum seeded random
+priority. The guided arm also uses blocked prefix, adjacent sorted run and
+individual track load; it uses the same number of true complete evaluations.
+Both keep the fixed control as a fallback.
+
+| Fresh set | Frozen turns ↓ | Random orders ↓ | Guided orders ↓ |
+|---|---:|---:|---:|
+| Dev (30) | 128.900 | 95.400 | 101.567 |
+| Holdout (30) | 125.800 | 93.833 | 101.067 |
+
+Random beats frozen on all 60. Guided beats random only 1 / 1 / 28 on
+holdout despite requiring fewer individual operations (241.3 vs 244.0).
+The discrepancy suggests parallel interference dominates simple move count.
+Median walls were .00700 s and .00702 s for the two 32-trial arms on
+holdout. All 180 fully solved and passed official plus independent
+capacity and crossing replay, max .02161 s. Random becomes the branch
+default; the guided policy remains a diagnostic. [Logs](benchmark-order-results.csv).
+
+Next optimize a seed/order encoding with **true packed turns** and
+explicit resource conflicts in the ranking, rather than favor easy
+extractions locally. A larger fixed budget of random orders is the
+necessary control.
+
+```sh
+p=problems/ahc064
+d=$(mktemp -d)
+for i in 0 1 2; do
+  g++ -std=c++23 -O3 -DAHC064_ORDER=$i "$p/main.cpp" -o "$d/arm$i"
+done
+python "$p/benchmark_order.py" /path/to/gen /path/to/vis \
+  "$d/arm0" "$d/arm1" "$d/arm2" "$d/results.csv"
 ```
