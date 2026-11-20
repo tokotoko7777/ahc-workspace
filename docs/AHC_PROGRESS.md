@@ -11,7 +11,7 @@
 | [AHC001](https://atcoder.jp/contests/ahc001/tasks/ahc001_a) | 本番 1,000 件完走・未達 | **993,823,071,683** 点（[AtCoder 提供の順位データ](https://huggingface.co/datasets/SakanaAI/ALE-Bench/blob/main/ahc001.zip)） | 凍結 v64: **993,411,282,631** 点 | 本番公開シード全 1,000 件・公式採点。最長 4.838 秒（ローカル） | [codex/ahc001-coordinate-slide-20261120](https://github.com/tokotoko7777/ahc-workspace/tree/codex/ahc001-coordinate-slide-20261120) |
 | [AHC002](https://atcoder.jp/contests/ahc002/tasks/ahc002_a) | 既存版から着手・未判定 | **6,255,977** 点（[AtCoder 提供の順位データ](https://huggingface.co/datasets/SakanaAI/ALE-Bench/blob/main/ahc002.zip)） | V10（未調整 20 件 1,254,587） | 本番 100 件。通常配布の 0–99 は別ケース | [codex/ahc002-corridor-repair-20261120](https://github.com/tokotoko7777/ahc-workspace/tree/codex/ahc002-corridor-repair-20261120) |
 | [AHC003](https://atcoder.jp/contests/ahc003/tasks/ahc003_a) | 本番 3,000 件を評価中・未判定 | **2,926,767,743,437** 点（[AtCoder 提供の順位データ](https://huggingface.co/datasets/SakanaAI/ALE-Bench/blob/main/ahc003.zip)） | 既存版を凍結 | 公式対話テスタ、本番公開シード 3,000 件、2 秒 | [codex/ahc003-probe-design-20261120](https://github.com/tokotoko7777/ahc-workspace/tree/codex/ahc003-probe-design-20261120) |
-| AHC004 | 既存使用例から着手・未判定 | 確認中 | — | — | 検証中 |
+| [AHC004](https://atcoder.jp/contests/ahc004/tasks/ahc004_a) | ローカル改善・本番未判定 | **7,321,305,762** 点（[AtCoder 提供の順位データ](https://huggingface.co/datasets/SakanaAI/ALE-Bench/blob/main/ahc004.zip)） | 周期パターン初期化・未調整 10 件で平均 +1,847,067 点 | 本番 100 件。通常配布の 0–99 は別ケース | [codex/ahc004-contig-seed-20261120](https://github.com/tokotoko7777/ahc-workspace/tree/codex/ahc004-contig-seed-20261120) |
 | AHC005〜074 | 未着手 | — | — | — | — |
 
 ### AHC001 の次の仮説
@@ -78,3 +78,10 @@
 - [実験と再現手順](https://github.com/tokotoko7777/ahc-workspace/blob/0d42d1839a9ff4a1f35b2830ea4b2e2eeba682c4/problems/ahc003/README.md)。既存の経路より少し高い程度の候補に限定して、観測から推定がどれだけ進むかも評価した。
 - スコア差（候補−既存）: 開発 16 件 −10,833,676、未調整 24 件 +51,063,960、追加の独立確認 24 件 −21,549,158。判定閾値を変えず追加確認は不合格、既存解を保持。128 出力すべてで対話テスタと独立検査が一致。C++23、単一ファイル、汎用部品の乱択 1,000 件比較を通過。
 - 既存解を凍結し、同じ公式対話テスタと本番公開シード 3,000 件で評価中。凍結バイナリ SHA-256 `a78c04bdaae066bee7b5e6458106b044e79179e606f607152adb11b4ad76e539`。本番結果は開発には使わない。AHC004 の着手準備も開始。
+
+### AHC004 周期付き文字列の重なりから初期配置を作る
+
+- [実装・ケース別点・再現手順](https://github.com/tokotoko7777/ahc-workspace/blob/74c0189dc1bea65370a25ee45a0b74e5b8ddd591/problems/ahc004/README.md)。文字列同士の重なりと相対オフセットから、矛盾しない周期パターンを作ってから盤面へ置き、既存 SA を同じ予算で適用する。
+- 開発用 10 件で平均 +2,185,938 点（8 勝）、未調整 10 件で平均 +1,847,067 点（5 勝 5 敗、中央値 +2,062,629 点）。全 40 出力で公式採点と独立検査が一致。最大 2.786604 秒。候補は問題別ブランチの通常ビルドに保存し、既存の使用例と main は変更しない。単一ファイル C++23 と汎用部品を検証済み。
+- [公式問題文](https://atcoder.jp/contests/ahc004/tasks/ahc004_a) は 100 ケース、各ケース整数点を合計、いずれかが失敗した提出は 0 点、3 秒。配布ローカルケースと本番は異なるので、順位データの 7,321,305,762 点とは未比較。配布した順位アーカイブ SHA-256 `2c43b467ddfabfa774306c350f397a272f1b4ae6023066a0c44ea93fe62a42c8` は配布元メタデータと一致。
+- 次は行の周期シフト・交換で平行方向の語を保ちつつ、直交方向を改善できるか同じ初期配置で検証する。
