@@ -56,10 +56,51 @@ and verify that no frozen cell is moved.
 ```sh
 p=problems/ahc068
 d=$(mktemp -d)
-g++ -std=c++23 -O3 -DAHC068_STRIPS=0 "$p/main.cpp" -o "$d/base"
+g++ -std=c++23 -O3 -DAHC068_WIDEN=0 -DAHC068_STRIPS=0 "$p/main.cpp" -o "$d/base"
 python scripts/bundle.py "$p/main.cpp" -o "$d/submission.cpp"
-g++ -std=c++23 -O3 "$d/submission.cpp" -o "$d/strips"
+g++ -std=c++23 -O3 -DAHC068_WIDEN=0 "$d/submission.cpp" -o "$d/strips"
 python "$p/benchmark.py" /path/to/gen /path/to/vis "$d/base" "$d/strips" "$d/results.csv"
 g++ -std=c++23 -O3 tests/half_swap_interval_test.cpp -o "$d/test"
 "$d/test"
+```
+
+## Follow-up: perpendicular expansion, equal shape evaluation
+
+The inherited route is always retained as fallback. Both additional arms
+use the same active half-strip routing and wall-aware shortest-path
+distances. For each strip start, they evaluate the same adjacent strips
+up to three away in each perpendicular direction. Every included strip
+must be fully active and have no along/across internal wall. Choose the
+best positive cumulative collateral gain separately on both sides, and
+add this to the priority of a strip's starting offset. The narrow control
+uses this extra computation to choose the same best offset, but executes
+only its main strip. The widen arm executes the full legal rectangle,
+keeping the target card's exact planned swap. This isolates collateral
+execution instead of comparing against a cheaper offset search.
+
+| Fresh cases | Frozen ops ↓ | Narrow score-only ops ↓ | Wide executed ops ↓ |
+|---|---:|---:|---:|
+| Dev (26) | 1804.269 | 1786.154 | 1606.115 |
+| Holdout (26) | 1641.077 | 1626.269 | 1485.500 |
+
+Wide beats both on all 52 cases; holdout median gain 129 vs the narrow
+control. Mean held-out collateral probes 4061 wide vs 4640 control; they
+diverge after swaps and wide finishes earlier, but cap and per-offset
+legality/potential computations match. Medians .00765 s and .00791 s.
+All 156 solutions sorted fully with exact official scoring and independent
+wall and permutation replay. Max wall .015539 s; widening is default.
+[Logs](benchmark-rectangle-results.csv).
+
+Next use a short global preprocessing sweep of net-beneficial rectangle
+swaps before fixing any cell, then compare against an equal-work sweep with
+size-one orthogonal dimensions only. Protect a full legal fallback.
+
+```sh
+p=problems/ahc068
+d=$(mktemp -d)
+for i in 0 1 2; do
+  g++ -std=c++23 -O3 -DAHC068_WIDEN=$i "$p/main.cpp" -o "$d/arm$i"
+done
+python "$p/benchmark_rectangles.py" /path/to/gen /path/to/vis \
+  "$d/arm0" "$d/arm1" "$d/arm2" "$d/results.csv"
 ```
