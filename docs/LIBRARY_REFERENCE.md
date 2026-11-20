@@ -2014,3 +2014,21 @@ sort(points.begin(), points.end(), [](const Point& a, const Point& b) {
 
 `bits=10` なら各座標は `0..1023` です。厳密な最近傍順ではありませんが、空間的に
 まとまったcluster作成、query順、cache localityの改善候補を1行のkeyで作れます。
+
+## Nonbacktracking path
+
+ヘッダ: [`nonbacktracking-path.hpp`](../library/nonbacktracking-path.hpp)
+
+直前の移動をすぐ反転できないグラフで、条件を満たす頂点への最短経路を返します。
+探索状態は (直前の頂点, 現在位置)。必要な出力は移動先の列だけです。
+解なしは `nullopt`、開始時点で条件を満たす場合は空の経路を返します。
+
+```cpp
+auto path = shortest_nonbacktracking_path(graph, prev, current,
+    [&](int v) { return v < shop_count; });
+```
+
+直前の頂点がないときは `prev=-1`。各有向辺状態を一度だけ処理します。
+状態番号の配列を持つためメモリ O(頂点数²) で、小規模グラフ向け。
+[AHC060のフォールバック](../problems/ahc060/main.cpp) と
+[層ごとの愚直到達判定との比較テスト](../tests/nonbacktracking_path_test.cpp)。
