@@ -19,6 +19,19 @@
 | 重複を含む被覆・確率的な行動列評価 | [CoverageCounter](#coveragecounter)、[ForwardBackwardDP](#forwardbackwarddp) |
 | 追加の探索・補助部品 | [ActionBeam・LNS・ILS・Chokudai・MCTS・照合・計測](#追加の探索補助部品) |
 
+## 独立なベルヌーイ試行の成功回数分布
+
+ヘッダ: [`bernoulli-count-distribution.hpp`](../library/bernoulli-count-distribution.hpp)。
+成功確率が同じでなくても、`pmf[k]` にちょうど `k` 回成功する確率を返す。
+試行を追加するたびに後ろから更新する。時間O(n²)、メモリO(n)。
+
+```cpp
+auto pmf = bernoulli_count_distribution({0.2, 0.7});
+assert(abs(pmf[1] - 0.62) < 1e-12);
+```
+
+[AHC016の辺反転後の次数分布](../problems/ahc016/main.cpp)と[全事象の列挙テスト](../tests/bernoulli_count_distribution_test.cpp)を参照。
+
 ## CoverageCounter
 
 ヘッダ: [`coverage-counter.hpp`](../library/coverage-counter.hpp)
