@@ -2014,3 +2014,23 @@ sort(points.begin(), points.end(), [](const Point& a, const Point& b) {
 
 `bits=10` なら各座標は `0..1023` です。厳密な最近傍順ではありませんが、空間的に
 まとまったcluster作成、query順、cache localityの改善候補を1行のkeyで作れます。
+
+## Periodic Closest Approach
+
+ヘッダ: [`periodic-closest-approach.hpp`](../library/periodic-closest-approach.hpp) /
+実例: [AHC057 の時系列結合](../problems/ahc057/main.cpp) /
+[総当たり突合のテスト](../tests/periodic_closest_approach_test.cpp)。
+
+長方形トーラスで、相対位置が毎ステップ一定速度で動くときの整数時刻の最近接です。
+結果は二乗距離と、同値なら最も早い時刻です（浮動小数点誤差を除く）。
+
+```cpp
+auto near = periodic_closest_approach(97, 20, 2, 0, 100, 80, 0, 30);
+// xが周期100、yが周期80。time == 1, squared_distance == 401。
+```
+
+端点間で最寄りになりうる周期コピーを各軸で列挙し、コピーへの距離二乗を
+最小にする連続時刻の床・天井だけを比較します。時間幅そのものではなく、
+各軸で通過する周期コピー数の積に比例します。周期は正、時刻区間は閉区間で、
+コピーの番号は `long long` に収まる必要があります。速度が変わった場合は
+変化時刻からの相対位置・速度で別に呼び出してください。

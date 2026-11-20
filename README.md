@@ -79,6 +79,7 @@ Windowsの既存クローンで改行差分が出る場合は [改行の確認](
 | 解の一部を壊して作り直したい | [LNSの雛形](template/lns/destroy-repair.cpp) | [AHC002: 経路の部分修復](examples/search/ahc002_destroy_repair_lns.cpp)、[AHC059: ペア再挿入](examples/search/ahc059_lns.cpp) |
 | 行動列を評価するたび、先頭から再実行している | [PrefixReplayの雛形](template/sa/prefix-replay.cpp) | [AHC058: 購入列の途中から再実行](examples/search/ahc058_prefix_sa.cpp) |
 | 有限状態の確率遷移で1操作の変更を速く評価したい | [ForwardBackwardDPの雛形](template/sa/forward-backward.cpp) | 過去問の完成例は未追加。[APIと適用条件](docs/LIBRARY_REFERENCE.md#forwardbackwarddp) |
+| 周期境界で移動する二点の最近接時刻を調べたい | [Periodic Closest Approach](docs/LIBRARY_REFERENCE.md#periodic-closest-approach) | [AHC057 の時系列結合](problems/ahc057/main.cpp) |
 | 候補の先を仮実行して、最初の1手だけ選びたい | [決定的先読みの雛形](template/rollout/deterministic.cpp) | [AHC026](examples/search/ahc026_deterministic_rollout.cpp)、[AHC058](examples/search/ahc058_deterministic_rollout.cpp) |
 
 `problems/ahcXXX/` が空でも、`examples/search/` にその回の実装がある場合があります。
@@ -86,7 +87,7 @@ Windowsの既存クローンで改行差分が出る場合は [改行の確認](
 
 ## 構成
 
-- `library/`: 再利用できるC++ヘッダ101個。
+- `library/`: 再利用できるC++ヘッダ102個。
 - `template/`: 手法ごとに分類した10本の雛形。選んだ1本を問題用の `main.cpp` にコピーします。
 - `examples/`: 実行できる使用例。
 - `scripts/bundle.py`: 提出用1ファイルへの任意の展開コマンド。
