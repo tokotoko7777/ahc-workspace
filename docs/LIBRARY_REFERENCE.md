@@ -2014,3 +2014,23 @@ sort(points.begin(), points.end(), [](const Point& a, const Point& b) {
 
 `bits=10` なら各座標は `0..1023` です。厳密な最近傍順ではありませんが、空間的に
 まとまったcluster作成、query順、cache localityの改善候補を1行のkeyで作れます。
+
+## Ragged Layer Shortest Path
+
+ヘッダ: [`ragged-layer-shortest-path.hpp`](../library/ragged-layer-shortest-path.hpp)
+
+各段で候補数が異なり、隣接段だけに遷移する最短路と選んだ候補を復元します。
+初期値と辺コストは関数で渡し、辺を列挙・保存する必要はありません。
+各段に1候補以上、段間の全ての辺に有限コストを仮定します。
+DAGなので負のコストも扱えます。
+
+```cpp
+auto [cost, states] = ragged_layer_shortest_path<int>(
+    {2, 3, 1},
+    [](int q) { return q; },
+    [](int layer, int previous, int next) { return abs(previous - next); });
+```
+
+[AHC028](../problems/ahc028/main.cpp) では、文字ごとに候補キーだけを集め、
+固定した文字列の最小打鍵コストと座標列を求めます。
+[全列挙との差分テスト](../tests/ragged_layer_shortest_path_test.cpp) もあります。
