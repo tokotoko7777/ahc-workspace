@@ -34,7 +34,7 @@
 | [AHC024](https://atcoder.jp/contests/ahc024/tasks/ahc024_a) | 着手・本番未判定 | **335,417**（絶対点） | 再始動版：新規未調整24件 平均2,065.79 | 本番150件・2秒、同一ケースの証拠なし | [問題別ブランチ](https://github.com/tokotoko7777/ahc-workspace/tree/c5b3b9f3d88b74ff5f9fa67446d16555dd509ef1)、[多様な再始動](https://github.com/tokotoko7777/ahc-workspace/tree/a0aa3ad5ff0cf55d5f3f6ea9c8714d8ca19bcfe9) |
 | [AHC025](https://atcoder.jp/contests/ahc025/tasks/ahc025_a) | 着手・本番未判定 | **492,832,027,444**（相対点） | 未調整32件 77,452,712（絶対点・低い方が良い） | 本番5,000件・2秒、各参加者のケース別結果が必要 | [問題別ブランチ](https://github.com/tokotoko7777/ahc-workspace/tree/21034a6404bafe091bac193b8315b0ffd1ed0686)、[低Q追試](https://github.com/tokotoko7777/ahc-workspace/tree/93cfb59980bf24166658b1b40f60363cd8e63cf3) |
 | [AHC026](https://atcoder.jp/contests/ahc026/tasks/ahc026_a) | 着手・本番未判定 | **1,423,183**（絶対点） | 既存法：未調整16件 平均9,344.63 | 本番150件・2秒、同一ケースの証拠なし | [問題別ブランチ](https://github.com/tokotoko7777/ahc-workspace/tree/9d10bdadaa08a7ca84e01228951b4e965082f00b) |
-| [AHC027](https://atcoder.jp/contests/ahc027/tasks/ahc027_a) | 着手・本番未判定 | **1,996,375,186,737**（相対点） | 開発比較準備中 | 本番2,000件・2秒、ケース別基準が必要 | 検証中 |
+| [AHC027](https://atcoder.jp/contests/ahc027/tasks/ahc027_a) | 着手・本番未判定 | **1,996,375,186,737**（相対点） | 未調整24件 568,819,988（絶対点・低い方が良い） | 本番2,000件・2秒、ケース別基準が必要 | [問題別ブランチ](https://github.com/tokotoko7777/ahc-workspace/tree/3ec2d6d02ab6aea5b461002201803016ce56ecb8) |
 | AHC028〜074 | 未着手 | — | — | — | — |
 
 ### AHC001 の次の仮説
@@ -396,3 +396,7 @@
 ### AHC027 本番条件
 
 [公式問題文](https://atcoder.jp/contests/ahc027/tasks/ahc027_a)。2秒 / 1,024 MiB。全マスを訪れ原点に戻る長さ10万以下の閉路を繰り返したときの平均汚れを丸めた絶対値を最小化。本番2,000件の相対点は当時のケース別最小値に依存し、その値は未取得。1位1,996,375,186,737は[AtCoder提供の順位・得点データ](https://huggingface.co/datasets/SakanaAI/ALE-Bench/blob/main/ahc027.zip)で確認（SHA-256 `f557d24377e00d105d6d2a0c5c5413166b6fe87662bdea5b4f163e0b64f21e1b`）。DFS周回を基準に、立ち寄り追加・削除と経路の反転を実際の訪問間隔で比べる。
+
+### AHC027 巡回の訪問間隔を直接評価する
+
+[比較と実装](https://github.com/tokotoko7777/ahc-workspace/blob/3ec2d6d02ab6aea5b461002201803016ce56ecb8/problems/ahc027/README.md)。同じ48本のDFS閉路から、追加予算でDFSを生成し直す版と、立ち寄り追加・区間の短絡や反転を訪問間隔の正確な費用で選ぶ版を比較（両方440ms上限）。dev12件373,539,272→305,718,347（11勝）、未調整24件623,349,268→568,819,988（−8.75%、19勝）。72出力は公式visと、2周期分の汚れを逐次再生する独立検証が一致、最大0.456秒。問題別既定に採用。公式本番2,000件のseedはハッシュのみ確認、ケース別基準値未取得。次は汚れの増加率が高く訪問間隔の長いマスを選び、間隔の中央近くに短い寄り道を足す。
