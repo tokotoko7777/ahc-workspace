@@ -141,3 +141,6 @@ python3 problems/ahc001/benchmark.py mincut-headroom/in bench-mincut-headroom --
 真横・上下の間の順序制約を切り替え、両軸のmin-cutをかけた後で再拡張」です。
 既存の順序を固定したままの移動や探索時間の微調整とは別の候補で、
 試行全体を公式スコアで採否判定します。
+
+単一ブロッカー縮小の試行は、[独立の比較診断](experiments/topology_v1/README.md)
+に再現コードと結果を保存しました。開発8件で平均+511.25点に留まり、不採用です。
