@@ -10,6 +10,12 @@
 #include <utility>
 #include <vector>
 
+#if !defined(AHC063_STATIC) && !defined(AHC063_NO_BRANCH) && !defined(AHC063_ROUTE_CONTROL)
+#ifndef AHC063_ROUTE_COLOR
+#define AHC063_ROUTE_COLOR
+#endif
+#endif
+
 using Clock=std::chrono::steady_clock;
 struct RNG {
     uint32_t x;
@@ -65,13 +71,15 @@ struct Problem {
         for(int i=0;i<int(s.body.size());++i) r[s.body[i]]=std::max(r[s.body[i]],int(s.body.size())-i);
         return r;
     }
-    std::pair<std::vector<int>,bool> static_path(const State& s,int wanted,RNG& rand) const {
+    std::pair<std::vector<int>,bool> static_path(const State& s,int wanted,RNG& rand,
+            std::vector<std::vector<int>>* alternatives=nullptr) const {
         std::array<int,256> prev,action,dist;
         prev.fill(-2);
         std::array<int,256> q{};
         auto free_at=release(s);
         int root=s.body.front(),begin=0,end=1,pick=-1,best=1<<30;
         prev[root]=-1;q[0]=root;dist[root]=0;
+        std::vector<std::pair<int,int>> targets;
         const int rot=rand.next()%4;
         while(begin<end) {
             int at=q[begin++];
@@ -82,15 +90,24 @@ struct Problem {
                 if(s.food[b]) {
                     int value=8*dist[b]+int(rand.next()%7)+(s.food[b]==wanted ? 0 : 10000);
                     if(value<best) pick=b,best=value;
+                    if(alternatives && s.food[b]==wanted) targets.emplace_back(value,b);
                 } else q[end++]=b;
             }
         }
         if(pick<0) return {};
         bool correct=s.food[pick]==wanted;
-        std::vector<int> path;
-        for(int b=pick;prev[b]>=0;b=prev[b]) path.push_back(action[b]);
-        std::reverse(path.begin(),path.end());
-        return {path,correct};
+        auto make_path=[&](int cell) {
+            std::vector<int> path;
+            for(int b=cell;prev[b]>=0;b=prev[b]) path.push_back(action[b]);
+            std::reverse(path.begin(),path.end());
+            return path;
+        };
+        if(alternatives) {
+            std::sort(targets.begin(),targets.end());
+            for(unsigned i=0;i<std::min<size_t>(4,targets.size());++i)
+                alternatives->push_back(make_path(targets[i].second));
+        }
+        return {make_path(pick),correct};
     }
     std::vector<int> moving_path(const State& s,int wanted,Clock::time_point deadline) const {
         const auto free_at=release(s);
@@ -129,6 +146,28 @@ struct Problem {
         }
         return {};
     }
+    std::vector<int> branch(const State& s,const std::vector<std::vector<int>>& paths,
+                            bool next_color) const {
+        if(paths.empty()) return {};
+        int value=1<<30;
+        std::vector<int> chosen=paths[0];
+        for(auto& path:paths) {
+            State next=s;
+            bool ok=true;
+            for(int d:path) ok=ok && apply(next,d);
+            if(!ok || next.colors.size()!=s.colors.size()+1) continue;
+            int result=12*int(path.size());
+            if(int(next.colors.size())<m) {
+                int want=next_color ? goal[next.colors.size()] : -1;
+                RNG deterministic{763323};
+                const auto [exit,matched]=static_path(next,want,deterministic);
+                result+=exit.empty() ? 140 : 6*int(exit.size());
+                if(next_color && !matched) result+=34;
+            }
+            if(result<value) value=result,chosen=path;
+        }
+        return chosen;
+    }
     std::pair<int,std::string> solve() const {
         const auto deadline=Clock::now()+std::chrono::milliseconds(1600);
         int best=score(initial,0);
@@ -140,7 +179,19 @@ struct Problem {
             int stall=0,best_run=score(s,0);
             while(int(ops.size())<1700 && stall<180 && int(s.colors.size())<m && Clock::now()<deadline) {
                 const int wanted=goal[s.colors.size()];
+#if defined(AHC063_ROUTE_CONTROL) || defined(AHC063_ROUTE_COLOR)
+                std::vector<std::vector<int>> alternatives;
+                auto [path,matched]=static_path(s,wanted,rnd,&alternatives);
+                if(alternatives.size()>1) {
+#ifdef AHC063_ROUTE_COLOR
+                    path=branch(s,alternatives,true);
+#else
+                    path=branch(s,alternatives,false);
+#endif
+                }
+#else
                 auto [path,matched]=static_path(s,wanted,rnd);
+#endif
 #ifndef AHC063_STATIC
                 if(!matched) {
                     auto moving=moving_path(s,wanted,deadline);
