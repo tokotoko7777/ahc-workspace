@@ -11,6 +11,10 @@
 #include <vector>
 #include "../../library/cyclic-visit-energy.hpp"
 
+#if !defined(AHC027_TARGET_GAPS) && !defined(AHC027_EXTRA_SPLICES) && !defined(AHC027_TREE_ONLY) && !defined(AHC027_FIRST_SPLICES)
+#define AHC027_TARGET_GAPS
+#endif
+
 struct Grid {
     int n,m;
     std::vector<std::array<int,4>> next;
@@ -48,6 +52,114 @@ struct Grid {
         }
     }
 };
+
+
+#if defined(AHC027_TARGET_GAPS) || defined(AHC027_EXTRA_SPLICES)
+void extend_patrol(const Grid& g,CyclicVisitEnergy& energy,std::vector<int>& best,
+                   std::int64_t& best_num,std::mt19937& rng) {
+    using Clock=std::chrono::steady_clock;
+    const auto deadline=Clock::now()+std::chrono::milliseconds(150);
+    auto current=best;
+    auto current_num=best_num;
+    std::vector<int> work;
+    std::vector<std::vector<int>> visits(g.m);
+#ifdef AHC027_TARGET_GAPS
+    struct Gap {int v,from,len;std::int64_t importance;};
+    std::vector<Gap> gaps;
+    const int reach=7;
+    // For each target, first steps toward it from positions within reach.
+    std::vector<std::int16_t> toward(g.m*g.m,-1);
+    std::vector<int> fifo(g.m),depth(g.m);
+    for(int to=0;to<g.m;++to) {
+        auto* p=toward.data()+to*g.m;
+        p[to]=to;fifo[0]=to;depth[0]=0;int tail=1;
+        for(int i=0;i<tail;++i) {
+            int u=fifo[i];
+            if(depth[i]==reach) continue;
+            for(int v:g.next[u]) if(v>=0&&p[v]<0) {
+                p[v]=u;depth[tail]=depth[i]+1;fifo[tail++]=v;
+            }
+        }
+    }
+#endif
+    auto index=[&] {
+        for(auto& a:visits) a.clear();
+        const int l=current.size()-1;
+        for(int i=0;i<l;++i) visits[current[i]].push_back(i);
+#ifdef AHC027_TARGET_GAPS
+        gaps.clear();
+        for(int v=0;v<g.m;++v) {
+            const auto& a=visits[v];
+            int from=a.back()-l;
+            for(int next:a) {
+                const int d=next-from;
+                gaps.push_back({v,from<0?from+l:from,d,1LL*d*d*g.weight[v]});
+                from=next;
+            }
+        }
+        if(gaps.size()>180) {
+            std::nth_element(gaps.begin(),gaps.begin()+180,gaps.end(),
+                             [](auto a,auto b){return a.importance>b.importance;});
+            gaps.resize(180);
+        }
+#endif
+    };
+    index();
+    for(int it=0;it<160000;++it) {
+        if((it&63)==0&&Clock::now()>=deadline) break;
+        const int l=current.size()-1;
+#ifdef AHC027_TARGET_GAPS
+        if(it%3!=0) {
+            if(l>=4*g.m) continue;
+            const auto gap=gaps[rng()%gaps.size()];
+            int offset=gap.len/2+int(rng()%(gap.len/3+1))-gap.len/6;
+            int i=(gap.from+offset)%l, at=current[i];
+            auto* step=toward.data()+gap.v*g.m;
+            if(step[at]<0||at==gap.v) continue;
+            std::array<int,15> excursion{};
+            int h=0;
+            for(int v=at;v!=gap.v;) {v=step[v];excursion[h++]=v;}
+            const int outward=h;
+            for(int j=outward-2;j>=0;--j) excursion[h++]=excursion[j];
+            excursion[h++]=at;
+            work=current;
+            work.insert(work.begin()+i+1,excursion.begin(),excursion.begin()+h);
+        } else
+#endif
+        {
+            const int i=rng()%l;
+            int v=g.next[current[i]][rng()%4],kind=rng()%10;
+            if(v<0) continue;
+            if(kind<=2) {
+                if(l>=4*g.m) continue;
+                work=current;
+                work.insert(work.begin()+i+1,{v,current[i]});
+            } else {
+                int j=visits[v][rng()%visits[v].size()];
+                const int a=std::min(i,j),b=std::max(i,j);
+                if(b-a<2||!g.edge(current[a],current[b])) continue;
+                if(kind<=6) {
+                    if(b-a>37) continue;
+                    work=current;
+                    work.erase(work.begin()+a+1,work.begin()+b);
+                } else {
+                    if(!g.edge(current[a+1],current[b+1])) continue;
+                    work=current;
+                    std::reverse(work.begin()+a+1,work.begin()+b+1);
+                }
+            }
+        }
+        const std::span<const int> route(work.data(),work.size()-1);
+        auto v=energy.numerator(route,g.weight);
+        if(!v || static_cast<__int128>(*v)*l>=static_cast<__int128>(current_num)*route.size()) continue;
+        current.swap(work);
+        current_num=*v;
+        index();
+    }
+    best=std::move(current);
+    best_num=current_num;
+}
+#endif
 
 int main() {
     std::ios::sync_with_stdio(false);std::cin.tie(nullptr);
@@ -128,6 +240,9 @@ int main() {
             best=current;best_num=current_num;
         }
     }
+#endif
+#if defined(AHC027_TARGET_GAPS) || defined(AHC027_EXTRA_SPLICES)
+    extend_patrol(g,energy,best,best_num,rng);
 #endif
     constexpr char directions[]="UDLR";
     for(int i=1;i<int(best.size());++i) {

@@ -56,10 +56,13 @@ def main():
     for key in ("inputs", "out", "vis", "baseline", "candidate"):
         parser.add_argument(key, type=Path)
     parser.add_argument("--candidate-label",default="splice")
+    parser.add_argument("--extra",type=Path)
     a = parser.parse_args()
     cases = sorted(a.inputs.resolve().glob("*.txt"))
     out, vis = a.out.resolve(), a.vis.resolve()
     solvers = [("baseline", a.baseline.resolve()), (a.candidate_label, a.candidate.resolve())]
+    if a.extra is not None:
+        solvers.append(("extra",a.extra.resolve()))
     out.mkdir(parents=True, exist_ok=True)
     scratch = out/"scratch"
     scratch.mkdir(exist_ok=True)
@@ -105,6 +108,9 @@ def main():
                           "max_wall":max(r["wall"] for r in rows)}
     summary["candidate_wins"] = sum(results[a.candidate_label,c.name]["score"] <
                                     results["baseline",c.name]["score"] for c in cases)
+    if a.extra is not None:
+        summary["candidate_vs_extra_wins"] = sum(results[a.candidate_label,c.name]["score"] <
+                                                 results["extra",c.name]["score"] for c in cases)
     (out/"summary.json").write_text(json.dumps(summary,indent=2)+"\n")
     print(json.dumps(summary))
 
