@@ -72,9 +72,11 @@
 | [AHC060](https://atcoder.jp/contests/ahc060/tasks/ahc060_a) | 着手・本番未判定 | Sweet_Sweet_Soul、得点未確認 | 新規未調整24件 平均992.333 | 本番150件、同一ケースの証拠なし | [経路重複除去](https://github.com/tokotoko7777/ahc-workspace/tree/204933bff927c6bac159926766888181897cc748)、[途中で色を変更](https://github.com/tokotoko7777/ahc-workspace/tree/6e7f42ee36c537681b0db68526aba19077582ad0) |
 | [AHC061](https://atcoder.jp/contests/ahc061/tasks/ahc061_a) | 凍結版：本番未達 | **2,424,667,397,941**（相対点） | **1,207,794,230,850**（本番3,000件・全件合法） | 本番3,000件、公式ケース別基準を取得 | [問題別ブランチ](https://github.com/tokotoko7777/ahc-workspace/tree/41ec433123816f9d026a4b719c5aeddbec16c29c)、[相手の同時手](https://github.com/tokotoko7777/ahc-workspace/tree/defe7c3d7e75e3b82da58b624c0b98906c4960dd)、[公式比較](https://github.com/tokotoko7777/ahc-workspace/tree/f119f0ff3e0268f477468ab09112488312198e7b) |
 | [AHC062](https://atcoder.jp/contests/ahc062/tasks/ahc062_a) | 着手・本番未判定 | gazelle、得点未確認 | 新規未調整18件 平均467,170,089 | 本番100件・3秒、同一ケースの証拠なし | [問題別ブランチ](https://github.com/tokotoko7777/ahc-workspace/tree/81151ac7b6335424f69b3bbb9da842061e296fb8)、[高低2本の経路](https://github.com/tokotoko7777/ahc-workspace/tree/083860ab332b39fa278b1736e3ca1e0561dc6765) |
-| [AHC063](https://atcoder.jp/contests/ahc063/tasks/ahc063_a) | 着手・本番未判定 | **1,985,255,142,455**（順位相対点） | 開発比較中 | 本番2,000件、基準とseed列照合済み | 検証中 |
-| [AHC064](https://atcoder.jp/contests/ahc064/tasks/ahc064_a) | 着手・本番未判定 | chokudai、得点未確認 | 開発比較中 | 本番150件、同一ケースの証拠なし | 検証中 |
-| AHC065〜074 | 未着手 | — | — | — | — |
+| [AHC063](https://atcoder.jp/contests/ahc063/tasks/ahc063_a) | 凍結版：本番未達 | **1,985,255,142,455**（順位相対点） | **1,189,793,908,234**（本番2,000件、当時の分布を固定） | 本番2,000件、基準とseed列照合済み | [尾の移動](https://github.com/tokotoko7777/ahc-workspace/tree/4a7f7b14ee8c06d079c94d10d19acd9df9d0f139)、[次の色](https://github.com/tokotoko7777/ahc-workspace/tree/6e48e0c6aea92464d043b408df772be340c25470)、[公式比較](https://github.com/tokotoko7777/ahc-workspace/tree/f7cb5923521b00e317025fa5eb2e1e1d2622a75a) |
+| [AHC064](https://atcoder.jp/contests/ahc064/tasks/ahc064_a) | 着手・本番未判定 | chokudai、得点未確認 | 新規未調整30件 平均93.833ターン | 本番150件、同一ケースの証拠なし | [同時操作](https://github.com/tokotoko7777/ahc-workspace/tree/63185be0c9a50743d00f846f73ca5f1ffab597e7)、[搬出順](https://github.com/tokotoko7777/ahc-workspace/tree/ab9244e54098611bbb35a322da00472d9bb95527) |
+| [AHC065](https://atcoder.jp/contests/ahc065/tasks/ahc065_a) | 着手・本番未判定 | 確認中 | 開発比較中 | 確認中 | 検証中 |
+| [AHC066](https://atcoder.jp/contests/ahc066/tasks/ahc066_a) | 着手・本番未判定 | 確認中 | 開発比較中 | 確認中 | 検証中 |
+| AHC067〜074 | 未着手 | — | — | — | — |
 
 ### AHC001 の次の仮説
 
@@ -841,3 +843,15 @@ AHC056は[公式採点CSV](https://img.atcoder.jp/ahc_standings/ahc056/result.cs
 
 [AHC063](https://atcoder.jp/contests/ahc063/tasks/ahc063_a)の[公式採点CSV](https://img.atcoder.jp/ahc_standings/ahc063/result.csv)は1,264人×2,000件、順位相対を整数丸めで再計算して1位1,985,255,142,455（rhoo）、上位3名は公式結果JSONと同じ。公式公開seedの順と特徴量N・M・Cを照合。静的に届かない色を、体が移動して空く時刻を使った経路で取得する案を比較する。
 [AHC064](https://atcoder.jp/contests/ahc064/tasks/ahc064_a)は本番150件、公式結果JSONの1位chokudaiの点数は未確認。同じ車両移動を使い、操作依存を保ったまま同時刻に詰める際、同時操作数優先と後続の長い連鎖優先を比較する。
+
+### AHC063 尾の移動と次の色を考えた回収
+
+[初版](https://github.com/tokotoko7777/ahc-workspace/tree/4a7f7b14ee8c06d079c94d10d19acd9df9d0f139)。同じ12再始動で、静的には届かない色について尾が退く時刻を使う経路を検索。未調整28件の費用7,018,745→6,639,383（−5.41%、15勝9敗4分）、完全一致4→6。84出力が公式・独立・内部一致、最大0.0084秒。
+[追試](https://github.com/tokotoko7777/ahc-workspace/tree/6e48e0c6aea92464d043b408df772be340c25470)は同じ色の複数経路の中から次の指定色を取得しやすいものを選ぶ。新規未調整28件の費用は初版9,058,369、同予算の次の餌への探索9,249,104、次色を指定8,289,603（対同予算−10.37%、16勝12敗）。168出力が公式・独立・内部一致、最大0.0594秒。専用既定に採用。
+
+[公式比較](https://github.com/tokotoko7777/ahc-workspace/tree/f7cb5923521b00e317025fa5eb2e1e1d2622a75a/problems/ahc063)は、この既定版の本番2,000件をすべてN・M・C・file・seed照合、全件合法・公式と独立が一致。完全一致362件、最大0.110657秒。当時1,264人の分布で候補 **1,189,793,908,234**、首位 **1,985,255,142,455**。候補を追加した同じ1,265人に再集計すると候補 **1,190,434,387,385**、首位 **1,985,266,007,770**、同点なし495位。**未達**、main未マージ。次は数色にわたって体を巻き戻せる経路を設計する。
+
+### AHC064 直列の搬出を非交差な同時操作に並べ直す
+
+[初版](https://github.com/tokotoko7777/ahc-workspace/tree/63185be0c9a50743d00f846f73ca5f1ffab597e7)。各線路ごとの操作順と搬送内容を厳密に保ち、同時に行える非交差な操作を選ぶ。新規未調整30件の平均ターンは直列241.933、同時数最大136.333、後続の長い操作を優先128.833（対同時数全勝、中央値7減）。180出力公式・独立一致、最大0.038199秒。
+[追試](https://github.com/tokotoko7777/ahc-workspace/tree/ab9244e54098611bbb35a322da00472d9bb95527)。共通の詰め替え器で各32候補を比較し、新規未調整30件は初版125.800、順序ランダム複数93.833、誘導順序101.067。後者はランダムに1勝1分28敗。180出力が公式と独立に一致、最大0.02161秒。ランダム複数を問題別既定。次は操作数でなく、詰め替え後の実ターンで搬出順を更新する。同じ本番150件の証拠はなく未判定。
