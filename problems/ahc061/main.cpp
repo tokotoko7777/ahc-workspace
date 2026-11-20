@@ -1,11 +1,19 @@
 #pragma GCC optimize("O3")
 #include <algorithm>
 #include <array>
+#include <chrono>
+#include <cstdint>
+#include <limits>
 #include <cmath>
 #include <cstdlib>
 #include <iostream>
 #include <numeric>
 #include <vector>
+
+#if !defined(AHC061_ROLLOUT_TWO) && !defined(AHC061_ROLLOUT_ONE) && \
+    !defined(AHC061_ACCESS) && !defined(AHC061_NO_ROLLOUT)
+#define AHC061_ROLLOUT_ONE
+#endif
 
 struct State {
     std::array<int,100> owner{},level{};
@@ -113,7 +121,100 @@ struct Problem {
         for(int i=0;i<N*N;++i) if(state.owner[i]>=0) a[state.owner[i]]+=V[i]*state.level[i];
         return a;
     }
-    int choose(int turn) {
+    State simulate(State state,const std::array<int,8>& moves) const {
+        std::array<int,100> count{};
+        for(int p=0;p<M;++p) ++count[moves[p]];
+        for(int p=0;p<M;++p) {
+            const int a=moves[p],o=state.owner[a];
+            if(count[a]>1 && o!=p) continue;
+            // A defending owner that already processed this cell cannot change its
+            // owner; cells with no defending contender are never modified.
+            if(o==p) state.level[a]=std::min(U,state.level[a]+1);
+            else if(state.level[a]<=1) state.owner[a]=p,state.level[a]=1;
+            else {--state.level[a];continue;}
+            state.piece[p]=a;
+        }
+        return state;
+    }
+    int sample(const Prob& pr,double u,int fallback) const {
+        for(int i=0;i<N*N;++i) if((u-=pr[i])<0) return i;
+        return fallback;
+    }
+    double exact_value(const State& state) const {
+        const auto score=land(state);
+        return std::llround(1e5*std::log2(1.+double(score[0])/
+                            *std::max_element(score.begin()+1,score.begin()+M)));
+    }
+    std::array<int,8> policy2(const State& st,const std::array<double,8>& draw) const {
+        std::array<int,8> move{};
+        std::array<Prob,8> pr{};
+        for(int p=1;p<M;++p) {
+            std::array<double,5> mean{};
+            for(int i=0;i<profiles;++i)
+                for(int j=0;j<5;++j) mean[j]+=weights[p][i]*param[i][j];
+            auto list=allowed(st,p);
+            double best=-1;
+            std::vector<int> ties;
+            for(int a:list) {
+                const int k=type(st,p,a);
+                const double w=k<4 ? V[a]*mean[k] : 0;
+                if(w>best) best=w,ties.clear();
+                if(w==best) ties.push_back(a);
+                pr[p][a]=mean[4]/list.size();
+            }
+            for(int a:ties) pr[p][a]+=(1-mean[4])/ties.size();
+            move[p]=sample(pr[p],draw[p],st.piece[p]);
+        }
+        auto points=land(st);
+        const double top=*std::max_element(points.begin()+1,points.begin()+M);
+        double best=-1;
+        for(int a:allowed(st,0)) {
+            const int p=st.owner[a],lv=st.level[a];
+            double safe=1;
+            for(int j=1;j<M;++j) safe*=1-pr[j][a];
+            double value=p==0 ? (lv<U ? 1. : 0.)+.55*(1-safe)
+              : p<0 ? 1.2*safe : (lv==1 ? 1.+points[p]/top : .6+.45*points[p]/top)*safe;
+            value*=V[a];
+            if(value>best) best=value,move[0]=a;
+        }
+        return move;
+    }
+    int rollout(const std::vector<std::pair<double,int>>& ranked,const std::array<Prob,8>& prob,
+                int turn,const std::array<int,8>& points,double strongest,bool two_ply,
+                std::chrono::steady_clock::time_point deadline) const {
+        if(std::chrono::steady_clock::now()>=deadline) return ranked[0].second;
+        constexpr int scenarios=6;
+        std::array<std::array<double,8>,2*scenarios> draws{};
+        uint32_t rng=6774703+99171u*turn;
+        for(auto& d:draws) for(int p=1;p<M;++p) {
+            rng^=rng<<13;rng^=rng>>17;rng^=rng<<5;
+            d[p]=(rng+.5)/4294967296.;
+        }
+        std::array<std::array<int,8>,2*scenarios> root{};
+        for(unsigned k=0;k<root.size();++k)
+            for(int p=1;p<M;++p) root[k][p]=sample(prob[p],draws[k][p],s.piece[p]);
+        const double base=exact_value(s), scale=.6931471805599453*(strongest+points[0])*1e-5;
+        double best=-std::numeric_limits<double>::infinity();
+        int pick=ranked[0].second;
+        for(unsigned j=0;j<std::min<size_t>(6,ranked.size());++j) {
+            const auto [heuristic,a]=ranked[j];
+            double expected=0;
+            for(int k=0;k<scenarios;++k) {
+                auto first=root[k],second=root[k+scenarios];
+                first[0]=second[0]=a;
+                State s1=simulate(s,first);
+                const double one=exact_value(s1)-base;
+                if(two_ply && turn+1<T) {
+                    State s2=simulate(s1,policy2(s1,draws[k+scenarios]));
+                    expected+=one+.62*(exact_value(s2)-base-one);
+                } else expected+=(one+exact_value(simulate(s,second))-base)*.5;
+            }
+            double value=heuristic*.85+scale*expected/scenarios;
+            if(value>best) best=value,pick=a;
+        }
+        return pick;
+    }
+    int choose(int turn,[[maybe_unused]] std::chrono::steady_clock::time_point deadline) {
         for(int p=0;p<M;++p) choices[p]=allowed(s,p);
         std::array<Prob,8> probs;
         for(int p=1;p<M;++p) probs[p]=forecast(p);
@@ -134,6 +235,9 @@ struct Problem {
         };
         std::array<double,8> base{};
         for(int p=0;p<M;++p) base[p]=opportunity(s,p,choices[p]);
+#endif
+#if defined(AHC061_ROLLOUT_ONE) || defined(AHC061_ROLLOUT_TWO)
+        std::vector<std::pair<double,int>> ranked;
 #endif
         int pick=s.piece[0];
         double best=-1e30;
@@ -168,7 +272,20 @@ struct Problem {
             }
 #endif
             if(value>best) best=value,pick=a;
+#if defined(AHC061_ROLLOUT_ONE) || defined(AHC061_ROLLOUT_TWO)
+            ranked.emplace_back(value,a);
+#endif
         }
+#if defined(AHC061_ROLLOUT_ONE) || defined(AHC061_ROLLOUT_TWO)
+        std::sort(ranked.begin(),ranked.end(),[](auto a,auto b) {
+            return a.first!=b.first ? a.first>b.first : a.second<b.second;
+        });
+#ifdef AHC061_ROLLOUT_TWO
+        pick=rollout(ranked,probs,turn,points,strongest,true,deadline);
+#else
+        pick=rollout(ranked,probs,turn,points,strongest,false,deadline);
+#endif
+#endif
         return pick;
     }
     bool feedback(bool trace) {
@@ -178,7 +295,9 @@ struct Problem {
             moves[p]=x*N+y;
             if(p>0) observe(p,moves[p]);
         }
+        State expected;
         if(trace) {
+            expected=simulate(s,moves);
             std::cerr<<"Turn";
             for(int p=0;p<M;++p) std::cerr<<' '<<moves[p];
             std::cerr<<'\n';
@@ -188,16 +307,22 @@ struct Problem {
         }
         for(int i=0;i<N*N;++i) std::cin>>s.owner[i];
         for(int i=0;i<N*N;++i) std::cin>>s.level[i];
+        if(trace && std::cin &&
+           (s.owner!=expected.owner || s.level!=expected.level || s.piece!=expected.piece)) {
+            std::cerr<<"Joint transition mismatch\n";
+            std::abort();
+        }
         return bool(std::cin);
     }
 };
 int main() {
     std::ios::sync_with_stdio(false);std::cin.tie(nullptr);
+    const auto deadline=std::chrono::steady_clock::now()+std::chrono::milliseconds(1600);
     Problem p;
     if(!p.init()) return 0;
     const bool trace=std::getenv("AHC061_TRACE")!=nullptr;
     for(int t=0;t<p.T;++t) {
-        int a=p.choose(t);
+        int a=p.choose(t,deadline);
         std::cout<<a/p.N<<' '<<a%p.N<<std::endl;
         if(!p.feedback(trace)) return 0;
     }
