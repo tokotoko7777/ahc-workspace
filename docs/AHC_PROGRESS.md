@@ -32,14 +32,15 @@
 | [AHC022](https://atcoder.jp/contests/ahc022/tasks/ahc022_a) | 凍結版：本番未達 | **2,808,216,532,758**（相対点） | **271,023,954,031**（本番3,000件・全件誤対応0） | 本番3,000件・4秒、公式アーカイブと本番seedの列対応を確認 | [問題別ブランチ](https://github.com/tokotoko7777/ahc-workspace/tree/d255c7a5ce936552a98346c8d2bf764f78add849)、[低配置費](https://github.com/tokotoko7777/ahc-workspace/tree/86f0b8b8dc3d75a877626672b36b2dec88da2e05)、[公式比較](https://github.com/tokotoko7777/ahc-workspace/tree/8e7f5ef9c7866da0db52954c549e62fa5fc5c791) |
 | [AHC023](https://atcoder.jp/contests/ahc023/tasks/asprocon10_a) | 凍結初版：本番未達／改良版：未判定 | **1,782,120,500**（[公式採点アーカイブ](https://img.atcoder.jp/ahc_standings/index.html?contest=ahc023)） | 本番公開2,000件 **1,100,483,250**（全件合法） | 本番公開2,000件・2秒、絶対点 | [問題別ブランチ](https://github.com/tokotoko7777/ahc-workspace/tree/52f76e1f5e905e5f4f11f0613285760073967281)、[植付と収穫の順序](https://github.com/tokotoko7777/ahc-workspace/tree/2b4a9df1aa5ad9cdc0d435bb8271d669d1fe43a6)、[区間流](https://github.com/tokotoko7777/ahc-workspace/tree/ac291d5344ff4f4eca283e694da5ba3737b14218) |
 | [AHC024](https://atcoder.jp/contests/ahc024/tasks/ahc024_a) | 着手・本番未判定 | **335,417**（絶対点） | 再始動版：新規未調整24件 平均2,065.79 | 本番150件・2秒、同一ケースの証拠なし | [問題別ブランチ](https://github.com/tokotoko7777/ahc-workspace/tree/c5b3b9f3d88b74ff5f9fa67446d16555dd509ef1)、[多様な再始動](https://github.com/tokotoko7777/ahc-workspace/tree/a0aa3ad5ff0cf55d5f3f6ea9c8714d8ca19bcfe9) |
-| [AHC025](https://atcoder.jp/contests/ahc025/tasks/ahc025_a) | 着手・本番未判定 | **492,832,027,444**（相対点） | 未調整32件 77,452,712（絶対点・低い方が良い） | 本番5,000件・2秒、各参加者のケース別結果・公式seedを照合済み | [問題別ブランチ](https://github.com/tokotoko7777/ahc-workspace/tree/21034a6404bafe091bac193b8315b0ffd1ed0686)、[低Q追試](https://github.com/tokotoko7777/ahc-workspace/tree/93cfb59980bf24166658b1b40f60363cd8e63cf3) |
+| [AHC025](https://atcoder.jp/contests/ahc025/tasks/ahc025_a) | 凍結版：本番未達 | **492,832,027,444**（相対点） | **354,364,239,662**（本番5,000件、当時の分布を固定） | 本番5,000件・2秒、各参加者のケース別結果・公式seedを照合済み | [問題別ブランチ](https://github.com/tokotoko7777/ahc-workspace/tree/21034a6404bafe091bac193b8315b0ffd1ed0686)、[低Q追試](https://github.com/tokotoko7777/ahc-workspace/tree/93cfb59980bf24166658b1b40f60363cd8e63cf3)、[公式比較](https://github.com/tokotoko7777/ahc-workspace/tree/a0f8cbdebfed6d111fead325f78dfed18fe21923) |
 | [AHC026](https://atcoder.jp/contests/ahc026/tasks/ahc026_a) | 着手・本番未判定 | **1,423,183**（絶対点） | 既存法：未調整16件 平均9,344.63 | 本番150件・2秒、同一ケースの証拠なし | [問題別ブランチ](https://github.com/tokotoko7777/ahc-workspace/tree/9d10bdadaa08a7ca84e01228951b4e965082f00b)、[途中状態の追試](https://github.com/tokotoko7777/ahc-workspace/tree/22fe2ca8760d43489acbd895b3d63a1c9933963f) |
 | [AHC027](https://atcoder.jp/contests/ahc027/tasks/ahc027_a) | 着手・本番未判定 | **1,996,375,186,737**（相対点） | 新規未調整20件 275,950,662（絶対点・低い方が良い） | 本番2,000件・2秒、ケース別基準と公式seedの列対応を確認 | [問題別ブランチ](https://github.com/tokotoko7777/ahc-workspace/tree/3ec2d6d02ab6aea5b461002201803016ce56ecb8)、[訪問間隔の中央を狙う版](https://github.com/tokotoko7777/ahc-workspace/tree/ba4622d04a7fede9644fee8bdf0408a364eaa1ec) |
 | [AHC028](https://atcoder.jp/contests/ahc028/tasks/ahc028_a) | 着手・本番未判定 | **1,105,471**（絶対点） | 厳密編集：未調整24件 平均7,139.67 | 本番150件・2秒、同一ケースの証拠なし | [初回](https://github.com/tokotoko7777/ahc-workspace/tree/84d5508c4284fa8e75116f1a038a8124946246ac)、[厳密編集](https://github.com/tokotoko7777/ahc-workspace/tree/a9f558c6c273ccb8f26433e8554a5e1aa8a2dc8d) |
 | [AHC029](https://atcoder.jp/contests/ahc029/tasks/ahc029_a) | 着手・本番未判定 | **2,200,575,652,801**（相対点） | 基準版：未調整28件 5,802,068（最終資金合計） | 本番3,000件・2秒、公開採点列と公式seedの対応を確認 | [問題別ブランチ](https://github.com/tokotoko7777/ahc-workspace/tree/400b9b1a8b5f302c0d5eccacc48953bed87484bd)、[増資後の追試](https://github.com/tokotoko7777/ahc-workspace/tree/94c34b158aa59b9a2d75153bd452ffa67faab2bd) |
 | [AHC030](https://atcoder.jp/contests/ahc030/tasks/ahc030_a) | 凍結版：本番未達 | **2,140,937,483,257**（相対点） | **323,222,495,387**（本番3,000件・全件初回正答） | 本番3,000件・3秒、ケース別基準・公式seedを照合済み | [問題別ブランチ](https://github.com/tokotoko7777/ahc-workspace/tree/ff4f0b02b3b5d35bb7a63748604649304e7c5d15)、[公式比較](https://github.com/tokotoko7777/ahc-workspace/tree/3dfdfcce6f81b2b034351960f8d506b8cdba735b)、[試し掘り追試](https://github.com/tokotoko7777/ahc-workspace/tree/a285e872f70c776469b2fe2780c9664de40bcc2b) |
 | [AHC031](https://atcoder.jp/contests/ahc031/tasks/ahc031_a) | 着手・本番未判定 | **1,722,250,219,489**（相対点） | 未調整32件 47,399,232（低い方が良い） | 本番2,000件・3秒、ケース別基準とseed列照合済み | [問題別ブランチ](https://github.com/tokotoko7777/ahc-workspace/tree/c1d15b819b45223d0c27bc3191918083c1b18362) |
-| AHC032〜074 | 未着手 | — | — | — | — |
+| [AHC032](https://atcoder.jp/contests/ahc032/tasks/ahc032_a) | 着手・本番未判定 | **11,854,207,127,046**（絶対点） | 開発比較準備中 | 本番150件、同一ケースの証拠なし | 検証中 |
+| AHC033〜074 | 未着手 | — | — | — | — |
 
 ### AHC001 の次の仮説
 
@@ -478,3 +479,13 @@
 [公式問題文](https://atcoder.jp/contests/ahc031/tasks/ahc031_a)は3秒 / 1,024 MiB。絶対費用は不足面積×100と前日との差分の壁長に1を足し、最小化。2,000ケースの相対点を[公式アーカイブ](https://img.atcoder.jp/ahc_standings/ahc031/result.csv)から再計算すると、1位1,722,250,219,489（アーカイブSHA-256 `3bc6bdaf8e6e259a4b80a5e45cfde40ff63349ce7a72cbba07cca24f88245fea`）。公式公開seed列は `input.csv` と一致。
 
 [検証と実装](https://github.com/tokotoko7777/ahc-workspace/tree/c1d15b819b45223d0c27bc3191918083c1b18362)。日ごとに独立配置する基準に対し、縦の境界は全日で固定して枠内で割当を変える。dev16件16,864,516→11,661,690（8勝）、未調整32件52,604,232→47,399,232（17勝15分、−9.89%）。96全出力の合法性と採点は公式と独立検証で一致、最大約0.090秒、C++23単一ファイルも一致。問題別既定のみ。本番ケースは未測定。次は固定された列の中で、面積を守りながら前日と横境界を揃える。
+
+### AHC025 歴史的な順位分布での本番比較
+
+[監査手順と実装](https://github.com/tokotoko7777/ahc-workspace/tree/a0f8cbdebfed6d111fead325f78dfed18fe21923/problems/ahc025)。低Q追試でなく、先に採用した比較回数を確実な交換に残す版を凍結。公式seedのまま生成した5,000件でN・D・Qをアーカイブに照合。全5,000件で公式・独立の絶対点が一致し、合計3,498,575回の合法な比較を各ケース指定どおりに行った。テスタ込み最大0.418925秒。
+
+当時の1,085人分布を固定すると、候補354,364,239,662点、公式首位492,832,027,444点。仮に候補追加後の1,086人を共通母集団にして双方を再計算すると、候補354,498,342,544点（313位相当）、同じ首位492,836,970,699点。どちらでも**未達**、mainへのマージなし。次は個別順位を深追いせず、重さが不確実なグループを、他の組と直接比較する予定。
+
+### AHC032 本番条件
+
+[公式問題文](https://atcoder.jp/contests/ahc032/tasks/ahc032_a)。1位11,854,207,127,046は[AtCoder提供の順位・得点データ](https://huggingface.co/datasets/SakanaAI/ALE-Bench/blob/main/ahc032.zip)から確認（SHA-256 `6d8a7a6831a00dfc7771a537e5417d2873d5f70bd6f35f84f4a60b20e0497f2a`、公式結果JSONで1位名一致）。付属100ケースを公式の150件とみなさない。既存のビームを出発点に、同じ初期解のスタンプを2手まとめて入れ替える案を試す。
