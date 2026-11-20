@@ -18,7 +18,7 @@
 | [AHC008](https://atcoder.jp/contests/ahc008/tasks/ahc008_a) | ローカル改善・本番未判定 | **121,980,050,607** 点（[AtCoder 提供の順位データ](https://huggingface.co/datasets/SakanaAI/ALE-Bench/blob/main/ahc008.zip)） | 適応分割版: 未調整 24 件合計 53,656,251 | 公式対話テスタ、本番公開 2,000 シード、3 秒 | [問題別ブランチ](https://github.com/tokotoko7777/ahc-workspace/tree/af41b4e70a89fef3c0389c689aa09dc633fffa16) |
 | [AHC009](https://atcoder.jp/contests/ahc009/tasks/ahc009_a) | 着手・未判定 | **7,547,834,181** 点（[AtCoder 提供の順位データ](https://huggingface.co/datasets/SakanaAI/ALE-Bench/blob/main/ahc009.zip)） | 確率 DP 版: 公開 100 件 7,214,943,739 | 本番との同一性は未確認 | ローカル保存・公開確認待ち |
 | [AHC010](https://atcoder.jp/contests/ahc010/tasks/ahc010_a) | ローカル改善・本番未判定 | **20,218,968** 点（[AtCoder 提供の順位データ](https://huggingface.co/datasets/SakanaAI/ALE-Bench/blob/main/ahc010.zip)） | 協調回転版: 未調整 10 件平均 56,482 | 本番 100 件、2 秒。配布入力との同一性未確認 | [問題別ブランチ](https://github.com/tokotoko7777/ahc-workspace/tree/8e99892f7dc12317ba365750a15a2a7c072b3731) |
-| [AHC011](https://atcoder.jp/contests/ahc011/tasks/ahc011_a) | ローカル比較中・本番未判定 | **2,691,447,336** 点（[AtCoder 提供の順位データ](https://huggingface.co/datasets/SakanaAI/ALE-Bench/blob/main/ahc011.zip)） | 既存木ビームと複数マスを一度に動かす近傍 | 本番公開 3,000 シード、3 秒 | 検証中 |
+| [AHC011](https://atcoder.jp/contests/ahc011/tasks/ahc011_a) | ローカル改善・本番未判定 | **2,691,447,336** 点（[AtCoder 提供の順位データ](https://huggingface.co/datasets/SakanaAI/ALE-Bench/blob/main/ahc011.zip)） | 局所回転追加: 未調整 15 件 6,060,235 | 本番公開 3,000 シード、3 秒 | ローカル保存・公開確認待ち |
 | AHC012 | 着手・未判定 | 確認中 | — | — | 検証中 |
 | AHC013〜074 | 未着手 | — | — | — | — |
 
@@ -187,3 +187,9 @@
 
 - [公式問題文](https://atcoder.jp/contests/ahc011/tasks/ahc011_a) の公開本番 3,000 件（N=6〜10 各 600 件、3 秒）。得点は各ケースを整数に丸めて総和。完全木と未完成で式が異なる。システム失敗はケース単位 0 点。
 - 公式公開シード SHA-256 `041256f962c6ba1a60294ad7a575684d6e401163cba316cf978f2e66a4f7b0e3`、順位データ SHA-256 `6d26e9ea3dbd8b97616d9727bdbe0db270d0df9ab54efd44c71f1c03379a03fb` を照合。順位 1 位 2,691,447,336 点。先に新規開発セットで検証する。
+
+### AHC011 空白を元の位置に戻す三枚置換
+
+- 既存の木ビームに、空白を迂回して 2×2 の 3 タイルを回し、同じ経路を逆に戻す手を追加。開発 10 件 3,462,518 → 3,980,103（8 勝）、未調整 15 件 5,229,021 → 6,060,235（14 勝）。同じ 850 ms の探索予算、全 50 実行で公式と独立の各点が一致、実測 0.895 秒以下。C++23 単一ファイル化を検証。
+- 完全木は両版とも 0 件なので、公開本番 3,000 件はまだ計測しない。ローカルに実装、全空白位置の検査、再現手順を保存。既存の使用例から引き継いだ出典を保持しており、ブランチ反映は出典の扱いを確認するまで保留する。
+- 次はタイルの在庫を満たす木を先に組み、空白移動で到達できる順序・パリティ・手数を分けて検証する。
