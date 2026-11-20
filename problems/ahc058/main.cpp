@@ -463,6 +463,47 @@ static pair<i128,vector<int>> ladder_calendar(
     return {game.final_apples(current),move(path)};
 }
 
+#ifndef AHC058_BLOCK
+#define AHC058_BLOCK 0
+#endif
+#ifndef AHC058_BLOCK_TRIALS
+#define AHC058_BLOCK_TRIALS 340
+#endif
+
+static int late_calendar(PurchaseSequenceProblem& game, vector<int>& order, int mode,
+                         chrono::steady_clock::time_point deadline) {
+    if (order.size()<50) return 0;
+    PrefixReplay<PurchaseSequenceProblem::SimulationState,int> cache(game.initial,8);
+    cache.reserve(500);
+    auto advance=[&](auto& s,int a){game.advance_purchase(s,a);};
+    i128 best=game.final_apples(cache.evaluate(order,advance));
+    cache.commit();
+    const int frozen=int(order.size())/2;
+    mt19937_64 rng(580433);
+    int count=0;
+    for (;count<AHC058_BLOCK_TRIALS&&chrono::steady_clock::now()<deadline;++count) {
+        auto next=order;
+        int a=frozen+int(rng()%(order.size()-frozen-1));
+        int length=min(int(order.size())-a,6+int(rng()%25));
+        int b=a+1+int(rng()%(length-1));
+        const int method=int(rng()%4);
+        if (mode==1) {
+            if(method%2)swap(next[a],next[b]);
+            else rotate(next.begin()+a,next.begin()+a+1,next.begin()+b+1);
+        } else {
+            if(method==0)rotate(next.begin()+a,next.begin()+b,next.begin()+a+length);
+            else if(method==1)reverse(next.begin()+a,next.begin()+a+length);
+            else stable_sort(next.begin()+a,next.begin()+a+length,[&](int a,int b){
+                return method==2?a/10>b/10:a/10<b/10;
+            });
+        }
+        // A no-op counts as a proposal, but still executes the same replay API.
+        const i128 value=game.final_apples(cache.evaluate(next,advance));
+        if(value>best){order=move(next);best=value;cache.commit();}
+    }
+    return count;
+}
+
 int main() {
     ios::sync_with_stdio(false);
     cin.tie(nullptr);
@@ -513,6 +554,18 @@ int main() {
         best_purchases = annealing.best_state().actions;
         iterations = annealing.iterations();
     }
+    i128 intermediate=0;
+    int block_trials=0;
+    if(AHC058_BLOCK) {
+        problem.decode(best_purchases,intermediate);
+        if(intermediate<baseline_apples) {
+            best_purchases.clear();
+            for(int a:baseline)if(a>=0)best_purchases.push_back(a);
+            intermediate=baseline_apples;
+        }
+        block_trials=late_calendar(problem,best_purchases,AHC058_BLOCK,
+            started+chrono::milliseconds(AHC058_TIME_LIMIT_MS));
+    }
     i128 candidate_apples = 0;
     auto answer = problem.decode(best_purchases, candidate_apples);
     // 元の先読み出力を保持し、厳密なりんご数でも悪化させない。
@@ -521,6 +574,8 @@ int main() {
         if (action == -1) cout << -1 << '\n';
         else cout << action / 10 << ' ' << action % 10 << '\n';
     }
-    cerr << "iterations=" << iterations << " elapsed_ms=" << elapsed_ms() << " initial=" << state.score << '\n';
+    cerr << "iterations=" << iterations << " elapsed_ms=" << elapsed_ms() << " initial=" << state.score;
+    if(AHC058_BLOCK)cerr << " block=" << block_trials << " frozen=" << llround(100000.0*log2(double(intermediate)));
+    cerr << '\n';
     return 0;
 }

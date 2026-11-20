@@ -66,3 +66,38 @@ python "$p/benchmark.py" /path/to/gen /path/to/vis "$d/arm0" "$d/arm1" "$d/resul
 python scripts/bundle.py "$p/main.cpp" -o "$d/submission.cpp"
 g++ -std=c++23 -O3 "$d/submission.cpp" -o "$d/submission"
 ```
+
+## Follow-up: preserve the multiset, reorder the late calendar
+
+Freeze the first half of inherited best purchase order after 1,300 fixed
+annealing proposals. From that identical checkpoint, make 340 exact replay
+proposals entirely in the second half. Control swaps or moves one purchase;
+the block arm rotates or reverses 6–30 actions, or stable-sorts them by level.
+Both retain exactly the purchase multiset, including repeated IDs and
+levels, and accept only a strictly better exact final apple count.
+The full suffix retains exact earliest affordability checks.
+
+| Fresh cases | Frozen score ↑ | Local moves ↑ | Block edits ↑ | Block vs local |
+|---|---:|---:|---:|---:|
+| Dev (16) | 5,209,681.31 | 5,213,176.63 | 5,216,709.38 | 14 / 0 / 2 |
+| Holdout (16) | 5,189,948.13 | 5,197,425.31 | 5,201,444.88 | 15 / 0 / 1 |
+
+Held-out median gain 1,842 over local moves. All arms used exactly the
+intended trial budgets; all 96 runs matched the official visualizer and
+independent replay with max wall 0.655 s at the fixed benchmark budget.
+Keep block search as an experimental flag rather than change the 1.72 s
+time-limited default: the latter spends most of the remaining time in SA
+and leaves no reliable budget for a post-pass. Next compare reserving a
+fixed late window before hard stop versus spending that equal wall time
+on additional old SA proposals; consider interleaving block moves into SA.
+
+```sh
+p=problems/ahc058
+d=$(mktemp -d)
+for i in 0 1 2; do
+  g++ -std=c++23 -O3 -DAHC058_SA_ITERATIONS=1300 \
+    -DAHC058_BLOCK=$i "$p/main.cpp" -o "$d/arm$i"
+done
+python "$p/benchmark_blocks.py" /path/to/gen /path/to/vis \
+  "$d/arm0" "$d/arm1" "$d/arm2" "$d/results.csv"
+```
