@@ -149,3 +149,8 @@ python3 problems/ahc001/benchmark.py mincut-headroom/in bench-mincut-headroom --
 [強制軸順序変更の結果](experiments/forced_precedence_v2/README.md) を参照。
 合法な途中配置を154回得ましたが、全体改善で採用された例はなく、
 未調整8件で平均 −459,750.50点でした。既定 v64 は変更しません。
+
+同じ凍結出力に対し、直接衝突する隣接図形だけを直す
+[局所軸修復診断](experiments/local_precedence_v3/README.md) も行いました。
+開発・未調整の計12開始配置で、両軸とも完全同点で、一度も改善が
+得られなかったため、こちらも既定版に組み込みません。
