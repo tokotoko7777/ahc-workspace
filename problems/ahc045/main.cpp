@@ -1,6 +1,7 @@
 #pragma GCC optimize("O3")
 #include <algorithm>
 #include <cmath>
+#include <chrono>
 #include <cstdint>
 #include <iostream>
 #include <limits>
@@ -175,6 +176,57 @@ struct Model {
         }
         calibrate();
     }
+#ifdef AHC045_POST_QUERY_SWAP
+    void refine(std::vector<std::vector<int>>& group,const std::vector<Edges>& exact) const {
+        // Queried whole-group MSTs remain exact and are never invalidated.
+        std::vector<int> belong(n,-1),index(n,-1),available;
+        std::vector<double> value(m);
+        int open_groups=0;
+        for(int g=0;g<m;++g) if(exact[g].empty()) {
+            ++open_groups;
+            value[g]=mst(group[g],false).first;
+            for(int j=0;j<int(group[g].size());++j) {
+                const int v=group[g][j];
+                belong[v]=g;index[v]=j;available.push_back(v);
+            }
+        }
+        if(open_groups<2) return;
+        std::vector<std::vector<int>> near(n);
+        const auto stop=std::chrono::steady_clock::now()+std::chrono::milliseconds(650);
+        for(int u:available) {
+            auto q=available;
+            int k=std::min(24,int(q.size()));
+            std::partial_sort(q.begin(),q.begin()+k,q.end(),[&](int a,int b) {
+                return std::pair(length(u,a),a)<std::pair(length(u,b),b);
+            });
+            q.resize(k);
+            near[u]=std::move(q);
+        }
+        uint32_t rng=758425039;
+        auto pick=[&](int bound) {
+            rng^=rng<<13;rng^=rng>>17;rng^=rng<<5;
+            return rng%bound;
+        };
+        int work=0;
+        for(int trial=0;trial<8192 && work<26'000'000;++trial) {
+            if(trial%64==0 && std::chrono::steady_clock::now()>=stop) break;
+            int u=available[pick(available.size())],v=near[u][pick(near[u].size())];
+            int a=belong[u],b=belong[v];
+            if(a==b) continue;
+            auto& x=group[a];auto& y=group[b];
+            int i=index[u],j=index[v];
+            std::swap(x[i],y[j]);
+            const auto left=mst(x,false).first,right=mst(y,false).first;
+            work+=int(x.size()*x.size()+y.size()*y.size());
+            if(left+right+1e-6<value[a]+value[b]) {
+                value[a]=left;value[b]=right;
+                std::swap(belong[u],belong[v]);
+                std::swap(index[u],index[v]);
+            } else std::swap(x[i],y[j]);
+        }
+    }
+#endif
+
 };
 int main() {
     std::ios::sync_with_stdio(false);std::cin.tie(nullptr);
@@ -188,6 +240,9 @@ int main() {
     auto group=model.groups();
     std::vector<Edges> known(model.m);
     model.fit(group,known);
+#ifdef AHC045_POST_QUERY_SWAP
+    model.refine(group,known);
+#endif
     std::cout<<"!\n";
     for(int g=0;g<model.m;++g) {
         const auto& c=group[g];

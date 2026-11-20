@@ -58,7 +58,8 @@ def score(case, transcript):
     if next(lines,None) is not None or len(assigned)!=n:
         raise ValueError("trailing output or missing city")
     return {"score":total,"queries":len(query),
-            "decision_hash":hashlib.sha256(repr((query,group)).encode()).hexdigest()}
+            "decision_hash":hashlib.sha256(repr((query,group)).encode()).hexdigest(),
+            "query_hash":hashlib.sha256(repr(query).encode()).hexdigest()}
 
 
 def sha(path):
@@ -69,12 +70,14 @@ def main():
     parser=argparse.ArgumentParser()
     for name in ("inputs","out","tester","baseline","candidate"):
         parser.add_argument(name,type=lambda x:Path(x).resolve())
+    parser.add_argument("--queries-only",action="store_true")
     a=parser.parse_args()
     cases=sorted(a.inputs.glob("*.txt"))
     a.out.mkdir(parents=True,exist_ok=True)
     solvers={"baseline":a.baseline,"ordinal":a.candidate}
     file=a.out/"manifest.json"
-    metadata={"checker":sha(Path(__file__)),"tester":sha(a.tester),
+    key="query_hash" if a.queries_only else "decision_hash"
+    metadata={"checker":sha(Path(__file__)),"tester":sha(a.tester),"compare":key,
               "solvers":{k:sha(p) for k,p in solvers.items()},
               "inputs":{p.name:sha(p) for p in cases}}
     if not cases or file.exists() and json.loads(file.read_text())!=metadata:
@@ -101,7 +104,7 @@ def main():
                 tmp.write_text(json.dumps(row)+"\n")
                 tmp.replace(path)
             results[case.name,name]=row
-        if results[case.name,"baseline"]["decision_hash"]!=results[case.name,"ordinal"]["decision_hash"]:
+        if results[case.name,"baseline"][key]!=results[case.name,"ordinal"][key]:
             raise ValueError("changed queries/grouping; not a matched comparison")
     summary={}
     for name in solvers:
