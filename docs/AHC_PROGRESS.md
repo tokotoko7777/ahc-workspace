@@ -52,10 +52,11 @@
 | [AHC042](https://atcoder.jp/contests/ahc042/tasks/ahc042_a) | 着手・本番未判定 | **468,807**（絶対点） | 未調整32件 111.125手/件（全件完了） | 本番150件・2秒、同一ケースの証拠なし | [部分復元](https://github.com/tokotoko7777/ahc-workspace/tree/e8796e286c2e197c2f1f5324755e4fb58da8f3f5)、[垂直方向の事前操作](https://github.com/tokotoko7777/ahc-workspace/tree/98a9e65e998f57a10a8f0b3f2cf2514a0b73b4cf) |
 | [AHC043](https://atcoder.jp/contests/ahc043/tasks/ahc043_a) | 着手・本番未判定 | **1,971,352,183,368**（相対点） | 未調整24件 最終資金合計63,926,853 | 本番2,000件・3秒、基準とseed列照合済み | [問題別ブランチ](https://github.com/tokotoko7777/ahc-workspace/tree/2920bc508229a62f10b0070b68f3f1941fae75a4)、[初期ルートの追試](https://github.com/tokotoko7777/ahc-workspace/tree/46cbc1ff5548f82b99e16300ca1a5c3ca51984ca) |
 | [AHC044](https://atcoder.jp/contests/ahc044/tasks/ahc044_a) | 着手・本番未判定 | **149,807,848**（絶対点） | 新規未調整24件 平均誤差約19,314 | 本番150件・2秒、同一ケースの証拠なし | [残差探索](https://github.com/tokotoko7777/ahc-workspace/tree/95185faa94950764129d78ae2422bd9b46da73e4)、[定常分布による追試](https://github.com/tokotoko7777/ahc-workspace/tree/39c6fccc3544603af106c420abf983f84ded74b1) |
-| [AHC045](https://atcoder.jp/contests/ahc045/tasks/ahc045_a) | 着手・本番未判定 | **2,988,855,588,054**（相対点） | 未調整28件 道路長6,910,990 | 本番3,000件・2秒、基準とseed列照合済み | [順序推定](https://github.com/tokotoko7777/ahc-workspace/tree/ef908953cb79d12f7f5f71ef4aaef53d45fc4c04)、[グループ交換](https://github.com/tokotoko7777/ahc-workspace/tree/f594e37f013614a169ff675440bfcfec1e63d219) |
+| [AHC045](https://atcoder.jp/contests/ahc045/tasks/ahc045_a) | 凍結版：本番未達 | **2,988,855,588,054**（相対点） | **1,809,922,568,865**（本番3,000件・全件合法） | 本番3,000件・2秒、基準とseed列照合済み | [順序推定](https://github.com/tokotoko7777/ahc-workspace/tree/ef908953cb79d12f7f5f71ef4aaef53d45fc4c04)、[グループ交換](https://github.com/tokotoko7777/ahc-workspace/tree/f594e37f013614a169ff675440bfcfec1e63d219)、[公式比較](https://github.com/tokotoko7777/ahc-workspace/tree/8d199405dc9bbdc8821997230ee282b8b4af168a) |
 | [AHC046](https://atcoder.jp/contests/ahc046/tasks/ahc046_a) | 着手・本番未判定 | **220,494**（絶対点） | 新規未調整30件 平均217.600手 | 本番150件・2秒、同一ケースの証拠なし | [停止ブロック](https://github.com/tokotoko7777/ahc-workspace/tree/00edc1ce4028926dcc2cfb8316e64994f3fe89bb)、[複数区間の探索](https://github.com/tokotoko7777/ahc-workspace/tree/8c258bffae710ee7b3764fa8f0da9e95d59a4f6d) |
-| [AHC047](https://atcoder.jp/contests/ahc047/tasks/ahc047_a) | 着手・本番未判定 | itigo、得点未確認 | 開発比較中 | 本番150件・2秒、同一ケースの証拠なし | 検証中 |
-| AHC048〜074 | 未着手 | — | — | — | — |
+| [AHC047](https://atcoder.jp/contests/ahc047/tasks/ahc047_a) | 着手・本番未判定 | itigo、得点未確認 | 未調整24件 得点平均21,656.67 | 本番150件・2秒、同一ケースの証拠なし | [問題別ブランチ](https://github.com/tokotoko7777/ahc-workspace/tree/e8aa0d41b813933b676a6b0cb442f1e51e7a92bc) |
+| [AHC048](https://atcoder.jp/contests/ahc048/tasks/ahc048_a) | 着手・本番未判定 | 確認中 | 開発比較中 | 確認中 | 検証中 |
+| AHC049〜074 | 未着手 | — | — | — | — |
 
 ### AHC001 の次の仮説
 
@@ -660,3 +661,15 @@
 ### AHC047 本番条件
 
 [公式問題文](https://atcoder.jp/contests/ahc047/tasks/ahc047_a)。2秒 / 1,024 MiB。12状態の出力分布を提案し、長さ100万の文字列で各パターンが1回以上出る確率の加重和を丸める、150件合計。[公式結果JSON](https://atcoder.jp/contests/ahc047/results/json)の首位はitigo、得点未確認。決定的な循環と、確率遷移を変えて正確な出現確率で判定する案を比較中。
+
+### AHC045 凍結版の本番比較
+
+[再現手順](https://github.com/tokotoko7777/ahc-workspace/tree/8d199405dc9bbdc8821997230ee282b8b4af168a/problems/ahc045)。グループ交換でなく、MSTの順序推定を採用した初版を凍結。公開公式seedのまま生成した3,000件をアーカイブのfile・seed・N・M・Q・L・Wと照合し、全件合法・公式と独立採点一致。道路長の合計764,179,938、質問880,324回（ケース最大400）、テスタ込み最大約0.242秒。候補 **1,809,922,568,865**、公式1位 **2,988,855,588,054**。ケース別最小値を更新した例は0なので、同じ基準で仮に追加すると1,300人中402位相当、同点なし。**未達**・main未マージ。本番評価は改善のフィードバックには使わない。
+
+### AHC047 確率的な遷移と厳密な出現確率
+
+[検証と実装](https://github.com/tokotoko7777/ahc-workspace/tree/e8aa0d41b813933b676a6b0cb442f1e51e7a92bc)。価値の高い文字列を確実に繰り返す決定的循環に対して、確率遷移を複数初期化し、厳密なパターン出現確率で採否を決める。dev24件平均13,671.67→23,499.75、未調整24件13,864.71→21,656.67（全48件改善、未調整中央値+5,523）。96出力の公式点と独立の行列計算が一致、最大0.097127秒。問題別既定に採用。次は複数の価値ある文字列が途中の遷移を共有できる初期グラフを、追加再始動を使う対照と比較する。
+
+### AHC048 構成から着手
+
+[公式問題文](https://atcoder.jp/contests/ahc048/tasks/ahc048_a)。3秒、指定色1,000件、出力上限はケースにより4,000〜64,000操作。顔料の使用費と、提出色のCMYのユークリッド距離誤差を最小にする。2マスの井戸を固定し、毎回独立に色を作る基準と、前に残った色を使いながらチューブから足す案を比較する。
