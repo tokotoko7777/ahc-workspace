@@ -10,7 +10,7 @@
 |---|---|---|---|---|---|
 | [AHC001](https://atcoder.jp/contests/ahc001/tasks/ahc001_a) | 本番 1,000 件完走・未達 | **993,823,071,683** 点（[AtCoder 提供の順位データ](https://huggingface.co/datasets/SakanaAI/ALE-Bench/blob/main/ahc001.zip)） | 凍結 v64: **993,411,282,631** 点 | 本番公開シード全 1,000 件・公式採点。最長 4.838 秒（ローカル） | [codex/ahc001-coordinate-slide-20261120](https://github.com/tokotoko7777/ahc-workspace/tree/codex/ahc001-coordinate-slide-20261120) |
 | [AHC002](https://atcoder.jp/contests/ahc002/tasks/ahc002_a) | 既存版から着手・未判定 | **6,255,977** 点（[AtCoder 提供の順位データ](https://huggingface.co/datasets/SakanaAI/ALE-Bench/blob/main/ahc002.zip)） | V10（未調整 20 件 1,254,587） | 本番 100 件。通常配布の 0–99 は別ケース | [codex/ahc002-corridor-repair-20261120](https://github.com/tokotoko7777/ahc-workspace/tree/codex/ahc002-corridor-repair-20261120) |
-| AHC003 | 既存版と公式対話テスタを確認中 | — | — | — | — |
+| [AHC003](https://atcoder.jp/contests/ahc003/tasks/ahc003_a) | 既存版から着手・未判定 | **2,926,767,743,437** 点（[AtCoder 提供の順位データ](https://huggingface.co/datasets/SakanaAI/ALE-Bench/blob/main/ahc003.zip)） | 開発比較準備中 | 公式対話テスタ、本番公開シード 3,000 件、2 秒 | 検証中 |
 | AHC004〜074 | 未着手 | — | — | — | — |
 
 ### AHC001 の次の仮説
@@ -60,3 +60,14 @@
 - 開発用 12 件の総得点: V10 の 744,958 → 746,876（+1,918）。独立した未調整 20 件: V10 の 1,254,587 → 1,254,478（−109）。後者では改善せず、V10 を既定のままにする。64 出力で公式採点と独立検査が一致。持ち出し可能な C++23 一ファイルと部品テストも通過。
 - 同一開始配置の切り分けでは、開発用 12 件で平均 +15.75 点、3 件改善。次は隣接する二つの区間をまとめて置換し、単独区間に固定した出入口の制約を緩める。
 - 本番 100 件での盲検比較は、この環境に公開評価機能の前提となる Docker がなく未実施。非公開の入力やシードは参照せず、状態は未判定。
+
+### AHC001 単一ブロッカーの配置順序変更診断
+
+- [コードと再現手順](https://github.com/tokotoko7777/ahc-workspace/blob/0c71d1904fb4b9c4dd0f329dc0a5a455679ad35f/problems/ahc001/experiments/topology_v1/README.md) を別ブランチ保存。新しい開発 8 件の同一開始配置で、邪魔な長方形 1 枚を一時的に縮めて既存の最小カットと比較。
+- 初回は平均 +511.25 点、再計測は +411.375 点、いずれも 4 勝 4 分。全 32 出力の公式採点・合法性検査が一致。83 試行中 4 回は狙った分離方向が変わったが、採用した最良配置には残らず。小さすぎるため既定版は変更しない。
+- 次は少し縮めるだけでなく、途中で一時的な失点を許したうえで、移したい順序を連続変形の制約に明示する。この近傍の反復数を増やすだけにはしない。
+
+### AHC003 の本番比較根拠
+
+- [公式問題文](https://atcoder.jp/contests/ahc003/tasks/ahc003_a) の本番 3,000 件、公式対話テスタでケースごとに採点し絶対得点を合計。各ケース 2 秒、無効・時間超過はそのケースのみ 0 点。[AtCoder 提供の順位データ](https://huggingface.co/datasets/SakanaAI/ALE-Bench/blob/main/ahc003.zip) を確認。
+- 公開 `seeds.txt` MD5 `0cf5051d586e7f62c0b3527f6f7fbb1c` と件数 3,000 を確認済み。開発・未使用ケースを別々に生成し、序盤の同程度の経路に限って、観測による推定の改善も評価する案を既存版と比較する。
