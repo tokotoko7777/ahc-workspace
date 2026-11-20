@@ -20,8 +20,8 @@
 | [AHC010](https://atcoder.jp/contests/ahc010/tasks/ahc010_a) | ローカル改善・本番未判定 | **20,218,968** 点（[AtCoder 提供の順位データ](https://huggingface.co/datasets/SakanaAI/ALE-Bench/blob/main/ahc010.zip)） | 協調回転版: 未調整 10 件平均 56,482 | 本番 100 件、2 秒。配布入力との同一性未確認 | [問題別ブランチ](https://github.com/tokotoko7777/ahc-workspace/tree/8e99892f7dc12317ba365750a15a2a7c072b3731) |
 | [AHC011](https://atcoder.jp/contests/ahc011/tasks/ahc011_a) | ローカル改善・本番未判定 | **2,691,447,336** 点（[AtCoder 提供の順位データ](https://huggingface.co/datasets/SakanaAI/ALE-Bench/blob/main/ahc011.zip)） | 局所回転追加: 未調整 15 件 6,060,235 | 本番公開 3,000 シード、3 秒 | ローカル保存・公開確認待ち |
 | [AHC012](https://atcoder.jp/contests/ahc012/tasks/ahc012_a) | ローカル比較・本番未判定 | **99,781,619** 点（[AtCoder 提供の順位データ](https://huggingface.co/datasets/SakanaAI/ALE-Bench/blob/main/ahc012.zip)） | 格子版: 未調整 8 件平均 972,456.375 | 本番 100 件・3 秒。同一性未確認 | [問題別ブランチ](https://github.com/tokotoko7777/ahc-workspace/tree/dc1a18935430728a5dbca82c14f8bc84c57145e1) |
-| [AHC013](https://atcoder.jp/contests/ahc013/tasks/ahc013_a) | ローカル比較中・本番未判定 | [公式順位](https://atcoder.jp/contests/ahc013/standings) 要ログイン。1 位の点数未確認 | 静的接続と隣接移動を比較 | 本番公開 2,000 シード、3 秒 | 検証中 |
-| AHC014 | 着手・未判定 | 確認中 | — | — | 検証中 |
+| [AHC013](https://atcoder.jp/contests/ahc013/tasks/ahc013_a) | ローカル改善・本番の自己得点を評価中 | [公式順位](https://atcoder.jp/contests/ahc013/standings) 要ログイン。1 位の点数未確認 | 隣接移動版: 未調整 20 件 64,679 | 本番公開 2,000 シード、3 秒 | [問題別ブランチ](https://github.com/tokotoko7777/ahc-workspace/tree/7526fecad74457ce05f786e5127c4e45c0357203) |
+| [AHC014](https://atcoder.jp/contests/ahc014/tasks/ahc014_a) | 開発比較準備中・未判定 | **3,122,399,998** 点（[AtCoder 提供の順位データ](https://huggingface.co/datasets/SakanaAI/ALE-Bench/blob/main/ahc014.zip)） | 貪欲構築・接頭辞巻き戻しを比較 | 本番公開 2,000 シード、5 秒 | 検証中 |
 | AHC015〜074 | 未着手 | — | — | — | — |
 
 ### AHC001 の次の仮説
@@ -212,3 +212,9 @@
 - [実装と再現手順](https://github.com/tokotoko7777/ahc-workspace/blob/247becac000d9343c3d98fa15ce6062d845566df/problems/ahc012/README.md)。凍結格子解へ、24 個の整数法線の全オフセットから 1 本だけ加える。分割で新旧サイズの充足数がどれだけ変わるかを差分で厳密評価。
 - 新規開発 8 件中 2 件で 1 人ずつ改善、別の 8 件は全同点。不採用・任意機能として保存。3 種の全 48 出力で公式採点と独立線分判定が一致、最大 2.727876 秒。C++23 と汎用 [capped-partition-sweep.hpp](https://github.com/tokotoko7777/ahc-workspace/blob/247becac000d9343c3d98fa15ce6062d845566df/library/capped-partition-sweep.hpp) の 800 比較を通過。
 - 次は一つの既存カットを外してから置き換え、異なる既存区画の統合と再分割を同時に許す。
+
+### AHC013 隣接移動から再配線
+
+- [実装と再現手順](https://github.com/tokotoko7777/ahc-workspace/blob/7526fecad74457ce05f786e5127c4e45c0357203/problems/ahc013/README.md)。移動なしの線分連結を基準に、同型の端点が並ぶ短い隣接移動を試し、移動と配線の残予算を守って配線案を再構築。開発 12 件 7,294 → 37,991、未調整 20 件 11,377 → 64,679（全 32 勝）。基準は最大約 5 ms、新版は最大 0.840538 秒で、比較は同一入力だが使った時間は異なる。
+- 全 64 出力で公式採点と独立検査が一致。C++23、一ファイルおよび四方向視界部品の対照テストを通過。研究ブランチの既定に保存。
+- 有効な本番公開 2,000 シードを SHA-256 `0a50dccf4689292f69a36be0ea1a99767de055434b854f2b0bc7f1fd40f9033e` で確認し、100 分類に各 20 件で生成。凍結版で公式の自己得点を計測中。順位表の 1 位得点が未取得なので、完走後も直ちに順位を判定しない。次は離れた成分をつなぐ複数移動を検討。
