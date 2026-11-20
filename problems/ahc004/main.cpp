@@ -317,6 +317,10 @@ struct GenomeProblem {
 };
 // ===== ここまでが問題依存。時計・温度・採否・最良解保存はRunnerへ任せる =====
 
+#ifdef AHC_CYCLE_SEED
+#include "observed-cycles.hpp"
+#endif
+
 #ifndef AHC004_TEST
 #ifdef AHC_CONTIG_SEED
 #include "../../library/circular-pattern-components.hpp"
@@ -378,6 +382,74 @@ static vector<string> seed_from_contigs(int n,const vector<Target>& targets,
       int z=(pos_best+k)%n;
       (axis_best ? board[z][line_best] : board[line_best][z])=c;
     }
+  }
+  return board;
+}
+#endif
+
+#ifdef AHC_CYCLE_SEED
+// Pack verified cyclic strings as whole lines before filling shorter words.
+// Distinct matched intersections, not coincidental pairwise overlap, couple axes.
+static vector<string> seed_from_cycles(
+    int n, int word_count, const vector<ahc004::Cycle>& bank, int variant,
+    const Timer& timer, double deadline) {
+  vector<string> board(n, string(n, '.'));
+  if (bank.empty()) return board;
+  const int limit = min<int>(24, bank.size());
+  vector<bool> used(limit), covered(word_count);
+  array<vector<bool>, 2> filled{vector<bool>(n), vector<bool>(n)};
+  const auto install = [&](int id, int axis, int lane, int phase) {
+    for (int p = 0; p < n; ++p) {
+      char c = bank[id].letters[(p+phase)%n];
+      char& cell = axis == 0 ? board[lane][p] : board[p][lane];
+      assert(cell == '.' || cell == c);
+      cell = c;
+    }
+    used[id] = filled[axis][lane] = true;
+    for (int word : bank[id].words) covered[word] = true;
+  };
+  install(variant % min(4,limit), 0, 0, 0);
+  for (int step = 1; step < min(limit, 7); ++step) {
+    if (timer.elapsed_ms() >= deadline) break;
+    const int preferred = step < 2 ? 0 : step % 2 == 0;
+    int best = -1, id = -1, axis = 0, lane = 0, phase = 0;
+    for (const int d : {preferred, preferred ^ 1}) {
+      if (id >= 0) break;
+      for (int i=0; i<limit; ++i) {
+        if (used[i]) continue;
+        const int novelty = count_if(bank[i].words.begin(), bank[i].words.end(),
+                                     [&](int w) { return !covered[w]; });
+        if (!novelty) continue;
+        for (int w=0; w<n; ++w) {
+          const int line = (w + 5*variant + 3*step) % n;
+          if (filled[d][line]) continue;
+          for (int v=0; v<n; ++v) {
+            const int shift = (v + 7*variant + step) % n;
+            int intersections = 0;
+            for (int p=0; p<n; ++p) {
+              const char old = d == 0 ? board[line][p] : board[p][line];
+              if (old == '.') continue;
+              if (old != bank[i].letters[(p+shift)%n]) {
+                intersections = -1;
+                break;
+              }
+              ++intersections;
+            }
+            if (intersections < 0) continue;
+            const int value = 16*novelty + bank[i].evidence + 24*intersections;
+            if (value > best) {
+              best = value;
+              id = i;
+              axis = d;
+              lane = line;
+              phase = shift;
+            }
+          }
+        }
+      }
+    }
+    if (id < 0) break;
+    install(id, axis, lane, phase);
   }
   return board;
 }
@@ -486,11 +558,37 @@ int main() {
   Board best_board(n, string(n, '.'));
   pair<int, int> best_score{-1, -1};
   int attempt = 0;
+#ifdef AHC_CYCLE_SEED
+  ahc004::CycleCatalogue catalogue;
+  int cycle_attempts = 0, cycle_incumbents = 0;
+#endif
 
   do {
+#ifdef AHC_CYCLE_SEED
+    bool used_cycles = false;
+#endif
     Board board(n, string(n, '.'));
 #ifdef AHC_CONTIG_SEED
     if(attempt%3==1)board=seed_from_contigs(n,targets,maximal_indices,random,4+(attempt/3)%3);
+#endif
+#ifdef AHC_CYCLE_SEED
+    if (attempt == 1 && timer.elapsed_ms() < GREEDY_END_MS - 18.0) {
+      const double deadline = timer.elapsed_ms() + 8.0;
+      vector<string> words;
+      vector<int> weights;
+      for (const auto& word : targets) {
+        words.push_back(word.text);
+        weights.push_back(word.frequency);
+      }
+      catalogue = ahc004::observed_cycles(n, words, weights,
+          20000, [&] { return timer.elapsed_ms() >= deadline; });
+    }
+    if (attempt % 3 == 2 && !catalogue.cycles.empty()) {
+      used_cycles = true;
+      ++cycle_attempts;
+      board = seed_from_cycles(n, target_count, catalogue.cycles, attempt / 3, timer,
+          min(GREEDY_END_MS, timer.elapsed_ms() + 6.0));
+    }
 #endif
     vector<int> order = maximal_indices;
     vector<uint64_t> priority(target_count);
@@ -599,12 +697,21 @@ int main() {
 
     const pair<int, int> score = count_score(board);
     if (score > best_score) {
+#ifdef AHC_CYCLE_SEED
+      cycle_incumbents += used_cycles;
+#endif
       best_score = score;
       best_board = move(board);
     }
     ++attempt;
   } while (timer.elapsed_ms() < GREEDY_END_MS);
 
+#ifdef AHC_CYCLE_SEED
+  cerr << "cycle_candidates=" << catalogue.cycles.size()
+       << " cycle_visits=" << catalogue.visits << " cycle_capped=" << catalogue.capped
+       << " cycle_attempts=" << cycle_attempts
+       << " cycle_incumbents=" << cycle_incumbents << '\n';
+#endif
   GenomeProblem problem(n, m, targets);
   auto initial = problem.make_state(best_board);
   const double initial_score = problem.score(initial);
@@ -619,5 +726,6 @@ int main() {
          << " covered=" << runner.best_state().coverage.covered_weight << "/" << m << '\n';
   }
   for (const string& row : best_board) cout << row << '\n';
+  return 0;
 }
 #endif
