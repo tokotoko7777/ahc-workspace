@@ -10,8 +10,9 @@
 |---|---|---|---|---|---|
 | [AHC001](https://atcoder.jp/contests/ahc001/tasks/ahc001_a) | 本番 1,000 件完走・未達 | **993,823,071,683** 点（[AtCoder 提供の順位データ](https://huggingface.co/datasets/SakanaAI/ALE-Bench/blob/main/ahc001.zip)） | 凍結 v64: **993,411,282,631** 点 | 本番公開シード全 1,000 件・公式採点。最長 4.838 秒（ローカル） | [codex/ahc001-coordinate-slide-20261120](https://github.com/tokotoko7777/ahc-workspace/tree/codex/ahc001-coordinate-slide-20261120) |
 | [AHC002](https://atcoder.jp/contests/ahc002/tasks/ahc002_a) | 既存版から着手・未判定 | **6,255,977** 点（[AtCoder 提供の順位データ](https://huggingface.co/datasets/SakanaAI/ALE-Bench/blob/main/ahc002.zip)） | V10（未調整 20 件 1,254,587） | 本番 100 件。通常配布の 0–99 は別ケース | [codex/ahc002-corridor-repair-20261120](https://github.com/tokotoko7777/ahc-workspace/tree/codex/ahc002-corridor-repair-20261120) |
-| [AHC003](https://atcoder.jp/contests/ahc003/tasks/ahc003_a) | 既存版から着手・未判定 | **2,926,767,743,437** 点（[AtCoder 提供の順位データ](https://huggingface.co/datasets/SakanaAI/ALE-Bench/blob/main/ahc003.zip)） | 開発比較準備中 | 公式対話テスタ、本番公開シード 3,000 件、2 秒 | 検証中 |
-| AHC004〜074 | 未着手 | — | — | — | — |
+| [AHC003](https://atcoder.jp/contests/ahc003/tasks/ahc003_a) | 本番 3,000 件を評価中・未判定 | **2,926,767,743,437** 点（[AtCoder 提供の順位データ](https://huggingface.co/datasets/SakanaAI/ALE-Bench/blob/main/ahc003.zip)） | 既存版を凍結 | 公式対話テスタ、本番公開シード 3,000 件、2 秒 | [codex/ahc003-probe-design-20261120](https://github.com/tokotoko7777/ahc-workspace/tree/codex/ahc003-probe-design-20261120) |
+| AHC004 | 既存使用例から着手・未判定 | 確認中 | — | — | 検証中 |
+| AHC005〜074 | 未着手 | — | — | — | — |
 
 ### AHC001 の次の仮説
 
@@ -71,3 +72,9 @@
 
 - [公式問題文](https://atcoder.jp/contests/ahc003/tasks/ahc003_a) の本番 3,000 件、公式対話テスタでケースごとに採点し絶対得点を合計。各ケース 2 秒、無効・時間超過はそのケースのみ 0 点。[AtCoder 提供の順位データ](https://huggingface.co/datasets/SakanaAI/ALE-Bench/blob/main/ahc003.zip) を確認。
 - 公開 `seeds.txt` MD5 `0cf5051d586e7f62c0b3527f6f7fbb1c` と件数 3,000 を確認済み。開発・未使用ケースを別々に生成し、序盤の同程度の経路に限って、観測による推定の改善も評価する案を既存版と比較する。
+
+### AHC003 序盤の観測経路の比較
+
+- [実験と再現手順](https://github.com/tokotoko7777/ahc-workspace/blob/0d42d1839a9ff4a1f35b2830ea4b2e2eeba682c4/problems/ahc003/README.md)。既存の経路より少し高い程度の候補に限定して、観測から推定がどれだけ進むかも評価した。
+- スコア差（候補−既存）: 開発 16 件 −10,833,676、未調整 24 件 +51,063,960、追加の独立確認 24 件 −21,549,158。判定閾値を変えず追加確認は不合格、既存解を保持。128 出力すべてで対話テスタと独立検査が一致。C++23、単一ファイル、汎用部品の乱択 1,000 件比較を通過。
+- 既存解を凍結し、同じ公式対話テスタと本番公開シード 3,000 件で評価中。凍結バイナリ SHA-256 `a78c04bdaae066bee7b5e6458106b044e79179e606f607152adb11b4ad76e539`。本番結果は開発には使わない。AHC004 の着手準備も開始。
