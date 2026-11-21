@@ -26,6 +26,9 @@
 #endif
 #endif
 
+#ifdef AHC004_FAST_FILL
+#include "../../library/toroidal-symbol-masks.hpp"
+#endif
 #include <bits/stdc++.h>
 #include "../../library/time-based-simulated-annealing.hpp"
 #include "../../library/aho-corasick.hpp"
@@ -762,6 +765,7 @@ int main() {
 
   using Board = vector<string>;
 
+#ifndef AHC004_FAST_FILL
   const auto is_present = [&](const Board& board, const string& text) {
     const int length = static_cast<int>(text.size());
     for (int direction = 0; direction < 2; ++direction) {
@@ -783,7 +787,14 @@ int main() {
     return false;
   };
 
+#endif
   const auto count_score = [&](const Board& board) {
+#ifdef AHC004_FAST_FILL
+    ahc004::ToroidalSymbolMasks mask(board);
+    int covered=0;
+    for(const Target& target:targets)if(mask.present(target.text))covered+=target.frequency;
+    return pair<int,int>{covered,mask.dots()};
+#else
     int covered = 0;
     for (const Target& target : targets) {
       if (is_present(board, target.text)) covered += target.frequency;
@@ -793,6 +804,7 @@ int main() {
       empty += count(row.begin(), row.end(), '.');
     }
     return pair<int, int>{covered, empty};
+#endif
   };
 
   Random random(input_hash);
@@ -829,9 +841,16 @@ int main() {
     });
     order.insert(order.end(), remaining.begin(), remaining.end());
 
+#ifdef AHC004_FAST_FILL
+    ahc004::ToroidalSymbolMasks mask(board);
+#endif
     for (int target_index : order) {
       const string& text = targets[target_index].text;
+#ifdef AHC004_FAST_FILL
+      if (mask.present(text)) continue;
+#else
       if (is_present(board, text)) continue;
+#endif
 
       long long best_quality = numeric_limits<long long>::min();
       int best_direction = -1;
@@ -839,6 +858,36 @@ int main() {
       int best_start = -1;
       int equal_candidates = 0;
 
+#ifdef AHC004_FAST_FILL
+      const char* const text_data=text.data();
+      const int len=text.size();
+      for(int line=0;line<2*n;++line) {
+        const int filled=mask.filled_in_line(line);
+        uint32_t choices=mask.starts<true>(line,text_data,len);
+        while(choices) {
+          const int start=std::countr_zero(choices);
+          choices&=choices-1;
+          const int new_cells=mask.dots_in_window(line,start,len);
+          const int matching=len-new_cells;
+          long long quality=1000000LL*matching-10000LL*new_cells;
+          quality+=(matching==0?-100LL:10LL)*filled;
+          if(quality>best_quality) {
+            best_quality=quality;
+            best_direction=line<n?0:1;
+            best_line=line<n?line:line-n;
+            best_start=start;
+            equal_candidates=1;
+          } else if(quality==best_quality) {
+            ++equal_candidates;
+            if(random.next_int(0,equal_candidates)==0) {
+              best_direction=line<n?0:1;
+              best_line=line<n?line:line-n;
+              best_start=start;
+            }
+          }
+        }
+      }
+#else
       for (int direction = 0; direction < 2; ++direction) {
         for (int line = 0; line < n; ++line) {
           int line_filled = 0;
@@ -894,6 +943,7 @@ int main() {
         }
       }
 
+#endif
       if (best_direction == -1) continue;
       for (int offset = 0; offset < static_cast<int>(text.size()); ++offset) {
         const int row = best_direction == 0
@@ -902,11 +952,39 @@ int main() {
         const int column = best_direction == 0
                                ? (best_start + offset) % n
                                : best_line;
+#ifdef AHC004_FAST_FILL
+        mask.set(row,column,board[row][column],text[offset]);
+#endif
         board[row][column] = text[offset];
       }
     }
 
   };
+
+#ifdef AHC004_FIXED_FILL_BENCH
+  // Deterministic work only, no wall-clock stop. No benchmark entry ships
+  // with this macro. Grid hashes and next RNG word are compared externally.
+  double fill_ms=0, score_ms=0;
+  for(int rep=0;rep<25;++rep){
+    Board board(n,string(n,'.'));
+    if(rep%3!=0)board=seed_from_contigs(n,targets,maximal_indices,random,4+rep%3);
+    const auto t0=timer.elapsed_ms();
+    fill_words(board,rep);
+    const auto t1=timer.elapsed_ms();
+    pair<int,int> final{};
+    for(int k=0;k<8;++k){
+      asm volatile("" ::: "memory");
+      final=count_score(board);
+    }
+    const auto t2=timer.elapsed_ms();
+    fill_ms+=t1-t0; score_ms+=t2-t1;
+    cout<<final.first<<'/'<<final.second<<'\n';
+    for(const auto& row:board)cout<<row<<'\n';
+  }
+  cout<<random.next_u64()<<'\n';
+  cerr<<"fixed_fill_ms="<<fill_ms<<" fixed_score_ms="<<score_ms<<'\n';
+  return 0;
+#endif
 
 #ifdef AHC004_LINE_REBUILD
   const char* checkpoint_in=getenv("AHC004_LINE_CHECKPOINT_IN");
