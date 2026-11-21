@@ -1395,6 +1395,80 @@ int main() {
       <<" medium_raw="<<medium_raw<<" medium_filled="<<medium_filled
       <<" medium_selected="<<medium_selected<<" medium_ms="<<timer.elapsed_ms()-medium_begin<<'\n';
 #endif
+#if defined(AHC004_WILD_GEOMETRY) && defined(AHC004_MEDIUM_DIVERSE) && defined(AHC004_COMPLETE_WILD_RETRY)
+  const double late_begin=timer.elapsed_ms();
+  if (full_geometry_attempted && sweep_visits && 10<=wild_longest && wild_longest<=12
+      && best_score==ordinary_key && late_begin<1930.0) {
+    // Complete lines often become misleading in an overlap-augmented
+    // catalogue. Retry with genuinely partial anchors, while preserving
+    // strong observed closed lines as donors.
+    const auto saved_rng=random.engine;
+    auto partial=ahc004::partial_assembled_lines(n,words,5,[&]{
+      return timer.elapsed_ms()>=late_begin+24.0;
+    });
+    vector<ahc004::PartialLine> patterns;
+    set<string> seen_lines;
+    auto add=[&](const string& line,int known) {
+      if(patterns.size()>=48 || !seen_lines.insert(line).second)return;
+      patterns.push_back({line,known});
+    };
+    int open_anchors=0;
+    for(const auto& x:partial)
+      if(15<=x.known && x.known<20 && open_anchors<3) {
+        add(x.letters,x.known);
+        open_anchors=patterns.size();
+      }
+#if defined(AHC004_MERGED_NATIVE_RETRY) && defined(AHC004_MERGED_CYCLES)
+    if(adopted_merged_bank) for(const auto& line:native_order)add(line,20);
+#endif
+    for(const auto& x:closed.cycles)add(x.letters,20);
+    for(const auto& x:partial)if(x.known>=15)add(x.letters,x.known);
+    int late_triples=0,late_parents=0,late_realized=0,late_filled=0;
+    if(open_anchors>=1 && patterns.size()>=24 && timer.elapsed_ms()<1960.0) {
+      auto bank=ahc004::make_wild_bank(std::move(patterns),15);
+      const double tri_end=min(2100.0,timer.elapsed_ms()+215.0);
+      auto tri=ahc004::wild_offset_diverse(bank,144,850000,
+                          [&]{return timer.elapsed_ms()>=tri_end;});
+      const double fourth_end=min(2290.0,tri_end+250.0);
+      auto fourth=ahc004::medium_fourth(bank,tri,7200000,
+                          [&]{return timer.elapsed_ms()>=fourth_end;});
+      late_triples=tri.examined;
+      late_parents=fourth.parents;
+      vector<string> seen;
+      vector<pair<pair<int,int>,Board>> verified;
+      for(const auto& a:fourth.ranked) {
+        if(late_realized>=24 || timer.elapsed_ms()>=2360.0)break;
+        auto x=ahc004::wild_realize(bank,a,[&]{return timer.elapsed_ms()>=2360.0;});
+        if(x.board.empty())continue;
+        ++late_realized;
+        if(x.extensions<2 && a.strong<16)continue;
+        auto key=ahc004::geometry_shape_key(x.board);
+        if(find(seen.begin(),seen.end(),key)!=seen.end())continue;
+        seen.push_back(move(key));
+        auto raw=count_score(x.board);
+        if(raw>best_score){best_board=x.board;best_score=raw;}
+        verified.emplace_back(raw,move(x.board));
+      }
+      stable_sort(verified.begin(),verified.end(),[](const auto& a,const auto& b){
+        return a.first>b.first;
+      });
+      for(int i=0;i<min<int>(3,verified.size()) && timer.elapsed_ms()<2410.0;++i){
+        auto& board=verified[i].second;
+        fill_words(board,attempt+i+1);
+        auto key=count_score(board);
+        late_filled=max(late_filled,key.first);
+        if(key>best_score){best_score=key;best_board=move(board);}
+        if(best_score.first==m)break;
+      }
+    }
+    if(best_score==ordinary_key)random.engine=saved_rng;
+    cerr<<"late_wild_begin="<<late_begin<<" late_wild_open="<<open_anchors
+        <<" late_wild_triples="<<late_triples<<" late_wild_parents="<<late_parents
+        <<" late_wild_realized="<<late_realized<<" late_wild_filled="<<late_filled
+        <<" late_wild_selected="<<(best_score>ordinary_key)
+        <<" late_wild_end="<<timer.elapsed_ms()<<'\n';
+  }
+#endif
 #ifdef AHC004_LINE_REBUILD
   }
 #endif
