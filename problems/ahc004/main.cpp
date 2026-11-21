@@ -14,6 +14,9 @@
 #include "anchor-congruence.hpp"
 #ifdef AHC004_WILD_GEOMETRY
 #include "wild-geometry.hpp"
+#ifdef AHC004_WILD_DISJOINT_RETRY
+#include "wild-disjoint-retry.hpp"
+#endif
 #endif
 #ifdef AHC004_MERGED_CYCLES
 #include "partial-lines.hpp"
@@ -1282,6 +1285,58 @@ int main() {
       <<" wild_extensions="<<wild_extensions<<" wild_raw="<<wild_raw
       <<" wild_filled="<<wild_filled<<" wild_selected="<<wild_selected
       <<" wild_ms="<<timer.elapsed_ms()-wild_begin<<'\n';
+#endif
+#if defined(AHC004_WILD_GEOMETRY) && defined(AHC004_WILD_DISJOINT_RETRY)
+  int retry_tri=0,retry_parents=0,retry_real=0,retry_reject=0,retry_raw=0,retry_fill=0;
+  bool retry_selected=false;
+  const double retry_begin=timer.elapsed_ms();
+  // All successful incumbent routes are identical. This path is deliberately
+  // limited to dense-L6/L7 cases that spent the first wildcard search and
+  // still could not beat ordinary construction.
+  if(wild_tri && !wild_selected && !full_geometry_attempted && best_score==ordinary_key
+      && retry_begin<1675.0) {
+    const auto rng_before=random.engine;
+    auto bank=ahc004::make_wild_bank(ahc004::partial_assembled_lines(n,words,4,
+                         [&]{return timer.elapsed_ms()-retry_begin>=17.0;}),12);
+    if(bank.n>=24){
+      const double triple_end=min(1830.0,timer.elapsed_ms()+230.0);
+      auto tri=ahc004::wild_offset_disjoint(bank,176,1368000,
+                             [&]{return timer.elapsed_ms()>=triple_end;});
+      const double fourth_end=min(2080.0,triple_end+260.0);
+      auto four=ahc004::disjoint_fourth(bank,tri,15000000,
+                             [&]{return timer.elapsed_ms()>=fourth_end;});
+      retry_tri=tri.examined;retry_parents=four.parents;
+      std::set<std::array<int,4>> seen;
+      std::vector<std::pair<std::pair<int,int>,Board>> verified;
+      for(const auto& a:four.ranked){
+        if(retry_real>=44 || timer.elapsed_ms()>=2175.0)break;
+        if(!seen.insert(ahc004::wild_anchor_key(a)).second)continue;
+        auto x=ahc004::wild_realize(bank,a,[&]{return timer.elapsed_ms()>=2175.0;});
+        if(x.board.empty())continue;
+        ++retry_real;
+        if(x.extensions<2 && a.strong<17){++retry_reject;continue;}
+        auto score=count_score(x.board);
+        retry_raw=max(retry_raw,score.first);
+        if(score>best_score){best_score=score;best_board=x.board;}
+        verified.emplace_back(score,std::move(x.board));
+      }
+      std::stable_sort(verified.begin(),verified.end(),[](const auto& a,const auto& b){return a.first>b.first;});
+      for(int i=0;i<min<int>(4,verified.size()) && timer.elapsed_ms()<2240.0;++i){
+        auto& board=verified[i].second;
+        fill_words(board,attempt+i+1);
+        const auto score=count_score(board);
+        retry_fill=max(retry_fill,score.first);
+        if(score>best_score){best_score=score;best_board=std::move(board);}
+        if(best_score.first==m)break;
+      }
+    }
+    retry_selected=best_score>ordinary_key;
+    if(!retry_selected)random.engine=rng_before;
+  }
+  cerr<<"disjoint_triples="<<retry_tri<<" disjoint_parents="<<retry_parents
+      <<" disjoint_realized="<<retry_real<<" disjoint_rejected="<<retry_reject
+      <<" disjoint_raw="<<retry_raw<<" disjoint_filled="<<retry_fill
+      <<" disjoint_selected="<<retry_selected<<" disjoint_ms="<<timer.elapsed_ms()-retry_begin<<'\n';
 #endif
 #ifdef AHC004_LINE_REBUILD
   }
