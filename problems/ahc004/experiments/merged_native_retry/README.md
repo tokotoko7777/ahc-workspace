@@ -8,9 +8,9 @@ formerly successful geometry starts.
 
 Alternative quintets use observed closed k-mer cycles rather than assuming the
 merged evidence ordering can identify consistent anchors. Merged cycles remain
-allowed donors; exact crossings are enforced. Native donors are tried first by
-the augmenting-path matcher and extension, but maximum matching cardinality
-remains exact. Actual read coverage ranks the distinct realized boards; only a
+allowed donors; exact crossings are enforced. Donor-first augmentations maximize matching cardinality, then maximize the
+number of native donors among those matchings. Native lines are also tried first
+during extension. Actual read coverage ranks the distinct realized boards; only a
 material covered-word advantage over the ordinary board can replace that board.
 The retry phases end by about 1990 ms, and the normal optimization limit is
 unchanged. Failed retries keep the ordinary seed and RNG state, though time

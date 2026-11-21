@@ -26,4 +26,18 @@ int main(){
       seen|=bit;
     }
   }
+  for(int t=0;t<150;++t){
+    a.fill(0);
+    for(int i=0;i<5;++i)a[i]=rng()&127;
+    uint64_t native=rng()&127;
+    int got=ahc004::match_columns<true>(a,&preferred,native), fav=0;
+    for(int id:preferred)if(id>=0)fav+=(native>>id)&1;
+    bool can[128]{true};
+    for(int i=0;i<5;++i)for(int mask=127;mask>=0;--mask)if(can[mask])
+      for(int j=0;j<7;++j)if(!(mask>>j&1)&&(a[i]>>j&1))can[mask|(1<<j)]=true;
+    std::pair<int,int> opt{};
+    for(unsigned mask=0;mask<128;++mask)if(can[mask])
+      opt=std::max(opt,{std::popcount(mask),std::popcount(mask&native)});
+    assert((std::pair{got,fav}==opt));
+  }
 }

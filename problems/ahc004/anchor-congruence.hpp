@@ -20,6 +20,35 @@ struct AnchorSearch {
 template<bool PreferNative=false>
 inline int match_columns(const std::array<uint64_t,20>& domains,
                          std::array<int,20>* assignment=nullptr, uint64_t native=0) {
+  if constexpr(PreferNative) {
+    // Greedy augmentations on the donor side preserve all donors already
+    // matched. Taking native donors first therefore attains maximum native
+    // count among maximum-cardinality assignments.
+    uint32_t lanes[64]{};
+    for(int col=0;col<20;++col) for(uint64_t bits=domains[col];bits;bits&=bits-1)
+      lanes[std::countr_zero(bits)]|=uint32_t(1)<<col;
+    std::array<int,20> col_mate;
+    col_mate.fill(-1);
+    int size=0;
+    for(int pass=0;pass<2;++pass) for(int id=0;id<64;++id){
+      if(int((native>>id)&1)!=1-pass || !lanes[id])continue;
+      uint32_t seen=0;
+      const auto augment=[&](const auto& self,int cur)->bool{
+        while(const uint32_t bits=lanes[cur]&~seen){
+          const int col=std::countr_zero(bits);
+          seen|=uint32_t(1)<<col;
+          if(col_mate[col]<0 || self(self,col_mate[col])){
+            col_mate[col]=cur;
+            return true;
+          }
+        }
+        return false;
+      };
+      size+=augment(augment,id);
+    }
+    if(assignment)*assignment=col_mate;
+    return size;
+  }
   std::array<int,64> mate;
   mate.fill(-1);
   int result=0;
@@ -27,7 +56,7 @@ inline int match_columns(const std::array<uint64_t,20>& domains,
     uint64_t seen=0;
     const auto dfs=[&](const auto& self,int col)->bool {
       while (const uint64_t bits=domains[col]&~seen) {
-        const int id=std::countr_zero(PreferNative && (bits&native) ? bits&native : bits);
+        const int id=std::countr_zero(bits);
         seen|=uint64_t(1)<<id;
         if (mate[id]<0 || self(self,mate[id])) {
           mate[id]=col;
