@@ -12,6 +12,9 @@
 
 #ifdef AHC_ANCHOR_GEOMETRY
 #include "anchor-congruence.hpp"
+#ifdef AHC004_WILD_GEOMETRY
+#include "wild-geometry.hpp"
+#endif
 #ifdef AHC004_MERGED_CYCLES
 #include "partial-lines.hpp"
 #endif
@@ -1088,6 +1091,64 @@ int main() {
        << " partial_ms=" << merged_ms << '\n';
 #endif
 
+#ifdef AHC004_WILD_GEOMETRY
+  int wild_longest=0;
+  for(const auto& w:words)wild_longest=max(wild_longest,int(w.size()));
+  int wild_lines=0,wild_tri=0,wild_parents=0,wild_4=0,wild_real=0,wild_reject=0;
+  int wild_extensions=0,wild_raw=0,wild_filled=0;
+  bool wild_selected=false;
+  const double wild_begin=timer.elapsed_ms();
+  if (!sweep_visits && n==20 && (wild_longest==9 || (wild_longest==8 && m>=680))) {
+    const double assembly_end=wild_begin+18.0;
+    auto bank=ahc004::make_wild_bank(ahc004::partial_assembled_lines(n,words,4,
+                      [&]{return timer.elapsed_ms()>=assembly_end;}),12);
+    wild_lines=bank.n;
+    if (bank.n>=24) {
+      const double triple_end=min(690.0,wild_begin+440.0);
+      auto triples=ahc004::wild_triples(bank,192,1368000,
+                  [&]{return timer.elapsed_ms()>=triple_end;});
+      const double fourth_end=min(1510.0,wild_begin+1300.0);
+      auto fourth=ahc004::wild_fourth(bank,triples,15000000,
+                  [&]{return timer.elapsed_ms()>=fourth_end;});
+      wild_tri=triples.examined;wild_parents=fourth.parents;wild_4=fourth.tested;
+      const double seed_end=min(1760.0,wild_begin+1575.0);
+      std::vector<std::pair<std::pair<int,int>,Board>> verified;
+      std::set<std::array<int,4>> seen;
+      for(const auto& anchor:fourth.ranked) {
+        if(wild_real>=32 || timer.elapsed_ms()>=seed_end)break;
+        if(!seen.insert(ahc004::wild_anchor_key(anchor)).second)continue;
+        auto x=ahc004::wild_realize(bank,anchor,
+                      [&]{return timer.elapsed_ms()>=seed_end;});
+        if(x.board.empty())continue;
+        ++wild_real;
+        wild_extensions=max(wild_extensions,x.extensions);
+        if(x.extensions<2 && anchor.strong<17){++wild_reject;continue;}
+        auto raw=count_score(x.board);
+        wild_raw=max(wild_raw,raw.first);
+        if(raw>best_score){
+          best_score=raw;best_board=x.board;wild_selected=true;
+        }
+        verified.emplace_back(raw,std::move(x.board));
+      }
+      std::stable_sort(verified.begin(),verified.end(),[](const auto& a,const auto& b){return a.first>b.first;});
+      for(int i=0;i<min<int>(5,verified.size()) && timer.elapsed_ms()<1850.0;++i) {
+        auto& candidate=verified[i].second;
+        fill_words(candidate,attempt+i+1);
+        const auto score=count_score(candidate);
+        wild_filled=max(wild_filled,score.first);
+        if (score>best_score) {
+          best_score=score;best_board=std::move(candidate);wild_selected=true;
+        }
+      }
+    }
+  }
+  cerr<<"wild_lines="<<wild_lines<<" wild_triples="<<wild_tri
+      <<" wild_parents="<<wild_parents<<" wild_fourth="<<wild_4
+      <<" wild_realized="<<wild_real<<" wild_rejected="<<wild_reject
+      <<" wild_extensions="<<wild_extensions<<" wild_raw="<<wild_raw
+      <<" wild_filled="<<wild_filled<<" wild_selected="<<wild_selected
+      <<" wild_ms="<<timer.elapsed_ms()-wild_begin<<'\n';
+#endif
 #ifdef AHC004_LINE_REBUILD
   }
 #endif
