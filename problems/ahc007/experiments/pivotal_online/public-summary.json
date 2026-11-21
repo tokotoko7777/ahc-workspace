@@ -1,0 +1,25 @@
+{
+  "baseline": {
+    "valid": 150,
+    "total": 14184305386,
+    "max_wall": 0.2278195300000334,
+    "max_cpu": 0.2016439999999875,
+    "diagnostics": {}
+  },
+  "scenario": {
+    "valid": 150,
+    "total": 14253784455,
+    "max_wall": 0.44083689399985815,
+    "max_cpu": 0.4253570000000053,
+    "diagnostics": {
+      "changed": 3801,
+      "fallback": 0,
+      "pivotal": 25485,
+      "queries": 243408,
+      "samples": 4817000,
+      "short": 221024
+    }
+  },
+  "candidate_wins": 120,
+  "identical_decisions": 0
+}
