@@ -1,0 +1,57 @@
+{
+  "case_count": 100,
+  "case_set_sha256": "abdbb75810c19e3a410fe7563eca05213af44640ee78bd64db5ef837400f18f1",
+  "models": {
+    "adaptive": {
+      "solver_sha256": "60bdd154c6b4000de08a94f3ae151dcfc5db0ffbfa69b29ea4fa40b69ec43978",
+      "score_sum": 259408028,
+      "failed": 0,
+      "max_wall": 0.06444196899997223,
+      "median_wall": 0.026506312500032436,
+      "pet_free_cases": 7,
+      "pet_free_humans": 51,
+      "observed_humans": 736,
+      "mean_pet_free_area": 114.92156862745098,
+      "mean_human_area": 149.7173913043478,
+      "mean_reachable_pets": 3.724184782608696,
+      "perfect_pet_exclusion_cap_with_fixed_humans": 1675222279,
+      "perfect_pet_exclusion_and_placement_cap": 3124777795,
+      "wins_vs_first": 0,
+      "losses_vs_first": 0
+    },
+    "parallel": {
+      "solver_sha256": "f9a5287eb4d465a2826d94051c8bc3df01026cd189cd7f156007c31c74e51268",
+      "score_sum": 1153430892,
+      "failed": 0,
+      "max_wall": 1.6988875999998072,
+      "median_wall": 0.21996831000001293,
+      "pet_free_cases": 9,
+      "pet_free_humans": 417,
+      "observed_humans": 736,
+      "mean_pet_free_area": 152.61390887290167,
+      "mean_human_area": 188.84103260869566,
+      "mean_reachable_pets": 1.733695652173913,
+      "perfect_pet_exclusion_cap_with_fixed_humans": 2061066187,
+      "perfect_pet_exclusion_and_placement_cap": 4652777820,
+      "wins_vs_first": 84,
+      "losses_vs_first": 16
+    },
+    "mincut": {
+      "solver_sha256": "3760bca3eca021badfb134bd455ed2d4f5a57d50de6f58416ed241bf9f6696fc",
+      "score_sum": 1338602186,
+      "failed": 0,
+      "max_wall": 1.1795651380000436,
+      "median_wall": 0.3897005965001199,
+      "pet_free_cases": 9,
+      "pet_free_humans": 410,
+      "observed_humans": 736,
+      "mean_pet_free_area": 181.2219512195122,
+      "mean_human_area": 193.97826086956522,
+      "mean_reachable_pets": 1.4904891304347827,
+      "perfect_pet_exclusion_cap_with_fixed_humans": 2194061953,
+      "perfect_pet_exclusion_and_placement_cap": 4295666711,
+      "wins_vs_first": 90,
+      "losses_vs_first": 10
+    }
+  }
+}

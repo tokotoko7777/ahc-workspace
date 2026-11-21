@@ -48,3 +48,22 @@ python problems/ahc008/benchmark_cases.py "$tools/target/release/tester" "$tools
 - Larger pockets: up to 14.7m; connectivity rollback: up to 16.7m; parallel capture: up to 18.8m. These are exploratory best scores, not an estimate of final expected score.
 - Reactive damaged pocket closures and early seams did not improve reliably. Fixed-grid probability propagation for passive animals plus biased dog/cat moves was not better than its corresponding pilot control.
 - Next: relax cage shape with min-cut while preserving cohesion; test dog target posterior and tighter exit timing; compare shortlisted policies on fresh held-out generators without using the distributed practice cases for tuning.
+
+## Checkpoint version: mincut-freeze-v2
+
+The fixed-diamond family is still available. For each nearby active animal, generate additional custom perimeters by a vertex-split s–t minimum cut. Source owns a small diamond around the animal; choosing a cutting cell is charged for its build plus travel time, and interior cells incur an area charge. Existing walls and map boundaries naturally provide free edges. A high-scoring irregular pocket can win against all fixed diamonds; the same cohesion guard, assignment logic, two-worker-group policy, and late seams execute the chosen boundaries.
+
+- Modular: `../../mincut_solver.cpp` using existing FlatGridFirstStepBfs and MaxFlow.
+- Standalone: `../../mincut_submission.cpp`; use same benchmark invocation as v1 with `g++ -std=c++23` and no runtime flags.
+- Both generated sets improved: development100 1,733,637,921 vs parallel 1,510,807,240; separate generated e1 1,530,047,562 vs 1,376,164,470. These are direct tester exploratory comparisons; records below are live official tester plus recorded-action replay.
+
+| 100-case set | Adaptive | Habitat v1 parallel | Habitat v2 mincut | v2 legal | v2 max direct tester wall |
+|---|---:|---:|---:|---:|---:|
+| Frozen generated | 280,010,038 | 1,142,886,072 | **1,483,627,404** | 100/100 | 1.259053 s |
+| Official distributed practice | 259,408,028 | 1,153,430,892 | **1,338,602,186** | 100/100 | 1.179565 s |
+
+Practice set hash `abdbb75810c19e3a410fe7563eca05213af44640ee78bd64db5ef837400f18f1`; no tuning on it. Under the 1.65 s solver CPU soft cap, terminal actions on a few cases can vary with process/runtime conditions; recorded-action replay eliminates ambiguity about what the tested solver actually did. Direct elapsed timings above include the wrapper's tester process and came from mixed workstation load. This is below the 6,263,333,336 goal.
+
+Fixed-wall optimistic cap, excluding all pets and optimally assigning every person to the largest component: 4,380,222,265 (generated100), 4,295,666,711 (practice100). Thus pet prediction alone is insufficient; v2 even with perfect removal and placement needs to preserve substantially larger connected components. In sampled traces, 3–5 animals remained at turn 200; late seams frequently removed roughly half of the remaining 450–650 cells. Large pockets and redundant walls can also split off harmless cells.
+
+Other pilots rejected: deterministic posterior-informed dog decoy selection, delaying the dog phase to focus on nearby passive animals first, building from the pocket interior, and simulated random-walk capture probability estimated from static job routes. None improved score consistently over v2 in the 30-case development pilots.
