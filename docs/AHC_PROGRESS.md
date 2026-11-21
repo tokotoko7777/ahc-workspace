@@ -26,7 +26,7 @@
 | [AHC005](https://atcoder.jp/contests/ahc005/tasks/ahc005_a) | 配布100件で目標達成。13:00切替に備え最良版凍結 | 配布目標 **22,318,770**。本番値の出典: [AtCoder提供データ](https://huggingface.co/datasets/SakanaAI/ALE-Bench/blob/main/ahc005.zip) | 2スタート版 **23,020,218**（目標+701,448、基準+96,961）、全件完全可視・帰着 | 配布seed 0–99、公式・独立一致、最長2.812822秒。本番100件とは別。追加未使用100件は22,122,939 | [最良ソース・比較・再現](https://github.com/tokotoko7777/ahc-workspace/tree/6d9d59bf76cb921bba15c12e19ec6f6188bdb401/problems/ahc005/experiments/official100) |
 | [AHC006](https://atcoder.jp/contests/ahc006/tasks/ahc006_a) | 公式配布100件で目標達成、未使用100件で検証 | 配布目標 **2,220,425点超え**（[本番1位の参照値](https://huggingface.co/datasets/SakanaAI/ALE-Bench/blob/main/ahc006.zip)） | 幾何候補＋厳密な前計算高速化 **2,238,273**（目標+17,848、基準+159,865） | 配布seed 0–99、合法・公式独立一致100件、最長1.856995秒。本番とは別。未使用別100件2,226,481（比較版2,230,236） | [最良コード・ケース別・再現](https://github.com/tokotoko7777/ahc-workspace/tree/cbebfc73c5260374eb0af7c76fe6f10e0754c32a/problems/ahc006/experiments/official100)。配布最良は研究枝に保存。 |
 | [AHC007](https://atcoder.jp/contests/ahc007/tasks/ahc007_a) | **本番同一150件で首位超え**・[PR #4](https://github.com/tokotoko7777/ahc-workspace/pull/4) main統合済 | **14,241,733,941** 点（[AtCoder提供の順位データ](https://huggingface.co/datasets/SakanaAI/ALE-Bench/blob/main/ahc007.zip)） | 符号付きボトルネック推定 **14,248,878,730** (+7,144,789)。公式配布150件 **14,255,819,331** (基準+71,513,945) | [本番同一ケース根拠](https://openreview.net/pdf?id=JCjGvbsOmQ)。本番150件を凍結版で盲検し、対話tester・vis・独立採点一致、最長0.308726秒。未調整別150件も14,249,050,741 | [main上の最良コード・再現](https://github.com/tokotoko7777/ahc-workspace/tree/9fb81532ac1f2092309b1e2887756e6c590c9c4d/problems/ahc007)・[研究枝](https://github.com/tokotoko7777/ahc-workspace/tree/a545fe5aa083eac8a6c6bf4533147df1840a8596/problems/ahc007/experiments/focus)。次の仮説: 安い辺の買いすぎと棄却コストの差を、疎な代替カットに限り厳密化。 |
-| [AHC008](https://atcoder.jp/contests/ahc008/tasks/ahc008_a) | ローカル改善・本番未判定 | **121,980,050,607** 点（[AtCoder 提供の順位データ](https://huggingface.co/datasets/SakanaAI/ALE-Bench/blob/main/ahc008.zip)） | 公式配布100件・最小カット囲い v2 **1,338,602,186**（既存259,408,028）。目標 6,263,333,336（[ユーザー提示の採点結果](https://atcoder.jp/contests/ahc008/submissions/29654603)） | 公式対話テスタ v3、配布100と本番2,000は別扱い、3秒 | [並行囲いの作業ブランチ](https://github.com/tokotoko7777/ahc-workspace/tree/codex/ahc008-habitat-20261122)・[独立検証](https://github.com/tokotoko7777/ahc-workspace/tree/codex/ahc008-benchmark-20261122) |
+| [AHC008](https://atcoder.jp/contests/ahc008/tasks/ahc008_a) | ローカル改善・本番未判定 | **121,980,050,607** 点（[AtCoder 提供の順位データ](https://huggingface.co/datasets/SakanaAI/ALE-Bench/blob/main/ahc008.zip)） | 公式配布100件・最高 **1,459,735,698**（別案）。標準v2 **1,338,602,186**、初期259,408,028。目標 6,263,333,336（[ユーザー提示の採点結果](https://atcoder.jp/contests/ahc008/submissions/29654603)） | 公式対話テスタ v3、配布100と本番2,000は別扱い、3秒 | [並行囲いの作業ブランチ](https://github.com/tokotoko7777/ahc-workspace/tree/codex/ahc008-habitat-20261122)・[独立検証](https://github.com/tokotoko7777/ahc-workspace/tree/codex/ahc008-benchmark-20261122) |
 | [AHC009](https://atcoder.jp/contests/ahc009/tasks/ahc009_a) | 着手・未判定 | **7,547,834,181** 点（[AtCoder 提供の順位データ](https://huggingface.co/datasets/SakanaAI/ALE-Bench/blob/main/ahc009.zip)） | 確率 DP 版: 公開 100 件 7,214,943,739 | 本番との同一性は未確認 | ローカル保存・公開確認待ち |
 | [AHC010](https://atcoder.jp/contests/ahc010/tasks/ahc010_a) | ローカル改善・本番未判定 | **20,218,968** 点（[AtCoder 提供の順位データ](https://huggingface.co/datasets/SakanaAI/ALE-Bench/blob/main/ahc010.zip)） | 協調回転版: 未調整 10 件平均 56,482 | 本番 100 件、2 秒。配布入力との同一性未確認 | [問題別ブランチ](https://github.com/tokotoko7777/ahc-workspace/tree/8e99892f7dc12317ba365750a15a2a7c072b3731) |
 | [AHC011](https://atcoder.jp/contests/ahc011/tasks/ahc011_a) | ローカル改善・本番未判定 | **2,691,447,336** 点（[AtCoder 提供の順位データ](https://huggingface.co/datasets/SakanaAI/ALE-Bench/blob/main/ahc011.zip)） | 局所回転追加: 未調整 15 件 6,060,235 | 本番公開 3,000 シード、3 秒 | ローカル保存・公開確認待ち |
@@ -1032,3 +1032,20 @@ AHC056は[公式採点CSV](https://img.atcoder.jp/ahc_standings/ahc056/result.cs
 牛は3.03から0.78匹。終盤の広い分割でペット数を減らすだけでは目標に届かず、
 面積を使わずに猫などを早期に減らす手段が必要。別案の作業者隣接壁による即時閉鎖は、
 未調整100件で1,161,600,000から1,014,600,494へ悪化し不採用。
+
+
+### AHC008 高速な標準版と独立検証を区別
+
+配布100件の最高は面積優先案 **1,459,735,698**、全件合法、最大1.618秒。
+独立生成100件の一組では標準v2 1,483,627,404 に対し1,453,107,690で、
+標準置換しない。[面積優先案アーカイブ](https://github.com/tokotoko7777/ahc-workspace/tree/f49f4909311d4cf38d2997d5ec4b5d7cf83ced6d/problems/ahc008)。
+
+[高速な標準v2と再現手順](https://github.com/tokotoko7777/ahc-workspace/blob/codex/ahc008-benchmark-20261122/problems/ahc008/experiments/20261122/checkpoint.md)。
+直線仕切りの行ビット化、最大流の作業領域再利用、安全な上界枝刈り。
+配布・未調整各100件で全操作一致。配布100 最大1.104→.408秒、中央値.383→.225秒。
+保存済み単一ファイルをGNU C++23で再構築して1,338,602,186点・合法100/100を再現。
+
+猫の短期方向推定は精度が上がったが、予測位置に新設して完成した18個の囲いで対象猫捕獲0。
+終盤の面積上限は標準版で仮に全ペットなし全員最適位置でも配布100で4.296B。
+次は観測後に囲いを一から作るより、既存壁に接続する入口付きの短い通路を用意し、
+入った瞬間に閉鎖できる配置を検証する。本番2,000件は未使用、mainに変更なし。
