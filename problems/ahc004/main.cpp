@@ -1329,6 +1329,12 @@ int main() {
       <<" wild_ms="<<timer.elapsed_ms()-wild_begin<<'\n';
 #endif
 #if defined(AHC004_WILD_GEOMETRY) && defined(AHC004_WILD_DISJOINT_RETRY)
+#ifdef AHC004_WILD_MIXED
+  ahc004::WildBank mixed_pending;
+#ifdef AHC004_MEDIUM_MIXED_EXTEND
+  bool from_medium=false;
+#endif
+#endif
   int retry_tri=0,retry_parents=0,retry_real=0,retry_reject=0,retry_raw=0,retry_fill=0;
   bool retry_selected=false;
   const double retry_begin=timer.elapsed_ms();
@@ -1377,6 +1383,9 @@ int main() {
     }
     retry_selected=best_score>ordinary_key;
     if(!retry_selected)random.engine=rng_before;
+#ifdef AHC004_WILD_MIXED
+    if(wild_longest==8 && retry_tri && !retry_selected) mixed_pending=std::move(bank);
+#endif
   }
   cerr<<"disjoint_triples="<<retry_tri<<" disjoint_parents="<<retry_parents
       <<" disjoint_realized="<<retry_real<<" disjoint_rejected="<<retry_reject
@@ -1434,6 +1443,12 @@ int main() {
     }
     medium_selected=best_score>old_score;
     if(!medium_selected)random.engine=old_rng;
+#if defined(AHC004_WILD_MIXED) && defined(AHC004_MEDIUM_MIXED_EXTEND)
+    if(medium_tri && !medium_selected && bank.n>=24) {
+      mixed_pending=std::move(bank);
+      from_medium=true;
+    }
+#endif
   }
   cerr<<"medium_triples="<<medium_tri<<" medium_parents="<<medium_parents
       <<" medium_realized="<<medium_realized<<" medium_rejected="<<medium_rejected
@@ -1580,6 +1595,55 @@ int main() {
         <<" strip_rank="<<(proposals?min_rank:0)<<":"<<(proposals?max_rank:0)
         <<" strip_ms="<<timer.elapsed_ms()-strip_begin<<'\n';
   }
+#endif
+#ifdef AHC004_WILD_MIXED
+    const double third_begin=timer.elapsed_ms();
+    if (mixed_pending.n>=24 && best_score==ordinary_key && third_begin<2230.0) {
+      const auto& bank=mixed_pending;
+      const auto rng_before=random.engine;
+      const double third_triple_end=min(2260.0,third_begin+115.0);
+      const double third_budget=
+#ifdef AHC004_MEDIUM_MIXED_EXTEND
+        from_medium?390.0:
+#endif
+        295.0;
+      const double third_fourth_end=min(2415.0,third_begin+third_budget);
+      auto tri=ahc004::wild_offset_disjoint(bank,128,1368000,
+                           [&]{return timer.elapsed_ms()>=third_triple_end;},true);
+      auto four=ahc004::disjoint_fourth(bank,tri,10500000,
+                           [&]{return timer.elapsed_ms()>=third_fourth_end;});
+      std::set<std::array<int,4>> seen;
+      std::vector<std::pair<std::pair<int,int>,Board>> verified;
+      int realized=0,rejected=0;
+      for(const auto& a:four.ranked) {
+        if(realized>=36 || timer.elapsed_ms()>=2440.0)break;
+        if(!seen.insert(ahc004::wild_anchor_key(a)).second)continue;
+        auto x=ahc004::wild_realize(bank,a,[&]{return timer.elapsed_ms()>=2440.0;});
+        if(x.board.empty())continue;
+        ++realized;
+        if(x.extensions<2 && a.strong<17){++rejected;continue;}
+        auto score=count_score(x.board);
+        if(score>best_score){best_score=score;best_board=x.board;}
+        verified.emplace_back(score,std::move(x.board));
+      }
+      std::stable_sort(verified.begin(),verified.end(),[](const auto& a,const auto& b){return a.first>b.first;});
+      for(int i=0;i<min<int>(3,verified.size()) && timer.elapsed_ms()<2480.0;++i) {
+        auto& board=verified[i].second;
+        fill_words(board,attempt+i+1,2495.0);
+        const auto score=count_score(board);
+        if(score>best_score){best_score=score;best_board=std::move(board);}
+        if(best_score.first==m)break;
+      }
+      const bool selected=best_score>ordinary_key;
+      if(!selected)random.engine=rng_before;
+      cerr<<"third_triples="<<tri.examined<<" third_parents="<<four.parents
+          <<" third_realized="<<realized<<" third_rejected="<<rejected
+          <<" third_selected="<<selected<<" third_coverage="<<best_score.first
+#ifdef AHC004_MEDIUM_MIXED_EXTEND
+          <<" third_medium="<<from_medium
+#endif
+          <<" third_ms="<<timer.elapsed_ms()-third_begin<<'\n';
+    }
 #endif
 #ifdef AHC004_LINE_REBUILD
   }

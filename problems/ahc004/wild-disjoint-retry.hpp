@@ -87,17 +87,25 @@ done:
 // own phase null. Phases of sparse anchors must not compete only on raw count
 // with relative positions that happen to contain fewer wildcard intersections.
 inline WildTriples wild_offset_disjoint(const WildBank& b, int width, int cap,
-                                       const std::function<bool()>& deadline) {
+                                       const std::function<bool()>& deadline, bool mixed=false) {
     WildTriples result;
     if(b.n<24 || width<=0)return result;
-    constexpr int first=5;
     struct Ranked {
         WildAnchor a;
         double z=0;
         auto key()const{return std::tuple(z,a.strong,a.distinct,a.weak);}
     };
     std::array<int,3> ids[10]{};int ni=0;
-    for(int a=0;a<5;++a)for(int d=a+1;d<5;++d)for(int c=d+1;c<5;++c)ids[ni++]={a+first,d+first,c+first};
+    if (!mixed) {
+        for(int a=5;a<10;++a)for(int d=a+1;d<10;++d)for(int c=d+1;c<10;++c)ids[ni++]={a,d,c};
+    } else {
+        // Same triple budget, but each rank in each previous tier appears
+        // three times across the ten mixed triples.
+        for (int i=0;i<5;++i) {
+            ids[ni++]={i,(i+2)%5,5+i};
+            ids[ni++]={(i+1)%5,5+i,5+(i+2)%5};
+        }
+    }
     std::vector<Ranked> local[10];
     // Fixed shuffle spreads deadline-limited exploration across offset pairs.
     std::vector<std::pair<int,int>> lanes;
