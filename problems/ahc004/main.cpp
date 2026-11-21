@@ -14,6 +14,9 @@
 #include "anchor-congruence.hpp"
 #ifdef AHC004_WILD_GEOMETRY
 #include "wild-geometry.hpp"
+#ifdef AHC004_MEDIUM_DIVERSE
+#include "medium-diverse.hpp"
+#endif
 #ifdef AHC004_WILD_DISJOINT_RETRY
 #include "wild-disjoint-retry.hpp"
 #endif
@@ -1337,6 +1340,60 @@ int main() {
       <<" disjoint_realized="<<retry_real<<" disjoint_rejected="<<retry_reject
       <<" disjoint_raw="<<retry_raw<<" disjoint_filled="<<retry_fill
       <<" disjoint_selected="<<retry_selected<<" disjoint_ms="<<timer.elapsed_ms()-retry_begin<<'\n';
+#endif
+#if defined(AHC004_WILD_GEOMETRY) && defined(AHC004_MEDIUM_DIVERSE)
+  int medium_tri=0,medium_parents=0,medium_realized=0,medium_rejected=0;
+  int medium_raw=0,medium_filled=0;
+  bool medium_selected=false;
+  const double medium_begin=timer.elapsed_ms();
+  // This experimental path targets the gap below the old L6 M>=680 gate.
+  // Do not alter any path whose complete or primary wildcard geometry ran.
+  if (!full_geometry_attempted && !wild_tri && !wild_selected
+      && n==20 && wild_longest==8 && 600<=m && m<680 && medium_begin<500.0) {
+    const auto old_rng=random.engine;
+    const auto old_score=best_score;
+    auto bank=ahc004::make_wild_bank(ahc004::partial_assembled_lines(n,words,4,
+                             [&]{return timer.elapsed_ms()-medium_begin>=18.0;}),12);
+    if(bank.n>=24) {
+      auto trio=ahc004::wild_offset_diverse(bank,384,1368000,
+                      [&]{return timer.elapsed_ms()>=620.0;});
+      auto fourth=ahc004::medium_fourth(bank,trio,49000000,
+                      [&]{return timer.elapsed_ms()>=1390.0;});
+      medium_tri=trio.examined;medium_parents=fourth.parents;
+      std::vector<std::pair<std::pair<int,int>,Board>> verified;
+      std::set<std::array<int,4>> seen;
+      for(const auto& a:fourth.ranked) {
+        if(medium_realized>=40 || timer.elapsed_ms()>=1695.0)break;
+        if(!seen.insert(ahc004::wild_anchor_key(a)).second)continue;
+        auto x=ahc004::wild_realize(bank,a,[&]{return timer.elapsed_ms()>=1695.0;});
+        if(x.board.empty())continue;
+        ++medium_realized;
+        // Unlike crossing count alone, independent extra lines provide
+        // corroborating intersections not involved in choosing the anchors.
+        if(x.extensions<2){++medium_rejected;continue;}
+        auto raw=count_score(x.board);
+        medium_raw=max(medium_raw,raw.first);
+        if(raw>best_score){best_score=raw;best_board=x.board;}
+        verified.emplace_back(raw,std::move(x.board));
+      }
+      std::stable_sort(verified.begin(),verified.end(),
+                        [](const auto& a,const auto& b){return a.first>b.first;});
+      for(int i=0;i<min<int>(5,verified.size())&&timer.elapsed_ms()<1815.0;++i){
+        auto& board=verified[i].second;
+        fill_words(board,attempt+i+1);
+        auto score=count_score(board);
+        medium_filled=max(medium_filled,score.first);
+        if(score>best_score){best_score=score;best_board=std::move(board);}
+        if(best_score.first==m)break;
+      }
+    }
+    medium_selected=best_score>old_score;
+    if(!medium_selected)random.engine=old_rng;
+  }
+  cerr<<"medium_triples="<<medium_tri<<" medium_parents="<<medium_parents
+      <<" medium_realized="<<medium_realized<<" medium_rejected="<<medium_rejected
+      <<" medium_raw="<<medium_raw<<" medium_filled="<<medium_filled
+      <<" medium_selected="<<medium_selected<<" medium_ms="<<timer.elapsed_ms()-medium_begin<<'\n';
 #endif
 #ifdef AHC004_LINE_REBUILD
   }
