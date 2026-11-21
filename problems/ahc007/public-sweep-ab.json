@@ -1,0 +1,28 @@
+{
+  "baseline": {
+    "valid": 150,
+    "total": 14255819331,
+    "max_wall": 0.28808514799993645,
+    "max_cpu": 0.23736599999999441,
+    "diagnostics": {
+      "fallback": 0,
+      "nqueries": 240865,
+      "samples": 4557311,
+      "short": 221361
+    }
+  },
+  "scenario": {
+    "valid": 150,
+    "total": 14255819331,
+    "max_wall": 0.22307563000003938,
+    "max_cpu": 0.21161500000000188,
+    "diagnostics": {
+      "fallback": 0,
+      "nqueries": 240865,
+      "samples": 4557311,
+      "short": 221361
+    }
+  },
+  "candidate_wins": 0,
+  "identical_decisions": 150
+}
