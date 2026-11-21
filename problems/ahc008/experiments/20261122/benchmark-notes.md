@@ -38,3 +38,14 @@ g++ -std=c++23 -O3 tests/vertex_removal_components_test.cpp -o /tmp/ahc008-cut-t
 
 出力の最大実測は0.128秒未満（公式テスタ含む同一環境の逐次計測、他プロセスの負荷は残る）。
 時間の厳密な本番比較は未実施。
+
+### 連結成分ルーチンの速度確認
+
+30×30、250盤面、平均約52候補/盤面。全候補について除去後の各成分のサイズと
+重みの集約チェックサムが一致。3回の反復で前処理込みの中央値0.03788秒、
+候補ごとのBFSは0.54360秒で、この条件では約14.4倍。ソルバー全体の高速化ではない。
+
+```sh
+g++ -std=c++23 problems/ahc008/experiments/20261122/vertex-removal-microbench.cpp -o /tmp/ahc008-cut-bench
+/tmp/ahc008-cut-bench
+```
