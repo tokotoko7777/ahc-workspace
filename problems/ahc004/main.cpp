@@ -971,6 +971,10 @@ int main() {
   }
 #ifdef AHC004_MERGED_CYCLES
   int merged_new_lines=0;
+#if defined(AHC004_MERGED_NATIVE_RETRY)
+  vector<string> native_order;
+  bool adopted_merged_bank=false;
+#endif
   const int orig_cycle_count=closed.cycles.size(), orig_supported=supported_reads;
   int longest_word=0;
   for(const auto& w:words)longest_word=max(longest_word,int(w.size()));
@@ -1007,6 +1011,10 @@ int main() {
       int after=0;
       for(int i=0;i<target_count;++i)if(seen[i])after+=weights[i];
       if(4*after>=3*m) {
+#if defined(AHC004_MERGED_NATIVE_RETRY)
+        for(const auto& c:closed.cycles)native_order.push_back(c.letters);
+        adopted_merged_bank=true;
+#endif
         closed.cycles=std::move(candidates);
         supported_reads=after;
       }
@@ -1096,6 +1104,80 @@ int main() {
     if(best_score==ordinary_key) random.engine=rng_before_rescue;
   }
 #endif
+#if defined(AHC004_MERGED_NATIVE_RETRY) && defined(AHC004_MERGED_CYCLES)
+  int native_retry_tries=0, native_retry_sweeps=0, native_retry_realized=0;
+  if (adopted_merged_bank && sweep_visits && best_score==ordinary_key) {
+    // Overlap-merged lines are useful crossing candidates, but may dominate
+    // the evidence ordering. Start new hypotheses on observed closed cycles,
+    // whose whole line (including closure) is supported by actual k-mers.
+    vector<int> natives;
+    uint64_t native_mask=0;
+    for(const auto& line:native_order) {
+      for(int id=0;id<int(closed.cycles.size());++id)if(closed.cycles[id].letters==line){
+        natives.push_back(id);
+        native_mask|=uint64_t(1)<<id;
+        break;
+      }
+    }
+    const double begin=timer.elapsed_ms();
+    const double finish=min(1990.0,begin+1000.0);
+    if(natives.size()>=5 && finish-begin>=500.0) {
+      vector<array<int,5>> plans;
+      auto add_plan=[&](array<int,5> offsets){
+        if(offsets.back()>=int(natives.size()))return;
+        array<int,5> ids;
+        for(int k=0;k<5;++k)ids[k]=natives[offsets[k]];
+        sort(ids.begin(),ids.end());
+        if(ids==array<int,5>{0,1,2,3,4})return;
+        if(find(plans.begin(),plans.end(),ids)==plans.end())plans.push_back(ids);
+      };
+      add_plan({0,1,2,3,4});      // strongest observed cycles
+      add_plan({0,2,5,7,9});      // distinct sample from the observed list
+      add_plan({1,2,3,4,5});      // fallback when the first plan duplicates primary
+      if(plans.size()>2)plans.resize(2);
+      vector<string> seen;
+      auto before_retry_rng=random.engine;
+      for(const auto& ids:plans) {
+        const auto at=timer.elapsed_ms();
+        if(at>=finish-250.0)break;
+        ++native_retry_tries;
+        const double until=begin+(finish-begin)*native_retry_tries/max<int>(1,plans.size());
+        const auto expired=[&]{return timer.elapsed_ms()>=until;};
+        auto triple=ahc004::three_parallel_anchors(closed.cycles,1368000,
+            [&]{return timer.elapsed_ms()>=min(at+165.0,until-120.0);},480,ids);
+        auto fourth=ahc004::fourth_row_extensions(closed.cycles,triple.layouts,5800000,
+            [&]{return timer.elapsed_ms()>=until-85.0;},true);
+        native_retry_sweeps+=triple.examined;
+        vector<pair<pair<int,int>,Board>> ranked;
+        int realized_retry=0;
+        for(const auto& f:fourth.ranked) {
+          if(realized_retry>=18 || timer.elapsed_ms()>=until-55.0)break;
+          auto geo=ahc004::realize_anchor<true>(closed.cycles,triple.layouts[f.parent],f,expired,native_mask);
+          if(geo.board.empty())continue;
+          ++realized_retry;
+          ++native_retry_realized;
+          auto key=ahc004::geometry_shape_key(geo.board);
+          if(find(seen.begin(),seen.end(),key)!=seen.end())continue;
+          seen.push_back(move(key));
+          ranked.emplace_back(count_score(geo.board),move(geo.board));
+        }
+        stable_sort(ranked.begin(),ranked.end(),[](const auto& a,const auto& b){return a.first>b.first;});
+        for(int i=0;i<min<int>(2,ranked.size()) && !expired();++i) {
+          auto &board=ranked[i].second;
+          fill_words(board,attempt+realized+i+native_retry_tries);
+          auto key=count_score(board);
+          if(key.first>=ordinary_key.first+max(6,m/30) && key>best_score) {
+            best_board=move(board);
+            best_score=key;
+          }
+          if(best_score.first==m)break;
+        }
+        if(best_score.first==m)break;
+      }
+      if(best_score==ordinary_key)random.engine=before_retry_rng;
+    }
+  }
+#endif
   cerr << "geometry_cycles=" << closed.cycles.size()
        << " geometry_extraction_capped=" << closed.capped
        << " geometry_supported=" << supported_reads << " geometry_words=" << m
@@ -1123,6 +1205,12 @@ int main() {
        << " partial_novel=" << merged_new_lines << '\n';
 #endif
 
+#if defined(AHC004_MERGED_NATIVE_RETRY) && defined(AHC004_MERGED_CYCLES)
+  if(native_retry_tries)cerr << "native_retry_tries=" << native_retry_tries
+       << " native_retry_sweeps=" << native_retry_sweeps
+       << " native_retry_realized=" << native_retry_realized
+       << " native_retry_selected=" << (best_score>ordinary_key) << '\n';
+#endif
 #ifdef AHC004_LINE_REBUILD
   }
 #endif

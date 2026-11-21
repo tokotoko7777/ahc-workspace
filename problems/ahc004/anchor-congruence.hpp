@@ -17,8 +17,9 @@ struct AnchorSearch {
   bool capped=false;
 };
 
+template<bool PreferNative=false>
 inline int match_columns(const std::array<uint64_t,20>& domains,
-                         std::array<int,20>* assignment=nullptr) {
+                         std::array<int,20>* assignment=nullptr, uint64_t native=0) {
   std::array<int,64> mate;
   mate.fill(-1);
   int result=0;
@@ -26,7 +27,7 @@ inline int match_columns(const std::array<uint64_t,20>& domains,
     uint64_t seen=0;
     const auto dfs=[&](const auto& self,int col)->bool {
       while (const uint64_t bits=domains[col]&~seen) {
-        const int id=std::countr_zero(bits);
+        const int id=std::countr_zero(PreferNative && (bits&native) ? bits&native : bits);
         seen|=uint64_t(1)<<id;
         if (mate[id]<0 || self(self,mate[id])) {
           mate[id]=col;
@@ -231,10 +232,12 @@ struct RealizedAnchor {
 
 // Recover a phase witness for every selected column edge. Then extend the
 // disjoint line inventory on either axis, only through exact intersections.
+template<bool PreferNative=false>
 inline RealizedAnchor realize_anchor(const std::vector<Cycle>& bank,
                                      const AnchorLayout& anchor,
                                      const FourthRow& fourth,
-                                     const std::function<bool()>& deadline=[] {return false;}) {
+                                     const std::function<bool()>& deadline=[] {return false;},
+                                     uint64_t native=0) {
   constexpr int N=20;
   const int k=std::min<int>(bank.size(),64);
   RealizedAnchor out{std::vector<std::string>(N,std::string(N,'.')),0,0};
@@ -269,16 +272,24 @@ inline RealizedAnchor realize_anchor(const std::vector<Cycle>& bank,
     }
   }
   std::array<int,N> assignment;
-  if(match_columns(masks,&assignment)!=fourth.matched) return {};
+  if(match_columns<PreferNative>(masks,&assignment,native)!=fourth.matched) return {};
   for(int lane=0;lane<N;++lane) if(assignment[lane]>=0)
     if(!place(assignment[lane],1,lane,phases[lane][assignment[lane]])) return {};
-  for(int id=0;id<k && !deadline();++id) {
-    if(taken[id]) continue;
+  const auto extend=[&](int id) {
+    if(taken[id])return;
     for(int axis=0;axis<2 && !taken[id];++axis)
     for(int lane=0;lane<N && !taken[id];++lane) {
       if(lanes[axis][lane]) continue;
       for(int phase=0;phase<N;++phase) if(place(id,axis,lane,phase)) break;
     }
+  };
+  if constexpr(PreferNative) {
+    for(int group=0;group<2;++group)
+      for(int id=0;id<k && !deadline();++id) {
+        if(int((native>>id)&1)==1-group)extend(id);
+      }
+  } else {
+    for(int id=0;id<k && !deadline();++id)extend(id);
   }
   return out;
 }
