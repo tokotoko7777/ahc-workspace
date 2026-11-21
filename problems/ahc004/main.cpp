@@ -12,6 +12,10 @@
 
 #ifdef AHC_ANCHOR_GEOMETRY
 #include "anchor-congruence.hpp"
+#ifdef AHC004_STRIP_REPAIR
+#include "forced-letters.hpp"
+#include "strip-repair.hpp"
+#endif
 #ifdef AHC004_WILD_GEOMETRY
 #include "wild-geometry.hpp"
 #ifdef AHC004_MEDIUM_DIVERSE
@@ -800,7 +804,11 @@ int main() {
   pair<int, int> best_score{-1, -1};
   int attempt = 0;
 
-  const auto fill_words = [&](Board& board, int attempt) {
+  const auto fill_words = [&](Board& board, int attempt
+#ifdef AHC004_STRIP_REPAIR
+                              , double fill_deadline=INFINITY
+#endif
+                             ) {
     vector<int> order = maximal_indices;
     vector<uint64_t> priority(target_count);
     for (int index : order) {
@@ -830,6 +838,9 @@ int main() {
     order.insert(order.end(), remaining.begin(), remaining.end());
 
     for (int target_index : order) {
+#ifdef AHC004_STRIP_REPAIR
+      if(fill_deadline<INFINITY && timer.elapsed_ms()>=fill_deadline)break;
+#endif
       const string& text = targets[target_index].text;
       if (is_present(board, text)) continue;
 
@@ -955,6 +966,21 @@ int main() {
   // First finish and score the original starts above. Geometry then spends
   // part of the existing wall-clock allowance, never replacing a better seed.
   const auto ordinary_key = best_score;
+#ifdef AHC004_STRIP_REPAIR
+  vector<pair<pair<int,int>,Board>> completion_seeds;
+  const auto remember_scaffold=[&](const Board& b,pair<int,int> key) {
+    // Geometry must already explain a substantial part of the board.
+    if(n!=20 || best_score.first==m || key.first==m || key.second<2 ||
+       key.second>178 || 5*key.first<2*m)return;
+    key.second=-key.second;  // Rank otherwise equal scaffolds by density.
+    if(completion_seeds.size()>=2 && key<=completion_seeds.back().first)return;
+    for(const auto& p:completion_seeds)if(p.second==b)return;
+    completion_seeds.emplace_back(key,b);
+    stable_sort(completion_seeds.begin(),completion_seeds.end(),
+                [](const auto& a,const auto& b){return a.first>b.first;});
+    if(completion_seeds.size()>2)completion_seeds.pop_back();
+  };
+#endif
   constexpr double GEOMETRY_END_MS = 1000.0;
   const auto past_geometry = [&] { return timer.elapsed_ms() >= GEOMETRY_END_MS; };
   vector<string> words;
@@ -1052,7 +1078,11 @@ int main() {
       auto geometry=ahc004::realize_anchor(closed.cycles,anchors.layouts[f.parent],f,past_geometry);
       if (geometry.board.empty()) continue;
       ++realized;
-      raw=max(raw,count_score(geometry.board));
+      const auto raw_key=count_score(geometry.board);
+      raw=max(raw,raw_key);
+#ifdef AHC004_STRIP_REPAIR
+      remember_scaffold(geometry.board,raw_key);
+#endif
       if(past_geometry()) break;
       fill_words(geometry.board, attempt+realized);
       auto key=count_score(geometry.board);
@@ -1108,6 +1138,9 @@ int main() {
     const auto rng_before_rescue=random.engine;
     for(int i=0;i<min<int>(4,ranked_boards.size()) && !deadline();++i){
       auto& b=ranked_boards[i].second;
+#ifdef AHC004_STRIP_REPAIR
+      remember_scaffold(b,ranked_boards[i].first);
+#endif
       fill_words(b,attempt+realized+i+1);
       auto key=count_score(b);
       if(key>best_score) {
@@ -1183,6 +1216,9 @@ int main() {
         stable_sort(ranked.begin(),ranked.end(),[](const auto& a,const auto& b){return a.first>b.first;});
         for(int i=0;i<min<int>(2,ranked.size()) && !expired();++i) {
           auto &board=ranked[i].second;
+#ifdef AHC004_STRIP_REPAIR
+          remember_scaffold(board,ranked[i].first);
+#endif
           fill_words(board,attempt+realized+i+native_retry_tries);
           auto key=count_score(board);
           if(key.first>=ordinary_key.first+max(6,m/30) && key>best_score) {
@@ -1273,6 +1309,9 @@ int main() {
       std::stable_sort(verified.begin(),verified.end(),[](const auto& a,const auto& b){return a.first>b.first;});
       for(int i=0;i<min<int>(5,verified.size()) && timer.elapsed_ms()<1850.0;++i) {
         auto& candidate=verified[i].second;
+#ifdef AHC004_STRIP_REPAIR
+        remember_scaffold(candidate,verified[i].first);
+#endif
         fill_words(candidate,attempt+i+1);
         const auto score=count_score(candidate);
         wild_filled=max(wild_filled,score.first);
@@ -1326,6 +1365,9 @@ int main() {
       std::stable_sort(verified.begin(),verified.end(),[](const auto& a,const auto& b){return a.first>b.first;});
       for(int i=0;i<min<int>(4,verified.size()) && timer.elapsed_ms()<2240.0;++i){
         auto& board=verified[i].second;
+#ifdef AHC004_STRIP_REPAIR
+        remember_scaffold(board,verified[i].first);
+#endif
         fill_words(board,attempt+i+1);
         const auto score=count_score(board);
         retry_fill=max(retry_fill,score.first);
@@ -1380,6 +1422,9 @@ int main() {
                         [](const auto& a,const auto& b){return a.first>b.first;});
       for(int i=0;i<min<int>(5,verified.size())&&timer.elapsed_ms()<1815.0;++i){
         auto& board=verified[i].second;
+#ifdef AHC004_STRIP_REPAIR
+        remember_scaffold(board,verified[i].first);
+#endif
         fill_words(board,attempt+i+1);
         auto score=count_score(board);
         medium_filled=max(medium_filled,score.first);
@@ -1478,6 +1523,62 @@ int main() {
         <<" late_wild_realized="<<late_realized<<" late_wild_filled="<<late_filled
         <<" late_wild_selected="<<(best_score>ordinary_key)
         <<" late_wild_end="<<timer.elapsed_ms()<<'\n';
+  }
+#endif
+#ifdef AHC004_STRIP_REPAIR
+  if(best_score.first<m && !completion_seeds.empty() && timer.elapsed_ms()<2280.0) {
+    const double strip_begin=timer.elapsed_ms();
+    const double stop=min(2320.0,strip_begin+128.0);
+    int checked=0, contradictory=0, tested=0, proposals=0, voted=0, selected=0, best_gain=INT_MIN;
+    const int before_strip=best_score.first;
+    int min_rank=INT_MAX,max_rank=INT_MIN;
+    const auto strip_rng=random.engine;
+    for(const auto& record:completion_seeds) {
+      if(timer.elapsed_ms()>=stop-8.0 || best_score.first==m)break;
+      const auto* seed=&record.second;
+      ++checked;
+      const double contradiction_stop=min(stop-8.0,timer.elapsed_ms()+9.0);
+      // Contradiction test only: never use its mutated board as a candidate.
+      const auto diagnosis=ahc004::force_letters(*seed,words,
+            [&]{return timer.elapsed_ms()>=contradiction_stop;});
+      if(diagnosis.status!=ahc004::ForcedStatus::contradictory)continue;
+      ++contradictory;
+      const double rank_stop=min(stop-8.0,timer.elapsed_ms()+22.0);
+      const auto expired=[&]{return timer.elapsed_ms()>=rank_stop;};
+      ahc004::strip::Evidence evidence(*seed,words,weights,expired);
+      if(!evidence.complete)continue;
+      ++tested;
+      const auto choices=evidence.rank(*seed,expired);
+      for(const auto& c:choices) {
+        if(timer.elapsed_ms()>=stop-4.0 || best_score.first==m)break;
+        min_rank=min(min_rank,c.quality);max_rank=max(max_rank,c.quality);
+        auto [guess,filled]=evidence.seed(*seed,c);
+        voted+=filled;
+        const double proposal_stop=min(stop-1.0,timer.elapsed_ms()+21.0);
+        auto run=[&](Board candidate,double end) {
+          if(timer.elapsed_ms()>=end-1.0)return;
+          ++proposals;
+          random.engine=strip_rng;
+          fill_words(candidate,attempt+1,end-1.0);
+          const auto actual=count_score(candidate);
+          best_gain=max(best_gain,actual.first-before_strip);
+          if(actual.first>best_score.first || (actual.first==m && actual>best_score)) {
+            best_score=actual;
+            best_board=move(candidate);
+            ++selected;
+          }
+        };
+        if(filled)run(move(guess),min(proposal_stop,timer.elapsed_ms()+10.0));
+        if(best_score.first<m)run(evidence.blank(*seed,c),proposal_stop);
+      }
+    }
+    random.engine=strip_rng;
+    cerr<<"strip_tested="<<tested<<" strip_checked="<<checked
+        <<" strip_contradictory="<<contradictory<<" strip_proposals="<<proposals
+        <<" strip_voted="<<voted<<" strip_gain="<<(proposals?best_gain:0)
+        <<" strip_selected="<<selected<<" strip_after="<<best_score.first<<"/"<<m
+        <<" strip_rank="<<(proposals?min_rank:0)<<":"<<(proposals?max_rank:0)
+        <<" strip_ms="<<timer.elapsed_ms()-strip_begin<<'\n';
   }
 #endif
 #ifdef AHC004_LINE_REBUILD
