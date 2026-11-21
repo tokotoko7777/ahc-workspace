@@ -76,7 +76,13 @@ class Game {
     return pens.plan(humans, pets, walls);
 #endif
 #if defined(AHC008_EXACT_ENDGAME)
-#ifdef AHC008_EXACT_REPLACE
+#if defined(AHC008_EXACT_PAIR)
+    if (turn >= 270) {
+      string instant = exact_endgame(false, true);
+      if (instant.find_first_of(builds) != string::npos) endgame_only = true;
+      if (endgame_only || instant.find_first_not_of('.') != string::npos) return instant;
+    }
+#elif defined(AHC008_EXACT_REPLACE)
     if (turn >= 270) return exact_endgame(true);
 #else
     if (turn >= 195) {
@@ -183,7 +189,7 @@ class Game {
     Counts& operator+=(const Counts& b) { h+=b.h; p+=b.p; return *this; }
     Counts& operator-=(const Counts& b) { h-=b.h; p-=b.p; return *this; }
   };
-  string exact_endgame(bool permit_approach) {
+  string exact_endgame(bool permit_approach, bool use_pairs = false) {
     string cmd(humans.size(), '.');
     array<Counts,CELLS> counts{};
     bitset<CELLS> forbidden;
@@ -215,6 +221,50 @@ class Game {
               [&](int u){ return counts[u].h > 0; })) continue;
       best_gain = gain, best = gate;
     }
+    if (use_pairs) {
+      vector<pair<int,unsigned>> candidates;
+      for (int i = 0; i < int(humans.size()); ++i) {
+        for (int a : close_neighbors[humans[i]]) {
+          if (walls[a] || forbidden[a] || end_cuts.is_cut(a)) continue;
+          auto existing = ranges::find(candidates, a, &pair<int,unsigned>::first);
+          if (existing == candidates.end()) candidates.emplace_back(a, 1u << i);
+          else existing->second |= 1u << i;
+        }
+      }
+      pair<int,int> joint{-1,-1}, who2;
+      for (int i = 0; i + 1 < int(candidates.size()); ++i) {
+        const auto [a, a_workers] = candidates[i];
+        pair_cuts.build([&](int v) -> const auto& { return close_neighbors[v]; },
+                  [&](int v) { return v != a && !walls[v]; }, [&](int v) { return counts[v]; });
+        for (int j = i+1; j < int(candidates.size()); ++j) {
+          const auto [b, b_workers] = candidates[j];
+          if (popcount(a_workers | b_workers) < 2 || !pair_cuts.is_cut(b)
+                   || end_cuts.side_of(a,b) == -1) continue;
+          Counts old;
+          int area = 2;
+          int64_t value = 0;
+          pair_cuts.after_removing(b, [&](int, int area2, Counts c) {
+            old += c;
+            area += area2;
+            value += (int64_t(area2) * c.h) << (20-c.p);
+          });
+          if (!old.h || !old.p) continue;
+          const int64_t gain = value - ((int64_t(area) * old.h) << (20-old.p));
+          if (gain > best_gain) {
+            const int aw = countr_zero((b_workers & (b_workers - 1)) ? a_workers : a_workers & ~b_workers);
+            const int bw = countr_zero(b_workers & ~(1u << aw));
+            best_gain = gain;
+            joint = {a,b};
+            who2 = {aw,bw};
+          }
+        }
+      }
+      if (joint.first >= 0) {
+        cmd[who2.first] = builds[direction(humans[who2.first], joint.first)];
+        cmd[who2.second] = builds[direction(humans[who2.second], joint.second)];
+        return cmd;
+      }
+    }
     if (best < 0) return cmd;
     int who = -1, dmin = INT_MAX, step = -1;
     for (int i = 0; i < int(humans.size()); ++i) {
@@ -239,7 +289,7 @@ class Game {
       if (int q = adjacent(v,d); q >= 0) ans[v].push_back(q);
     return ans;
   }();
-  VertexRemovalComponents<Counts> end_cuts{CELLS};
+  VertexRemovalComponents<Counts> end_cuts{CELLS}, pair_cuts{CELLS};
   bool endgame_only = false;
 #endif
 

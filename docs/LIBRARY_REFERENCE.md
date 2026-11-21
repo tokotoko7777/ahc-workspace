@@ -2068,3 +2068,46 @@ cuts.after_removing(gate, [](int label, int area, int pets) {
 
 [ランダムグラフでの全再計算との照合](../tests/vertex_removal_components_test.cpp)。
 複数頂点の同時除去には、この API を単独で使えません。
+
+## 行数の少ない割当と最大流の再利用
+
+- [`hungarian.hpp`](../library/hungarian.hpp) の
+  `hungarian_rectangular_minimum_assignment(cost)` は行数が列数以下の行列に
+  対応します。各行を異なる列に割り当てます。R行C列に O(R²C) で、正方形に
+  埋める必要はありません。任意の行が未割当でもよい場合は、未割当に相当する
+  ダミー列を必要数用意します。旧APIは正方形のままです。
+  [総当たりとの比較](../tests/hungarian_rectangular_test.cpp)。
+- [`max-flow.hpp`](../library/max-flow.hpp) の `clear_edges()` は同じ頂点数の
+  別グラフを組み直すとき、残余容量・辺IDを消して作業メモリを再利用します。
+  `flow()` や `min_cut()` の直後に別の辺から始めたいときだけ使用し、
+  残余を引き継ぎたい場合には呼びません。[全カットとの比較](../tests/max_flow_workspace_test.cpp)。
+
+```cpp
+auto jobs = hungarian_rectangular_minimum_assignment(cost);
+MaxFlow<int> buffer(vertex_count);
+for (const auto& trial : trial_edges) {
+    buffer.clear_edges();
+    for (auto [a,b,c] : trial) buffer.add_edge(a,b,c);
+    auto amount = buffer.flow(source,sink);
+}
+```
+
+[AHC008の作業者割当・小領域カットでの試用](../problems/ahc008/assignment-experiment.cpp)。
+
+## 行ビットで4近傍連結成分を抽出
+
+ヘッダ: [`bit-grid-components.hpp`](../library/bit-grid-components.hpp)、C++20以上。
+縦横32以下で行ごとの通行可能ビット集合を扱います。
+`pop_first` は行優先の最初の未訪問成分を、一度に行ビット単位で取り出します。
+入力と出力は別の配列で、列幅より上のビットは0にします。
+
+```cpp
+using Board = BitGridComponents<30,30>;
+Board::Rows remaining = open_by_row, piece{};
+for (int area; Board::pop_first(remaining, piece, area); ) {
+    // piece[r] は r 行目でこの連結成分に含まれるセル。
+}
+```
+
+[6種類の盤面サイズでの塗り直し照合](../tests/bit_grid_components_test.cpp)、
+[AHC008の直線仕切り候補での差し替え](../problems/ahc008/assignment-experiment.cpp)。

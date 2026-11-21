@@ -36,6 +36,14 @@ struct MaxFlow {
       : n(vertex_count), graph(vertex_count), level(vertex_count),
         next_edge(vertex_count) {
     assert(vertex_count >= 0);
+    bfs_queue_.reserve(vertex_count);
+  }
+
+  // Start an unrelated graph on the same vertex set, retaining allocations.
+  // All prior edge IDs, flows and residual capacities are discarded.
+  void clear_edges() {
+    for (auto& adjacency : graph) adjacency.clear();
+    edge_positions.clear();
   }
 
   int add_edge(int from, int to, Capacity capacity) {
@@ -106,18 +114,19 @@ struct MaxFlow {
   }
 
  private:
+  std::vector<int> bfs_queue_;
+
   bool build_level_graph(int source, int sink) {
     std::fill(level.begin(), level.end(), -1);
-    std::vector<int> queue;
-    queue.reserve(n);
+    bfs_queue_.clear();
     level[source] = 0;
-    queue.push_back(source);
-    for (int head = 0; head < static_cast<int>(queue.size()); ++head) {
-      const int vertex = queue[head];
+    bfs_queue_.push_back(source);
+    for (int head = 0; head < static_cast<int>(bfs_queue_.size()); ++head) {
+      const int vertex = bfs_queue_[head];
       for (const Edge& edge : graph[vertex]) {
         if (edge.capacity == Capacity{} || level[edge.to] != -1) continue;
         level[edge.to] = level[vertex] + 1;
-        queue.push_back(edge.to);
+        bfs_queue_.push_back(edge.to);
       }
     }
     return level[sink] != -1;
