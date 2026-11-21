@@ -1,0 +1,21 @@
+{
+  "case_count": 150,
+  "valid": 150,
+  "official_agreement": 150,
+  "original_winner": 14241733941,
+  "total": 14248878730,
+  "delta": 7144789,
+  "max_lockstep_wall": 0.3087258169998677,
+  "max_solver_cpu": 0.27679400000000065,
+  "dataset_sha256": "533ebc1446dd730d4687f973f2ab2300044d606af48b34cb13da9187ff4b5fc1",
+  "solver_sha256": "72f74416c36836eef1df755cd08891039e32d3266acc0e44a02890e43dd59024",
+  "tool_sha256": {
+    "gen": "51c89bbf6f464b63e5de4c16f93b970e0d7019299433784cc4ee9de16edf23e4",
+    "vis": "aae9a32178c02330b93ef0159c871d7734ba9d7c10b4a3617211d2ed1f274048",
+    "tester": "70e6496e1d38eaf0014bf2142381726f3a5745dc133e41c92db87f6cc83b7fa4"
+  },
+  "frozen_remote_commit": "d93d5e1851c8c973708e691d1ad97d70fffc1679",
+  "frozen_source_sha256": "c00cd0e5986a4104ce553d232989b2b6d45fedd4d482ad10e4656a2f02f9eff7",
+  "compiler": "GNU C++ 14.2.0, -std=c++23; optimization pragma in source",
+  "comparison": "ALE-Bench full, original contest input set, maximum score, sum of 150 cases"
+}

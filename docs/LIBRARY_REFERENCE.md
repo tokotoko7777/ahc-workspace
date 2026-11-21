@@ -2014,3 +2014,17 @@ sort(points.begin(), points.end(), [](const Point& a, const Point& b) {
 
 `bits=10` なら各座標は `0..1023` です。厳密な最近傍順ではありませんが、空間的に
 まとまったcluster作成、query順、cache localityの改善候補を1行のkeyで作れます。
+
+### 縮約つき双方向ボトルネック探索
+
+[`weighted-bottleneck-witness.hpp`](../library/weighted-bottleneck-witness.hpp)
+で、既知連結成分を縮約した無向グラフ上の最小ボトルネックと、その経路上の
+最大重み辺IDを求める。既定の重み範囲は 0〜4,095。辺IDの接頭辞を除外できる。
+`set_groups(dsu)` は最初と縮約変更後に呼ぶ。`cutoff(weights,i,u,v,&witness)`
+の i は無効化する最後の辺番号。未接続なら -1、同じ成分なら 0。
+同重みの証拠辺は任意で、証拠辺が存在しないときは -1。
+ID昇順で初期化したグラフは、期限切れ辺を `erase_next(id,u,v)` で順に
+除くと `cutoff_active(weights,u,v,&witness)` で同じ結果をより短い隣接列から求められる。
+[使用例](../examples/weighted_bottleneck_witness_usage.cpp)、
+[乱択照合](../tests/weighted_bottleneck_witness_test.cpp)、
+[AHC007での利用](../problems/ahc007/solver.cpp)。
