@@ -795,6 +795,22 @@ auto shortest = grid_bfs(height, width, start, [&](int row, int column) {
 });
 ```
 
+### 平坦グリッドで最初の一歩を引くBFS
+
+ヘッダ: [`flat-grid-first-step-bfs.hpp`](../library/flat-grid-first-step-bfs.hpp)。
+複数の目的地を比べ、経路の最初の1マスだけを何度も取得する場合に使います。
+距離・次のマス・キューを使い回すため `run()` ごとに経路の配列は作りません。
+
+```cpp
+FlatGridFirstStepBfs bfs(height, width);
+bfs.run(start, [&](int cell) { return !wall[cell]; });
+int next = bfs.first_step(goal); // 到達不能なら -1、同じマスなら start
+int distance = bfs.distance(goal);
+```
+
+セル番号は `row * width + col`。実例は[AHC008の壁作りの移動](../problems/ahc008/main.cpp)。
+[差分テスト](../tests/flat_grid_first_step_bfs_test.cpp)では既存BFSで復元した経路の最初の一歩と突き合わせます。
+
 ## Topological Sort
 
 ヘッダ: [`topological-sort.hpp`](../library/topological-sort.hpp)
@@ -2028,3 +2044,27 @@ ID昇順で初期化したグラフは、期限切れ辺を `erase_next(id,u,v)`
 [使用例](../examples/weighted_bottleneck_witness_usage.cpp)、
 [乱択照合](../tests/weighted_bottleneck_witness_test.cpp)、
 [AHC007での利用](../problems/ahc007/solver.cpp)。
+
+## 頂点を除いた連結成分の集計
+
+ヘッダ: [`vertex-removal-components.hpp`](../library/vertex-removal-components.hpp)
+
+単純無向グラフで、任意の1頂点を除いたときに元の連結成分がどう分かれるかを調べます。
+前処理は反復 DFS で O(V+E)、集計値の列挙は分裂後の成分数に比例します。
+`after_removing(v, fn)` は成分ラベル、頂点数、重み合計を渡します。
+ラベル `v` は残余側を表し、実際に頂点 `v` が残るわけではありません。
+`side_of(v, u)` で元の頂点がどちらに残るか引けます。
+`is_cut(v)` は除去で2成分以上になる場合に真を返します。
+
+```cpp
+VertexRemovalComponents<int> cuts(n);
+cuts.build([&](int v) -> const auto& { return graph[v]; },
+           [&](int v) { return !blocked[v]; },
+           [&](int v) { return pet_count[v]; });
+cuts.after_removing(gate, [](int label, int area, int pets) {
+    // 面積 area、残存ペット数 pets の部分領域。
+});
+```
+
+[ランダムグラフでの全再計算との照合](../tests/vertex_removal_components_test.cpp)。
+複数頂点の同時除去には、この API を単独で使えません。
