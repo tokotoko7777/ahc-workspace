@@ -11,10 +11,12 @@ int main(){
         std::vector<std::string> b(n,std::string(n,'.'));
         for(auto& row:b)for(char& c:row)c="AAAABBCDEF..G.H"[rng()%15];
         ahc004::ToroidalSymbolMasks m(b);
+        ahc004::BasicToroidalSymbolMasks<true> f(b);
         for(int step=0;step<55;++step){
             int a=rng()%n,c=rng()%n;
             char fresh="ABCDEFGH.."[rng()%10];
             m.set(a,c,b[a][c],fresh);
+            f.set(a,c,b[a][c],fresh);
             b[a][c]=fresh;
             int holes=0;
             for(auto& row:b)for(char v:row)holes+=v=='.';
@@ -51,6 +53,7 @@ int main(){
                 assert(m.starts<true>(l,w.data(),len)==loose);
             }
             assert(m.present(w)==present);
+            assert(f.present_prefilter(w,f.signature(w))==present);
         }
     }
 }
