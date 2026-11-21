@@ -1397,13 +1397,24 @@ int main() {
 #endif
 #if defined(AHC004_WILD_GEOMETRY) && defined(AHC004_MEDIUM_DIVERSE) && defined(AHC004_COMPLETE_WILD_RETRY)
   const double late_begin=timer.elapsed_ms();
-  if (full_geometry_attempted && sweep_visits && 10<=wild_longest && wild_longest<=12
+  if (full_geometry_attempted && sweep_visits
+      && (10<=wild_longest && wild_longest<=12
+#ifdef AHC004_COMPLETE_WILD_L7
+          || wild_longest==9
+#endif
+      )
       && best_score==ordinary_key && late_begin<1930.0) {
     // Complete lines often become misleading in an overlap-augmented
     // catalogue. Retry with genuinely partial anchors, while preserving
     // strong observed closed lines as donors.
     const auto saved_rng=random.engine;
-    auto partial=ahc004::partial_assembled_lines(n,words,5,[&]{
+#ifdef AHC004_COMPLETE_WILD_L7
+    const int late_overlap=wild_longest==9?4:5;
+    const int late_min_known=wild_longest==9?13:15;
+#else
+    constexpr int late_overlap=5, late_min_known=15;
+#endif
+    auto partial=ahc004::partial_assembled_lines(n,words,late_overlap,[&]{
       return timer.elapsed_ms()>=late_begin+24.0;
     });
     vector<ahc004::PartialLine> patterns;
@@ -1414,7 +1425,7 @@ int main() {
     };
     int open_anchors=0;
     for(const auto& x:partial)
-      if(15<=x.known && x.known<20 && open_anchors<3) {
+      if(late_min_known<=x.known && x.known<20 && open_anchors<3) {
         add(x.letters,x.known);
         open_anchors=patterns.size();
       }
@@ -1422,10 +1433,10 @@ int main() {
     if(adopted_merged_bank) for(const auto& line:native_order)add(line,20);
 #endif
     for(const auto& x:closed.cycles)add(x.letters,20);
-    for(const auto& x:partial)if(x.known>=15)add(x.letters,x.known);
+    for(const auto& x:partial)if(x.known>=late_min_known)add(x.letters,x.known);
     int late_triples=0,late_parents=0,late_realized=0,late_filled=0;
     if(open_anchors>=1 && patterns.size()>=24 && timer.elapsed_ms()<1960.0) {
-      auto bank=ahc004::make_wild_bank(std::move(patterns),15);
+      auto bank=ahc004::make_wild_bank(std::move(patterns),late_min_known);
       const double tri_end=min(2100.0,timer.elapsed_ms()+215.0);
       auto tri=ahc004::wild_offset_diverse(bank,144,850000,
                           [&]{return timer.elapsed_ms()>=tri_end;});
