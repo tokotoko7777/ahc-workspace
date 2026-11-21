@@ -80,6 +80,19 @@ struct ActiveKruskal {
     void erase(int id) {
         for(auto& s:simulations)s.erase(id);
     }
+    template<int Limit>
+    int boundary(int vertex,int i,std::array<int,Limit>& ids) {
+        const int a=Scenario::root(parent,vertex);
+        int count=0;
+        for(int x=head[a];x>=0;x=next[x]) {
+            for(int j=adj[x];j<adj[x+1];++j) {
+                if(arcs[j].id<=i || Scenario::root(parent,arcs[j].v)==a) continue;
+                if(count==Limit)return Limit+1;
+                ids[count++]=arcs[j].id;
+            }
+        }
+        return count;
+    }
     void merge(int a,int b,int i) {
         a=Scenario::root(parent,a); b=Scenario::root(parent,b);
         if(a==b)return;
