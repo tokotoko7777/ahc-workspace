@@ -47,14 +47,39 @@ def inside(p):
     return 1 <= p[0] <= 30 and 1 <= p[1] <= 30
 
 
-def replay(case, trace, commands, *, detailed=False):
+def replay(case, trace, commands, *, detailed=False, topology=False, snapshots=None, interval=50):
     f = iter(case.splitlines())
-    pets = [tuple(map(int, next(f).split()[:2])) for _ in range(int(next(f)))]
+    pet_rows = [tuple(map(int, next(f).split())) for _ in range(int(next(f)))]
+    pets = [row[:2] for row in pet_rows]
     humans = [tuple(map(int, next(f).split())) for _ in range(int(next(f)))]
     assert len(trace) == 600 and trace[::2] == commands
     blocked = set()
     assert all(inside(p) for p in humans + pets)
-    for cmd, reply in zip(trace[::2], trace[1::2], strict=True):
+    def snapshot(turn):
+        labels = {}
+        groups = []
+        for human in humans:
+            if human not in labels:
+                side = len(groups)
+                queue = [human]
+                labels[human] = side
+                for p in queue:
+                    for step in STEPS:
+                        v = add(p, step)
+                        if inside(v) and v not in blocked and v not in labels:
+                            labels[v] = side
+                            queue.append(v)
+                kinds = [0]*5
+                for row, pet in zip(pet_rows, pets, strict=True):
+                    if labels.get(pet) == side:
+                        kinds[row[2]-1] += 1
+                groups.append([0, len(queue), kinds])
+            groups[labels[human]][0] += 1
+        snapshots(turn, groups)
+
+    if snapshots:
+        snapshot(0)
+    for turn, (cmd, reply) in enumerate(zip(trace[::2], trace[1::2], strict=True), 1):
         assert len(cmd) == len(humans)
         forbidden = set(humans + pets)
         forbidden |= {add(p, s) for p in pets for s in STEPS}
@@ -82,14 +107,15 @@ def replay(case, trace, commands, *, detailed=False):
                 if op != ".":
                     pets[i] = add(pets[i], op)
                     assert inside(pets[i]) and pets[i] not in blocked
-    values = []
+        if snapshots and (turn % interval == 0 or turn == 300):
+            snapshot(turn)
     component = {}
-    for h in humans:
-        if h in component:
-            values.append(component[h])
-            continue
-        todo = [h]
-        seen = {h}
+
+    def visit(start):
+        if start in component:
+            return component[start]
+        todo = [start]
+        seen = {start}
         while todo:
             p = todo.pop()
             for s in STEPS:
@@ -99,7 +125,8 @@ def replay(case, trace, commands, *, detailed=False):
                     todo.append(q)
         stats = (len(seen), sum(p in seen for p in pets))
         component.update((p, stats) for p in seen)
-        values.append(stats)
+        return stats
+    values = [visit(h) for h in humans]
     n = len(pets)
     numerator = 10**8 * sum(a << (n-k) for a, k in values)
     denominator = (900 * len(humans)) << n
@@ -112,6 +139,10 @@ def replay(case, trace, commands, *, detailed=False):
     fraction, integral = modf(1e8 * score_sum / len(values))
     score = int(integral) + (fraction >= 0.5)
     assert abs(score - exact_score) <= 1
+    if topology:
+        largest = max(visit(p)[0] for p in ((r,c) for r in range(1,31) for c in range(1,31))
+                      if p not in blocked)
+        return score, values, len(blocked), largest
     if detailed:
         return score, values, len(blocked)
     return score, values[0][0], values[0][1], len(blocked)
