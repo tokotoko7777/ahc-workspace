@@ -64,17 +64,54 @@ struct DeliveryProblem {
   using Score = int;
 
   array<Order, ORDER_COUNT> orders{};
+#ifdef AHC006_DENSE_COORDS
+  array<int, DEPOT_EVENT + 1> xs{}, ys{};
+#endif
 #if AHC006_PRECOMPUTE_DISTANCE
   // 任意の前計算。距離<=1600なのでuint16_tで十分（差分はintに戻す）。約8MB。
   vector<uint16_t> distances;
 #endif
 
+#ifdef AHC006_GEOMETRIC_SELECTION
+  static constexpr int near_count=24;
+  array<array<uint16_t,near_count>,ORDER_COUNT> nearby{};
+  void prepare_nearby() {
+#ifdef AHC006_PACKED_COHORT_KEYS
+    static_assert(ORDER_COUNT <= 1024);
+    array<uint32_t,ORDER_COUNT-1> keys;
+#else
+    array<pair<int,int>,ORDER_COUNT-1> keys;
+#endif
+    for(int i=0;i<ORDER_COUNT;++i) {
+      auto a=orders[i];
+      for(int j=0,k=0;j<ORDER_COUNT;++j)if(i!=j) {
+        auto b=orders[j];
+        int d=abs(a.pickup_x-b.pickup_x)+abs(a.pickup_y-b.pickup_y)
+             +abs(a.delivery_x-b.delivery_x)+abs(a.delivery_y-b.delivery_y);
+#ifdef AHC006_PACKED_COHORT_KEYS
+        keys[k++]=uint32_t(d)*1024+uint32_t(j);
+#else
+        keys[k++]={d,j};
+#endif
+      }
+      nth_element(keys.begin(),keys.begin()+near_count,keys.end());
+#ifdef AHC006_PACKED_COHORT_KEYS
+      for(int j=0;j<near_count;++j)nearby[i][j]=keys[j]&1023U;
+#else
+      for(int j=0;j<near_count;++j)nearby[i][j]=keys[j].second;
+#endif
+    }
+  }
+#endif
   void read_input() {
     for (Order& order : orders) {
       cin >> order.pickup_x >> order.pickup_y
           >> order.delivery_x >> order.delivery_y;
     }
     prepare_distances();
+#ifdef AHC006_GEOMETRIC_SELECTION
+    prepare_nearby();
+#endif
   }
 
   pair<int, int> point(int event) const {
@@ -91,11 +128,24 @@ struct DeliveryProblem {
   }
 
   void prepare_distances() {
+#ifdef AHC006_DENSE_COORDS
+    for (int e = 0; e <= DEPOT_EVENT; ++e) {
+      auto [x,y] = point(e); xs[e]=x; ys[e]=y;
+    }
+#endif
 #if AHC006_PRECOMPUTE_DISTANCE
     distances.resize((DEPOT_EVENT + 1) * (DEPOT_EVENT + 1));
-    for (int a = 0; a <= DEPOT_EVENT; ++a)
+    for (int a = 0; a <= DEPOT_EVENT; ++a) {
+#ifdef AHC006_DENSE_COORDS
+      const int x = xs[a], y = ys[a];
+      auto *row = distances.data() + a * (DEPOT_EVENT + 1);
+      for (int b = 0; b <= DEPOT_EVENT; ++b)
+        row[b] = abs(x-xs[b]) + abs(y-ys[b]);
+#else
       for (int b = 0; b <= DEPOT_EVENT; ++b)
         distances[a * (DEPOT_EVENT + 1) + b] = direct_distance(a, b);
+#endif
+    }
 #endif
   }
 
@@ -198,6 +248,36 @@ struct DeliveryProblem {
     }
   };
 
+#if defined(AHC006_REUSE_PAIR_ROWS) && AHC006_PRECOMPUTE_DISTANCE
+  // The grid metric and its table are symmetric. Read new-endpoint entries
+  // from the two fixed rows, carrying the previous entry across the gap.
+  OrderedPairInsertion<int> fast_pair_rows(const WithoutPair& r, int p, int d) const {
+    constexpr int stride = DEPOT_EVENT + 1;
+    const uint16_t* dp = distances.data() + p * stride;
+    const uint16_t* dd = distances.data() + d * stride;
+    const int between = dp[d];
+    int best_cost = INT_MAX, first_cost = INT_MAX, first_gap = 0;
+    int best_a = 1, best_b = 1;
+    int u = r[0], pu = dp[u], du = dd[u];
+    auto consider = [&](int cost, int a, int b) {
+      if (cost < best_cost || (cost == best_cost &&
+          (a < best_a || (a == best_a && b < best_b)))) {
+        best_cost = cost; best_a = a; best_b = b;
+      }
+    };
+    for (int g = 1; g < r.size(); ++g) {
+      int v = r[g], pv = dp[v], dv = dd[v];
+      int old = distances[u * stride + v];
+      if (first_gap) consider(first_cost + du + dv - old, first_gap, g);
+      consider(pu + between + dv - old, g, g);
+      int cost = pu + pv - old;
+      if (cost < first_cost) { first_cost = cost; first_gap = g; }
+      u = v; pu = pv; du = dv;
+    }
+    return {best_cost, best_a, best_b};
+  }
+#endif
+
   // swapで位置が変わる2イベントについてだけ先行制約を調べれば十分。
   static bool swap_is_valid(const State& state, int first, int second) {
     const auto valid = [&](int from, int to) {
@@ -272,10 +352,52 @@ struct DeliveryProblem {
           ? dist(r[p - 1], r[d + 1]) - dist(r[p - 1], r[p]) -
             dist(r[p], r[d]) - dist(r[d], r[d + 1])
           : route_removal_delta(r, p, dist) + route_removal_delta(r, d, dist);
+#if defined(AHC006_REUSE_PAIR_ROWS) && AHC006_PRECOMPUTE_DISTANCE
+      const auto best = fast_pair_rows(WithoutPair{r, p, d},
+          2 * move.inserted_order, 2 * move.inserted_order + 1);
+#else
       const auto best = best_ordered_pair_insertion(WithoutPair{r, p, d},
           2 * move.inserted_order, 2 * move.inserted_order + 1, dist);
+#endif
       move.first_gap = best.first_gap; move.second_gap = best.second_gap;
       move.delta = removal + best.delta;
+#ifdef AHC006_PAIR_TOURNAMENT
+      // Keep the removed pair fixed; compare exact insertion cost against
+      // several independently sampled unused orders on the same route.
+#ifdef AHC006_GEOMETRIC_SELECTION
+      array<int,4> examined{move.inserted_order,-1,-1,-1};
+#endif
+      for (int trial = 1; trial < 4; ++trial) {
+        int id;
+#ifdef AHC006_GEOMETRIC_SELECTION
+        // Two global draws (including the initial one), then one geometrical
+        // neighbor of the removed order and one of a random selected order.
+        // Distance matches pickup to pickup, delivery to delivery.
+        auto available=[&](int q){
+          return !state.selected[q] && find(examined.begin(),examined.begin()+trial,q)==examined.begin()+trial;
+        };
+        id=-1;
+        if(trial>=2) {
+          const int ref=trial==2?move.removed_order:state.route[random_int(engine,1,ROUTE_SIZE-1)]/2;
+          for(int tries=0;tries<6;++tries) {
+            int q=nearby[ref][random_int(engine,0,near_count)];
+            if(available(q)){id=q;break;}
+          }
+        }
+        if(id<0)do{id=random_int(engine,0,ORDER_COUNT);}while(!available(id));
+        examined[trial]=id;
+#else
+        do { id = random_int(engine, 0, ORDER_COUNT); } while (state.selected[id]);
+        if (id == move.inserted_order) continue;
+#endif
+        const auto alt = fast_pair_rows(WithoutPair{r, p, d}, 2 * id, 2 * id + 1);
+        if (removal + alt.delta < move.delta) {
+          move.inserted_order = id;
+          move.delta = removal + alt.delta;
+          move.first_gap = alt.first_gap; move.second_gap = alt.second_gap;
+        }
+      }
+#endif
     }
 
     return move;

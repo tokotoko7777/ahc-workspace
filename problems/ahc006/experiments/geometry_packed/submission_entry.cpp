@@ -1,0 +1,6 @@
+#define AHC006_STATS
+#define AHC006_REUSE_PAIR_ROWS
+#define AHC006_PAIR_TOURNAMENT
+#define AHC006_GEOMETRIC_SELECTION
+#define AHC006_DENSE_COORDS
+#include "../../main.cpp"
