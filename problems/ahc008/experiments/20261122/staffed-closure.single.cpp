@@ -762,7 +762,7 @@ struct Game {
   if(!fmode||turn<fturn||overBudget())return false;
   const int nh=humans.size(),inf=10000000;
   array<int,V> id,staff{};
-  id.fill(-1); 
+  id.fill(-1);
   vector<int> gates;
   for(int i=0;i<nh;i++)if(!captiveHuman(i))for(int p:nb[humans[i]])if(p>=0&&!block[p])staff[p]|=1<<i;
   for(int i=0;i<nh;i++)if(!captiveHuman(i))for(int p:nb[humans[i]])if(p>=0&&staff[p]&&id[p]<0){

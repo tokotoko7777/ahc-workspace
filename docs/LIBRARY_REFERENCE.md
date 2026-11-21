@@ -2111,3 +2111,18 @@ for (int area; Board::pop_first(remaining, piece, area); ) {
 
 [6種類の盤面サイズでの塗り直し照合](../tests/bit_grid_components_test.cpp)、
 [AHC008の直線仕切り候補での差し替え](../problems/ahc008/assignment-experiment.cpp)。
+
+## 最短経路の先頭方向を全て列挙
+
+[`shortest-first-masks.hpp`](../library/shortest-first-masks.hpp) は
+4近傍の無重みグラフで、到達先ごとに最短路の長さと最初に進める
+方向のビット集合を1回のBFSで返します。隣接表は各行4列で、移動不能は -1。
+
+```cpp
+ShortestFirstMasks<N> directions;
+directions.run(start, neighbors, [&](int v) { return !blocked[v]; });
+auto first_dirs = directions.mask[goal];  // bit d は方向 d も最短
+```
+
+[総当たり逆向きBFSとの比較](../tests/shortest_first_masks_test.cpp)、
+[AHC008の移動方向から目的地を推定する試用](../problems/ahc008/cat-target-filter.hpp)。

@@ -1,0 +1,23 @@
+{
+  "case_count": 100,
+  "case_set_sha256": "abdbb75810c19e3a410fe7563eca05213af44640ee78bd64db5ef837400f18f1",
+  "models": {
+    "restored": {
+      "solver_sha256": "3c2a9678e58ecea1f6fc26b9898a1300bdd876b6dd2315b3aec7321b6077f7de",
+      "score_sum": 1338602186,
+      "failed": 0,
+      "max_wall": 0.42897893200006365,
+      "median_wall": 0.2305325420002191,
+      "pet_free_cases": 9,
+      "pet_free_humans": 410,
+      "observed_humans": 736,
+      "mean_pet_free_area": 181.2219512195122,
+      "mean_human_area": 193.97826086956522,
+      "mean_reachable_pets": 1.4904891304347827,
+      "perfect_pet_exclusion_cap_with_fixed_humans": 2194061953,
+      "perfect_pet_exclusion_and_placement_cap": 4295666711,
+      "wins_vs_first": 0,
+      "losses_vs_first": 0
+    }
+  }
+}
