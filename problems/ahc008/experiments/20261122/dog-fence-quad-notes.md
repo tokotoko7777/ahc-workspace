@@ -44,3 +44,24 @@ Reproduce using the unchanged instrumented binary from quad-causal-notes
 and the exact matching dev30:
 
     python dog_fence_quad_audit.py "$HARNESS" "$TESTER" ./instrumented "$CASES" quad-defer-dev30.csv witness.json > audit.csv
+
+## Borrow a stance already on the approach to the anchor
+
+After all actual original dog walls exist and while phase1 is active,
+scour ordinary paths before turn155 for workers already on either T-pen
+wall's exterior stance. A normal movement could be postponed one action
+to build, but no extra walking and no original build displaced. This
+is not free: a movement delay would change later observations. Search
+for a complementary second stance with target inside and both wall
+actions locally legal on the observed trajectory, within eight turns.
+Record if the original paths would cross the added first wall, and
+whether any other animal remains in the broad corner. These are
+hindsight route windows, not counterfactual simulation of pet motion.
+
+Across 679 actual post-prep phase1 turns in 24 cases, there are 43
+geometric stance visits, 40 individually legal single-wall jobs not
+displacing a wall command (zero on genuinely idle actions), and six
+with a resident at a potentially finishing stance. No complementary
+pairs fit the eight-turn calendar even before rejecting path crossings
+or checking whether the broad parent gate should still close. Skip
+rollout. Same command above, add `--routes` and unique outputs.
