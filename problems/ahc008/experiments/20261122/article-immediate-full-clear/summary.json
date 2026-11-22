@@ -1,0 +1,15 @@
+{
+  "verified_final_miss_cases": 16,
+  "state_reasons": {
+    "not_1_2": 467,
+    "small_current": 23,
+    "tested": 150
+  },
+  "actual_tested_cases": 5,
+  "legal_sets": 20663,
+  "positive_sets": 0,
+  "positive_turns": 0,
+  "positive_cases": 0,
+  "first_before299_cases": 0,
+  "first": null
+}
