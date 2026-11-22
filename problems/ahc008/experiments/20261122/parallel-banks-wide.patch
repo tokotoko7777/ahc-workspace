@@ -1,0 +1,81 @@
+--- problems/ahc008/tactical_gate_submission.cpp
++++ problems/ahc008/tactical_gate_submission.cpp
+@@ -1076,4 +1076,4 @@
+- int bankMode=0,bankRot=0,bankShift=4,bankStarted=0,bankRelease=225;
+- array<int,4> laneCrew{-1,-1,-1,-1};
+- array<int,3> oldPlan{-1,-1,-1};
+- array<int,3> planAge{};
++ int bankMode=0,bankRot=0,bankShift=4,bankStarted=0,bankRelease=225,bankN=3;
++ array<int,5> laneCrew{-1,-1,-1,-1,-1};
++ array<int,4> oldPlan{-1,-1,-1,-1};
++ array<int,4> planAge{};
+@@ -1083,0 +1084,2 @@
++  bankN=bankMode==4&&humans.size()>=7?4:3;
++  const vector<int> offsets=bankN==3?vector<int>{2,4,6}:vector<int>{0,1};
+@@ -1085 +1087 @@
+-  for(int z=0;z<2;z++)for(int a:{2,4,6}){
++  for(int z=0;z<2;z++)for(int a:offsets){
+@@ -1092 +1094 @@
+-    for(int j=0;j<3;j++)for(int k=2;k<=5;k++)d=min(d,abs(y-(a+7*j+k)));
++    for(int j=0;j<bankN;j++)for(int k=2;k<=5;k++)d=min(d,abs(y-(a+7*j+k)));
+@@ -1095 +1097 @@
+-   for(int j=0;j<4;j++){
++   for(int j=0;j<=bankN;j++){
+@@ -1104 +1106 @@
+-  for(int j=0;j<3;j++){
++  for(int j=0;j<bankN;j++){
+@@ -1122 +1124 @@
+-  array<int,4> q{};
++  array<int,5> q{-1,-1,-1,-1,-1};
+@@ -1125 +1127 @@
+-   if(j==4){gain=score;laneCrew=q;return;}
++   if(j==bankN+1){gain=score;laneCrew=q;return;}
+@@ -1128 +1130 @@
+-    for(const auto &x:banks)if(x.b==clamp(j,0,2)){
++    for(const auto &x:banks)if(x.b==clamp(j,0,bankN-1)){
+@@ -1139 +1141 @@
+-  array<int,3> tubes{};
++  array<int,4> tubes{};
+@@ -1141 +1143 @@
+-  int total=tubes[0]+tubes[1]+tubes[2];
++  int total=accumulate(tubes.begin(),tubes.end(),0);
+@@ -1143,3 +1145,3 @@
+-  if(laneN>=2&&total<24)return;
+-  array<bool,3> skipped{};
+-  for(int pass=0;pass<3;pass++){
++  if(laneN>=2&&total<8*bankN)return;
++  array<bool,4> skipped{};
++  for(int pass=0;pass<bankN;pass++){
+@@ -1147,2 +1149,2 @@
+-   array<int,4> best{};
+-   for(int j=0;j<3;j++){
++   array<int,5> best{};
++   for(int j=0;j<bankN;j++){
+@@ -1166 +1168 @@
+-   if(total<24)return;
++   if(total<8*bankN)return;
+@@ -1177 +1179 @@
+-  if((laneCrew[0]<0&&turn>=bankStaffTurn)||(bankMode==3&&turn==bankStaffTurn))assignBanks();
++  if((laneCrew[0]<0&&turn>=bankStaffTurn)||(bankMode>=3&&turn==bankStaffTurn))assignBanks();
+@@ -1191 +1193 @@
+-  if(bankMode==3)stageBanks(ready);
++  if(bankMode>=3)stageBanks(ready);
+@@ -1208,2 +1210,2 @@
+-   array<double,3> value{-1.,-1.,-1.};
+-   array<int,3> selected{-1,-1,-1};
++   array<double,4> value{-1.,-1.,-1.,-1.};
++   array<int,4> selected{-1,-1,-1,-1};
+@@ -1230,2 +1232,11 @@
+-   bool center=value[1]>max(0.,value[0])+max(0.,value[2]);
+-   for(int j=0;j<3;j++)if(selected[j]>=0&&(j==1)==center&&value[j]>.20){
++   int selectedMask=0;
++   if(bankN==3)selectedMask=value[1]>max(0.,value[0])+max(0.,value[2])?2:5;
++   else{
++    double highest=0;
++    for(int mask=1;mask<(1<<bankN);mask++)if(!(mask&(mask<<1))){
++     double sum=0;bool okay=true;
++     for(int j=0;j<bankN;j++)if(mask>>j&1){if(value[j]<=.20)okay=false;sum+=value[j];}
++     if(okay&&sum>highest)highest=sum,selectedMask=mask;
++    }
++   }
++   for(int j=0;j<bankN;j++)if(selected[j]>=0&&(selectedMask>>j&1)&&value[j]>.20){
