@@ -1,0 +1,117 @@
+--- problems/ahc008/tactical_gate_submission.cpp
++++ problems/ahc008/tactical_gate_submission.cpp
+@@ -1370,0 +1371,103 @@
++ int irregularMode=0;
++ array<int,8> irregularStats{};
++ string irregularCut(string original){
++  if(!irregularMode||turn<bankRelease||turn>=295||turn%2||overBudget())return original;
++  int m=humans.size();
++  constexpr int inf=1'000'000;
++  auto rect=[](const vector<int>& cells){
++   int a=30,b=30,c=-1,d=-1;
++   for(int p:cells)a=min(a,p/S),b=min(b,p%S),c=max(c,p/S),d=max(d,p%S);
++   return (c-a+1)*(d-b+1)==int(cells.size());
++  };
++  array<unsigned char,V> base=wall;
++  array<int,10> h{};
++  for(int i=0;i<m;i++){
++   char c=original[i];h[i]=humans[i];
++   if(c=='.')continue;
++   auto a=islower(c)?BUILD:MOVE;int q=nb[h[i]][find(a,a+4,c)-a];
++   if(islower(c))base[q]=1;else h[i]=q;
++  }
++  vector<int> eligible;
++  for(auto p:pets)if(find_if(humans.begin(),humans.end(),[&](int h){return group[p.p]==group[h];})!=humans.end())eligible.push_back(p.p);
++  sort(eligible.begin(),eligible.end());eligible.erase(unique(eligible.begin(),eligible.end()),eligible.end());
++  string out=original;double best=0;
++  array<int,V> baseComp; baseComp.fill(-1);
++  auto comps=[&](const array<unsigned char,V>& wall,array<int,V>& id,vector<int>&sizes,vector<int>& np){
++   id.fill(-1);
++   for(int s=0;s<V;s++)if(!wall[s]&&id[s]<0){
++    int q[V],n=1,k=sizes.size();id[s]=k;q[0]=s;
++    for(int j=0;j<n;j++)for(int p:nb[q[j]])if(p>=0&&!wall[p]&&id[p]<0)q[n++]=p,id[p]=k;
++    sizes.push_back(n);np.push_back(0);
++   }
++   for(auto p:pets)if(id[p.p]>=0)np[id[p.p]]++;
++  };
++  vector<int> ba,bp_;comps(base,baseComp,ba,bp_);
++  double score=0;
++  for(int i=0;i<m;i++)score+=ldexp(double(ba[baseComp[h[i]]]),-bp_[baseComp[h[i]]]);
++  vector<int> winner;
++  for(int center:eligible){
++   int before=baseComp[center];
++   if(before<0||none_of(h.begin(),h.begin()+m,[&](int p){return baseComp[p]==before;}))continue;
++   array<int,V> id;id.fill(-1);vector<int> local;
++   for(int x=max(0,center/S-5);x<=min(29,center/S+5);x++)
++   for(int y=max(0,center%S-5);y<=min(29,center%S+5);y++){
++    int p=pos(x,y);if(base[p]||md(p,center)>5)continue;
++    id[p]=local.size();local.push_back(p);
++   }
++   int src=2*local.size(),sink=src+1;MaxFlow<int> f(sink+1);
++   for(int p:local){
++    int k=id[p];int options=0;
++    for(int i=0;i<m;i++)if(!islower(original[i])&&dir(humans[i],p)>=0)options|=1<<i;
++    bool boundary=false;
++    for(int q:nb[p])if(q>=0&&!base[q]&&id[q]<0)boundary=true;
++    bool human=find(h.begin(),h.begin()+m,p)!=h.begin()+m||find(humans.begin(),humans.end(),p)!=humans.end();
++    int lane=bankRot?p/S:p%S;
++    bool service=lane>=bankShift&&(lane-bankShift)%7==0&&(lane-bankShift)/7<4;
++    f.add_edge(2*k,2*k+1,(!block[p]&&options&&!human&&!service)?100:inf);
++    f.add_edge(2*k+1,sink,(human||service||boundary)?inf:4);
++    if(p==center)f.add_edge(src,2*k,inf);
++    for(int q:nb[p])if(q>=0&&id[q]>=0)f.add_edge(2*k+1,2*id[q],inf);
++   }
++   irregularStats[0]++;
++   if(f.flow(src,sink,401)>=401){irregularStats[1]++;continue;}
++   auto reach=f.min_cut(src);vector<int> walls,pit;
++   for(int p:local)if(reach[2*id[p]])(reach[2*id[p]+1]?pit:walls).push_back(p);
++   if(pit.size()<4||pit.size()>24||walls.empty()||walls.size()>3){irregularStats[2]++;continue;}
++   if(rect(pit)){irregularStats[3]++;continue;}
++   irregularStats[4]++;
++   auto match=[&](auto&&self,int j,int seen,int changed,string&act)->bool{
++    if(j==int(walls.size()))return true;
++    int p=walls[j];
++    for(int i=0;i<m;i++)if(!(seen>>i&1)&&!islower(original[i])){
++     int d=dir(humans[i],p);if(d<0)continue;
++     int w=changed+(original[i]!='.');if(w>2)continue;
++     act[i]=BUILD[d];
++     if(self(self,j+1,seen|1<<i,w,act))return true;
++     act[i]=original[i];
++    }
++    return false;
++   };
++   string proposal=original;if(!match(match,0,0,0,proposal)){irregularStats[5]++;continue;}
++   auto after=base;for(int p:walls)after[p]=1;
++   array<int,V> comp;vector<int> size,np;comps(after,comp,size,np);
++   array<int,10> hp=h;
++   for(int i=0;i<m;i++)if(proposal[i]!=original[i])hp[i]=humans[i];
++   bool okay=true;
++   for(int i=0;i<m;i++)if(comp[hp[i]]<0)okay=false;
++   for(int i=0;i<m;i++)for(int j=0;j<i;j++)if(baseComp[h[i]]==baseComp[h[j]]&&comp[hp[i]]!=comp[hp[j]])okay=false;
++   if(!okay){irregularStats[6]++;continue;}
++   int k=comp[center];
++   if(k<0||size[k]<4||size[k]>24||any_of(hp.begin(),hp.begin()+m,[&](int p){return comp[p]==k;}))continue;
++   double z=0;
++   for(int i=0;i<m;i++)z+=ldexp(double(size[comp[hp[i]]]),-np[comp[hp[i]]]);
++   double gain=z-score;
++   if(gain<=0.)irregularStats[7]++;
++   if(gain>best+1e-9){best=gain;out=proposal;winner=walls;}
++  }
++  if(best>0)if(const char *p=getenv("AHC008_IRREGULAR_LOG")){
++   ofstream f(p,ios::app);
++   f<<turn;for(int q:winner)f<<" "<<q;f<<"\n";
++  }
++  return out;
++ }
++
+@@ -1756,0 +1860 @@
++ g.irregularMode=argc>2?atoi(argv[2]):0;
+@@ -1759 +1863 @@
+-  g.act=g.terminal(g.tacticalGate(g.repair(g.bankMode?g.bankPlan():g.plan())));
++  g.act=g.terminal(g.irregularCut(g.tacticalGate(g.repair(g.bankMode?g.bankPlan():g.plan()))));
+@@ -1762,0 +1867,5 @@
++ }
++ if(const char *p=getenv("AHC008_IRREGULAR_DIAG")){
++  ofstream f(p);
++  for(int x:g.irregularStats)f<<x<<" ";
++  f<<"\n";

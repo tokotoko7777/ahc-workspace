@@ -1,0 +1,183 @@
+--- problems/ahc008/tactical_gate_submission.cpp
++++ problems/ahc008/tactical_gate_submission.cpp
+@@ -1374 +1374 @@
+-  if(!irregularMode||turn<bankRelease||turn>=295||turn%2||overBudget())return original;
++  if(irregularMode!=1||turn<bankRelease||turn>=295||turn%2||overBudget())return original;
+@@ -1473,0 +1474,174 @@
++ struct IrregularShort{
++  int target=-1,begin=-1;
++  vector<int> walls,inside,crew,stance;
++ } ip;
++ pair<int,int> irrWalk(int from,int goal,const bitset<V>& no,const array<unsigned char,V>& closed,int cap=4)const{
++  if(closed[goal]||no[goal])return {99,-1};
++  if(from==goal)return {0,goal};
++  int q[V],d[V],first[V],n=1;fill(d,d+V,-1);q[0]=from;d[from]=0;
++  for(int a=0;a<n;a++)if(d[q[a]]<cap)
++   for(int p:nb[q[a]])if(p>=0&&!closed[p]&&!no[p]&&d[p]<0){
++    d[p]=d[q[a]]+1;first[p]=a==0?p:first[q[a]];
++    if(p==goal)return {d[p],first[p]};
++    q[n++]=p;
++   }
++  return {99,-1};
++ }
++ static bool irregShape(const vector<int>& cells){
++  if(cells.size()<4||cells.size()>24)return false;
++  int l=30,r=-1,u=30,d=-1;
++  for(int x:cells)l=min(l,x/S),r=max(r,x/S),u=min(u,x%S),d=max(d,x%S);
++  return (r-l+1)*(d-u+1)!=int(cells.size());
++ }
++ string irregularShort(string original){
++  if(irregularMode!=2||turn<bankRelease||turn>=295||overBudget())return original;
++  const int m=humans.size();
++  array<unsigned char,V> base=wall;
++  array<int,10> originalH{};
++  for(int i=0;i<m;i++){
++   char c=original[i];originalH[i]=humans[i];if(c=='.')continue;
++   auto a=islower(c)?BUILD:MOVE;int z=nb[humans[i]][find(a,a+4,c)-a];
++   if(islower(c))base[z]=1;else originalH[i]=z;
++  }
++  auto note=[&](int reason){
++   if(const char *p=getenv("AHC008_SHORT_EVENTS")){
++    ofstream f(p,ios::app);f<<turn<<" "<<reason<<" "<<ip.target<<" "<<ip.walls.size()<<"\n";
++   }
++  };
++  auto floodCells=[&](int p,const array<unsigned char,V>& b){
++   vector<int> q;if(b[p])return q;
++   bitset<V> used;used[p]=1;q.push_back(p);
++   for(int i=0;i<int(q.size());i++)for(int u:nb[q[i]])if(u>=0&&!b[u]&&!used[u])used[u]=1,q.push_back(u);
++   return q;
++  };
++  auto facts=[&](const array<unsigned char,V>& b,const array<int,10>& hh){
++   vector<int> ids(V,-1),sz,np;double value=0.;
++   for(int i=0;i<m;i++){
++    int h=hh[i];
++    if(b[h])continue;
++    if(ids[h]<0){
++     vector<int> q=floodCells(h,b);int k=sz.size();
++     for(int p:q)ids[p]=k;
++     int n=0;for(auto p:pets)n+=ids[p.p]==k;
++     np.push_back(n);sz.push_back(q.size());
++    }
++    int j=ids[h];value+=ldexp(double(sz[j]),-np[j]);
++   }
++   return pair{ids,value};
++  };
++  if(ip.target<0){
++   if(turn%3||turn>287)return original;
++   constexpr int inf=1000000;
++   array<int,V> stepDist;stepDist.fill(99);
++   for(int p=0;p<V;p++)if(!base[p]&&!block[p]){
++    for(int q:nb[p])if(q>=0&&!base[q])for(int w=0;w<m;w++)if(!islower(original[w])){
++     int d=workers[w].bfs.distance(q);
++     if(d>=0)stepDist[p]=min(stepDist[p],d);
++    }
++   }
++   int best=-9999;
++   for(int j=0;j<int(pets.size());j++){
++    int center=pets[j].p;
++    if(pets[j].t>3||none_of(humans.begin(),humans.end(),[&](int h){return group[h]==group[center];}))continue;
++    array<int,V> id;id.fill(-1);vector<int> cells;
++    for(int i=max(0,center/S-5);i<=min(29,center/S+5);i++)
++    for(int k=max(0,center%S-5);k<=min(29,center%S+5);k++){
++     int p=pos(i,k);if(base[p]||md(p,center)>5)continue;
++     id[p]=cells.size();cells.push_back(p);
++    }
++    int src=2*cells.size(),sink=src+1;
++    MaxFlow<int> f(sink+1);
++    for(int p:cells){
++     int k=id[p],lane=(bankRot?p/S:p%S);
++     bool human=find(humans.begin(),humans.end(),p)!=humans.end();
++     bool service=lane>=bankShift&&(lane-bankShift)%7==0&&(lane-bankShift)/7<4;
++     bool outer=false;
++     for(int q:nb[p])if(q>=0&&!base[q]&&id[q]<0)outer=true;
++     f.add_edge(2*k,2*k+1,(!human&&!service&&stepDist[p]<=3)?100+4*stepDist[p]:inf);
++     f.add_edge(2*k+1,sink,(human||service||outer)?inf:4);
++     if(p==center)f.add_edge(src,2*k,inf);
++     for(int q:nb[p])if(q>=0&&id[q]>=0)f.add_edge(2*k+1,2*id[q],inf);
++    }
++    if(f.flow(src,sink,450)>=450)continue;
++    auto reach=f.min_cut(src);
++    vector<int> w,in;
++    for(int p:cells)if(reach[2*id[p]])(reach[2*id[p]+1]?in:w).push_back(p);
++    if(w.empty()||w.size()>3||!irregShape(in))continue;
++    bitset<V> no;for(int p:w)no[p]=1;for(int p:in)no[p]=1;
++    vector<vector<tuple<int,int,int>>> op;
++    for(int p:w){
++     vector<tuple<int,int,int>> options;
++     for(int q:nb[p])if(q>=0&&!base[q]&&!no[q])for(int i=0;i<m;i++)if(!islower(original[i])){
++      auto [d,move]=irrWalk(humans[i],q,no,base,3);
++      if(d<=3)options.emplace_back(d,i,q);
++     }
++     op.push_back(move(options));
++    }
++    vector<int> c(w.size()),s(w.size()),winC,winS;
++    int bestCost=999;
++    auto dfs=[&](auto&&self,int k,int used,int eta,int sum)->void{
++     if(22*eta+sum>=bestCost)return;
++     if(k==int(w.size())){bestCost=22*eta+sum;winC=c;winS=s;return;}
++     for(auto [d,i,q]:op[k])if(!(used>>i&1)){
++      c[k]=i;s[k]=q;self(self,k+1,used|1<<i,max(eta,d),sum+d);
++     }
++    };
++    dfs(dfs,0,0,0,0);
++    if(bestCost==999)continue;
++    int n=0;
++    for(auto p:pets)n+=find(in.begin(),in.end(),p.p)!=in.end();
++    int rank=100*n-(pets[j].t-1)*12-17*w.size()-bestCost;
++    if(rank>best)best=rank,ip={j,turn,w,in,winC,winS};
++   }
++   if(ip.target<0)return original;
++   note(1);
++  }
++  int target=pets[ip.target].p;
++  if(turn>ip.begin+5||find(ip.inside.begin(),ip.inside.end(),target)==ip.inside.end()){
++   note(turn>ip.begin+5?3:2);ip={};return original;
++  }
++  bitset<V> no;
++  for(int p:ip.inside)no[p]=1;
++  for(int p:ip.walls)no[p]=1;
++  auto aft=base;
++  for(int p:ip.walls)aft[p]=1;
++  vector<int> inside=floodCells(target,aft);
++  if(!irregShape(inside)){note(4);ip={};return original;}
++  string proposal=original;
++  bool ready=true;
++  int count=0;
++  for(int k=0;k<int(ip.walls.size());k++){
++   int p=ip.walls[k],w=ip.crew[k];
++   if(base[p])continue;
++   count++;
++   if(islower(original[w])||block[p]||dir(humans[w],p)<0){ready=false;continue;}
++   proposal[w]=BUILD[dir(humans[w],p)];
++  }
++  if(!count){note(4);ip={};return original;}
++  if(ready){
++   array<int,10> hh=originalH;for(int i=0;i<m;i++)if(proposal[i]!=original[i])hh[i]=humans[i];
++   auto [prev,score]=facts(base,originalH);
++   auto [post,newScore]=facts(aft,hh);
++   bool okay=post[target]<0&&newScore>score;
++   for(int i=0;i<m;i++)if(post[hh[i]]<0)okay=false;
++   for(int i=0;i<m;i++)for(int j=0;j<i;j++)if(prev[originalH[i]]==prev[originalH[j]]&&post[hh[i]]!=post[hh[j]])okay=false;
++   if(okay){
++    note(5);
++    if(const char *p=getenv("AHC008_IRREGULAR_LOG")){
++     ofstream f(p,ios::app);f<<turn;for(int w:ip.walls)if(!base[w])f<<" "<<w;f<<"\n";
++    }
++    ip={};return proposal;
++   }
++   note(4);ip={};return original;
++  }
++  proposal=original;
++  for(int k=0;k<int(ip.walls.size());k++){
++   int w=ip.crew[k],p=ip.walls[k];
++   if(base[p]||islower(original[w]))continue;
++   auto [d,q]=irrWalk(humans[w],ip.stance[k],no,base,4);
++   if(d>4)continue;
++   proposal[w]=d?MOVE[dir(humans[w],q)]:'.';
++  }
++  return proposal;
++ }
++
+@@ -1863 +2037 @@
+-  g.act=g.terminal(g.irregularCut(g.tacticalGate(g.repair(g.bankMode?g.bankPlan():g.plan()))));
++  g.act=g.terminal(g.irregularShort(g.irregularCut(g.tacticalGate(g.repair(g.bankMode?g.bankPlan():g.plan())))));
