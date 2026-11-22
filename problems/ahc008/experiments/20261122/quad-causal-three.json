@@ -1,0 +1,2783 @@
+[
+  {
+    "group": "practice",
+    "case": "0005.txt",
+    "first_action_difference": 0,
+    "first_wall_state_difference": 0,
+    "first_different_wall_delayed_control": [
+      [
+        18,
+        4
+      ]
+    ],
+    "first_different_wall_in_quad": [],
+    "early_displaced_wall_count": 4,
+    "early_restore_major_40cells": 0,
+    "early_omissions": [
+      {
+        "t": 0,
+        "worker": 5,
+        "current": [
+          17,
+          4
+        ],
+        "wall": [
+          18,
+          4
+        ],
+        "replaced_by": "U",
+        "legal_same_turn": true,
+        "actual": [
+          [
+            898,
+            17
+          ],
+          [
+            898,
+            17
+          ],
+          [
+            898,
+            17
+          ],
+          [
+            898,
+            17
+          ],
+          [
+            898,
+            17
+          ],
+          [
+            898,
+            17
+          ],
+          [
+            898,
+            17
+          ],
+          [
+            898,
+            17
+          ],
+          [
+            898,
+            17
+          ],
+          [
+            898,
+            17
+          ]
+        ],
+        "alternative": [
+          [
+            897,
+            17
+          ],
+          [
+            897,
+            17
+          ],
+          [
+            897,
+            17
+          ],
+          [
+            897,
+            17
+          ],
+          [
+            897,
+            17
+          ],
+          [
+            897,
+            17
+          ],
+          [
+            897,
+            17
+          ],
+          [
+            897,
+            17
+          ],
+          [
+            897,
+            17
+          ],
+          [
+            897,
+            17
+          ]
+        ],
+        "original_arm_plan": [],
+        "unmodified_control_plan": [],
+        "variant_dog_phase": 0,
+        "control_dog_phase": 0,
+        "in_intended_dog_fence": true
+      },
+      {
+        "t": 1,
+        "worker": 2,
+        "current": [
+          16,
+          3
+        ],
+        "wall": [
+          16,
+          2
+        ],
+        "replaced_by": ".",
+        "legal_same_turn": true,
+        "actual": [
+          [
+            897,
+            17
+          ],
+          [
+            897,
+            17
+          ],
+          [
+            897,
+            17
+          ],
+          [
+            897,
+            17
+          ],
+          [
+            897,
+            17
+          ],
+          [
+            897,
+            17
+          ],
+          [
+            897,
+            17
+          ],
+          [
+            897,
+            17
+          ],
+          [
+            897,
+            17
+          ],
+          [
+            897,
+            17
+          ]
+        ],
+        "alternative": [
+          [
+            896,
+            17
+          ],
+          [
+            896,
+            17
+          ],
+          [
+            896,
+            17
+          ],
+          [
+            896,
+            17
+          ],
+          [
+            896,
+            17
+          ],
+          [
+            896,
+            17
+          ],
+          [
+            896,
+            17
+          ],
+          [
+            896,
+            17
+          ],
+          [
+            896,
+            17
+          ],
+          [
+            896,
+            17
+          ]
+        ],
+        "original_arm_plan": [],
+        "unmodified_control_plan": [],
+        "variant_dog_phase": 0,
+        "control_dog_phase": 0,
+        "in_intended_dog_fence": true
+      },
+      {
+        "t": 2,
+        "worker": 5,
+        "current": [
+          16,
+          3
+        ],
+        "wall": [
+          16,
+          2
+        ],
+        "replaced_by": "L",
+        "legal_same_turn": true,
+        "actual": [
+          [
+            896,
+            17
+          ],
+          [
+            896,
+            17
+          ],
+          [
+            896,
+            17
+          ],
+          [
+            896,
+            17
+          ],
+          [
+            896,
+            17
+          ],
+          [
+            896,
+            17
+          ],
+          [
+            896,
+            17
+          ],
+          [
+            896,
+            17
+          ],
+          [
+            896,
+            17
+          ],
+          [
+            896,
+            17
+          ]
+        ],
+        "alternative": [
+          [
+            895,
+            17
+          ],
+          [
+            895,
+            17
+          ],
+          [
+            895,
+            17
+          ],
+          [
+            895,
+            17
+          ],
+          [
+            895,
+            17
+          ],
+          [
+            895,
+            17
+          ],
+          [
+            895,
+            17
+          ],
+          [
+            895,
+            17
+          ],
+          [
+            895,
+            17
+          ],
+          [
+            895,
+            17
+          ]
+        ],
+        "original_arm_plan": [],
+        "unmodified_control_plan": [],
+        "variant_dog_phase": 0,
+        "control_dog_phase": 0,
+        "in_intended_dog_fence": true
+      },
+      {
+        "t": 6,
+        "worker": 5,
+        "current": [
+          17,
+          2
+        ],
+        "wall": [
+          16,
+          2
+        ],
+        "replaced_by": "L",
+        "legal_same_turn": true,
+        "actual": [
+          [
+            890,
+            17
+          ],
+          [
+            890,
+            17
+          ],
+          [
+            890,
+            17
+          ],
+          [
+            890,
+            17
+          ],
+          [
+            890,
+            17
+          ],
+          [
+            890,
+            17
+          ],
+          [
+            890,
+            17
+          ],
+          [
+            890,
+            17
+          ],
+          [
+            890,
+            17
+          ],
+          [
+            890,
+            17
+          ]
+        ],
+        "alternative": [
+          [
+            889,
+            17
+          ],
+          [
+            889,
+            17
+          ],
+          [
+            889,
+            17
+          ],
+          [
+            889,
+            17
+          ],
+          [
+            889,
+            17
+          ],
+          [
+            889,
+            17
+          ],
+          [
+            889,
+            17
+          ],
+          [
+            889,
+            17
+          ],
+          [
+            889,
+            17
+          ],
+          [
+            889,
+            17
+          ]
+        ],
+        "original_arm_plan": [],
+        "unmodified_control_plan": [],
+        "variant_dog_phase": 0,
+        "control_dog_phase": 0,
+        "in_intended_dog_fence": true
+      }
+    ],
+    "control": {
+      "quad_footprint": {},
+      "dog_phases": [
+        {
+          "turn": 0,
+          "phase": 0,
+          "closed": 0,
+          "decoy": -1
+        },
+        {
+          "turn": 15,
+          "phase": 1,
+          "closed": 0,
+          "decoy": -1
+        },
+        {
+          "turn": 40,
+          "phase": 2,
+          "closed": 0,
+          "decoy": 0
+        },
+        {
+          "turn": 56,
+          "phase": 9,
+          "closed": 1,
+          "decoy": 0
+        }
+      ],
+      "dog_gate": [
+        22,
+        8
+      ],
+      "dog_gate_actual_wall_turn": 56,
+      "dog_fence_ready": 15,
+      "dog_fence_cells": 15,
+      "score": 11683333,
+      "digest": "41e66d8dc9564341657b8581fdb12d48b96022aa032c35e08ca27859288c8d45",
+      "final": [
+        [
+          120,
+          4
+        ],
+        [
+          116,
+          0
+        ],
+        [
+          116,
+          0
+        ],
+        [
+          116,
+          0
+        ],
+        [
+          116,
+          0
+        ],
+        [
+          116,
+          0
+        ],
+        [
+          116,
+          0
+        ],
+        [
+          116,
+          0
+        ],
+        [
+          116,
+          0
+        ],
+        [
+          116,
+          0
+        ]
+      ],
+      "separation": [
+        {
+          "t": 56,
+          "delta_area": [
+            765,
+            121,
+            121,
+            121,
+            121,
+            121,
+            121,
+            121,
+            121,
+            121
+          ],
+          "delta_reachable": [
+            13,
+            4,
+            4,
+            4,
+            4,
+            4,
+            4,
+            4,
+            4,
+            4
+          ],
+          "walls": [
+            [
+              22,
+              8
+            ]
+          ],
+          "after": [
+            [
+              120,
+              4
+            ],
+            [
+              764,
+              13
+            ],
+            [
+              764,
+              13
+            ],
+            [
+              764,
+              13
+            ],
+            [
+              764,
+              13
+            ],
+            [
+              764,
+              13
+            ],
+            [
+              764,
+              13
+            ],
+            [
+              764,
+              13
+            ],
+            [
+              764,
+              13
+            ],
+            [
+              764,
+              13
+            ]
+          ]
+        },
+        {
+          "t": 165,
+          "delta_area": [
+            0,
+            47,
+            47,
+            47,
+            47,
+            47,
+            47,
+            47,
+            47,
+            47
+          ],
+          "delta_reachable": [
+            0,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1
+          ],
+          "walls": [
+            [
+              19,
+              23
+            ]
+          ],
+          "after": [
+            [
+              120,
+              4
+            ],
+            [
+              590,
+              10
+            ],
+            [
+              590,
+              10
+            ],
+            [
+              590,
+              10
+            ],
+            [
+              590,
+              10
+            ],
+            [
+              590,
+              10
+            ],
+            [
+              590,
+              10
+            ],
+            [
+              590,
+              10
+            ],
+            [
+              590,
+              10
+            ],
+            [
+              590,
+              10
+            ]
+          ]
+        },
+        {
+          "t": 221,
+          "delta_area": [
+            0,
+            105,
+            105,
+            105,
+            105,
+            105,
+            105,
+            105,
+            105,
+            105
+          ],
+          "delta_reachable": [
+            0,
+            3,
+            3,
+            3,
+            3,
+            3,
+            3,
+            3,
+            3,
+            3
+          ],
+          "walls": [
+            [
+              13,
+              1
+            ]
+          ],
+          "after": [
+            [
+              120,
+              4
+            ],
+            [
+              430,
+              5
+            ],
+            [
+              430,
+              5
+            ],
+            [
+              430,
+              5
+            ],
+            [
+              430,
+              5
+            ],
+            [
+              430,
+              5
+            ],
+            [
+              430,
+              5
+            ],
+            [
+              430,
+              5
+            ],
+            [
+              430,
+              5
+            ],
+            [
+              430,
+              5
+            ]
+          ]
+        },
+        {
+          "t": 252,
+          "delta_area": [
+            0,
+            196,
+            196,
+            196,
+            196,
+            196,
+            196,
+            196,
+            196,
+            196
+          ],
+          "delta_reachable": [
+            0,
+            3,
+            3,
+            3,
+            3,
+            3,
+            3,
+            3,
+            3,
+            3
+          ],
+          "walls": [
+            [
+              2,
+              28
+            ],
+            [
+              3,
+              27
+            ]
+          ],
+          "after": [
+            [
+              120,
+              4
+            ],
+            [
+              223,
+              2
+            ],
+            [
+              223,
+              2
+            ],
+            [
+              223,
+              2
+            ],
+            [
+              223,
+              2
+            ],
+            [
+              223,
+              2
+            ],
+            [
+              223,
+              2
+            ],
+            [
+              223,
+              2
+            ],
+            [
+              223,
+              2
+            ],
+            [
+              223,
+              2
+            ]
+          ]
+        },
+        {
+          "t": 259,
+          "delta_area": [
+            0,
+            62,
+            62,
+            62,
+            62,
+            62,
+            62,
+            62,
+            62,
+            62
+          ],
+          "delta_reachable": [
+            0,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1
+          ],
+          "walls": [
+            [
+              11,
+              11
+            ],
+            [
+              12,
+              12
+            ]
+          ],
+          "after": [
+            [
+              120,
+              4
+            ],
+            [
+              161,
+              1
+            ],
+            [
+              161,
+              1
+            ],
+            [
+              161,
+              1
+            ],
+            [
+              161,
+              1
+            ],
+            [
+              161,
+              1
+            ],
+            [
+              161,
+              1
+            ],
+            [
+              161,
+              1
+            ],
+            [
+              161,
+              1
+            ],
+            [
+              161,
+              1
+            ]
+          ]
+        }
+      ]
+    },
+    "deferred-square": {
+      "quad_footprint": {
+        "pen": [
+          [
+            14,
+            0
+          ],
+          [
+            14,
+            1
+          ],
+          [
+            15,
+            0
+          ],
+          [
+            15,
+            1
+          ]
+        ],
+        "shell": [
+          [
+            13,
+            0
+          ],
+          [
+            13,
+            1
+          ],
+          [
+            14,
+            2
+          ],
+          [
+            15,
+            2
+          ],
+          [
+            16,
+            0
+          ],
+          [
+            16,
+            1
+          ]
+        ],
+        "begin_overlap_dog_walls": []
+      },
+      "dog_phases": [
+        {
+          "turn": 0,
+          "phase": 0,
+          "closed": 0,
+          "decoy": -1
+        },
+        {
+          "turn": 70,
+          "phase": 9,
+          "closed": 0,
+          "decoy": -1
+        }
+      ],
+      "dog_gate": [
+        22,
+        8
+      ],
+      "dog_gate_actual_wall_turn": null,
+      "dog_fence_ready": null,
+      "dog_fence_cells": 15,
+      "score": 1555556,
+      "digest": "047f4e302fa3ce96e29c4c5a8419bd028a44d59695f2cf0421ebc02d5079442e",
+      "final": [
+        [
+          14,
+          0
+        ],
+        [
+          14,
+          0
+        ],
+        [
+          14,
+          0
+        ],
+        [
+          14,
+          0
+        ],
+        [
+          14,
+          0
+        ],
+        [
+          14,
+          0
+        ],
+        [
+          14,
+          0
+        ],
+        [
+          14,
+          0
+        ],
+        [
+          14,
+          0
+        ],
+        [
+          14,
+          0
+        ]
+      ],
+      "separation": [
+        {
+          "t": 84,
+          "delta_area": [
+            764,
+            764,
+            764,
+            764,
+            764,
+            764,
+            764,
+            764,
+            764,
+            764
+          ],
+          "delta_reachable": [
+            12,
+            12,
+            12,
+            12,
+            12,
+            12,
+            12,
+            12,
+            12,
+            12
+          ],
+          "walls": [
+            [
+              22,
+              6
+            ]
+          ],
+          "after": [
+            [
+              102,
+              5
+            ],
+            [
+              102,
+              5
+            ],
+            [
+              102,
+              5
+            ],
+            [
+              102,
+              5
+            ],
+            [
+              102,
+              5
+            ],
+            [
+              102,
+              5
+            ],
+            [
+              102,
+              5
+            ],
+            [
+              102,
+              5
+            ],
+            [
+              102,
+              5
+            ],
+            [
+              102,
+              5
+            ]
+          ]
+        },
+        {
+          "t": 92,
+          "delta_area": [
+            44,
+            44,
+            44,
+            44,
+            44,
+            44,
+            44,
+            44,
+            44,
+            44
+          ],
+          "delta_reachable": [
+            3,
+            3,
+            3,
+            3,
+            3,
+            3,
+            3,
+            3,
+            3,
+            3
+          ],
+          "walls": [
+            [
+              23,
+              4
+            ]
+          ],
+          "after": [
+            [
+              52,
+              2
+            ],
+            [
+              52,
+              2
+            ],
+            [
+              52,
+              2
+            ],
+            [
+              52,
+              2
+            ],
+            [
+              52,
+              2
+            ],
+            [
+              52,
+              2
+            ],
+            [
+              52,
+              2
+            ],
+            [
+              52,
+              2
+            ],
+            [
+              52,
+              2
+            ],
+            [
+              52,
+              2
+            ]
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "group": "practice",
+    "case": "0009.txt",
+    "first_action_difference": 0,
+    "first_wall_state_difference": 1,
+    "first_different_wall_delayed_control": [
+      [
+        11,
+        25
+      ]
+    ],
+    "first_different_wall_in_quad": [],
+    "early_displaced_wall_count": 6,
+    "early_restore_major_40cells": 0,
+    "early_omissions": [
+      {
+        "t": 1,
+        "worker": 3,
+        "current": [
+          10,
+          25
+        ],
+        "wall": [
+          11,
+          25
+        ],
+        "replaced_by": "R",
+        "legal_same_turn": true,
+        "actual": [
+          [
+            900,
+            17
+          ],
+          [
+            900,
+            17
+          ],
+          [
+            900,
+            17
+          ],
+          [
+            900,
+            17
+          ],
+          [
+            900,
+            17
+          ]
+        ],
+        "alternative": [
+          [
+            899,
+            17
+          ],
+          [
+            899,
+            17
+          ],
+          [
+            899,
+            17
+          ],
+          [
+            899,
+            17
+          ],
+          [
+            899,
+            17
+          ]
+        ],
+        "original_arm_plan": [],
+        "unmodified_control_plan": [],
+        "variant_dog_phase": 0,
+        "control_dog_phase": 0,
+        "in_intended_dog_fence": true
+      },
+      {
+        "t": 4,
+        "worker": 3,
+        "current": [
+          11,
+          26
+        ],
+        "wall": [
+          12,
+          26
+        ],
+        "replaced_by": "r",
+        "legal_same_turn": true,
+        "actual": [
+          [
+            898,
+            17
+          ],
+          [
+            898,
+            17
+          ],
+          [
+            898,
+            17
+          ],
+          [
+            898,
+            17
+          ],
+          [
+            898,
+            17
+          ]
+        ],
+        "alternative": [
+          [
+            898,
+            17
+          ],
+          [
+            898,
+            17
+          ],
+          [
+            898,
+            17
+          ],
+          [
+            898,
+            17
+          ],
+          [
+            898,
+            17
+          ]
+        ],
+        "original_arm_plan": [],
+        "unmodified_control_plan": [],
+        "variant_dog_phase": 0,
+        "control_dog_phase": 0,
+        "in_intended_dog_fence": true
+      },
+      {
+        "t": 5,
+        "worker": 3,
+        "current": [
+          11,
+          26
+        ],
+        "wall": [
+          12,
+          26
+        ],
+        "replaced_by": "D",
+        "legal_same_turn": true,
+        "actual": [
+          [
+            898,
+            17
+          ],
+          [
+            898,
+            17
+          ],
+          [
+            898,
+            17
+          ],
+          [
+            898,
+            17
+          ],
+          [
+            898,
+            17
+          ]
+        ],
+        "alternative": [
+          [
+            897,
+            17
+          ],
+          [
+            897,
+            17
+          ],
+          [
+            897,
+            17
+          ],
+          [
+            897,
+            17
+          ],
+          [
+            897,
+            17
+          ]
+        ],
+        "original_arm_plan": [],
+        "unmodified_control_plan": [],
+        "variant_dog_phase": 0,
+        "control_dog_phase": 0,
+        "in_intended_dog_fence": true
+      },
+      {
+        "t": 7,
+        "worker": 3,
+        "current": [
+          12,
+          27
+        ],
+        "wall": [
+          13,
+          27
+        ],
+        "replaced_by": "r",
+        "legal_same_turn": true,
+        "actual": [
+          [
+            897,
+            17
+          ],
+          [
+            897,
+            17
+          ],
+          [
+            897,
+            17
+          ],
+          [
+            897,
+            17
+          ],
+          [
+            897,
+            17
+          ]
+        ],
+        "alternative": [
+          [
+            897,
+            17
+          ],
+          [
+            897,
+            17
+          ],
+          [
+            897,
+            17
+          ],
+          [
+            897,
+            17
+          ],
+          [
+            897,
+            17
+          ]
+        ],
+        "original_arm_plan": [],
+        "unmodified_control_plan": [],
+        "variant_dog_phase": 0,
+        "control_dog_phase": 0,
+        "in_intended_dog_fence": true
+      },
+      {
+        "t": 8,
+        "worker": 3,
+        "current": [
+          12,
+          27
+        ],
+        "wall": [
+          13,
+          27
+        ],
+        "replaced_by": "D",
+        "legal_same_turn": true,
+        "actual": [
+          [
+            896,
+            17
+          ],
+          [
+            896,
+            17
+          ],
+          [
+            896,
+            17
+          ],
+          [
+            896,
+            17
+          ],
+          [
+            896,
+            17
+          ]
+        ],
+        "alternative": [
+          [
+            895,
+            17
+          ],
+          [
+            895,
+            17
+          ],
+          [
+            895,
+            17
+          ],
+          [
+            895,
+            17
+          ],
+          [
+            895,
+            17
+          ]
+        ],
+        "original_arm_plan": [],
+        "unmodified_control_plan": [],
+        "variant_dog_phase": 0,
+        "control_dog_phase": 0,
+        "in_intended_dog_fence": true
+      },
+      {
+        "t": 10,
+        "worker": 3,
+        "current": [
+          13,
+          28
+        ],
+        "wall": [
+          14,
+          28
+        ],
+        "replaced_by": "R",
+        "legal_same_turn": true,
+        "actual": [
+          [
+            896,
+            17
+          ],
+          [
+            896,
+            17
+          ],
+          [
+            896,
+            17
+          ],
+          [
+            896,
+            17
+          ],
+          [
+            896,
+            17
+          ]
+        ],
+        "alternative": [
+          [
+            895,
+            17
+          ],
+          [
+            895,
+            17
+          ],
+          [
+            895,
+            17
+          ],
+          [
+            895,
+            17
+          ],
+          [
+            895,
+            17
+          ]
+        ],
+        "original_arm_plan": [],
+        "unmodified_control_plan": [],
+        "variant_dog_phase": 0,
+        "control_dog_phase": 0,
+        "in_intended_dog_fence": true
+      }
+    ],
+    "control": {
+      "quad_footprint": {},
+      "dog_phases": [
+        {
+          "turn": 0,
+          "phase": 0,
+          "closed": 0,
+          "decoy": -1
+        },
+        {
+          "turn": 70,
+          "phase": 9,
+          "closed": 0,
+          "decoy": -1
+        }
+      ],
+      "dog_gate": [
+        7,
+        21
+      ],
+      "dog_gate_actual_wall_turn": 74,
+      "dog_fence_ready": null,
+      "dog_fence_cells": 15,
+      "score": 13333333,
+      "digest": "48b615e87e992fb51c74537166e73de8dd5f0d76c01ff1bfc7d7704a2672d5b8",
+      "final": [
+        [
+          120,
+          0
+        ],
+        [
+          120,
+          0
+        ],
+        [
+          120,
+          0
+        ],
+        [
+          120,
+          0
+        ],
+        [
+          120,
+          0
+        ]
+      ],
+      "separation": [
+        {
+          "t": 112,
+          "delta_area": [
+            62,
+            62,
+            62,
+            62,
+            62
+          ],
+          "delta_reachable": [
+            6,
+            6,
+            6,
+            6,
+            6
+          ],
+          "walls": [
+            [
+              11,
+              17
+            ]
+          ],
+          "after": [
+            [
+              807,
+              11
+            ],
+            [
+              807,
+              11
+            ],
+            [
+              807,
+              11
+            ],
+            [
+              807,
+              11
+            ],
+            [
+              807,
+              11
+            ]
+          ]
+        },
+        {
+          "t": 278,
+          "delta_area": [
+            346,
+            346,
+            346,
+            346,
+            346
+          ],
+          "delta_reachable": [
+            4,
+            4,
+            4,
+            4,
+            4
+          ],
+          "walls": [
+            [
+              12,
+              6
+            ],
+            [
+              12,
+              9
+            ]
+          ],
+          "after": [
+            [
+              341,
+              6
+            ],
+            [
+              341,
+              6
+            ],
+            [
+              341,
+              6
+            ],
+            [
+              341,
+              6
+            ],
+            [
+              341,
+              6
+            ]
+          ]
+        },
+        {
+          "t": 290,
+          "delta_area": [
+            216,
+            216,
+            216,
+            216,
+            216
+          ],
+          "delta_reachable": [
+            6,
+            6,
+            6,
+            6,
+            6
+          ],
+          "walls": [
+            [
+              12,
+              4
+            ]
+          ],
+          "after": [
+            [
+              120,
+              0
+            ],
+            [
+              120,
+              0
+            ],
+            [
+              120,
+              0
+            ],
+            [
+              120,
+              0
+            ],
+            [
+              120,
+              0
+            ]
+          ]
+        }
+      ]
+    },
+    "deferred-square": {
+      "quad_footprint": {
+        "pen": [
+          [
+            10,
+            28
+          ],
+          [
+            10,
+            29
+          ],
+          [
+            11,
+            28
+          ],
+          [
+            11,
+            29
+          ]
+        ],
+        "shell": [
+          [
+            9,
+            28
+          ],
+          [
+            9,
+            29
+          ],
+          [
+            10,
+            27
+          ],
+          [
+            11,
+            27
+          ],
+          [
+            12,
+            28
+          ],
+          [
+            12,
+            29
+          ]
+        ],
+        "begin_overlap_dog_walls": []
+      },
+      "dog_phases": [
+        {
+          "turn": 0,
+          "phase": 0,
+          "closed": 0,
+          "decoy": -1
+        },
+        {
+          "turn": 70,
+          "phase": 9,
+          "closed": 0,
+          "decoy": -1
+        }
+      ],
+      "dog_gate": [
+        7,
+        21
+      ],
+      "dog_gate_actual_wall_turn": null,
+      "dog_fence_ready": null,
+      "dog_fence_cells": 15,
+      "score": 9657,
+      "digest": "42684f62240e74009dbb14c6e817d7e2528db4b884fd1c905af574d79e82eae9",
+      "final": [
+        [
+          712,
+          13
+        ],
+        [
+          712,
+          13
+        ],
+        [
+          712,
+          13
+        ],
+        [
+          712,
+          13
+        ],
+        [
+          712,
+          13
+        ]
+      ],
+      "separation": [
+        {
+          "t": 110,
+          "delta_area": [
+            52,
+            52,
+            52,
+            52,
+            52
+          ],
+          "delta_reachable": [
+            2,
+            2,
+            2,
+            2,
+            2
+          ],
+          "walls": [
+            [
+              7,
+              22
+            ]
+          ],
+          "after": [
+            [
+              817,
+              14
+            ],
+            [
+              817,
+              14
+            ],
+            [
+              817,
+              14
+            ],
+            [
+              817,
+              14
+            ],
+            [
+              817,
+              14
+            ]
+          ]
+        },
+        {
+          "t": 162,
+          "delta_area": [
+            51,
+            51,
+            51,
+            51,
+            51
+          ],
+          "delta_reachable": [
+            1,
+            1,
+            1,
+            1,
+            1
+          ],
+          "walls": [
+            [
+              8,
+              20
+            ]
+          ],
+          "after": [
+            [
+              760,
+              13
+            ],
+            [
+              760,
+              13
+            ],
+            [
+              760,
+              13
+            ],
+            [
+              760,
+              13
+            ],
+            [
+              760,
+              13
+            ]
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "group": "generated",
+    "case": "0059.txt",
+    "first_action_difference": 0,
+    "first_wall_state_difference": 1,
+    "first_different_wall_delayed_control": [],
+    "first_different_wall_in_quad": [
+      [
+        1,
+        2
+      ]
+    ],
+    "early_displaced_wall_count": 3,
+    "early_restore_major_40cells": 0,
+    "early_omissions": [
+      {
+        "t": 7,
+        "worker": 0,
+        "current": [
+          1,
+          10
+        ],
+        "wall": [
+          1,
+          9
+        ],
+        "replaced_by": "D",
+        "legal_same_turn": true,
+        "actual": [
+          [
+            898,
+            11
+          ],
+          [
+            898,
+            11
+          ],
+          [
+            898,
+            11
+          ],
+          [
+            898,
+            11
+          ],
+          [
+            898,
+            11
+          ],
+          [
+            898,
+            11
+          ],
+          [
+            898,
+            11
+          ]
+        ],
+        "alternative": [
+          [
+            897,
+            11
+          ],
+          [
+            897,
+            11
+          ],
+          [
+            897,
+            11
+          ],
+          [
+            897,
+            11
+          ],
+          [
+            897,
+            11
+          ],
+          [
+            897,
+            11
+          ],
+          [
+            897,
+            11
+          ]
+        ],
+        "original_arm_plan": [],
+        "unmodified_control_plan": [],
+        "variant_dog_phase": 0,
+        "control_dog_phase": 0,
+        "in_intended_dog_fence": true
+      },
+      {
+        "t": 9,
+        "worker": 0,
+        "current": [
+          2,
+          9
+        ],
+        "wall": [
+          2,
+          8
+        ],
+        "replaced_by": "L",
+        "legal_same_turn": true,
+        "actual": [
+          [
+            898,
+            11
+          ],
+          [
+            898,
+            11
+          ],
+          [
+            898,
+            11
+          ],
+          [
+            898,
+            11
+          ],
+          [
+            898,
+            11
+          ],
+          [
+            898,
+            11
+          ],
+          [
+            898,
+            11
+          ]
+        ],
+        "alternative": [
+          [
+            897,
+            11
+          ],
+          [
+            897,
+            11
+          ],
+          [
+            897,
+            11
+          ],
+          [
+            897,
+            11
+          ],
+          [
+            897,
+            11
+          ],
+          [
+            897,
+            11
+          ],
+          [
+            897,
+            11
+          ]
+        ],
+        "original_arm_plan": [],
+        "unmodified_control_plan": [],
+        "variant_dog_phase": 0,
+        "control_dog_phase": 0,
+        "in_intended_dog_fence": true
+      },
+      {
+        "t": 11,
+        "worker": 0,
+        "current": [
+          2,
+          7
+        ],
+        "wall": [
+          3,
+          7
+        ],
+        "replaced_by": "L",
+        "legal_same_turn": true,
+        "actual": [
+          [
+            898,
+            11
+          ],
+          [
+            898,
+            11
+          ],
+          [
+            898,
+            11
+          ],
+          [
+            898,
+            11
+          ],
+          [
+            898,
+            11
+          ],
+          [
+            898,
+            11
+          ],
+          [
+            898,
+            11
+          ]
+        ],
+        "alternative": [
+          [
+            897,
+            11
+          ],
+          [
+            897,
+            11
+          ],
+          [
+            897,
+            11
+          ],
+          [
+            897,
+            11
+          ],
+          [
+            897,
+            11
+          ],
+          [
+            897,
+            11
+          ],
+          [
+            897,
+            11
+          ]
+        ],
+        "original_arm_plan": [],
+        "unmodified_control_plan": [],
+        "variant_dog_phase": 0,
+        "control_dog_phase": 0,
+        "in_intended_dog_fence": true
+      }
+    ],
+    "control": {
+      "quad_footprint": {},
+      "dog_phases": [
+        {
+          "turn": 0,
+          "phase": 0,
+          "closed": 0,
+          "decoy": -1
+        },
+        {
+          "turn": 21,
+          "phase": 1,
+          "closed": 0,
+          "decoy": -1
+        },
+        {
+          "turn": 44,
+          "phase": 2,
+          "closed": 0,
+          "decoy": 0
+        },
+        {
+          "turn": 55,
+          "phase": 9,
+          "closed": 1,
+          "decoy": 0
+        }
+      ],
+      "dog_gate": [
+        5,
+        5
+      ],
+      "dog_gate_actual_wall_turn": 55,
+      "dog_fence_ready": 21,
+      "dog_fence_cells": 10,
+      "score": 45836806,
+      "digest": "a84bf4cc742fa8a2ff0fc057526bc6d7e0ff9c5f54ee0f1ad5a2f6eee1b7e6db",
+      "final": [
+        [
+          55,
+          5
+        ],
+        [
+          481,
+          0
+        ],
+        [
+          481,
+          0
+        ],
+        [
+          481,
+          0
+        ],
+        [
+          481,
+          0
+        ],
+        [
+          481,
+          0
+        ],
+        [
+          481,
+          0
+        ]
+      ],
+      "separation": [
+        {
+          "t": 55,
+          "delta_area": [
+            835,
+            56,
+            56,
+            56,
+            56,
+            56,
+            56
+          ],
+          "delta_reachable": [
+            6,
+            5,
+            5,
+            5,
+            5,
+            5,
+            5
+          ],
+          "walls": [
+            [
+              5,
+              5
+            ]
+          ],
+          "after": [
+            [
+              55,
+              5
+            ],
+            [
+              834,
+              6
+            ],
+            [
+              834,
+              6
+            ],
+            [
+              834,
+              6
+            ],
+            [
+              834,
+              6
+            ],
+            [
+              834,
+              6
+            ],
+            [
+              834,
+              6
+            ]
+          ]
+        },
+        {
+          "t": 156,
+          "delta_area": [
+            0,
+            43,
+            43,
+            43,
+            43,
+            43,
+            43
+          ],
+          "delta_reachable": [
+            0,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1
+          ],
+          "walls": [
+            [
+              5,
+              21
+            ]
+          ],
+          "after": [
+            [
+              55,
+              5
+            ],
+            [
+              730,
+              4
+            ],
+            [
+              730,
+              4
+            ],
+            [
+              730,
+              4
+            ],
+            [
+              730,
+              4
+            ],
+            [
+              730,
+              4
+            ],
+            [
+              730,
+              4
+            ]
+          ]
+        },
+        {
+          "t": 245,
+          "delta_area": [
+            0,
+            218,
+            218,
+            218,
+            218,
+            218,
+            218
+          ],
+          "delta_reachable": [
+            0,
+            3,
+            3,
+            3,
+            3,
+            3,
+            3
+          ],
+          "walls": [
+            [
+              26,
+              19
+            ]
+          ],
+          "after": [
+            [
+              55,
+              5
+            ],
+            [
+              481,
+              0
+            ],
+            [
+              481,
+              0
+            ],
+            [
+              481,
+              0
+            ],
+            [
+              481,
+              0
+            ],
+            [
+              481,
+              0
+            ],
+            [
+              481,
+              0
+            ]
+          ]
+        }
+      ]
+    },
+    "deferred-square": {
+      "quad_footprint": {
+        "pen": [
+          [
+            0,
+            0
+          ],
+          [
+            0,
+            1
+          ],
+          [
+            1,
+            0
+          ],
+          [
+            1,
+            1
+          ]
+        ],
+        "shell": [
+          [
+            0,
+            2
+          ],
+          [
+            1,
+            2
+          ],
+          [
+            2,
+            0
+          ],
+          [
+            2,
+            1
+          ]
+        ],
+        "begin_overlap_dog_walls": []
+      },
+      "dog_phases": [
+        {
+          "turn": 0,
+          "phase": 0,
+          "closed": 0,
+          "decoy": -1
+        },
+        {
+          "turn": 25,
+          "phase": 1,
+          "closed": 0,
+          "decoy": -1
+        },
+        {
+          "turn": 132,
+          "phase": 2,
+          "closed": 0,
+          "decoy": -1
+        },
+        {
+          "turn": 183,
+          "phase": 9,
+          "closed": 0,
+          "decoy": -1
+        }
+      ],
+      "dog_gate": [
+        5,
+        5
+      ],
+      "dog_gate_actual_wall_turn": null,
+      "dog_fence_ready": 25,
+      "dog_fence_cells": 10,
+      "score": 9309524,
+      "digest": "95d7950dd0a07b8a8e2e88a3e3ffb9446b30815875b26ded9bd13539c3db38b9",
+      "final": [
+        [
+          194,
+          1
+        ],
+        [
+          194,
+          1
+        ],
+        [
+          9,
+          1
+        ],
+        [
+          194,
+          1
+        ],
+        [
+          194,
+          1
+        ],
+        [
+          194,
+          1
+        ],
+        [
+          194,
+          1
+        ]
+      ],
+      "separation": [
+        {
+          "t": 199,
+          "delta_area": [
+            59,
+            59,
+            59,
+            59,
+            59,
+            59,
+            59
+          ],
+          "delta_reachable": [
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1
+          ],
+          "walls": [
+            [
+              8,
+              6
+            ],
+            [
+              15,
+              9
+            ],
+            [
+              19,
+              3
+            ]
+          ],
+          "after": [
+            [
+              813,
+              9
+            ],
+            [
+              813,
+              9
+            ],
+            [
+              813,
+              9
+            ],
+            [
+              813,
+              9
+            ],
+            [
+              813,
+              9
+            ],
+            [
+              813,
+              9
+            ],
+            [
+              813,
+              9
+            ]
+          ]
+        },
+        {
+          "t": 249,
+          "delta_area": [
+            245,
+            245,
+            245,
+            245,
+            245,
+            245,
+            245
+          ],
+          "delta_reachable": [
+            4,
+            4,
+            4,
+            4,
+            4,
+            4,
+            4
+          ],
+          "walls": [
+            [
+              29,
+              22
+            ]
+          ],
+          "after": [
+            [
+              535,
+              5
+            ],
+            [
+              535,
+              5
+            ],
+            [
+              535,
+              5
+            ],
+            [
+              535,
+              5
+            ],
+            [
+              535,
+              5
+            ],
+            [
+              535,
+              5
+            ],
+            [
+              535,
+              5
+            ]
+          ]
+        },
+        {
+          "t": 294,
+          "delta_area": [
+            301,
+            301,
+            301,
+            301,
+            301,
+            301,
+            301
+          ],
+          "delta_reachable": [
+            3,
+            3,
+            3,
+            3,
+            3,
+            3,
+            3
+          ],
+          "walls": [
+            [
+              14,
+              29
+            ]
+          ],
+          "after": [
+            [
+              210,
+              2
+            ],
+            [
+              210,
+              2
+            ],
+            [
+              210,
+              2
+            ],
+            [
+              210,
+              2
+            ],
+            [
+              210,
+              2
+            ],
+            [
+              210,
+              2
+            ],
+            [
+              210,
+              2
+            ]
+          ]
+        },
+        {
+          "t": 299,
+          "delta_area": [
+            13,
+            13,
+            198,
+            13,
+            13,
+            13,
+            13
+          ],
+          "delta_reachable": [
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1
+          ],
+          "walls": [
+            [
+              10,
+              22
+            ],
+            [
+              11,
+              21
+            ],
+            [
+              11,
+              23
+            ],
+            [
+              12,
+              24
+            ]
+          ],
+          "after": [
+            [
+              194,
+              1
+            ],
+            [
+              194,
+              1
+            ],
+            [
+              9,
+              1
+            ],
+            [
+              194,
+              1
+            ],
+            [
+              194,
+              1
+            ],
+            [
+              194,
+              1
+            ],
+            [
+              194,
+              1
+            ]
+          ]
+        }
+      ]
+    }
+  }
+]

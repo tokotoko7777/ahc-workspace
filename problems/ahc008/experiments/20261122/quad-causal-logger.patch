@@ -1,0 +1,13 @@
+--- problems/ahc008/tactical_gate_submission.cpp
++++ problems/ahc008/tactical_gate_submission.cpp
+@@ -1717,0 +1718,10 @@
++  if(const char *p=getenv("AHC008_CAUSE_LOG")){
++   ofstream f(p,ios::app);
++   f<<g.turn<<" "<<original<<" "<<g.act<<" "<<g.dogPhase<<" "<<g.dogClosed<<" "<<g.dogGate<<" "<<g.dogDecoy;
++   f<<" @";for(int w:g.dogWalls)f<<" "<<w;
++   for(int i:{g.target,g.target2})if(i>=0&&i<(int)g.pockets.size()){
++    auto &z=g.pockets[i];f<<" | "<<i<<" "<<z.cx<<" "<<z.cy;
++    for(int w:z.wall)f<<" "<<w;
++   }
++   f<<"\n";
++  }
