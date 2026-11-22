@@ -1,0 +1,22 @@
+{
+  "verified": 1,
+  "search": {
+    "searches": 27,
+    "protected": 16,
+    "protection_empty": 11,
+    "fallback": 11,
+    "attempts": 12,
+    "one_shape": 2
+  },
+  "abort": 12,
+  "focussed": 10,
+  "focussed_cases": 1,
+  "escaped": 10,
+  "reuse_possible": 2,
+  "geometry": 0,
+  "short": 0,
+  "short_cases": 0,
+  "short_final_missed_cases": 0,
+  "immediate_final_missed_cases": 0,
+  "factual_final_missed_cases": 0
+}
