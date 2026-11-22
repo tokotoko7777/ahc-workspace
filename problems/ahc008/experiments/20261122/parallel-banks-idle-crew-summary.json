@@ -1,0 +1,15 @@
+{
+  "verified": 30,
+  "candidate_turns": 8,
+  "case_count": 7,
+  "status": {
+    "no_stance": 8
+  },
+  "safe_cases": 0,
+  "safe_builds": 0,
+  "capture_turns": 0,
+  "capture_pets": 0,
+  "final_missed_capture": 0,
+  "final_missed_exposure": 0,
+  "final_missed_exposure_cases": 0
+}

@@ -1,0 +1,40 @@
+--- global-clear.cpp
++++ global-clear.cpp
+@@ -361,6 +361,8 @@
+   form();
+  }
+  int phase=0, target=-1, radius=3, tag=0, limit=20, bestPrev=0;
++ struct BorrowTick{int turn,mask;vector<int> wall,inside;};
++ vector<BorrowTick> borrowTicks;
+  int phase2=0, target2=-1, bestPrev2=0;
+  int multi=2, secdist=13, multiMin=3;
+  int minKeep=450, keepRelax=7, petsPivot=0, priorLen=3;
+@@ -1503,6 +1505,12 @@
+   for(int j=mainWorkers;j<free;j++)p1[rank[j].second]=false,p2[rank[j].second]=true;
+   pocketPlan(p1,target,phase,bestPrev,target2);
+   pocketPlan(p2,target2,phase2,bestPrev2,target);
++  if(bankMode&&turn>=bankRelease&&target>=0&&target2<0){
++   int mask=0;
++   for(int i=0;i<hm;i++)if(p2[i])mask|=1<<i;
++   borrowTicks.push_back({turn,mask,pockets[target].wall,pockets[target].inside});
++  }
++
+   return act;
+  }
+  string repair(string q){
+@@ -1863,6 +1871,15 @@
+  if(const char *p=getenv("AHC008_SEAM_MEMO_LOG")){
+   ofstream f(p);f<<g.memoQueries<<" "<<g.memoHits<<" "<<g.seamParts.capacity()<<"\n";
+  }
++ if(const char* p=getenv("AHC008_BORROW_LOG")){
++  ofstream f(p);f<<S<<" "<<g.bankRelease<<'\n';
++  for(const auto& x:g.borrowTicks){
++   f<<x.turn<<" "<<x.mask<<" "<<x.wall.size();
++   for(int q:x.wall)f<<" "<<q;
++   for(int q:x.inside)f<<" "<<q;
++   f<<'\n';
++  }
++ }
+  if(const char *p=getenv("AHC008_RESCUE_LOG")){
+   ofstream f(p);f<<g.residual160<<" "<<g.bankRelease<<"\n";
+  }
