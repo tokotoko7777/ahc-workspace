@@ -1,0 +1,48 @@
+--- ../ahc008_terry_same_geometry/hybrid/source-release/frozen.cpp	2026-11-22 20:33:32.603595904 +0900
++++ submission.cpp	2026-11-22 21:21:31.661368971 +0900
+@@ -3574,6 +3574,7 @@
+  array<int,4> planAge{};
+  static constexpr int bankStaffTurn=101;
+  int bp(int x,int y)const{return bankRot?pos(y,x):pos(x,y);}
++ int m5LayoutOverride=-1;
+  void makeBanks(){
+   if(!bankMode)return;
+   if(narrowRescue&&humans.size()<=6)bankN=2;
+@@ -3596,6 +3597,10 @@
+    }
+    if(value>best)best=value,bankStarted=z,bankShift=a;
+   }
++  if(m5LayoutOverride>=0&&humans.size()==5&&bankN==2){
++   bankStarted=m5LayoutOverride/3;
++   bankShift=offsets[m5LayoutOverride%3];
++  }
+   bankRot=bankStarted; bankStarted=0;
+   bitset<V> needed;
+   for(int j=0;j<bankN;j++){
+@@ -4678,8 +4683,26 @@
+   constexpr string_view p="--terry-force-map=";
+   string_view v(argv[i]);
+   if(v.starts_with(p))forced=clamp(atoi(argv[i]+p.size()),0,4);
++  constexpr string_view geometry="--m5-layout=";
++  if(v.starts_with(geometry)){
++   auto k=v.substr(geometry.size());
++   if(k.size()!=1||k[0]<'0'||k[0]>'5'||g.m5LayoutOverride>=0){
++    cerr<<"Expected exactly one --m5-layout=0..5\n";return 2;
++   }
++   g.m5LayoutOverride=k[0]-'0';
++  }
++ }
++ if(g.m5LayoutOverride>=0&&(forced>=0||g.humans.size()!=5)){
++  cerr<<"--m5-layout requires M=5 and cannot be combined with --terry-force-map\n";
++  return 2;
+  }
+  g.terryLayout(forced<0?5:forced);
++ if(const char* path=getenv("AHC008_M5_LAYOUT_LOG");path&&forced<0&&g.humans.size()==5){
++  ofstream layoutLog(path);
++  int id=3*g.bankRot+(g.bankShift-4)/4;
++  if(layoutLog)layoutLog<<"layout,"<<id<<",rotation,"<<g.bankRot<<",offset,"<<g.bankShift
++                         <<",forced,"<<g.m5LayoutOverride<<'\n';
++ }
+  if(forced>=0)cerr<<"terry_forced_map="<<g.terryMap<<'\n';
+  g.setupObservedMotion();
+  int stopTurn=-1;

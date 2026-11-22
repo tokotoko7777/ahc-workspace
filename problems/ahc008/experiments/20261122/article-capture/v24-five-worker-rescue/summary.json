@@ -1,0 +1,20 @@
+{
+  "score_baseline_original": 434537087,
+  "score_baseline_forced": 434537087,
+  "score_oracle": 857769441,
+  "default_exact_action_count": 30,
+  "whole_possible": 25,
+  "useful_possible": 8,
+  "oracle_raw_full": 18,
+  "oracle_useful_full": 8,
+  "median_baseline": 14484569.566666666,
+  "layout_scores": [
+    325759735,
+    438220486,
+    504546267,
+    400299499,
+    309554095,
+    414523713
+  ],
+  "max_runtime": 0.6888188049997552
+}
