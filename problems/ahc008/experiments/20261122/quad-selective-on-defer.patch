@@ -1,0 +1,63 @@
+--- problems/ahc008/tactical_gate_submission.cpp
++++ problems/ahc008/tactical_gate_submission.cpp
+@@ -1320,0 +1321,54 @@
++ int quadSelective=0,forecastEta=-1,forecastOn=0;
++ double forecastProb=0.;
++ void quadSelect(){
++  if(!quadSelective||quadAlive!=1)return;
++  auto travel=[&](int a,int b){
++   if(a==b)return 0;
++   int ds[V],q[V],n=1;
++   fill(ds,ds+V,-1);q[0]=a;ds[a]=0;
++   for(int k=0;k<n;k++)for(int u:nb[q[k]])if(u>=0&&!quadReserved[u]&&!wall[u]&&ds[u]<0){
++    ds[u]=ds[q[k]]+1;
++    if(u==b)return ds[u];
++    q[n++]=u;
++   }
++   return 999;
++  };
++  int eta=travel(humans[quad.gh],quad.ga);
++  for(int c=0;c<2;c++){
++   int p=humans[quad.crew[c]],d=0;
++   for(int j:quad.jobs[c]){d+=travel(p,quad.stance[j])+1;p=quad.stance[j];}
++   eta=max(eta,d);
++  }
++  forecastEta=eta;
++  if(eta+2>=quadSetupDeadline){quadAlive=0;return;}
++  vector<vector<int>> safe;
++  for(int g:quad.outside){
++   if(none_of(nb[g].begin(),nb[g].end(),[&](int q){return q>=0&&!quadReserved[q];}))continue;
++   int parity=0;vector<int> a;
++   for(int x:quad.inner)if(md(x,g)>=2){a.push_back(x);parity|=1<<((x/S+x%S)&1);}
++   if(parity==3)safe.push_back(move(a));
++  }
++  vector<array<double,4>> notready(safe.size(),{1.,1.,1.,1.});
++  for(auto p:pets){
++   if(p.t>3)continue;
++   array<double,V> a{},b{};a[p.p]=1.;
++   for(int t=1;t<=eta+5;t++){
++    for(int u=0;u<p.t;u++){
++     b.fill(0.);
++     for(int q=0;q<V;q++)if(a[q]>0){
++      int n=0;for(int v:nb[q])n+=v>=0&&!wall[v];
++      if(n){double m=a[q]/n;for(int v:nb[q])if(v>=0&&!wall[v])b[v]+=m;}
++     }
++     a.swap(b);
++    }
++    if(t<eta+2)continue;
++    for(int j=0;j<int(safe.size());j++){
++     double pwin=0.;for(int v:safe[j])pwin+=a[v];
++     notready[j][t-eta-2]*=1.-pwin;
++    }
++   }
++  }
++  for(auto a:notready)for(double p:a)forecastProb=max(forecastProb,1.-p);
++  forecastOn=forecastProb>=.20;
++  if(!forecastOn)quadAlive=0;
++ }
+@@ -1333,0 +1388 @@
++   if(quadSelective)f<<"forecast "<<forecastEta<<" "<<setprecision(12)<<forecastProb<<" "<<forecastOn<<"\n";
+@@ -1711,0 +1767 @@
++ g.quadSelective=argc>4?atoi(argv[4]):0;
+@@ -1712,0 +1769 @@
++ g.quadSelect();
