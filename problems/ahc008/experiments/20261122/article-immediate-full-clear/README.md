@@ -23,3 +23,26 @@ blocks that mouth both pass. No live override or further thresholds.
 
 `python check.py HARNESS TESTER V7 DEV30 V7_REPLAY_LEDGER.csv
 events.jsonl summary.json`.
+
+## One actual guard move, factual next observation ceiling
+
+At the same 5 previously eligible failing cases, replay 145 states from
+t260–298 (no t299 setups). Allow prospective distinct guards to hold
+or move one physically valid step, with at least one such move. All
+actual physical wall work on the setup turn is preserved. At close,
+preserve remaining old moves and existing installs/actors, check true
+new actor/animal occupation and all other same-turn move endpoints,
+require the genuinely united all-human exterior ≥300 and ≥65%, and no
+reachable pet. Use the actual next observed animal positions only as
+a retrospective ceiling, not a prediction or certainty under altered
+human motion. One-step exact fixture passes and rejects a blocked
+original gate. All5 official match all actions/scores/exact replay.
+
+173,476 one/two-wall candidate masks with per-wall present or
+one-step legal stances evaluated, zero even achieve structurally
+qualified whole-case capture and retained area after original wires;
+no fully feasible assignable outcomes or branch-overlap witnesses.
+No live or larger horizon threshold sweep. Re-run
+`one-step.py HARNESS TESTER V7 DEV30 V7_REPLAY_LEDGER.csv
+dev30.jsonl events.jsonl summary.json`, where dev30.jsonl is the
+prior immediate audit input, not its new output.
