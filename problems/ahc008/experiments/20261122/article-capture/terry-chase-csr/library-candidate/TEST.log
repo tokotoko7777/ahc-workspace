@@ -1,0 +1,8 @@
+3104 exhaustive topology/terminal combinations and 32000 seeded multigraph/order cases passed
+4
+0 1 
+3104 exhaustive topology/terminal combinations and 32000 seeded multigraph/order cases passed
+csr_dinic.hpp: OK
+test.cpp: OK
+example.cpp: OK
+README.md: OK
