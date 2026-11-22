@@ -34,3 +34,27 @@ all requiring movement replacements, produce 13 summed compartment
 floor cells. No dot-only cases, no stock wall or actual other capture
 displaced in the six. Both predeclared gates (20 boards, 200 cells) fail.
 No official tool, live suggestion, or threshold widening.
+
+## One-turn entry anticipation
+
+Run `python ahc008_terry_small_rooms/entry.py` with the same catalog.
+On the frozen tapes, require at least one pet outside the room at t−1
+and safely, physically inside and human-accessible before actions at t.
+Move exactly one preceding dot actor one cardinal step into a real
+stance; preserve all preceding nonwait commands and available
+simultaneous wall grid. The other pending gate, if any, must already
+have its closure actor in stance. Preserve all t wall orders and unrelated
+walks, no loss of another real stock isolation, and mean retained floor
+at least 300. Separate strict t dot-only from redirecting a t walk.
+Dots may hide existing paid waits. Stock future pet positions and later
+capture rosters are only hindsight witness data, not forecast/policy
+inputs; a prior changed worker position might alter the pet trajectory.
+
+100/100 verified tapes contain 1740 legal entry room-turns (1744 entrant
+incidences). 336 on 84 boards offer the necessary same-roster comparison
+to a larger later room before staffing. Zero valid alignments preserving
+all t walks. Allowing t walks of closing actors to be redirected leaves
+four single-mouth and one two-mouth assignments before applying later
+roster/area comparability. Of those, two same-roster single-mouth
+assignments on two boards offer three deduplicated total floor cells.
+Neither predeclared threshold (20 boards/100 floor cells) is met.
