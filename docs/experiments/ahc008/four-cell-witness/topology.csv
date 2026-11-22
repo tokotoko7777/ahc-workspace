@@ -1,0 +1,6 @@
+case,model,human_components,distinct_safe_area,distinct_pet_only_area,distinct_mixed_area,distinct_residual_pets,isolated_pets,largest_pet_only_area,groups_humans_area_pets
+cat.txt,corner,1,0,4,892,9,1,4,"[[5,892,9],[0,4,1]]"
+cow.txt,corner,1,0,4,892,9,1,4,"[[5,892,9],[0,4,1]]"
+dog.txt,corner,1,0,4,892,9,1,4,"[[5,892,9],[0,4,1]]"
+pig.txt,corner,1,0,4,892,9,1,4,"[[5,892,9],[0,4,1]]"
+rabbit.txt,corner,1,0,4,892,9,1,4,"[[5,892,9],[0,4,1]]"
