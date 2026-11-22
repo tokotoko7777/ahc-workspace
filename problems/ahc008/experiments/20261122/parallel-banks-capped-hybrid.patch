@@ -1,0 +1,119 @@
+--- problems/ahc008/experiments/20261122/parallel-banks-narrow-rescue-research.cpp
++++ problems/ahc008/experiments/20261122/parallel-banks-capped-hybrid.cpp
+@@ -1218,0 +1219,75 @@
++ bool sparseCaps=false;
++ bitset<16> capHeld;
++ struct CapInfo {int shut=-1,open=-1,capStance=-1,openStance=-1,openLane=-1;};
++ CapInfo capInfo(const TubeBank& x)const{
++  if(!sparseCaps)return {};
++  int i=(x.r-3)/2;
++  if((i+x.b)%3!=1)return {};
++  if((i/3+x.b)%2==0)return {x.g,x.k,x.l,x.h,x.b+1};
++  return {x.k,x.g,x.h,x.l,x.b};
++ }
++ void steerSingles(const vector<int>& ready,const vector<int>& viable,const bitset<V>& build,bitset<V>& moveTo,bitset<16>* use){
++  if(!sparseCaps)return;
++  vector<tuple<double,int,int>> picks;
++  for(int i=0;i<int(banks.size());i++){
++   const auto &x=banks[i];auto c=capInfo(x);
++   if(c.shut<0||!ready[i]||!wall[c.shut]||wall[c.open]||build[c.open])continue;
++   int worker=zonesActive?zoneCrew[x.r>=14][c.openLane]:laneCrew[c.openLane];
++   if(worker<0||capHeld[worker]||act[worker]!='.')continue;
++   int d=workers[worker].bfs.distance(c.openStance);
++   if(d<0||d>19)continue;
++   double val=0.;
++   for(auto p:pets){
++    if(group[p.p]!=group[c.openStance])continue;
++    if(p.t==4&&find(x.inner.begin(),x.inner.end(),p.p)==x.inner.end())continue;
++    int dist=min(md(p.p,x.inner[1]),md(p.p,x.inner[2]));
++    if(dist>6+d/2)continue;
++    if(dist==0)val+=d<=1?12.:6.;
++    else val+=(p.t>=3?3.7:4.8)/(1.+.65*dist+.14*dist*dist);
++   }
++   val=(val+(viable[i]?2.0:0.))/(2.+.63*d);
++   if(val>.20)picks.emplace_back(val,-i,-worker);
++  }
++  sort(picks.rbegin(),picks.rend());
++  for(auto [v,j,k]:picks){
++   int i=-j,w=-k;
++   if(capHeld[w]||act[w]!='.')continue;
++   auto c=capInfo(banks[i]);
++   int q=workers[w].bfs.first_step(c.openStance),h=humans[w];
++   if(q<0||build[q])continue;
++   if(q!=h)act[w]=MOVE[dir(h,q)],moveTo[q]=1;
++   capHeld[w]=1;if(use)(*use)[w]=1;
++  }
++ }
++ void capReadyTubes(const vector<int>& ready,const vector<int>& occupancy,bitset<V>& build,bitset<V>& moveTo){
++  if(!sparseCaps||turn<35)return;
++  vector<tuple<int,int,int,int>> jobs;
++  for(int i=0;i<int(banks.size());i++){
++   auto &x=banks[i];auto c=capInfo(x);
++   if(c.shut<0||!ready[i]||occupancy[i]||wall[c.shut]||wall[c.open]||build[c.shut]||build[c.open])continue;
++   if(any_of(humans.begin(),humans.end(),[&](int p){return find(x.inner.begin(),x.inner.end(),p)!=x.inner.end();}))continue;
++   if(block[c.shut]||moveTo[c.shut])continue;
++   for(int w=0;w<int(humans.size());w++){
++    if(capHeld[w]||act[w]!='.')continue;
++    int p=humans[w],d=md(p,c.capStance);
++    if(d>2||(bankRot?p/S:p%S)!=(bankRot?c.capStance/S:c.capStance%S))continue;
++    if(zonesActive&&zoneUsed[w]){
++     int anchor=bankRot?zoneAnchor[w]%S:zoneAnchor[w]/S;
++     if(anchor!=13&&((anchor>=14)!=(x.r>=14)))continue;
++    }
++    int q=(p==c.capStance)?p:bp((bankRot?p%S:p/S)+(x.r>(bankRot?p%S:p/S)?1:-1),bankRot?p/S:p%S);
++    if(wall[q]||build[q])continue;
++    jobs.emplace_back(d,i,w,q);
++   }
++  }
++  sort(jobs.begin(),jobs.end());
++  bitset<48> took;
++  for(auto [d,i,w,q]:jobs)if(!took[i]&&act[w]=='.'&&!build[q]){
++   auto c=capInfo(banks[i]);
++   if(d){act[w]=MOVE[dir(humans[w],q)];moveTo[q]=1;}
++   else if(!build[c.shut]&&!moveTo[c.shut]){
++    act[w]=BUILD[dir(c.capStance,c.shut)];build[c.shut]=1;
++   } else continue;
++   took[i]=1;
++  }
++ }
+@@ -1258 +1333 @@
+-    used[w]=1;
++    used[w]=capHeld[w]=1;
+@@ -1263,0 +1339 @@
++  steerSingles(ready,viable,build,moveTo,&used);
+@@ -1275 +1351 @@
+-  prep();
++  prep();capHeld.reset();
+@@ -1296 +1372,2 @@
+-   if(wall[x.g]||wall[x.k])continue;
++   auto c=capInfo(x);bool one=c.shut>=0&&wall[c.shut]&&!wall[c.open];
++   if(!one&&(wall[x.g]||wall[x.k]))continue;
+@@ -1300 +1377 @@
+-   viable[i]=ready[i]&&occupancy[i]&&!human&&!block[x.g]&&!block[x.k];
++   viable[i]=ready[i]&&occupancy[i]&&!human&&(one?!block[c.open]:!block[x.g]&&!block[x.k]);
+@@ -1305 +1382,6 @@
+-  sort(order.begin(),order.end());
++  if(!sparseCaps)sort(order.begin(),order.end());
++  else sort(order.begin(),order.end(),[&](auto a,auto b){
++   auto one=[&](int i){auto c=capInfo(banks[i]);return c.shut>=0&&wall[c.shut];};
++   // Never replace an already-legal paired capture by a concurrent single.
++   return tuple{one(a.second),a.first,a.second}<tuple{one(b.second),b.first,b.second};
++  });
+@@ -1307,0 +1390,8 @@
++   auto c=capInfo(x);
++   if(c.shut>=0&&wall[c.shut]){
++    if(build[c.open])continue;
++    for(int j=m-1;j>=0;j--)if(act[j]=='.'&&humans[j]==c.openStance){
++     act[j]=BUILD[dir(c.openStance,c.open)];build[c.open]=1;break;
++    }
++    continue;
++   }
+@@ -1358 +1448 @@
+-    const auto &x=banks[i];
++    const auto &x=banks[i];capHeld[laneCrew[j]]=capHeld[laneCrew[j+1]]=1;
+@@ -1364,0 +1455 @@
++  if(!zonesActive)steerSingles(ready,viable,build,moveTo,nullptr);
+@@ -1395,0 +1487 @@
++  capReadyTubes(ready,occupancy,build,moveTo);
+@@ -1785,0 +1878 @@
++ g.sparseCaps=argc>4&&atoi(argv[4])!=0&&g.humans.size()>=7;
