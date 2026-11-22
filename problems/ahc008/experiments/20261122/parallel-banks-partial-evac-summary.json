@@ -1,0 +1,35 @@
+{
+  "verified": 30,
+  "screened_ticks": 210,
+  "screened_cases": 27,
+  "filters": {
+    "main_not_sterile_300": 59,
+    "illegal_or_move_conflict": 151
+  },
+  "groups": {
+    "A": {
+      "ticks": 0,
+      "episodes": 0,
+      "cases": 0,
+      "positive_constructive_cases": 0,
+      "best_delta_by_case": {},
+      "optimistic_positive_only": 0
+    },
+    "B": {
+      "ticks": 0,
+      "episodes": 0,
+      "cases": 0,
+      "positive_constructive_cases": 0,
+      "best_delta_by_case": {},
+      "optimistic_positive_only": 0
+    }
+  },
+  "blocking_ingredients": {
+    "pet": 84,
+    "ordinary_move": 23,
+    "human_now": 123
+  },
+  "main_below_300": 24,
+  "main_contains_pets": 45,
+  "sterile_but_small_max": 207
+}
