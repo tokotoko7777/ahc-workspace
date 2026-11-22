@@ -1,0 +1,26 @@
+--- problems/ahc008/experiments/20261122/parallel_banks_dog_posterior_probe.cpp
++++ problems/ahc008/experiments/20261122/parallel_banks_dog_aligned_probe.cpp
+@@ -101 +101 @@
+-int main(){
++int main(int argc,char**){
+@@ -117,0 +118,8 @@
++ struct Query{int id,i,k,l,r;};
++ vector<vector<Query>> qs(300);
++ if(argc>1){
++  int nQueries;cin>>nQueries;
++  for(int ii=0;ii<nQueries;ii++){
++   int t;Query q;cin>>t>>q.id>>q.i>>q.k>>q.l>>q.r;qs[t].push_back(q);
++  }
++ }
+@@ -138 +146,10 @@
+-   if(t>=35&&t+3<release)for(int j=0;j<int(tubes.size());j++){
++   if(argc>1){
++    for(auto q:qs[t])if(q.i==i){
++     Frame changed=f;const auto &tube=tubes[q.k];changed.h[q.l]=tube.l;changed.h[q.r]=tube.r;
++     Graph hypothetical(changed);
++     cout<<"A "<<q.id<<" "<<hitting(hypothetical,p,tube,b,0)[0]
++         <<" "<<hitting(hypothetical,p,tube,reset,0)[0]
++         <<" "<<hitting(graph,p,tube,b,0)[0]<<"\n";
++    }
++   }
++   if(argc==1&&t>=35&&t+3<release)for(int j=0;j<int(tubes.size());j++){

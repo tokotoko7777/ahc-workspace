@@ -1,0 +1,13 @@
+--- problems/ahc008/experiments/20261122/parallel-banks-narrow-rescue-research.cpp
++++ problems/ahc008/experiments/20261122/parallel-banks-dog-aligned-observer.cpp
+@@ -1255,0 +1256,3 @@
++   if(const char* f=getenv("AHC008_ASSIGNED_AUDIT")){
++    ofstream out(f,ios::app);out<<turn<<" "<<p.t<<" "<<p.a<<" "<<p.b<<"\n";
++   }
+@@ -1789,0 +1793,6 @@
++  if(g.turn==101)if(const char* d=getenv("AHC008_ZONE_AUDIT")){
++   ofstream out(d);
++   out<<g.zonesActive<<" "<<g.zoneUsed.to_ulong()<<"\n";
++   for(int z=0;z<2;z++)for(int i=0;i<=g.bankN;i++)out<<g.zoneCrew[z][i]<<" ";
++   out<<"\n";
++  }

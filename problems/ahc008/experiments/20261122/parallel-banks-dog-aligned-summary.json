@@ -1,0 +1,49 @@
+{
+  "verified": 30,
+  "subsets": {
+    "all": {
+      "rows": 216,
+      "cases": 20,
+      "hidden_other_pair": 31,
+      "held_shift_mean": 0.0,
+      "observed_safe": 59,
+      "other_pet_blocks": 30,
+      "observed_all_pet_legal": 29,
+      "distinct_missed": 1,
+      "missed_cases": 1
+    },
+    "changed": {
+      "rows": 30,
+      "cases": 12,
+      "hidden_other_pair": 30,
+      "held_shift_mean": 0.0,
+      "observed_safe": 3,
+      "other_pet_blocks": 0,
+      "observed_all_pet_legal": 3,
+      "distinct_missed": 1,
+      "missed_cases": 1
+    },
+    "high": {
+      "rows": 2,
+      "cases": 2,
+      "hidden_other_pair": 2,
+      "held_shift_mean": 0.0,
+      "observed_safe": 1,
+      "other_pet_blocks": 0,
+      "observed_all_pet_legal": 1,
+      "distinct_missed": 0,
+      "missed_cases": 0
+    },
+    "high_no_other_assignment": {
+      "rows": 0,
+      "cases": 0,
+      "hidden_other_pair": 0,
+      "held_shift_mean": 0,
+      "observed_safe": 0,
+      "other_pet_blocks": 0,
+      "observed_all_pet_legal": 0,
+      "distinct_missed": 0,
+      "missed_cases": 0
+    }
+  }
+}
