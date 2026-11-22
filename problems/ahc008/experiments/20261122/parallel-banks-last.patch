@@ -1,0 +1,194 @@
+--- problems/ahc008/experiments/20261122/parallel-banks-rescue-research.cpp
++++ problems/ahc008/experiments/20261122/parallel-banks-last-experiment.cpp
+@@ -1743,6 +1743,174 @@
+   for(auto [i,p]:keep)ret[i]=BUILD[dir(humans[i],p)];
+   return ret;
+  }
++ int lastMode=0;bool lastUsed=false;
++ int lastPet=-1,lastUntil=-1,lastFirst=-1,lastScans=0,lastCandidates=0;
++ vector<int> lastWalls,lastInside;
++ void lastNote(const char* event,int animal,int area=0){
++  if(const char* p=getenv("AHC008_LAST_LOG")){
++   ofstream f(p,ios::app);f<<event<<" "<<turn<<" "<<animal<<" "<<(animal<0?0:pets[animal].t)<<" "<<area;
++   if(string_view(event)=="plan"||string_view(event)=="close"){
++    for(int q:lastWalls)f<<" "<<q;
++   }
++   f<<"\n";
++  }
++ }
++ string lastAnimal(string base){
++  if(turn<185||turn<bankRelease||turn>=299)return base;
++  int m=humans.size(),root=group[humans[0]],animal=-1;
++  for(int h:humans)if(group[h]!=root)return base;
++  for(int i=0;i<int(pets.size());i++)if(group[pets[i].p]==root){
++   if(animal>=0){animal=-1;break;}
++   animal=i;
++  }
++  if(animal>=0&&lastFirst<0){lastFirst=turn;lastNote("one",animal);}
++  if(!lastMode||overBudget())return base;
++  auto reset=[&]{lastPet=-1;lastWalls.clear();lastInside.clear();};
++  auto abort=[&](const char* s){lastNote(s,lastPet,lastInside.size());reset();};
++  if(lastPet>=0&&(animal!=lastPet||turn>lastUntil||find(lastInside.begin(),lastInside.end(),pets[lastPet].p)==lastInside.end()))
++   abort(animal!=lastPet?"changed":turn>lastUntil?"expired":"escaped");
++  if(animal<0)return base;
++  int center=pets[animal].p;
++  array<unsigned char,V> planned=wall;
++  array<int,10> post{};
++  for(int i=0;i<m;i++){
++   post[i]=humans[i];
++   char c=base[i];if(c=='.')continue;
++   auto a=islower(c)?BUILD:MOVE;
++   int q=nb[humans[i]][find(a,a+4,c)-a];
++   if(islower(c))planned[q]=1;else post[i]=q;
++  }
++  auto component=[&](const array<unsigned char,V>& blocked,int src){
++   bitset<V> visited;
++   if(blocked[src])return visited;
++   int q[V],n=1;q[0]=src;visited[src]=1;
++   for(int j=0;j<n;j++)for(int u:nb[q[j]])if(u>=0&&!blocked[u]&&!visited[u])q[n++]=u,visited[u]=1;
++   return visited;
++  };
++  auto ordinary=component(planned,post[0]);
++  if(!ordinary[center]&&all_of(post.begin(),post.begin()+m,[&](int h){return ordinary[h];})){
++   if(lastPet>=0)abort("ordinary");
++   return base;
++  }
++  constexpr int etaCap=7;
++  auto match=[&](const vector<int>& walls,const vector<int>& inside,bool closeOnly){
++   vector<int> todo;
++   for(int z:walls)if(!planned[z])todo.push_back(z);
++   using Option=tuple<int,int,int>; // distance, worker, first step
++   vector<vector<Option>> opts(todo.size());
++   bitset<V> forbid;
++   for(int z:inside)forbid[z]=1;
++   for(int z:walls)forbid[z]=1;
++   if(todo.empty()||todo.size()>size_t(m))return pair{1000,base};
++   for(int i=0;i<m;i++)if(!islower(base[i])){
++    int dist[V],first[V],q[V],n=1;
++    fill(dist,dist+V,-1);
++    q[0]=humans[i];dist[q[0]]=0;first[q[0]]=q[0];
++    for(int j=0;j<n;j++)if(!closeOnly&&dist[q[j]]<etaCap)
++     for(int u:nb[q[j]])if(u>=0&&!planned[u]&&!forbid[u]&&dist[u]<0)
++      q[n++]=u,dist[u]=dist[q[j]]+1,first[u]=(j==0?u:first[q[j]]);
++    for(int k=0;k<int(todo.size());k++){
++     int z=todo[k],best=etaCap+1,step=-1;
++     if(closeOnly&&block[z])continue;
++     for(int p:nb[z])if(p>=0&&!planned[p]&&!forbid[p]&&dist[p]>=0&&dist[p]<best)
++      best=dist[p],step=first[p];
++     if(step>=0)opts[k].emplace_back(best,i,step);
++    }
++   }
++   vector<int> seq(todo.size());iota(seq.begin(),seq.end(),0);
++   for(auto& v:opts)sort(v.begin(),v.end());
++   sort(seq.begin(),seq.end(),[&](int a,int b){return opts[a].size()<opts[b].size();});
++   int best=1000;string result=base;
++   auto dfs=[&](auto&&self,int k,int used,int eta,int sum,string act)->void{
++    if(64*eta+sum>=best)return;
++    if(k==int(seq.size())){best=64*eta+sum;result=act;return;}
++    int j=seq[k];
++    for(auto [d,i,p]:opts[j])if(!(used>>i&1)){
++     string next=act;
++     if(d)next[i]=MOVE[dir(humans[i],p)];
++     else if(closeOnly)next[i]=BUILD[dir(humans[i],todo[j])];
++     else next[i]='.';
++     self(self,k+1,used|1<<i,max(eta,d),sum+d,next);
++    }
++   };
++   dfs(dfs,0,0,0,0,base);
++   return pair{best,result};
++  };
++  auto validation=[&](const vector<int>& walls,const vector<int>& inside){
++   auto final=planned;for(int p:walls)final[p]=1;
++   auto pen=component(final,center);
++   if(pen.count()<4||pen.count()>48)return false;
++   for(int p:inside)if(!pen[p])return false;
++   auto kept=component(final,humans[0]);
++   if(!kept.any()||kept[center]||kept.count()*2<=ordinary.count())return false;
++   for(int i=0;i<m;i++)if(!kept[humans[i]]||!kept[post[i]])return false;
++   for(auto p:pets)if(kept[p.p])return false;
++   return true;
++  };
++  if(lastPet<0){
++   if(lastUsed||turn%3||turn>287)return base;
++   ++lastScans;
++   constexpr int INF=1000000;
++   array<int,V> id,near;
++   id.fill(-1);near.fill(99);vector<int> cells;
++   for(int x=max(0,center/S-7);x<=min(29,center/S+7);x++)
++   for(int y=max(0,center%S-7);y<=min(29,center%S+7);y++){
++    int p=pos(x,y);if(planned[p]||md(p,center)>7)continue;
++    id[p]=cells.size();cells.push_back(p);
++    for(int q:nb[p])if(q>=0&&!planned[q])for(int i=0;i<m;i++)if(!islower(base[i])){
++     int d=workers[i].bfs.distance(q);if(d>=0)near[p]=min(near[p],d);
++    }
++   }
++   vector<vector<int>> seeds;
++   for(int r=center/S-1;r<=center/S;r++)for(int c=center%S-1;c<=center%S;c++)if(r>=0&&r<29&&c>=0&&c<29){
++    vector<int> a{pos(r,c),pos(r+1,c),pos(r,c+1),pos(r+1,c+1)};
++    if(all_of(a.begin(),a.end(),[&](int p){return id[p]>=0;}))seeds.push_back(a);
++   }
++   for(int rot=0;rot<4;rot++){
++    vector<int> a{center};bitset<V> used;used[center]=1;
++    for(int j=0;j<int(a.size())&&a.size()<4;j++)for(int t=0;t<4&&a.size()<4;t++){
++     int q=nb[a[j]][(rot+t)%4];if(q>=0&&id[q]>=0&&!used[q])a.push_back(q),used[q]=1;
++    }
++    if(a.size()==4){sort(a.begin(),a.end());seeds.push_back(a);}
++   }
++   sort(seeds.begin(),seeds.end());seeds.erase(unique(seeds.begin(),seeds.end()),seeds.end());
++   int best=99999;
++   for(const auto& seed:seeds){
++    int src=2*cells.size(),sink=src+1;MaxFlow<int> f(sink+1);
++    for(int p:cells){
++     int k=id[p],lane=bankRot?p/S:p%S;
++     bool service=lane>=bankShift&&(lane-bankShift)%7==0&&(lane-bankShift)/7<4;
++     bool guard=!service&&find(humans.begin(),humans.end(),p)==humans.end()&&find(post.begin(),post.begin()+m,p)==post.begin()+m;
++     bool outer=false;
++     for(int q:nb[p])if(q>=0&&!planned[q]&&id[q]<0)outer=true;
++     f.add_edge(2*k,2*k+1,(guard&&near[p]<=etaCap)?54+4*near[p]+(block[p]?12:0):INF);
++     f.add_edge(2*k+1,sink,(guard&&!outer)?2:INF);
++     for(int q:nb[p])if(q>=0&&id[q]>=0)f.add_edge(2*k+1,2*id[q],INF);
++    }
++    for(int p:seed)f.add_edge(src,2*id[p]+1,INF);
++    if(f.flow(src,sink,720)>=720)continue;
++    auto cut=f.min_cut(src);vector<int> walls,inside;
++    for(int p:cells)if(cut[2*id[p]+1])inside.push_back(p);else if(cut[2*id[p]])walls.push_back(p);
++    if(walls.empty()||walls.size()>6||inside.size()<4||inside.size()>48||!validation(walls,inside))continue;
++    int cost=match(walls,inside,false).first;
++    if(cost>=1000)continue;
++    ++lastCandidates;
++    int x0=29,y0=29,x1=0,y1=0;
++    for(int p:inside)x0=min(x0,p/S),y0=min(y0,p%S),x1=max(x1,p/S),y1=max(y1,p%S);
++    bool rectangle=(x1-x0+1)*(y1-y0+1)==int(inside.size());
++    cost+=10*walls.size()+inside.size()/2+5*rectangle;
++    if(cost<best)best=cost,lastWalls=walls,lastInside=inside;
++   }
++   if(lastWalls.empty())return base;
++   lastUsed=true;lastPet=animal;lastUntil=turn+10;lastNote("plan",animal,lastInside.size());
++  }
++  if(!validation(lastWalls,lastInside)){abort("split");return base;}
++  auto close=match(lastWalls,lastInside,true);
++  if(close.first<1000){lastNote("close",animal,lastInside.size());reset();return close.second;}
++  auto approach=match(lastWalls,lastInside,false);
++  if(approach.first>=1000){abort("crew");return base;}
++  return approach.second;
++ }
+  bool advance(){
+   for(int i=0;i<(int)humans.size();i++) if(act[i]!='.'){
+    if(islower(act[i]))wall[nb[humans[i]][find(BUILD,BUILD+4,act[i])-BUILD]]=1;
+@@ -1762,13 +1930,16 @@
+  Game g;g.init(1,argv);
+  g.bankMode=argc>1?atoi(argv[1]):5;
+  g.rescueMode=argc>2?atoi(argv[2]):1;
++ g.lastMode=argc>3?atoi(argv[3]):0;
+  g.makeBanks();
+  for(;g.turn<300;g.turn++){
+   g.act=g.terminal(g.tacticalGate(g.repair(g.bankMode?g.bankPlan():g.plan())));
++  g.act=g.lastAnimal(g.act);
+   g.bankRecord();
+   cout<<g.act<<'\n'<<flush;
+   if(!g.advance())break;
+  }
++ if(const char *p=getenv("AHC008_LAST_LOG")){ofstream f(p,ios::app);f<<"stats "<<g.lastScans<<" "<<g.lastCandidates<<"\n";}
+  if(const char *p=getenv("AHC008_RESCUE_LOG")){
+   ofstream f(p);f<<g.residual160<<" "<<g.bankRelease<<"\n";
+  }
