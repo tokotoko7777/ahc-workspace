@@ -1,0 +1,102 @@
+{
+  "practice100": {
+    "sha256": "c7b4058a3bf74986ef83427a2bf2b9d15b6363b7bb6954761479f7920a1da7b8",
+    "baseline": {
+      "n": 100,
+      "score": 2655369894,
+      "full": 36,
+      "full300": 25,
+      "full100": 35,
+      "mean_floor": 434.41343,
+      "residual": 165,
+      "four": 822,
+      "four100": 433,
+      "wall_med": 0.6339809109995258,
+      "wall_max": 0.9904032080012257
+    },
+    "candidate": {
+      "n": 100,
+      "score": 989470357,
+      "full": 3,
+      "full300": 3,
+      "full100": 3,
+      "mean_floor": 639.1,
+      "residual": 612,
+      "four": 874,
+      "four100": 101,
+      "wall_med": 0.5858515610016184,
+      "wall_max": 1.0492733920036699
+    },
+    "clear_gained": 0,
+    "clear_lost": 33,
+    "score_wins": 16,
+    "same_actions": 0,
+    "realized": {
+      "map_counts": {
+        "0": 9,
+        "1": 20,
+        "3": 10,
+        "4": 61
+      },
+      "predicted_cases": 93,
+      "nominal_install_med": 89.0,
+      "scheduled_walls_issued": 19189,
+      "lane_handoff_cases": 99,
+      "lane_arrivals": 219,
+      "late_scored_cases": 67,
+      "late_pairs": 491,
+      "late_cut_votes": 7,
+      "late_actual_closures": 0
+    }
+  },
+  "independent100": {
+    "sha256": "63c6df2d8a535b6afdc5dea1508c05a3d200faca2edf01481f34f9669eb9bf73",
+    "baseline": {
+      "n": 100,
+      "score": 2688102365,
+      "full": 44,
+      "full300": 26,
+      "full100": 42,
+      "mean_floor": 411.65644,
+      "residual": 139,
+      "four": 837,
+      "four100": 456,
+      "wall_med": 0.6481119865020446,
+      "wall_max": 0.844812468996679
+    },
+    "candidate": {
+      "n": 100,
+      "score": 846529625,
+      "full": 4,
+      "full300": 4,
+      "full100": 4,
+      "mean_floor": 643.77,
+      "residual": 626,
+      "four": 907,
+      "four100": 114,
+      "wall_med": 0.6247695884994755,
+      "wall_max": 1.151333222995163
+    },
+    "clear_gained": 3,
+    "clear_lost": 43,
+    "score_wins": 8,
+    "same_actions": 0,
+    "realized": {
+      "map_counts": {
+        "0": 3,
+        "1": 20,
+        "3": 2,
+        "4": 75
+      },
+      "predicted_cases": 92,
+      "nominal_install_med": 88.0,
+      "scheduled_walls_issued": 18511,
+      "lane_handoff_cases": 99,
+      "lane_arrivals": 253,
+      "late_scored_cases": 76,
+      "late_pairs": 510,
+      "late_cut_votes": 18,
+      "late_actual_closures": 3
+    }
+  }
+}

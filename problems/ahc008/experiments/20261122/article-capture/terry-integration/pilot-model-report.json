@@ -1,0 +1,73 @@
+{
+  "mse": 0.007336804177612066,
+  "policy": 0.06997117400169373,
+  "fixed_train_best": 4,
+  "fixed_train_best_score": 0.06861431896686554,
+  "fixed_lean4_score": 0.06861431896686554,
+  "oracle": 0.13102614879608154,
+  "improvement": 0.0013568596914410591,
+  "different": 7,
+  "delta_stderr": 0.004709736444056034,
+  "selected_histogram": [
+    0,
+    5,
+    0,
+    2,
+    13
+  ],
+  "chosen_epoch": 157,
+  "training": {
+    "schema": "ahc008-terry-five-map-v1",
+    "split": "train",
+    "start": 33000,
+    "count": 80,
+    "seed_namespace": "ahc008/terry-five-map/offline-selector/pilot-v1",
+    "gen_sha256": "39150ebab394c3e35b0bc845d73fe7908ca1a3d7220830af068d958f30f558ff",
+    "tester_sha256": "f95e04c6adacf82d51352ae1fcd32212ce9ba4d38bfa3e81156ca9580308ebfe",
+    "solver_sha256": "c3053e27c13b1900e0ca1491f63297d5d8c424d668dcddddf9b2ebd8ec212ca4",
+    "score_scale": 100000000,
+    "forced_maps": [
+      0,
+      1,
+      2,
+      3,
+      4
+    ],
+    "labels_sha256": "b5be65d6505907ecce8522b82d65757553862a0acfaf8fca668cb29c6ec06fea",
+    "cases_collected": 80
+  },
+  "validation": {
+    "schema": "ahc008-terry-five-map-v1",
+    "split": "validation",
+    "start": 34000,
+    "count": 20,
+    "seed_namespace": "ahc008/terry-five-map/offline-selector/pilot-v1",
+    "gen_sha256": "39150ebab394c3e35b0bc845d73fe7908ca1a3d7220830af068d958f30f558ff",
+    "tester_sha256": "f95e04c6adacf82d51352ae1fcd32212ce9ba4d38bfa3e81156ca9580308ebfe",
+    "solver_sha256": "c3053e27c13b1900e0ca1491f63297d5d8c424d668dcddddf9b2ebd8ec212ca4",
+    "score_scale": 100000000,
+    "forced_maps": [
+      0,
+      1,
+      2,
+      3,
+      4
+    ],
+    "labels_sha256": "41decd681e363e6ac13c0cc3cfd961bdb63ff53864e19e26ef2dcb72cba6807f",
+    "cases_collected": 20
+  },
+  "trainer_seed": 574008,
+  "architecture": [
+    7,
+    32,
+    32,
+    32,
+    32,
+    5
+  ],
+  "epochs": 160,
+  "publication_gate_passed": false,
+  "exploratory_export": true,
+  "weights_written": true,
+  "weights_sha256": "8a2ec3d66e45a2fff5470f72114150880de0cd3afd139794cbbe017e397bac1d"
+}

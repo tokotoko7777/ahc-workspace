@@ -1,0 +1,20 @@
+{
+  "schema": "ahc008-terry-five-map-v1",
+  "split": "validation",
+  "start": 34000,
+  "count": 20,
+  "seed_namespace": "ahc008/terry-five-map/offline-selector/pilot-v1",
+  "gen_sha256": "39150ebab394c3e35b0bc845d73fe7908ca1a3d7220830af068d958f30f558ff",
+  "tester_sha256": "f95e04c6adacf82d51352ae1fcd32212ce9ba4d38bfa3e81156ca9580308ebfe",
+  "solver_sha256": "c3053e27c13b1900e0ca1491f63297d5d8c424d668dcddddf9b2ebd8ec212ca4",
+  "score_scale": 100000000,
+  "forced_maps": [
+    0,
+    1,
+    2,
+    3,
+    4
+  ],
+  "labels_sha256": "41decd681e363e6ac13c0cc3cfd961bdb63ff53864e19e26ef2dcb72cba6807f",
+  "cases_collected": 20
+}
