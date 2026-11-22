@@ -34,3 +34,25 @@ Generate `python instrument.py V7.cpp audit.cpp`, compile
 V7_DEV_LEDGER events.jsonl summary.json`. The wide audit helper
 provides the bounded exterior matching. Official playback independently
 rechecks legal traces, rather than comparing only the model's labels.
+
+## Same-target short passive retention matched-support screen
+
+Using the identical no-action instrument and official replay, ask if
+chosen v7 lastcap geometries have a plausible comparable shape, rather
+than evaluating generic area-dependent residence. Restrict to same
+reachable passive animal initially inside the real irregular4–48
+pen, equal pending wall count, area difference at most 20% (at
+least one cell tolerance), exactly equal true distinct outside ETA
+in 1–6 turns, and same actually visited protection tier. At common
+horizon propagate exact uniform substeps on the actual current
+graph, absorb at first turn-end exit (not each animal substep),
+and use baseline factual occupancy only as a held label.
+This does not imply altered construction keeps the same trajectory.
+The engine's pig two-substep exit/reenter fixture passed.
+
+All30 actual solver/replay complete hashes/scores match. 110
+selected attempts, 92 selected small passive launch-target pairs,
+only **one** with distinctly staffed short ETA, and zero matched
+alternatives even before testing equality of alternate ETA. No
+affected launch-target pair or rank inference. No policy change.
+Re-run with `retention.py` using the same CLI as `check.py`.

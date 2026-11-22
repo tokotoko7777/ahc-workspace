@@ -1,0 +1,12 @@
+{
+  "verified": 30,
+  "counts": {
+    "selected": 110,
+    "selected_small_passive": 92,
+    "selected_small_passive_short": 1
+  },
+  "matched_cases": 0,
+  "matched_exact_area": 0,
+  "factual_informative_pairs": 0,
+  "factual_informative_cases": 0
+}
