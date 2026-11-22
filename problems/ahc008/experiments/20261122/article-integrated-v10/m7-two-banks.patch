@@ -1,0 +1,11 @@
+--- integrated.cpp
++++ integrated.cpp
+@@ -1566,7 +1566,7 @@
+  int bp(int x,int y)const{return bankRot?pos(y,x):pos(x,y);}
+  void makeBanks(){
+   if(!bankMode)return;
+-  if(narrowRescue&&humans.size()<=6)bankN=2;
++  if(narrowRescue&&humans.size()<=7)bankN=2;
+   const vector<int> offsets=bankN==3?vector<int>{2,4,6}:vector<int>{4,8,12};
+   double best=-1e10;
+   for(int z=0;z<2;z++)for(int a:offsets){

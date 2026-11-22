@@ -1,0 +1,74 @@
+{
+  "baseline": {
+    "ready_count": 89,
+    "ready_median": 38,
+    "staff_count": 83,
+    "staff_median": 65,
+    "staff_gap_median": 20,
+    "lock_count": 78,
+    "lock_median": 81.0,
+    "lock_gap_median": 37,
+    "milestones": {
+      "50": {
+        "shells": 555,
+        "open_tubes": 541,
+        "staffed_tubes": 8,
+        "available_workers": 32,
+        "ready_banks": 66,
+        "legal_tubes": 6
+      },
+      "75": {
+        "shells": 754,
+        "open_tubes": 704,
+        "staffed_tubes": 18,
+        "available_workers": 69,
+        "ready_banks": 86,
+        "legal_tubes": 13
+      },
+      "100": {
+        "shells": 851,
+        "open_tubes": 739,
+        "staffed_tubes": 9,
+        "available_workers": 64,
+        "ready_banks": 87,
+        "legal_tubes": 8
+      }
+    }
+  },
+  "candidate": {
+    "ready_count": 60,
+    "ready_median": 27.5,
+    "staff_count": 60,
+    "staff_median": 50.5,
+    "staff_gap_median": 24.5,
+    "lock_count": 59,
+    "lock_median": 63,
+    "lock_gap_median": 38,
+    "milestones": {
+      "50": {
+        "shells": 546,
+        "open_tubes": 531,
+        "staffed_tubes": 13,
+        "available_workers": 54,
+        "ready_banks": 60,
+        "legal_tubes": 13
+      },
+      "75": {
+        "shells": 614,
+        "open_tubes": 540,
+        "staffed_tubes": 23,
+        "available_workers": 83,
+        "ready_banks": 60,
+        "legal_tubes": 6
+      },
+      "100": {
+        "shells": 699,
+        "open_tubes": 566,
+        "staffed_tubes": 16,
+        "available_workers": 94,
+        "ready_banks": 60,
+        "legal_tubes": 3
+      }
+    }
+  }
+}
