@@ -52,3 +52,29 @@ compact fully cleared cases. Exact residual distribution, per-case pen
 areas at first separation and gained/lost people-weighted area are in
 the paired report. Check via `paired_analysis.py V7_LEDGER V4_LEDGER`;
 concatenate decompressed A+B pieces (B headerless).
+
+## Frozen independent official-generator 100, unchanged variant
+
+Same independent generated100 frozen before v7, with official v3 seeds
+below and exact v4 controls. All100 previous v4 hashes match, both arms
+exact t0–100 prefix throughout,79 no-start cases completely identical.
+21 active cases and27/27 completed bridge crossings (189 moves).
+All200 official/independent playback legal. v4→v7 all-clear41→44
+(7 gains/4 losses/37 both/52 neither), final residual152→139, true
+exact4 830→837, real irregular4–48 218→221, official score
+2,519,824,436→2,688,102,365, normalized area ceiling −0.10%;
+max .934→.870s (sample only). Newly clear mean floors
+666,510,621,138,445,158,192; lost v4 clear floors500,171,2,383.
+The 666-cell first case had all animals in exactly-four pens; 138-cell
+case included a 441-cell first-isolation component. Practice100 full-clear
+with ≥100 floor33→35 (excluding v7's 36-cell refuge); independent38→42
+(excluding two v7 and three v4 small cases). Full-clear with ≥300 floor
+practice22→25, independent24→26. Analytical area bins don't redefine
+official raw all-clear.
+
+`gzip -dc integrated.cpp.gz > integrated.cpp` is exact frozen standalone,
+`g++ -std=c++23 integrated.cpp -o integrated`, no args. Independent
+seeds use the official v3 `gen`; retain order as archived. V7 provides
+small measured full-isolation gains in both cohorts with area largely
+preserved; large residual shortfall remains. These are local evaluation
+sets, not hidden system judging or first place.
