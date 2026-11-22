@@ -1,0 +1,194 @@
+--- integrated.cpp
++++ integrated.cpp
+@@ -630,6 +630,105 @@
+ };
+ }
+ 
++#include <array>
++#include <cstdint>
++
++// Four-neighbor unweighted graph. Neighbor callback supplies -1 for a missing
++// edge, and admissible(v) determines whether a vertex may be visited.
++template<int N>
++struct ShortestFirstMasks {
++  std::array<int, N> distance, reachable;
++  std::array<uint8_t, N> mask;
++  int count = 0;
++  template<class Neighbors, class Admissible>
++  void run(int source, const Neighbors& neighbors, Admissible admissible) {
++    distance.fill(-1);
++    mask.fill(0);
++    distance[source] = 0;
++    reachable[0] = source;
++    count = 1;
++    for (int head = 0; head < count; ++head) {
++      const int p = reachable[head], next_distance = distance[p] + 1;
++      for (int d = 0; d < 4; ++d) {
++        int q = neighbors[p][d];
++        if (q < 0 || (distance[q] >= 0 && distance[q] != next_distance)) continue;
++        if (distance[q] < 0) {
++          if (!admissible(q)) continue;
++          distance[q] = next_distance;
++          reachable[count++] = q;
++        }
++        mask[q] |= p == source ? uint8_t(1u << d) : mask[p];
++      }
++    }
++  }
++};
++
++#include <array>
++#include <algorithm>
++#include <bit>
++
++// Posterior state is over target cells and the 'choose a new target' sentinel.
++// Decisions depend only on the judge's public movement history, not its RNG.
++template<int N>
++struct CatTargetFilter {
++  std::array<float,N> target{};
++  float reset = 1.0f;
++  static constexpr std::array<float,5> inv{0,1,0.5f,1.f/3,0.25f};
++
++  template<class Neighbors, class Admissible>
++  void observe(int origin, int first_direction, int mid, int finish,
++               const Neighbors& neighbors, Admissible admissible,
++               ShortestFirstMasks<N>& bfs) {
++    if (first_direction < 0 || first_direction >= 4) {
++      target.fill(0); reset = 1; return;
++    }
++    bfs.run(origin, neighbors, admissible);
++    if (bfs.count < 2) { target.fill(0); reset = 1; return; }
++    float renew = reset + target[origin];
++    for (int q = 0; q < N; ++q)
++      if (bfs.distance[q] < 0) renew += target[q], target[q] = 0;
++    const float uniform = renew / (bfs.count-1);
++    const uint8_t bit = 1u << first_direction;
++    float total = 0;
++    target[origin] = 0;
++    for (int i = 1; i < bfs.count; ++i) {
++      int q = bfs.reachable[i];
++      const unsigned m = bfs.mask[q];
++      target[q] = m & bit ? (target[q] + uniform) * inv[std::popcount(m)] : 0;
++      total += target[q];
++    }
++    if (total < 1.e-30f) {
++      target.fill(0); reset = 1; return;
++    }
++    reset = (target[mid] + (finish == mid ? 0 : target[finish])) / total;
++    target[mid] = target[finish] = 0;
++    const float factor = 1.0f / total;
++    for (int i = 1; i < bfs.count; ++i) target[bfs.reachable[i]] *= factor;
++  }
++
++  template<class Neighbors, class Admissible>
++  std::array<float,4> next(int origin, const Neighbors& neighbors,
++                           Admissible admissible, ShortestFirstMasks<N>& bfs) const {
++    bfs.run(origin, neighbors, admissible);
++    std::array<float,4> ans{};
++    if (bfs.count < 2) return ans;
++    float renew = reset + target[origin];
++    for (int q = 0; q < N; ++q)
++      if (bfs.distance[q] < 0) renew += target[q];
++    const float uniform = renew / (bfs.count-1);
++    for (int i = 1; i < bfs.count; ++i) {
++      const int q = bfs.reachable[i];
++      unsigned m = bfs.mask[q];
++      const float p = (target[q] + uniform) * inv[std::popcount(m)];
++      while (m) {
++        ans[std::countr_zero(m)] += p;
++        m &= m - 1;
++      }
++    }
++    return ans;
++  }
++};
++
+ using namespace std;
+ namespace {
+ constexpr int S=30, V=S*S;
+@@ -1435,7 +1534,12 @@
+  vector<TubeBank> banks;
+  vector<int> bankWalls;
+  vector<AHC008DogTargetFilter> dogBelief;
++
+  vector<int> catHead;
++ vector<CatTargetFilter<V>> catPosterior;
++ ShortestFirstMasks<V> catBfs;
++ bool hasCat=false;
++
+  array<array<short,V>,10> postDist{};
+  bool postReady=false;
+  static constexpr int Horizon=10,DogModelHorizon=3;
+@@ -1462,7 +1566,18 @@
+  }
+  void setupObservedMotion(){
+   for(Pet p:pets)dogBelief.emplace_back(humans.size());
++
+   catHead.assign(pets.size(),-1);
++  hasCat=any_of(pets.begin(),pets.end(),[](Pet a){return a.t==5;});
++  if(hasCat)catPosterior.resize(pets.size());
++ }
++
++ void observeCat(int id,int src,const string& moves){
++  if(turn>=bankRelease||pets[id].t!=5)return;
++  int d=int(find(MOVE,MOVE+4,moves[0])-MOVE);
++  int q=(d<4?nb[src][d]:src),r=q;
++  if(moves.size()>1&&moves[1]!='.')r=nb[q][find(MOVE,MOVE+4,moves[1])-MOVE];
++  catPosterior[id].observe(src,d,q,r,nb,[&](int x){return !wall[x];},catBfs);
+  }
+  void ingestMotion(int i,int start,const string& reply){
+   int type=pets[i].t;
+@@ -1489,6 +1604,23 @@
+    }
+   }
+  }
++
++ void replaceShortCat(int id,int horizon,Forecast& f){
++  if(!horizon||pets[id].t!=5)return;
++  const int src=pets[id].p;
++  auto d=catPosterior[id].next(src,nb,[&](int x){return !wall[x];},catBfs);
++  Prob a{};
++  if(!degree[src])a[src]=1.f;
++  else for(int k=0;k<4;k++)
++   if(nb[src][k]>=0&&!wall[nb[src][k]])a[nb[src][k]]=d[k];
++  f[1].fill(0);
++  uniformStep(a,f[1],src,1);
++  for(int h=2;h<=horizon;h++){
++   a.fill(0);f[h].fill(0);
++   uniformStep(f[h-1],a,src,2*(h-1));
++   uniformStep(a,f[h],src,2*h-1);
++  }
++ }
+  void dogStep(array<Prob,11>& cur,array<Prob,11>& next,int src,int t)const{
+   int reach=2*(t-1), resetIndex=humans.size(),cx=src/S,cy=src%S;
+   for(int x=max(0,cx-reach);x<=min(S-1,cx+reach);x++){
+@@ -1954,6 +2086,10 @@
+       pairInfo[k].push_back({a,b,max(1,d)});maxEta=max(maxEta,max(1,d));
+      }
+    }
++
++   int shortCat=0;
++   if(hasCat)for(const auto& e:pairInfo)for(auto p:e)
++    if(p.d<=3)shortCat=max(shortCat,p.d);
+    if(maxEta&&!overBudget()){
+     if(!postReady)observedMotionGraph();
+     vector<array<double,Horizon+1>> noBad(n),noPets(n),mass(n);
+@@ -1966,7 +2102,9 @@
+      sort(b.begin(),b.end());b.erase(unique(b.begin(),b.end()),b.end());
+     }
+     for(int pi=0;pi<int(pets.size());pi++)if(service[group[pets[pi].p]]){
++
+      Forecast f{};forecastPet(pi,maxEta,f);
++     if(shortCat)replaceShortCat(pi,shortCat,f);
+      for(int k=0;k<n;k++)if(!pairInfo[k].empty()){
+       const auto& x=banks[k];
+       for(int h=1;h<=maxEta;h++){
+@@ -2623,6 +2761,8 @@
+   int pi=0;
+   for(auto &p:pets){
+    if(!(cin>>m))return false;
++
++   if(hasCat)observeCat(pi,p.p,m);
+    if(turn<235)ingestMotion(pi,p.p,m);
+    ++pi;
+    for(char x:m)if(x!='.')p.p=nb[p.p][find(MOVE,MOVE+4,x)-MOVE];
