@@ -1,0 +1,16 @@
+{
+  "verified": 30,
+  "attempts": 114,
+  "cases": 19,
+  "small": 102,
+  "larger": 12,
+  "captured_attempts": 10,
+  "owned_turns": 331,
+  "actual_captures": 11,
+  "max_matching_slower_than_proxy": 86,
+  "max_matching_at_least_5_slower": 67,
+  "max_matching_exceeds_remaining": 6,
+  "slowed_cases": 16,
+  "slowed_5_cases": 15,
+  "slowed_5_final_missed_cases": 5
+}

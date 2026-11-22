@@ -1,0 +1,81 @@
+--- integrated.cpp
++++ integrated.cpp
+@@ -441,6 +441,8 @@
+  Shape active;
+  int began=-1, deadline=-1, total=0, retryAt=0, finalSince=-1;
+  int attempts=0, actions=0, placed=0, closes=0, escapes=0, lanePlans=0, retreatPlans=0, protectionTier=0;
++ struct AuditRow{int turn,attempt,kind,k,m,maxOpen,maxOutside,maxMatch,assignedSum,oldCost,remaining,builds,walks,tier,kept,trap;};
++ std::vector<AuditRow> auditRows;
+  std::array<int,10> pref{};
+  Planner(){pref.fill(-1);}
+  void reset(int turn){active={};began=-1;finalSince=-1;retryAt=turn+cfg.retry;pref.fill(-1);}
+@@ -559,7 +561,26 @@
+    if(q<0||nav[i].d[q]<0)continue;
+    if(nav[i].d[q]<job[i][j].d)job[i][j]={q,nav[i].d[q]};
+   }
++  int om=-1,xm=-1,bm=-1,sm=-1;
++  if(turn==began){
++   std::vector<BFS> clear(M);
++   for(int i=0;i<M;i++)clear[i].run(humans[i],open);
++   om=xm=0;
++   for(int j=0;j<K;j++){
++    int ob=INF,xb=INF;
++    for(int i=0;i<M;i++){
++     xb=std::min(xb,job[i][j].d);
++     for(int q:neighbors(todo[j]))if(q>=0&&clear[i].d[q]>=0)ob=std::min(ob,clear[i].d[q]);
++    }
++    om=std::max(om,ob);xm=std::max(xm,xb);
++   }
++  }
+   std::string out(M,'.');
++  auto emit=[&](int kind){
++   int bd=0,wd=0;
++   for(char c:out)if(c!='.'){if(c>='a')++bd;else ++wd;}
++   auditRows.push_back({turn,attempts,kind,K,M,om,xm,bm,sm,active.cost,deadline-turn,bd,wd,protectionTier,active.kept,active.trapped});
++  };
+   if(K<=M){
+    // Match all remaining doors to distinct builders with an exact bit DP.
+    // Primary goal = exact fastest completion. Secondary travel and churn are tie heuristics.
+@@ -582,6 +603,10 @@
+     for(int j=K-1,b=best;j>=0;--j){who[j]=choice[b];b^=1<<who[j];}
+     bool ready=true,legal=true;
+     for(int j=0;j<K;++j){ready&=job[who[j]][j].d==0;legal&=!blocked[todo[j]];}
++    if(turn==began){
++     bm=0;sm=0;
++     for(int j=0;j<K;j++){auto d=job[who[j]][j].d;bm=std::max(bm,d);sm+=d;}
++    }
+     if(ready&&legal){
+      for(int j=0;j<K;++j){int i=who[j];out[i]=BUILD[direction(humans[i],todo[j])];}
+      placed+=K;++closes;
+@@ -603,6 +628,7 @@
+      else if(finalSince<0)finalSince=turn;
+      if(finalSince>=0&&turn-finalSince>=cfg.finalWait){reset(turn);return std::nullopt;}
+     }
++    emit((ready&&legal)?2:1);
+     ++total;++actions;
+     return out;
+    }
+@@ -623,7 +649,8 @@
+    else out[i]=MOVE[direction(humans[i],nav[i].first[q])];
+    assigned[i]=taken[j]=true;
+   }
+-  if(out.find_first_not_of('.')==std::string::npos){reset(turn);return std::nullopt;}
++  if(out.find_first_not_of('.')==std::string::npos){emit(-1);reset(turn);return std::nullopt;}
++  emit(0);
+   ++total;++actions;
+   return out;
+  }
+@@ -2580,6 +2607,13 @@
+   cout<<g.act<<'\n'<<flush;
+   if(!g.advance())break;
+  }
++ if(const char* p=getenv("AHC008_LAST_SHAPE_LOG")){
++  ofstream f(p);
++  for(const auto& x:g.finalCapture.auditRows)
++   f<<x.turn<<" "<<x.attempt<<" "<<x.kind<<" "<<x.k<<" "<<x.m<<" "<<x.maxOpen<<" "<<x.maxOutside
++    <<" "<<x.maxMatch<<" "<<x.assignedSum<<" "<<x.oldCost<<" "<<x.remaining<<" "<<x.builds
++    <<" "<<x.walks<<" "<<x.tier<<" "<<x.kept<<" "<<x.trap<<'\n';
++ }
+  if(const char* p=getenv("AHC008_ARTICLE_LOG")){
+   ofstream f(p);
+   for(int t=0;t<300;t++)if(g.integratedMode[t]||g.integratedReady[t]||g.integratedLocks[t])
