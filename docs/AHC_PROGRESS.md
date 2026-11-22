@@ -1212,3 +1212,17 @@ S字でも犬・猫を含め4マスに合法に隔離できた。各S字系列�
 | 6人・未使用（9件） | +19,728,402、6/3 | 73→61 | 142→135 |
 
 初回捕獲が早まったのは全ての集合で再現したわけではない。改善上位3ケースを除く感度確認では、5人の合計差は両集合で正、6人は両集合で負。これは少数の大きな改善への依存度の確認で、正式な集計や採用条件は変えない。再現元は[配布ケース別台帳](https://github.com/tokotoko7777/ahc-workspace/blob/3fbe0d94d8a5602d2d2063be2ff159dfe803fd4e/problems/ahc008/experiments/20261122/parallel-banks-narrow-rescue-practice100.csv.gz)と[未使用ケース別台帳](https://github.com/tokotoko7777/ahc-workspace/blob/3fbe0d94d8a5602d2d2063be2ff159dfe803fd4e/problems/ahc008/experiments/20261122/parallel-banks-narrow-rescue-fresh100.csv.gz)。
+
+### AHC008 速度更新：盤面が同じ間は連結成分を再利用
+
+終盤の直線・斜めの囲い候補は、柵配置と元の人間側連結成分が同じ間だけ、分割結果を記憶。動物の位置・数と候補評価はその都度更新する。配置・得点ロジックは不変。[高速版の単一C++23](https://github.com/tokotoko7777/ahc-workspace/blob/be1cefb260f7f47b683f780eca2db2db603be3e0/problems/ahc008/experiments/20261122/parallel-banks-narrow-seam-cache.cpp)・[再現とケース別比較](https://github.com/tokotoko7777/ahc-workspace/blob/be1cefb260f7f47b683f780eca2db2db603be3e0/problems/ahc008/experiments/20261122/parallel-banks-seam-cache-notes.md)（`codex/ahc008-seam-cache`）。
+
+| 同条件・公式v3テスタ含む逐次計測 | 配布100 | 未使用生成100 |
+|---|---:|---:|
+| 両版の得点 | 2,116,997,192 | 1,916,659,829 |
+| 行動バイトが完全に一致 | 100/100 | 100/100 |
+| 時間中央値、前→後 | 0.376→0.336秒 | 0.377→0.345秒 |
+| ケースごとの時間変化の中央値 | −10.21% | −10.68% |
+| 最大時間、前→後 | 0.620→0.541秒 | 0.665→0.530秒 |
+
+開発30も含め230件すべて同一で、各版の全460実行が合法・独立再生と一致。採点内訳と目標未達は変わらない。高速版は同点の選択肢。AtCoderの本番環境での時間ではなく、mainも変更なし。[汎用化の提案](https://github.com/tokotoko7777/ahc-workspace/blob/be1cefb260f7f47b683f780eca2db2db603be3e0/docs/LIBRARY_PROPOSAL_GENERATION_TOPOLOGY_CACHE.md)。
