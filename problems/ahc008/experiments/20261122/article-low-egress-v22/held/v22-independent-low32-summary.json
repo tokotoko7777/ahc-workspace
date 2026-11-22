@@ -1,0 +1,556 @@
+{
+  "all": {
+    "cases": 32,
+    "score_WTL": [
+      9,
+      0,
+      23
+    ],
+    "clear_gained": [
+      "0003.txt",
+      "0022.txt",
+      "0041.txt",
+      "0055.txt"
+    ],
+    "clear_lost": [
+      "0002.txt",
+      "0032.txt",
+      "0037.txt",
+      "0042.txt",
+      "0043.txt",
+      "0067.txt",
+      "0090.txt",
+      "0095.txt",
+      "0098.txt"
+    ],
+    "arms": {
+      "baseline": {
+        "score": 520618810,
+        "all_clear": 11,
+        "final_reachable": 76,
+        "exact4_first": 219,
+        "final_exact4": 219,
+        "residual_turn100": 385,
+        "residual_turn160": 288,
+        "residual_turn225": 208,
+        "residual_turn275": 116,
+        "clean_union": 2806,
+        "exact4_species": {
+          "4": 100,
+          "3": 20,
+          "5": 47,
+          "2": 22,
+          "1": 30
+        },
+        "exact4_at100": 117,
+        "exact4_at160": 214,
+        "floor": [
+          374.67290625,
+          [
+            136.0,
+            240.0,
+            378.0
+          ]
+        ],
+        "wall": [
+          0.37332800799777033,
+          0.5562043725003605,
+          0.76182960299775
+        ],
+        "clear_area_100": 11,
+        "clear_area_300": 3,
+        "first5": [
+          14,
+          31.0,
+          42
+        ],
+        "first_staffed5": [
+          38,
+          45.0,
+          69
+        ],
+        "first_lock": [
+          43,
+          55.5,
+          158
+        ],
+        "milestones": {
+          "80": {
+            "shells": [
+              15,
+              18.0,
+              23
+            ],
+            "open_tubes": [
+              13,
+              16.0,
+              22
+            ],
+            "staffed_tubes": [
+              0,
+              0.0,
+              2
+            ],
+            "ready_banks": [
+              1,
+              2.0,
+              2
+            ]
+          },
+          "100": {
+            "shells": [
+              18,
+              20.0,
+              26
+            ],
+            "open_tubes": [
+              13,
+              16.0,
+              24
+            ],
+            "staffed_tubes": [
+              0,
+              0.0,
+              2
+            ],
+            "ready_banks": [
+              2,
+              2.0,
+              2
+            ]
+          },
+          "150": {
+            "shells": [
+              18,
+              24.0,
+              26
+            ],
+            "open_tubes": [
+              11,
+              17.5,
+              23
+            ],
+            "staffed_tubes": [
+              0,
+              1.0,
+              2
+            ],
+            "ready_banks": [
+              2,
+              2.0,
+              2
+            ]
+          }
+        },
+        "t150_total_shells_by_bank": [
+          357,
+          390,
+          0,
+          0
+        ]
+      },
+      "article": {
+        "score": 291720342,
+        "all_clear": 6,
+        "final_reachable": 140,
+        "exact4_first": 200,
+        "final_exact4": 200,
+        "residual_turn100": 413,
+        "residual_turn160": 306,
+        "residual_turn225": 270,
+        "residual_turn275": 209,
+        "clean_union": 884,
+        "exact4_species": {
+          "4": 100,
+          "5": 41,
+          "2": 11,
+          "3": 13,
+          "1": 35
+        },
+        "exact4_at100": 89,
+        "exact4_at160": 196,
+        "floor": [
+          370.934375,
+          [
+            55.0,
+            97.5,
+            199.0
+          ]
+        ],
+        "wall": [
+          0.32669216199428774,
+          0.5040565980016254,
+          0.656744660998811
+        ],
+        "clear_area_100": 3,
+        "clear_area_300": 0,
+        "first5": [
+          31,
+          48.0,
+          57
+        ],
+        "first_staffed5": [
+          42,
+          62.0,
+          94
+        ],
+        "first_lock": [
+          43,
+          68.0,
+          138
+        ],
+        "milestones": {
+          "80": {
+            "shells": [
+              13,
+              18.0,
+              24
+            ],
+            "open_tubes": [
+              12,
+              18.0,
+              22
+            ],
+            "staffed_tubes": [
+              0,
+              0.0,
+              2
+            ],
+            "ready_banks": [
+              1,
+              2.0,
+              2
+            ]
+          },
+          "100": {
+            "shells": [
+              17,
+              20.0,
+              26
+            ],
+            "open_tubes": [
+              14,
+              18.0,
+              23
+            ],
+            "staffed_tubes": [
+              0,
+              0.0,
+              2
+            ],
+            "ready_banks": [
+              2,
+              2.0,
+              2
+            ]
+          },
+          "150": {
+            "shells": [
+              19,
+              24.0,
+              26
+            ],
+            "open_tubes": [
+              13,
+              18.0,
+              23
+            ],
+            "staffed_tubes": [
+              0,
+              1.0,
+              2
+            ],
+            "ready_banks": [
+              2,
+              2.0,
+              2
+            ]
+          }
+        },
+        "t150_total_shells_by_bank": [
+          383,
+          378,
+          0,
+          0
+        ]
+      }
+    }
+  },
+  "M5-6": {
+    "cases": 32,
+    "score_WTL": [
+      9,
+      0,
+      23
+    ],
+    "clear_gained": [
+      "0003.txt",
+      "0022.txt",
+      "0041.txt",
+      "0055.txt"
+    ],
+    "clear_lost": [
+      "0002.txt",
+      "0032.txt",
+      "0037.txt",
+      "0042.txt",
+      "0043.txt",
+      "0067.txt",
+      "0090.txt",
+      "0095.txt",
+      "0098.txt"
+    ],
+    "arms": {
+      "baseline": {
+        "score": 520618810,
+        "all_clear": 11,
+        "final_reachable": 76,
+        "exact4_first": 219,
+        "final_exact4": 219,
+        "residual_turn100": 385,
+        "residual_turn160": 288,
+        "residual_turn225": 208,
+        "residual_turn275": 116,
+        "clean_union": 2806,
+        "exact4_species": {
+          "4": 100,
+          "3": 20,
+          "5": 47,
+          "2": 22,
+          "1": 30
+        },
+        "exact4_at100": 117,
+        "exact4_at160": 214,
+        "floor": [
+          374.67290625,
+          [
+            136.0,
+            240.0,
+            378.0
+          ]
+        ],
+        "wall": [
+          0.37332800799777033,
+          0.5562043725003605,
+          0.76182960299775
+        ],
+        "clear_area_100": 11,
+        "clear_area_300": 3,
+        "first5": [
+          14,
+          31.0,
+          42
+        ],
+        "first_staffed5": [
+          38,
+          45.0,
+          69
+        ],
+        "first_lock": [
+          43,
+          55.5,
+          158
+        ],
+        "milestones": {
+          "80": {
+            "shells": [
+              15,
+              18.0,
+              23
+            ],
+            "open_tubes": [
+              13,
+              16.0,
+              22
+            ],
+            "staffed_tubes": [
+              0,
+              0.0,
+              2
+            ],
+            "ready_banks": [
+              1,
+              2.0,
+              2
+            ]
+          },
+          "100": {
+            "shells": [
+              18,
+              20.0,
+              26
+            ],
+            "open_tubes": [
+              13,
+              16.0,
+              24
+            ],
+            "staffed_tubes": [
+              0,
+              0.0,
+              2
+            ],
+            "ready_banks": [
+              2,
+              2.0,
+              2
+            ]
+          },
+          "150": {
+            "shells": [
+              18,
+              24.0,
+              26
+            ],
+            "open_tubes": [
+              11,
+              17.5,
+              23
+            ],
+            "staffed_tubes": [
+              0,
+              1.0,
+              2
+            ],
+            "ready_banks": [
+              2,
+              2.0,
+              2
+            ]
+          }
+        },
+        "t150_total_shells_by_bank": [
+          357,
+          390,
+          0,
+          0
+        ]
+      },
+      "article": {
+        "score": 291720342,
+        "all_clear": 6,
+        "final_reachable": 140,
+        "exact4_first": 200,
+        "final_exact4": 200,
+        "residual_turn100": 413,
+        "residual_turn160": 306,
+        "residual_turn225": 270,
+        "residual_turn275": 209,
+        "clean_union": 884,
+        "exact4_species": {
+          "4": 100,
+          "5": 41,
+          "2": 11,
+          "3": 13,
+          "1": 35
+        },
+        "exact4_at100": 89,
+        "exact4_at160": 196,
+        "floor": [
+          370.934375,
+          [
+            55.0,
+            97.5,
+            199.0
+          ]
+        ],
+        "wall": [
+          0.32669216199428774,
+          0.5040565980016254,
+          0.656744660998811
+        ],
+        "clear_area_100": 3,
+        "clear_area_300": 0,
+        "first5": [
+          31,
+          48.0,
+          57
+        ],
+        "first_staffed5": [
+          42,
+          62.0,
+          94
+        ],
+        "first_lock": [
+          43,
+          68.0,
+          138
+        ],
+        "milestones": {
+          "80": {
+            "shells": [
+              13,
+              18.0,
+              24
+            ],
+            "open_tubes": [
+              12,
+              18.0,
+              22
+            ],
+            "staffed_tubes": [
+              0,
+              0.0,
+              2
+            ],
+            "ready_banks": [
+              1,
+              2.0,
+              2
+            ]
+          },
+          "100": {
+            "shells": [
+              17,
+              20.0,
+              26
+            ],
+            "open_tubes": [
+              14,
+              18.0,
+              23
+            ],
+            "staffed_tubes": [
+              0,
+              0.0,
+              2
+            ],
+            "ready_banks": [
+              2,
+              2.0,
+              2
+            ]
+          },
+          "150": {
+            "shells": [
+              19,
+              24.0,
+              26
+            ],
+            "open_tubes": [
+              13,
+              18.0,
+              23
+            ],
+            "staffed_tubes": [
+              0,
+              1.0,
+              2
+            ],
+            "ready_banks": [
+              2,
+              2.0,
+              2
+            ]
+          }
+        },
+        "t150_total_shells_by_bank": [
+          383,
+          378,
+          0,
+          0
+        ]
+      }
+    }
+  }
+}
