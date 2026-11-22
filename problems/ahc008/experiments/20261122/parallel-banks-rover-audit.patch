@@ -1,0 +1,9 @@
+--- problems/ahc008/experiments/20261122/parallel-banks-narrow-rescue-research.cpp
++++ problems/ahc008/experiments/20261122/parallel-banks-rover-audit.cpp
+@@ -1789,0 +1790,6 @@
++  if(g.turn==101)if(const char* d=getenv("AHC008_ZONE_AUDIT")){
++   ofstream out(d);
++   out<<g.zonesActive<<" "<<g.zoneUsed.to_ulong()<<"\n";
++   for(int z=0;z<2;z++)for(int i=0;i<=g.bankN;i++)out<<g.zoneCrew[z][i]<<" ";
++   out<<"\n";
++  }

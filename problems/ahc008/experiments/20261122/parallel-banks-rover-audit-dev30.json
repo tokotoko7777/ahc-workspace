@@ -1,0 +1,324 @@
+{
+  "cases": [
+    {
+      "case": "0000.txt",
+      "m": 7,
+      "release": 225,
+      "reserves": [
+        5
+      ],
+      "one_normal_windows": 10,
+      "one_normal_unresolved_ids": 0,
+      "near_two_ignoring_future": 0,
+      "near_two_and_free_now": 0
+    },
+    {
+      "case": "0003.txt",
+      "m": 9,
+      "release": 160,
+      "reserves": [
+        1
+      ],
+      "one_normal_windows": 6,
+      "one_normal_unresolved_ids": 0,
+      "near_two_ignoring_future": 0,
+      "near_two_and_free_now": 0
+    },
+    {
+      "case": "0005.txt",
+      "m": 9,
+      "release": 160,
+      "reserves": [
+        2
+      ],
+      "one_normal_windows": 0,
+      "one_normal_unresolved_ids": 0,
+      "near_two_ignoring_future": 0,
+      "near_two_and_free_now": 0
+    },
+    {
+      "case": "0006.txt",
+      "m": 9,
+      "release": 160,
+      "reserves": [
+        8
+      ],
+      "one_normal_windows": 3,
+      "one_normal_unresolved_ids": 1,
+      "near_two_ignoring_future": 0,
+      "near_two_and_free_now": 0
+    },
+    {
+      "case": "0008.txt",
+      "m": 9,
+      "release": 160,
+      "reserves": [
+        1
+      ],
+      "one_normal_windows": 7,
+      "one_normal_unresolved_ids": 0,
+      "near_two_ignoring_future": 0,
+      "near_two_and_free_now": 0
+    },
+    {
+      "case": "0012.txt",
+      "m": 10,
+      "release": 160,
+      "reserves": [
+        0,
+        2
+      ],
+      "one_normal_windows": 0,
+      "one_normal_unresolved_ids": 0,
+      "near_two_ignoring_future": 0,
+      "near_two_and_free_now": 0
+    },
+    {
+      "case": "0016.txt",
+      "m": 9,
+      "release": 160,
+      "reserves": [
+        8
+      ],
+      "one_normal_windows": 3,
+      "one_normal_unresolved_ids": 0,
+      "near_two_ignoring_future": 0,
+      "near_two_and_free_now": 0
+    },
+    {
+      "case": "0017.txt",
+      "m": 10,
+      "release": 160,
+      "reserves": [
+        0,
+        4
+      ],
+      "one_normal_windows": 12,
+      "one_normal_unresolved_ids": 1,
+      "near_two_ignoring_future": 0,
+      "near_two_and_free_now": 0
+    },
+    {
+      "case": "0019.txt",
+      "m": 7,
+      "release": 160,
+      "reserves": [
+        5
+      ],
+      "one_normal_windows": 3,
+      "one_normal_unresolved_ids": 0,
+      "near_two_ignoring_future": 0,
+      "near_two_and_free_now": 0
+    },
+    {
+      "case": "0022.txt",
+      "m": 7,
+      "release": 160,
+      "reserves": [
+        5
+      ],
+      "one_normal_windows": 4,
+      "one_normal_unresolved_ids": 0,
+      "near_two_ignoring_future": 0,
+      "near_two_and_free_now": 0
+    },
+    {
+      "case": "0023.txt",
+      "m": 7,
+      "release": 160,
+      "reserves": [
+        4
+      ],
+      "one_normal_windows": 9,
+      "one_normal_unresolved_ids": 0,
+      "near_two_ignoring_future": 0,
+      "near_two_and_free_now": 0
+    },
+    {
+      "case": "0024.txt",
+      "m": 7,
+      "release": 160,
+      "reserves": [
+        0
+      ],
+      "one_normal_windows": 1,
+      "one_normal_unresolved_ids": 1,
+      "near_two_ignoring_future": 0,
+      "near_two_and_free_now": 0
+    },
+    {
+      "case": "0025.txt",
+      "m": 7,
+      "release": 160,
+      "reserves": [
+        4
+      ],
+      "one_normal_windows": 1,
+      "one_normal_unresolved_ids": 1,
+      "near_two_ignoring_future": 0,
+      "near_two_and_free_now": 0
+    },
+    {
+      "case": "0027.txt",
+      "m": 7,
+      "release": 160,
+      "reserves": [
+        6
+      ],
+      "one_normal_windows": 3,
+      "one_normal_unresolved_ids": 0,
+      "near_two_ignoring_future": 0,
+      "near_two_and_free_now": 0
+    },
+    {
+      "case": "0028.txt",
+      "m": 10,
+      "release": 160,
+      "reserves": [
+        2,
+        7
+      ],
+      "one_normal_windows": 1,
+      "one_normal_unresolved_ids": 0,
+      "near_two_ignoring_future": 0,
+      "near_two_and_free_now": 0
+    },
+    {
+      "case": "0030.txt",
+      "m": 10,
+      "release": 160,
+      "reserves": [
+        5,
+        6
+      ],
+      "one_normal_windows": 1,
+      "one_normal_unresolved_ids": 1,
+      "near_two_ignoring_future": 0,
+      "near_two_and_free_now": 0
+    },
+    {
+      "case": "0031.txt",
+      "m": 10,
+      "release": 160,
+      "reserves": [
+        4,
+        7
+      ],
+      "one_normal_windows": 6,
+      "one_normal_unresolved_ids": 0,
+      "near_two_ignoring_future": 1,
+      "near_two_and_free_now": 1
+    },
+    {
+      "case": "0036.txt",
+      "m": 7,
+      "release": 160,
+      "reserves": [
+        6
+      ],
+      "one_normal_windows": 0,
+      "one_normal_unresolved_ids": 0,
+      "near_two_ignoring_future": 0,
+      "near_two_and_free_now": 0
+    },
+    {
+      "case": "0037.txt",
+      "m": 10,
+      "release": 160,
+      "reserves": [
+        3,
+        8
+      ],
+      "one_normal_windows": 6,
+      "one_normal_unresolved_ids": 0,
+      "near_two_ignoring_future": 0,
+      "near_two_and_free_now": 0
+    },
+    {
+      "case": "0039.txt",
+      "m": 7,
+      "release": 160,
+      "reserves": [
+        1
+      ],
+      "one_normal_windows": 2,
+      "one_normal_unresolved_ids": 0,
+      "near_two_ignoring_future": 0,
+      "near_two_and_free_now": 0
+    },
+    {
+      "case": "0040.txt",
+      "m": 9,
+      "release": 160,
+      "reserves": [
+        7
+      ],
+      "one_normal_windows": 1,
+      "one_normal_unresolved_ids": 0,
+      "near_two_ignoring_future": 0,
+      "near_two_and_free_now": 0
+    },
+    {
+      "case": "0041.txt",
+      "m": 7,
+      "release": 160,
+      "reserves": [
+        6
+      ],
+      "one_normal_windows": 3,
+      "one_normal_unresolved_ids": 2,
+      "near_two_ignoring_future": 0,
+      "near_two_and_free_now": 0
+    }
+  ],
+  "results": {
+    "wall_preserving0": {
+      "windows": 0,
+      "total_unique": 0,
+      "total_cases": 0,
+      "missed_unique": 0,
+      "missed_cases": 0,
+      "cross_missing": 0
+    },
+    "wall_preserving1": {
+      "windows": 0,
+      "total_unique": 0,
+      "total_cases": 0,
+      "missed_unique": 0,
+      "missed_cases": 0,
+      "cross_missing": 0
+    },
+    "wall_preserving2": {
+      "windows": 0,
+      "total_unique": 0,
+      "total_cases": 0,
+      "missed_unique": 0,
+      "missed_cases": 0,
+      "cross_missing": 0
+    },
+    "strict0": {
+      "windows": 0,
+      "total_unique": 0,
+      "total_cases": 0,
+      "missed_unique": 0,
+      "missed_cases": 0,
+      "cross_missing": 0
+    },
+    "strict1": {
+      "windows": 0,
+      "total_unique": 0,
+      "total_cases": 0,
+      "missed_unique": 0,
+      "missed_cases": 0,
+      "cross_missing": 0
+    },
+    "strict2": {
+      "windows": 0,
+      "total_unique": 0,
+      "total_cases": 0,
+      "missed_unique": 0,
+      "missed_cases": 0,
+      "cross_missing": 0
+    }
+  }
+}
