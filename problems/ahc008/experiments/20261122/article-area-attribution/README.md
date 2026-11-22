@@ -38,3 +38,27 @@ Ordinary pocket turns lose1526 for39 isolates, lastcap292 for11,
 banks5435 for235. No mixed-source wall turns occur in this cohort.
 The audit does not measure alternate paths or justify blanket late
 wall suppression.
+
+## Exact staffed alternatives at the 16 broad outcomes
+
+Run `alternatives.py HARNESS TESTER V4 DEV30 REFERENCE
+dev30-events.jsonl.gz alternatives-dev30.jsonl`. The same original
+30-case data are used, but only 14 cases are replayed (verified exact
+official actions/scores and independent legality). It examines 16
+factual >=100-cell mean-floor-loss actual latePlan turns, each with
+one original wall. Remove that proposed wall while preserving the
+present board and ordinary human actions except using builders when
+allowed. Enumerate all distinct legal 1–3 replacement walls with
+distinct staffed adjacent workers, no human split, and no original
+captured animal ID left reachable. Retaining the original wall is
+uninteresting here: adding more walls cannot give any human more
+reachable area on this turn.
+
+Of 3,012 distinct legal considered masks, zero capture the original
+pet ID set while preserving crew connectivity, even before requiring
++50 retained area. No original actual moves competed on these turns;
+strict and displacement-allowed alternatives were therefore the same.
+The result is only same-turn geometric feasibility at observed
+positions, not animal reroll or the trace of a hypothetical changed
+game. This excludes instant staffed local replacement here, not a
+different geometry while constructing earlier. No live overlay.

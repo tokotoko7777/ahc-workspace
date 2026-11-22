@@ -1,0 +1,16 @@
+{"case":"0001.txt","turn":254,"original_floor_loss":350.0,"target":[1,4,6,7,11],"enumeration":[25,0],"same_yield":[0,0],"best":[null,null]}
+{"case":"0002.txt","turn":262,"original_floor_loss":275.0,"target":[1,5,12],"enumeration":[91,0],"same_yield":[0,0],"best":[null,null]}
+{"case":"0003.txt","turn":235,"original_floor_loss":189.0,"target":[0,1,6,7,9],"enumeration":[611,0],"same_yield":[0,0],"best":[null,null]}
+{"case":"0004.txt","turn":243,"original_floor_loss":186.0,"target":[4,5],"enumeration":[85,0],"same_yield":[0,0],"best":[null,null]}
+{"case":"0004.txt","turn":283,"original_floor_loss":246.0,"target":[0,8],"enumeration":[78,0],"same_yield":[0,0],"best":[null,null]}
+{"case":"0005.txt","turn":281,"original_floor_loss":439.0,"target":[0,10,12],"enumeration":[25,0],"same_yield":[0,0],"best":[null,null]}
+{"case":"0007.txt","turn":225,"original_floor_loss":120.0,"target":[0,14,19],"enumeration":[66,0],"same_yield":[0,0],"best":[null,null]}
+{"case":"0007.txt","turn":293,"original_floor_loss":159.0,"target":[13],"enumeration":[29,0],"same_yield":[0,0],"best":[null,null]}
+{"case":"0008.txt","turn":272,"original_floor_loss":279.0,"target":[6,8,9],"enumeration":[36,0],"same_yield":[0,0],"best":[null,null]}
+{"case":"0012.txt","turn":296,"original_floor_loss":187.0,"target":[5,11],"enumeration":[816,0],"same_yield":[0,0],"best":[null,null]}
+{"case":"0019.txt","turn":295,"original_floor_loss":206.0,"target":[8,16],"enumeration":[23,0],"same_yield":[0,0],"best":[null,null]}
+{"case":"0021.txt","turn":250,"original_floor_loss":160.0,"target":[1,5,6,9,10],"enumeration":[183,0],"same_yield":[0,0],"best":[null,null]}
+{"case":"0023.txt","turn":290,"original_floor_loss":204.0,"target":[2],"enumeration":[443,0],"same_yield":[0,0],"best":[null,null]}
+{"case":"0024.txt","turn":299,"original_floor_loss":673.0,"target":[0,3,5,10,11,12,17,18],"enumeration":[7,0],"same_yield":[0,0],"best":[null,null]}
+{"case":"0026.txt","turn":256,"original_floor_loss":333.0,"target":[2,3,6],"enumeration":[7,0],"same_yield":[0,0],"best":[null,null]}
+{"case":"0028.txt","turn":260,"original_floor_loss":104.0,"target":[12],"enumeration":[487,0],"same_yield":[0,0],"best":[null,null]}

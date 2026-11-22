@@ -1,0 +1,14 @@
+{
+  "verified_cases": 14,
+  "audited_cuts": 16,
+  "strict_ge50": 0,
+  "replace_move_ge50": 0,
+  "same_yield_counts": [
+    0,
+    0
+  ],
+  "enumeration": [
+    3012,
+    0
+  ]
+}
