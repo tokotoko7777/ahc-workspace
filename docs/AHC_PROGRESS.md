@@ -1395,3 +1395,9 @@ S字でも犬・猫を含め4マスに合法に隔離できた。各S字系列�
 ### AHC008 短期の捕獲予測を厳密化
 
 [3組の比較ログ・再現とコード](https://github.com/tokotoko7777/ahc-workspace/blob/08f71a465a41b0005a4ad0f9bcb674d93588d008/problems/ahc008/experiments/20261122/article-capture/terry-passive-exact-short/VALIDATION.md)。牛・豚・ウサギが1〜3ターン後も元の部屋にいる確率を、予定柵を固定した移動モデル上で厳密に求める。犬・猫、他の時間幅、元の乱数列はそのまま。各100件の開発・事前確定の未使用・公式配布で順に **+0.554%・+0.575%・+0.184%**。全頭は **98→99・98→99・98→98**。公式配布では新最良 **6,093,833,333点**、目標まで数値差169,500,003点。全600実行で公式テスタ・再生・独立採点が一致。研究基準に採用し、次は隔離する動物を減らさず人側の可到達面積を残す終盤最小カットの同値解を調べる。本番の順位は未判定、mainは無変更。汎用化は[短い確率伝播の提案](experiments/ahc008/exact-local-markov-propagation.md)を参照。
+
+### AHC008 人側の面積不足を分解、短い門予測は不採用
+
+[全頭捕獲59ケースの面積内訳](https://github.com/tokotoko7777/ahc-workspace/blob/609c1f8d3b8a716b74f412155718a233b90cff04/problems/ahc008/experiments/20261122/article-capture/terry-final-area-budget/README.md)では、300ターン目の人側の外は平均で設営柵253.75、他の柵26.44、動物側の床61.20、空の孤立床0.085マス。人間同士が分断された分は0。[同一費用の終盤カットだけを変える調査](https://github.com/tokotoko7777/ahc-workspace/blob/609c1f8d3b8a716b74f412155718a233b90cff04/problems/ahc008/experiments/20261122/article-capture/terry-chase-cut-ties/README.md)は別60の175状態から厳密候補9件、4盤面の最大を合計28マスで基準50未満。実解に適用しない。
+
+[短期予測で動物自身が門をふさぐ確率を除く案](https://github.com/tokotoko7777/ahc-workspace/blob/61e493cf3de61652cc66ba7c6d318653447a8f8b/problems/ahc008/experiments/20261122/article-capture/terry-gate-safe-short/RESULT.md)は新規生成100で6,063,529,628→6,079,263,888点だが全頭98→97、残留2→6。追試・配布には進まず不採用。次は設営柵そのものを減らし、捕獲率を保てるかを検証。公式配布の最良値は6,093,833,333、本番順位未判定、main無変更。
