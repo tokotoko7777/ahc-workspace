@@ -1,0 +1,192 @@
+--- compact-corner.single.cpp
++++ station-prototype.single.cpp
+@@ -1154,7 +1154,7 @@
+  vector<Frontage> corners;
+  Frontage front{};
+  int compAttempts=0,compFinished=0,compConfirmed=0,compN=0,compArea=0,compWall=0,compTurns=0,compLast=-10;
+- int compStart=122,compEnd=240,compMax=5,compCalls=6,compHorizon=6;
++ int compStart=65,compEnd=214,compMax=4,compCalls=3,compHorizon=7;
+  array<unsigned char,V> compWas{};
+  void cornerTemplates(){
+   if(!roomReady)createRooms();
+@@ -1204,7 +1204,7 @@
+   if(front.started>=0){
+    bool done=true;for(int p:front.cut)done&=wall[p];
+    if(done){
+-    
++    int oldN=compN;
+     // Closed pockets no longer belong to the human root; read each actual
+     // occupied component touched by the original pocket once.
+     bitset<V> pieces;
+@@ -1262,20 +1262,12 @@
+   int occupied=0,workerInside=0;
+   for(auto p:pets)occupied+=inside(front,p.p);
+   for(int p:humans)workerInside+=inside(front,p);
+-  int missing=0,near=99;
+-  for(int p:front.cut)if(!wall[p]){
+-   ++missing;
+-   for(auto z:pets)if(group[z.p]==root)near=min(near,md(p,z.p));
+-  }
+-  if(workerInside||(!occupied&&near>3)){front.started=-1;compLast=turn;return old;}
+-  vector<FlatGridFirstStepBfs> route(hm,FlatGridFirstStepBfs(S,S));
+-  for(int i=0;i<hm;++i)route[i].run(humans[i],[&](int p){return p==humans[i]||(!wall[p]&&!inside(front,p)&&!remaining(front,p));});
+-
++  if(!occupied||workerInside){front.started=-1;compLast=turn;return old;}
+   struct Job{int z,i,w,stand;};
+   vector<Job> jobs;
+   for(int w:front.cut)if(!wall[w])for(int q:nb[w])if(q>=0&&group[q]==root&&!inside(front,q)&&!remaining(front,q))
+    for(int i=0;i<hm;++i){
+-    int d=route[i].distance(q);
++    int d=workers[i].bfs.distance(q);
+     if(d<0||d>=compHorizon-(turn-front.started)||(!d&&block[w]))continue;
+     int k=-6*d-7*block[w]+3*(old[i]=='.');
+     jobs.push_back({k,i,w,q});
+@@ -1286,14 +1278,13 @@
+   // actions unless they collide with a chosen movement or enter the chamber.
+   bitset<V> built,moved,assigned;int used=0;
+   vector<bool> busy(hm,false);
+-  int newWalls=0;
+   for(auto [z,i,w,q]:jobs)if(!busy[i]&&!assigned[w]&&used<compMax){
+    int h=humans[i];
+    if(h==q){
+-    if(moved[w]||block[w]||(!occupied&&newWalls+1>=missing))continue;
+-    ret[i]=BUILD[dir(h,w)];built.set(w);++compWall;++newWalls;
++    if(moved[w]||block[w])continue;
++    ret[i]=BUILD[dir(h,w)];built.set(w);++compWall;
+    }else {
+-    int to=route[i].first_step(q);
++    int to=workers[i].bfs.first_step(q);
+     if(to<0||built[to]||inside(front,to)||remaining(front,to))continue;
+     ret[i]=MOVE[dir(h,to)];moved.set(to);
+    }
+@@ -1313,6 +1304,117 @@
+   return ret;
+  }
+ 
++ struct GuardCage {
++  vector<int> room, walls, stance;
++  int gate=-1, sentinel=-1, seat=-1, start=-1, armed=-1;
++ };
++ GuardCage gc;
++ int gcStart=93,gcEnd=189,gcPatience=13,gcFires=0,gcArmed=0,gcStarts=0,gcSpent=0,gcGaps=0,gcNext=0,gcPorts=0;
++ string stationOverlay(string old){
++  if(turn<gcStart||turn>gcEnd||overBudget())return old;
++  if(corners.empty())cornerTemplates();
++  int hm=humans.size(), root=group[humans[0]];
++  for(int p:humans)if(group[p]!=root)return old;
++  if(currentCt[root]<350)return old;
++  auto contains=[](const vector<int>& a,int x){return find(a.begin(),a.end(),x)!=a.end();};
++  auto clear=[&](){gc=GuardCage{};gcNext=turn+7;};
++  if(gc.sentinel>=0){
++   if(wall[gc.gate]||(gc.armed>=0?turn-gc.armed>=gcPatience:turn-gc.start>=9))clear();
++   else for(int h:humans)if(contains(gc.room,h)){clear();break;}
++  }
++  if(gc.sentinel<0&&(gcStarts>=2||turn<gcNext||turn%3))return old;
++  if(gc.sentinel<0){
++   double best=.23;
++   GuardCage pick;
++   for(const auto &f:corners){
++    if(f.shape.size()<3||f.shape.size()>14)continue;
++    int hcnt=0;for(int h:humans)hcnt+=contains(f.shape,h);
++    if(hcnt)continue;
++    int area=0;
++    vector<int> gaps;
++    for(int p:f.shape)if(group[p]==root){
++     ++area;
++     for(int q:nb[p])if(q>=0&&group[q]==root&&!contains(f.shape,q)&&!contains(gaps,q))gaps.push_back(q);
++    }
++    if(area<3||gaps.empty()||gaps.size()>3)continue;
++    // No caging motive is selected *because* a pet currently occupies it. The
++    // design scores district traffic and must be useful after the worker arrives.
++    for(int gate:gaps){
++     if(block[gate])continue;
++     bool goodGate=false;
++     for(int p:f.shape)if(group[p]==root&&md(p,gate)>=2)goodGate=true;
++     if(!goodGate)continue;
++     vector<int> w;
++     for(int q:gaps)if(q!=gate)w.push_back(q);
++     unsigned char blocked[V]{};
++     for(int q:f.shape)blocked[q]=1;
++     for(int q:gaps)blocked[q]=1;
++     double pressure=0;
++     for(auto a:pets)if(group[a.p]==root){
++      int d=md(a.p,gate);
++      if(d>=1&&d<=7)pressure+=(8-d)*(a.t==1?.12:a.t==4?.10:.15);
++     }
++     if(pressure<.51)continue;
++     for(int pos:nb[gate])if(pos>=0&&group[pos]==root&&!blocked[pos])
++      for(int i=0;i<hm;i++){
++       int h=humans[i],d=workers[i].bfs.distance(pos);
++       if(d<0||d>5||blocked[h])continue;
++       vector<int> r;
++       vector<int> ws=w;
++       int before=h, cost=0, postpone=0;
++       if(ws.size()==2&&md(h,ws[1])<md(h,ws[0]))swap(ws[0],ws[1]);
++       bool good=true;
++       for(int q:ws){
++        int best2=99, near=-1;
++        for(int st:nb[q])if(st>=0&&group[st]==root&&!blocked[st]){
++         int s=md(before,st)+md(st,pos)/2;
++         if(s<best2){best2=s;near=st;}
++        }
++        if(near<0){good=false;break;}
++        cost+=md(before,near)+1;postpone+=int(block[q]);before=near;r.push_back(near);
++       }
++       if(!good)continue;
++       cost+=md(before,pos);
++       if(cost>7)continue;
++       double v=pressure/(1.+cost*.48+postpone*.4)+area*.026;
++       if(v>best) {
++        auto test=f;test.cut=gaps;
++        if(!compactValid(test,root))continue;
++        best=v;pick={f.shape,ws,r,gate,i,pos,turn,-1};
++       }
++      }
++    }
++   }
++   if(pick.sentinel<0)return old;
++   gc=move(pick);++gcStarts;gcGaps+=gc.walls.size();
++  }
++  int i=gc.sentinel,p=humans[i],w=-1,st=gc.seat;
++  for(int j=0;j<int(gc.walls.size());++j)if(!wall[gc.walls[j]]){w=gc.walls[j];st=gc.stance[j];break;}
++  if(w<0&&gc.armed<0)gc.armed=turn,++gcArmed;
++  auto qmask=[&](int q){return q>=0&&(!wall[q]&&!contains(gc.room,q)&&q!=gc.gate&&!contains(gc.walls,q));};
++  char action='.';
++  if(p!=st){
++   FlatGridFirstStepBfs f(S,S);f.run(p,[&](int x){return x==p||qmask(x);});
++   int to=f.first_step(st);
++   if(to<0||f.distance(st)>7){clear();return old;}
++   action=MOVE[dir(p,to)];
++  }else if(w>=0){
++   if(!block[w])action=BUILD[dir(p,w)];
++  }else{
++   ++gcPorts;
++   int n=0;for(auto a:pets)n+=contains(gc.room,a.p);
++   if(n&&!block[gc.gate])action=BUILD[dir(p,gc.gate)],++gcFires;
++  }
++  ++gcSpent;
++  old[i]=action;
++  int mine=action=='.'?-1:nb[p][(action<'a'?find(MOVE,MOVE+4,action)-MOVE:find(BUILD,BUILD+4,action)-BUILD)];
++  for(int j=0;j<hm;j++)if(j!=i&&old[j]!='.'){
++   int to=nb[humans[j]][(old[j]<'a'?find(MOVE,MOVE+4,old[j])-MOVE:find(BUILD,BUILD+4,old[j])-BUILD)];
++   if(contains(gc.room,to)||to==gc.gate||(to==mine&&(old[j]>='a'||action>='a')))old[j]='.';
++  }
++  return old;
++ }
++
+  bool roomCapture(){
+   if(!CAP_GRID||turn>=299||overBudget())return false;
+   if(!roomReady)createRooms();
+@@ -1789,10 +1891,11 @@
+  ios::sync_with_stdio(false);cin.tie(nullptr);
+  Game g;g.init(argc,argv);
+  for(;g.turn<300;g.turn++){
+-  g.act=g.terminal(g.tacticalGate(g.repair(g.compactOverlay(g.plan()))));
++  g.act=g.terminal(g.tacticalGate(g.repair(g.stationOverlay(g.plan()))));
+   cout<<g.act<<'\n'<<flush;
+   if(!g.advance())break;
+  }
++ cerr<<"rails "<<g.gcStarts<<","<<g.gcArmed<<","<<g.gcFires<<","<<g.gcSpent<<","<<g.gcGaps<<","<<g.gcPorts<<"\n";
+ #ifdef GATE_DIAG
+  cerr<<"gate "<<g.gateSearch<<" "<<g.gatePrep<<" "<<g.gateApplied<<"\n";
+ #endif
