@@ -1,0 +1,633 @@
+{
+  "baseline": {
+    "all_clear": 14,
+    "score": 829740689,
+    "final_reachable": 49,
+    "final_exact4": 236,
+    "residual_turn100": 321,
+    "residual_turn160": 202,
+    "four_by_species": {
+      "1": 28,
+      "2": 32,
+      "3": 35,
+      "4": 78,
+      "5": 63
+    },
+    "four_by100": 114,
+    "mean_floor": 393.9904666666667,
+    "wide_clear": 9,
+    "wall_med": 0.6357739689992741,
+    "wall_max": 0.8800164759959443
+  },
+  "staged": {
+    "all_clear": 10,
+    "score": 778050208,
+    "final_reachable": 58,
+    "final_exact4": 236,
+    "residual_turn100": 321,
+    "residual_turn160": 202,
+    "four_by_species": {
+      "1": 28,
+      "2": 32,
+      "3": 35,
+      "4": 78,
+      "5": 63
+    },
+    "four_by100": 114,
+    "mean_floor": 426.93333333333334,
+    "wide_clear": 8,
+    "wall_med": 0.6494730365011492,
+    "wall_max": 0.9367941610034904
+  },
+  "same_prefix": 30,
+  "cordon": [
+    32.0,
+    110.0,
+    3.0,
+    29.0,
+    248.0,
+    80.0
+  ],
+  "clear_gains": [
+    {
+      "case": "0009.txt",
+      "heads": [
+        2,
+        0
+      ],
+      "score": [
+        18527778,
+        71888889
+      ],
+      "floor": [
+        667.0,
+        647.0
+      ],
+      "same_prefix": true
+    }
+  ],
+  "clear_losses": [
+    {
+      "case": "0000.txt",
+      "heads": [
+        0,
+        1
+      ],
+      "score": [
+        54444444,
+        30111111
+      ],
+      "floor": [
+        490.0,
+        542.0
+      ],
+      "same_prefix": true
+    },
+    {
+      "case": "0004.txt",
+      "heads": [
+        0,
+        3
+      ],
+      "score": [
+        11000000,
+        6083333
+      ],
+      "floor": [
+        99.0,
+        438.0
+      ],
+      "same_prefix": true
+    },
+    {
+      "case": "0013.txt",
+      "heads": [
+        0,
+        2
+      ],
+      "score": [
+        32555556,
+        15972222
+      ],
+      "floor": [
+        293.0,
+        575.0
+      ],
+      "same_prefix": true
+    },
+    {
+      "case": "0015.txt",
+      "heads": [
+        0,
+        2
+      ],
+      "score": [
+        69555556,
+        18444444
+      ],
+      "floor": [
+        626.0,
+        664.0
+      ],
+      "same_prefix": true
+    },
+    {
+      "case": "0025.txt",
+      "heads": [
+        0,
+        1
+      ],
+      "score": [
+        51666667,
+        32722222
+      ],
+      "floor": [
+        465.0,
+        589.0
+      ],
+      "same_prefix": true
+    }
+  ],
+  "per_case": [
+    {
+      "case": "0000.txt",
+      "heads": [
+        0,
+        1
+      ],
+      "score": [
+        54444444,
+        30111111
+      ],
+      "floor": [
+        490.0,
+        542.0
+      ],
+      "same_prefix": true
+    },
+    {
+      "case": "0001.txt",
+      "heads": [
+        1,
+        1
+      ],
+      "score": [
+        13888889,
+        13888889
+      ],
+      "floor": [
+        250.0,
+        250.0
+      ],
+      "same_prefix": true
+    },
+    {
+      "case": "0002.txt",
+      "heads": [
+        5,
+        5
+      ],
+      "score": [
+        2322917,
+        2322917
+      ],
+      "floor": [
+        669.0,
+        669.0
+      ],
+      "same_prefix": true
+    },
+    {
+      "case": "0003.txt",
+      "heads": [
+        0,
+        0
+      ],
+      "score": [
+        53555556,
+        55333333
+      ],
+      "floor": [
+        482.0,
+        498.0
+      ],
+      "same_prefix": true
+    },
+    {
+      "case": "0004.txt",
+      "heads": [
+        0,
+        3
+      ],
+      "score": [
+        11000000,
+        6083333
+      ],
+      "floor": [
+        99.0,
+        438.0
+      ],
+      "same_prefix": true
+    },
+    {
+      "case": "0005.txt",
+      "heads": [
+        1,
+        1
+      ],
+      "score": [
+        10388889,
+        10388889
+      ],
+      "floor": [
+        187.0,
+        187.0
+      ],
+      "same_prefix": true
+    },
+    {
+      "case": "0006.txt",
+      "heads": [
+        0,
+        0
+      ],
+      "score": [
+        70333333,
+        63222222
+      ],
+      "floor": [
+        633.0,
+        569.0
+      ],
+      "same_prefix": true
+    },
+    {
+      "case": "0007.txt",
+      "heads": [
+        0,
+        0
+      ],
+      "score": [
+        37000000,
+        39000000
+      ],
+      "floor": [
+        333.0,
+        351.0
+      ],
+      "same_prefix": true
+    },
+    {
+      "case": "0008.txt",
+      "heads": [
+        1,
+        1
+      ],
+      "score": [
+        21944444,
+        21944444
+      ],
+      "floor": [
+        395.0,
+        395.0
+      ],
+      "same_prefix": true
+    },
+    {
+      "case": "0009.txt",
+      "heads": [
+        2,
+        0
+      ],
+      "score": [
+        18527778,
+        71888889
+      ],
+      "floor": [
+        667.0,
+        647.0
+      ],
+      "same_prefix": true
+    },
+    {
+      "case": "0010.txt",
+      "heads": [
+        0,
+        0
+      ],
+      "score": [
+        28000000,
+        53333333
+      ],
+      "floor": [
+        252.0,
+        480.0
+      ],
+      "same_prefix": true
+    },
+    {
+      "case": "0011.txt",
+      "heads": [
+        3,
+        3
+      ],
+      "score": [
+        10694444,
+        10694444
+      ],
+      "floor": [
+        234.25,
+        234.25
+      ],
+      "same_prefix": true
+    },
+    {
+      "case": "0012.txt",
+      "heads": [
+        1,
+        1
+      ],
+      "score": [
+        12000000,
+        12000000
+      ],
+      "floor": [
+        216.0,
+        216.0
+      ],
+      "same_prefix": true
+    },
+    {
+      "case": "0013.txt",
+      "heads": [
+        0,
+        2
+      ],
+      "score": [
+        32555556,
+        15972222
+      ],
+      "floor": [
+        293.0,
+        575.0
+      ],
+      "same_prefix": true
+    },
+    {
+      "case": "0014.txt",
+      "heads": [
+        12,
+        12
+      ],
+      "score": [
+        18962,
+        18962
+      ],
+      "floor": [
+        699.0,
+        699.0
+      ],
+      "same_prefix": true
+    },
+    {
+      "case": "0015.txt",
+      "heads": [
+        0,
+        2
+      ],
+      "score": [
+        69555556,
+        18444444
+      ],
+      "floor": [
+        626.0,
+        664.0
+      ],
+      "same_prefix": true
+    },
+    {
+      "case": "0016.txt",
+      "heads": [
+        0,
+        0
+      ],
+      "score": [
+        55444444,
+        55444444
+      ],
+      "floor": [
+        499.0,
+        499.0
+      ],
+      "same_prefix": true
+    },
+    {
+      "case": "0017.txt",
+      "heads": [
+        4,
+        4
+      ],
+      "score": [
+        6795139,
+        6795139
+      ],
+      "floor": [
+        210.25,
+        210.25
+      ],
+      "same_prefix": true
+    },
+    {
+      "case": "0018.txt",
+      "heads": [
+        1,
+        1
+      ],
+      "score": [
+        35166667,
+        32333333
+      ],
+      "floor": [
+        633.0,
+        582.0
+      ],
+      "same_prefix": true
+    },
+    {
+      "case": "0019.txt",
+      "heads": [
+        1,
+        3
+      ],
+      "score": [
+        17777778,
+        7208333
+      ],
+      "floor": [
+        320.0,
+        519.0
+      ],
+      "same_prefix": true
+    },
+    {
+      "case": "0020.txt",
+      "heads": [
+        0,
+        0
+      ],
+      "score": [
+        75111111,
+        75777778
+      ],
+      "floor": [
+        676.0,
+        682.0
+      ],
+      "same_prefix": true
+    },
+    {
+      "case": "0021.txt",
+      "heads": [
+        0,
+        0
+      ],
+      "score": [
+        32777778,
+        30555556
+      ],
+      "floor": [
+        295.0,
+        275.0
+      ],
+      "same_prefix": true
+    },
+    {
+      "case": "0022.txt",
+      "heads": [
+        3,
+        3
+      ],
+      "score": [
+        7982143,
+        10833333
+      ],
+      "floor": [
+        348.714,
+        210.0
+      ],
+      "same_prefix": true
+    },
+    {
+      "case": "0023.txt",
+      "heads": [
+        0,
+        0
+      ],
+      "score": [
+        31000000,
+        33000000
+      ],
+      "floor": [
+        279.0,
+        297.0
+      ],
+      "same_prefix": true
+    },
+    {
+      "case": "0024.txt",
+      "heads": [
+        2,
+        2
+      ],
+      "score": [
+        1250000,
+        1250000
+      ],
+      "floor": [
+        45.0,
+        45.0
+      ],
+      "same_prefix": true
+    },
+    {
+      "case": "0025.txt",
+      "heads": [
+        0,
+        1
+      ],
+      "score": [
+        51666667,
+        32722222
+      ],
+      "floor": [
+        465.0,
+        589.0
+      ],
+      "same_prefix": true
+    },
+    {
+      "case": "0026.txt",
+      "heads": [
+        3,
+        3
+      ],
+      "score": [
+        7847222,
+        7847222
+      ],
+      "floor": [
+        565.0,
+        565.0
+      ],
+      "same_prefix": true
+    },
+    {
+      "case": "0027.txt",
+      "heads": [
+        7,
+        7
+      ],
+      "score": [
+        10913194,
+        10913194
+      ],
+      "floor": [
+        189.5,
+        189.5
+      ],
+      "same_prefix": true
+    },
+    {
+      "case": "0028.txt",
+      "heads": [
+        2,
+        2
+      ],
+      "score": [
+        11888889,
+        10833333
+      ],
+      "floor": [
+        428.0,
+        390.0
+      ],
+      "same_prefix": true
+    },
+    {
+      "case": "0029.txt",
+      "heads": [
+        0,
+        0
+      ],
+      "score": [
+        37888889,
+        37888889
+      ],
+      "floor": [
+        341.0,
+        341.0
+      ],
+      "same_prefix": true
+    }
+  ]
+}
