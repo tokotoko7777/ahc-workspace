@@ -31,3 +31,26 @@ own actions 1→6. 19 cases have exactly the same full action SHA. All 60
 scores and action transcripts match official recorded replay and legal
 independent evaluation. Dev-only means evidence for the executor mechanism,
 not evidence yet of improved total case all-clear.
+
+## Frozen official-distributed practice100, same v4 source
+
+Paired v2→v4 official score 2,427,202,305→2,598,735,635
+(+7.07%, 21 wins, 61 ties, 18 losses), all-clear 25→33 (11 new, 3 lost,
+22 both, 64 neither), residual177→166, real exact4 818→814,
+actual irregular4–48 200→207, clean union12132→15223,
+clean humans233→286, 53 full output identities.
+Lastcap-owned turn captures24→35 and own-action all-clear closures6→8.
+Max official tester wall .975→.979s, all200 legal/replay score identical.
+For context, same frozen global-clear practice reference scores
+2,117,108,303 with 30 all-clear and 706 exactly-four captures.
+
+Static caveat: if a partial final capture cut builds within an existing
+tube during the t180–224 late-hunt overlap, ordinary ready-state checks
+do not explicitly verify all four inner cells remain passable. Official
+replay verifies genuine shapes independently. Comparing existing records,
+all 235 animals across 222 planned dev v4 bank-lock turns and all 798
+animals across 758 planned practice v4 bank-lock turns match genuine
+area=4 first isolations at the identical action, with zero mismatches;
+the same holds for v2 in both cohorts. The flaw is a potential
+classification/eligibility issue, not an observed mismatch. No source
+change in this validation.
