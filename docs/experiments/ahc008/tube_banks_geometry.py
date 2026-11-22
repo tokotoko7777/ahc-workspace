@@ -33,6 +33,7 @@ def flood(start, wall):
 class Geometry:
     lanes: list
     banks: list
+    collar: bool=True
 
     def make(self):
         wall, tubes = set(), []
@@ -41,7 +42,8 @@ class Geometry:
             for start,k in runs:
                 assert 0 < start <= start+2*k < D-1 and k>0
                 for i in range(k+1):
-                    wall |= {(start+2*i,c) for c in range(a+1,b)}
+                    extra = 1 if self.collar else 2
+                    wall |= {(start+2*i,c) for c in range(a+extra,b-extra+1)}
                 for v in range(k):
                     r=start+2*v+1
                     pen={(r,c) for c in range(a+2,b-1)}
@@ -56,19 +58,19 @@ class Geometry:
 
 
 def run():
-    print('banks,tubes_per_bank,setup,actual_room_capacity,largest_aisle_component_if_all_shut,residual_area_if_10_cages,residual_area_if_15_cages,residual_area_if_20_cages')
+    print('collar,banks,tubes_per_bank,setup,actual_room_capacity,largest_aisle_component_if_all_shut,residual_area_if_10_cages,residual_area_if_15_cages,residual_area_if_20_cages')
     for B,ks in ((2,range(10,14)),(3,range(8,14)),(4,range(6,12))):
-        for k in ks:
+        for k,collar in product(ks,(True,False)):
             lanes=[(D-1-7*B)//2+7*x for x in range(B+1)]
             first=(D-1-2*k)//2
-            layout=Geometry(lanes,[[(first+(j%2),k)] for j in range(B)])
+            layout=Geometry(lanes,[[(first+(j%2),k)] for j in range(B)],collar)
             wall,tubes=layout.make()
-            assert len(wall)==6*B*(k+1)
+            assert len(wall)==(6 if collar else 4)*B*(k+1)
             assert len(tubes)==B*k
             union=set().union(*(t[0] for t in tubes))
             all_doors=set().union(*(t[1] for t in tubes))
             assert all(flood(next(iter(pen)),wall|all_doors)==pen for pen,_,_,_ in tubes)
             connected=flood((0,0),wall|all_doors)
             assert connected == BOARD-wall-union-all_doors
-            print(B,k,len(wall),len(tubes),len(connected),*[900-len(wall)-6*n for n in (10,15,20)],sep=',')
+            print(int(collar),B,k,len(wall),len(tubes),len(connected),*[900-len(wall)-6*n for n in (10,15,20)],sep=',')
 if __name__=='__main__':run()
