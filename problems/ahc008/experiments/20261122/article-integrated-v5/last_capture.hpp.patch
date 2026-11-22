@@ -1,0 +1,65 @@
+--- last_capture.hpp
++++ last_capture.hpp
+@@ -55,6 +55,46 @@
+   return v;
+  }
+ };
++// Exact minimum maximum ETA for a distinct worker per wall.
++using CrewCosts=std::array<std::array<int,10>,10>;
++inline int crewBottleneck(const CrewCosts& d,int gates,int people){
++ if(!gates)return 0;
++ if(gates>people)return INF;
++ const auto fits=[&](int budget){
++  std::array<int,10> occupied;occupied.fill(-1);
++  for(int j=0;j<gates;j++){
++   unsigned visited=0;
++   auto augment=[&](auto&& self,int v)->bool{
++    for(int i=0;i<people;i++)if(!(visited>>i&1)&&d[v][i]<=budget){
++     visited|=1u<<i;
++     if(occupied[i]<0||self(self,occupied[i])){occupied[i]=v;return true;}
++    }
++    return false;
++   };
++   if(!augment(augment,j))return false;
++  }
++  return true;
++ };
++ if(!fits(V-1))return INF;
++ int lo=-1,hi=V-1;
++ while(hi-lo>1){
++  int mid=(hi+lo)/2;
++  if(fits(mid))hi=mid;else lo=mid;
++ }
++ return hi;
++}
++inline int exteriorBuildEta(const Board& exterior,const std::vector<int>& cut,
++                     const std::vector<int>& humans){
++ CrewCosts d;
++ for(auto& a:d)a.fill(INF);
++ BFS b;
++ for(int i=0;i<(int)humans.size();i++){
++  b.run(humans[i],exterior);
++  for(int j=0;j<(int)cut.size();j++)for(int q:neighbors(cut[j]))
++   if(q>=0&&b.d[q]>=0)d[j][i]=std::min(d[j][i],b.d[q]);
++ }
++ return crewBottleneck(d,cut.size(),humans.size());
++}
+ struct Config{
+  int start=146, maxAttempt=48, maxTotal=96, maxWalls=30, minArea=185;
+  int retry=5, finalWait=9, maxPet=2;
+@@ -139,7 +179,14 @@
+    int dur=far+2+int((z.cut.size()*2+H-1)/H)+left/2;
+    if(dur>=horizon)continue;
+    z.cost=dur;
+-   z.value=(double(z.kept*(1<<z.trapped))-size)/(1.+.045*dur+.034*z.cut.size()+.012*near);
++   const double gain=double(z.kept*(1<<z.trapped))-size;
++   const auto value=[&](int t){return gain/(1.+.045*t+.034*z.cut.size()+.012*near);};
++   z.value=value(dur);
++   if(gain>=0&&z.value<=best.value)continue; // new ETA can only weaken this bound
++   if(z.cut.size()<=humans.size()){
++    int real=exteriorBuildEta(z.can,z.cut,humans);
++    if(real<INF)z.value=value(std::max(dur,real+1));
++   }
+    if(z.value>best.value)best=std::move(z);
+   }
+   return best;
