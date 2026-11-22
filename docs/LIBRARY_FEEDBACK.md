@@ -158,3 +158,9 @@
 | 問題 | 部品 | 不便だった点 | 実際の回避策 | 改善案・対応状況 |
 |---|---|---|---|---|
 | AHC008 | 壁の設営計画、固定順序のタスク列 | 新しい柵を既存の列に足すと、その柵自体を後工程の足場にする既存タスクが5件失われた | 対象壁・担当・順序は維持し、予定柵と扉をすべて閉じても使える隣接足場だけへ移した | [作業位置を事前に移す提案](https://github.com/tokotoko7777/ahc-workspace/blob/67a3661cda7615fa16459629d29866401f76fe61/problems/ahc008/experiments/20261122/article-capture/terry-single-runs/REUSE_PROPOSAL.md)。旧失敗5件を含む35件の構築テスト合格。新盤面は別途得点で不採用。共通APIに未実装。 |
+
+### AHC008 固定グラフ向けCSR最大流
+
+| 問題 | 部品 | 不便だった点 | 実際の回避策 | 改善案・対応状況 |
+|---|---|---|---|---|
+| AHC008 | 固定トポロジーの最大流 | 固定グラフでも頂点ごとに隣接配列を割り当て、終端で連結側の探索を繰り返した | 隣接リストを連続配置し、流れが尽きた時の探索を最小カット側として再利用 | [独立したC++23部品・例・全列挙照合](https://github.com/tokotoko7777/ahc-workspace/blob/fc87aefa93c32c4aa16cd6f5cbbfc1d30441215a/problems/ahc008/experiments/20261122/article-capture/terry-chase-csr/library-candidate/README.md)。小グラフ3,104通りと多重有向グラフ32,000通り、通常ビルドとUBSanで一致。終盤版への統合は固定試行で約25%高速化したが通常時計の得点で不採用。共通ライブラリ・mainは変更なし。 |
