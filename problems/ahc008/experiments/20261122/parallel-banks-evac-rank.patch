@@ -1,0 +1,78 @@
+--- problems/ahc008/experiments/20261122/parallel-banks-narrow-rescue-research.cpp
++++ problems/ahc008/experiments/20261122/parallel-banks-evac-rank.cpp
+@@ -447 +447,38 @@
+- pair<double,int> testLine(const vector<int>& line, int root, bool keep, int delay, int minArea = 6){
++ bool realEvacRank=false;
++ int erTurn=-1,erRoot=-1,erChecks=0,erChanges=0,erDeadline=0,erSelectedPaid=0;
++ array<vector<Bitboard::Rows>,10> erReach;
++ int exactCrewETA(int root,const Bitboard::Rows& retained,int base){
++  ++erChecks;
++  int limit=299-turn;
++  if(erTurn!=turn||erRoot!=root){
++   erTurn=turn;erRoot=root;
++   for(int i=0;i<int(humans.size());i++)if(!captiveHuman(i)&&group[humans[i]]==root){
++    auto &v=erReach[i];v.assign(limit+1,{});
++    for(int p=0;p<V;p++){
++     int d=workers[i].bfs.distance(p);
++     if(d>=0&&d<=limit)v[d][p/S]|=1u<<(p%S);
++    }
++    for(int d=1;d<=limit;d++)for(int y=0;y<S;y++)v[d][y]|=v[d-1][y];
++   }
++  }
++  int eta=base;
++  for(int i=0;i<int(humans.size());i++)if(!captiveHuman(i)&&group[humans[i]]==root){
++   int h=humans[i];
++   if(retained[h/S]>>(h%S)&1u)continue;
++   auto intersects=[&](int d){
++    for(int y=0;y<S;y++)if(retained[y]&erReach[i][d][y])return true;
++    return false;
++   };
++   if(intersects(eta))continue;
++   if(!intersects(limit)){++erDeadline;return limit+1;}
++   int lo=eta,hi=limit;
++   while(lo+1<hi){
++    int mid=(lo+hi)/2;
++    if(intersects(mid))hi=mid;else lo=mid;
++   }
++   eta=hi;
++  }
++  if(eta>base)++erChanges;
++  return eta;
++ }
++ pair<double,int> testLine(const vector<int>& line, int root, bool keep, int delay, int minArea = 6, Bitboard::Rows* rawKeep=nullptr){
+@@ -460 +497 @@
+-  int n;
++  int n;double bestRaw=0.;
+@@ -466,0 +504,10 @@
++   if(rawKeep&&n>=
++#ifdef AHC008_FLOOR_SIDE
++      max(6,minArea)
++#else
++      6
++#endif
++      ){
++    double objective=ldexp(n,-lanimals[labels]);
++    if(objective>bestRaw)bestRaw=objective,*rawKeep=piece;
++   }
+@@ -544 +591 @@
+-   double best=0.;
++   double best=0.;bool wasPaid=false;
+@@ -590 +637,2 @@
+-      auto [benefit,id]=testLine(w,root,false,eta,areaReq);
++      Bitboard::Rows rawSide{};
++      auto [benefit,id]=testLine(w,root,false,eta,areaReq,realEvacRank?&rawSide:nullptr);
+@@ -601,0 +650,5 @@
++      const int oldEta=eta;
++      if(realEvacRank){
++       eta=exactCrewETA(root,rawSide,eta);
++       if(turn+eta>=300)continue;
++      }
+@@ -604 +657 @@
+-      if(v>best){best=v;lineId=j;lineBase=i;line.at=e;lineH=root;lineStart=turn;toBuild=move(w);}
++      if(v>best){best=v;lineId=j;lineBase=i;line.at=e;lineH=root;lineStart=turn;toBuild=move(w);wasPaid=eta>oldEta;}
+@@ -662,0 +716 @@
++   if(lineId>=0&&wasPaid)++erSelectedPaid;
+@@ -1785,0 +1840 @@
++ g.realEvacRank=argc>4&&atoi(argv[4])!=0;
+@@ -1792,0 +1848 @@
++ if(const char *p=getenv("AHC008_EVAC_RANK_LOG")){ofstream f(p);f<<g.erChecks<<" "<<g.erChanges<<" "<<g.erDeadline<<" "<<g.erSelectedPaid<<"\n";}
