@@ -1,0 +1,14 @@
+{
+  "verified": 30,
+  "screened": 19,
+  "geometries": 14,
+  "geo_cases": 9,
+  "ready_by_deadline": 14,
+  "cases_by_deadline": 9,
+  "new_gt_crew": 14,
+  "new_cases": 9,
+  "static_unblocked_new": 11,
+  "observed_resident_new": 3,
+  "observed_always_resident_new": 0,
+  "observed_resident_and_legal_new": 0
+}
