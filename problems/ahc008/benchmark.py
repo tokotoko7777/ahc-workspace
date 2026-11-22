@@ -47,7 +47,7 @@ def inside(p):
     return 1 <= p[0] <= 30 and 1 <= p[1] <= 30
 
 
-def replay(case, trace, commands, *, detailed=False, topology=False, snapshots=None, interval=50):
+def replay(case, trace, commands, *, detailed=False, topology=False, snapshots=None, interval=50, final_components=None):
     f = iter(case.splitlines())
     pet_rows = [tuple(map(int, next(f).split())) for _ in range(int(next(f)))]
     pets = [row[:2] for row in pet_rows]
@@ -110,10 +110,11 @@ def replay(case, trace, commands, *, detailed=False, topology=False, snapshots=N
         if snapshots and (turn % interval == 0 or turn == 300):
             snapshot(turn)
     component = {}
+    groups = []
 
     def visit(start):
         if start in component:
-            return component[start]
+            return groups[component[start]]
         todo = [start]
         seen = {start}
         while todo:
@@ -124,7 +125,8 @@ def replay(case, trace, commands, *, detailed=False, topology=False, snapshots=N
                     seen.add(q)
                     todo.append(q)
         stats = (len(seen), sum(p in seen for p in pets))
-        component.update((p, stats) for p in seen)
+        component.update((p, len(groups)) for p in seen)
+        groups.append(stats)
         return stats
     values = [visit(h) for h in humans]
     n = len(pets)
@@ -139,10 +141,20 @@ def replay(case, trace, commands, *, detailed=False, topology=False, snapshots=N
     fraction, integral = modf(1e8 * score_sum / len(values))
     score = int(integral) + (fraction >= 0.5)
     assert abs(score - exact_score) <= 1
-    if topology:
-        largest = max(visit(p)[0] for p in ((r,c) for r in range(1,31) for c in range(1,31))
-                      if p not in blocked)
-        return score, values, len(blocked), largest
+    if topology or final_components:
+        for r in range(1, 31):
+            for c in range(1, 31):
+                p = r, c
+                if p not in blocked:
+                    visit(p)
+        if final_components:
+            counts = [0] * len(groups)
+            for h in humans:
+                counts[component[h]] += 1
+            final_components([(h, area, npets)
+                              for h, (area, npets) in zip(counts, groups, strict=True)])
+        if topology:
+            return score, values, len(blocked), max(a for a, _ in groups)
     if detailed:
         return score, values, len(blocked)
     return score, values[0][0], values[0][1], len(blocked)

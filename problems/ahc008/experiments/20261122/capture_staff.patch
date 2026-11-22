@@ -1,0 +1,82 @@
+diff --git a/problems/ahc008/capture_first_submission.cpp b/problems/ahc008/capture_staff.cpp
+index 0950f01..9c6c2bc 100644
+--- a/problems/ahc008/capture_first_submission.cpp
++++ b/problems/ahc008/capture_staff.cpp
+@@ -1227,16 +1227,76 @@ struct Game {
+    roomTarget=pick;roomAge=turn;
+   }
+   if(!roomTarget)return false;
++#ifndef CAP_CONCURRENT_STAFF
++#define CAP_CONCURRENT_STAFF 1
++#endif
++#ifndef CAP_STAFF_INSIDE
++#define CAP_STAFF_INSIDE 0
++#endif
++#ifndef CAP_STAFF_SLACK
++#define CAP_STAFF_SLACK 2
++#endif
++  array<int,10> staged;staged.fill(-1);
++  if(CAP_CONCURRENT_STAFF&&!overBudget()){
++   int outside=0,travelETA=0;
++   for(int i=0;i<m;i++)if(!captiveHuman(i)){
++    int p=humans[i],j=rcell[p];
++    if(j>=0&&(roomTarget>>j&1))continue;
++    int d=999;
++    for(int w=roomTarget;w;w&=w-1)d=min(d,nearest[i][countr_zero((unsigned)w)]);
++    outside++;travelETA=max(travelETA,d);
++   }
++   if(outside&&travelETA<999){
++    vector<vector<array<int,3>>> opts;
++    bool app=true;
++    for(auto [p,e]:aperture)if((e&roomTarget)&&(e&~roomTarget)){
++     vector<array<int,3>> group;
++     for(int i=0;i<m;i++)if(!captiveHuman(i)){
++      int hr=rcell[humans[i]];
++      if(CAP_STAFF_INSIDE&&(hr<0||!(roomTarget>>hr&1)))continue;
++      int eta=999,pos0=-1;
++      for(int q:nb[p])if(q>=0&&!wall[q]&&rcell[q]>=0&&(roomTarget>>rcell[q]&1)){
++       int d=workers[i].bfs.distance(q);
++       if(CAP_STAFF_INSIDE&&d>0){int u=workers[i].bfs.first_step(q);if(u<0||rcell[u]<0||!(roomTarget>>rcell[u]&1))continue;}
++       if(d>=0&&d<eta){eta=d;pos0=q;}
++      }
++      if(pos0>=0&&eta<=travelETA+CAP_STAFF_SLACK)group.push_back({eta,i,pos0});
++     }
++     if(group.empty()){app=false;break;}
++     sort(group.begin(),group.end());
++     opts.push_back(move(group));
++    }
++    if(app&&!opts.empty()&&opts.size()<=6u&&opts.size()<=humans.size()){
++     sort(opts.begin(),opts.end(),[](auto& x,auto& y){return x.size()<y.size();});
++     int best=99999,calls=0;
++     array<int,10> state;state.fill(-1);
++     auto use=[&](auto&& self,int k,int used,int sum,int mx)->void{
++      if(++calls>1200||sum+mx*13>=best)return;
++      if(k==(int)opts.size()){best=sum+mx*13;staged=state;return;}
++      for(auto [d,i,q]:opts[k])if(!(used>>i&1)){
++       state[i]=q;self(self,k+1,used|(1<<i),sum+d,max(mx,d));state[i]=-1;
++      }
++     };
++     use(use,0,0,0,0);
++    }
++   }
++  }
+   int humansOut=0;
+   for(int i=0;i<m;i++)if(!captiveHuman(i)){
+    int p=humans[i],j=rcell[p];
+-   if(j>=0&&(roomTarget>>j&1))continue;
++   if(j>=0&&(roomTarget>>j&1)){
++    if(staged[i]>=0&&staged[i]!=p){
++     int q=workers[i].bfs.first_step(staged[i]);if(q>=0&&q!=p)act[i]=MOVE[dir(p,q)];
++    }
++    continue;
++   }
+    humansOut++;
+    int best=999,q=-1;
+    for(int w=roomTarget;w;w&=w-1){
+     int k=countr_zero((unsigned)w);
+     if(nearest[i][k]<best)best=nearest[i][k],q=anchor[i][k];
+    }
++   if(staged[i]>=0)q=staged[i];
+    if(q>=0){
+     int r=workers[i].bfs.first_step(q);if(r>=0&&r!=p)act[i]=MOVE[dir(p,r)];
+    }

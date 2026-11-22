@@ -1,0 +1,75 @@
+diff --git a/problems/ahc008/capture_first_submission.cpp b/problems/ahc008/capture_expand.cpp
+index 0950f01..0d2440e 100644
+--- a/problems/ahc008/capture_first_submission.cpp
++++ b/problems/ahc008/capture_expand.cpp
+@@ -1246,6 +1246,70 @@ struct Game {
+   for(auto [p,edges]:aperture)if((edges&roomTarget)&&(edges&~roomTarget))targets.emplace_back(p,130);
+   if(targets.empty()){roomTarget=0;return false;}
+   act=roomBuild(targets,roomTarget,true);
++#ifndef CAP_QUICK_EXPAND
++#define CAP_QUICK_EXPAND 1
++#endif
++  if(CAP_QUICK_EXPAND&&!overBudget()){
++   Bitboard::Rows live{};
++   for(int p=0;p<V;p++)if(group[p]==root)live[p/S]|=1U<<(p%S);
++   auto scoreReady=[&](Bitboard::Rows rows,const vector<int>& hs){
++    Bitboard::Rows piece{};
++    int n=0;
++    while(Bitboard::pop_first(rows,piece,n)){
++     int h=hs[0];
++     if(!(piece[h/S]>>(h%S)&1U))continue;
++     for(int q:hs)if(!(piece[q/S]>>(q%S)&1U))return 0;
++     for(auto pet:pets)if(piece[pet.p/S]>>(pet.p%S)&1U)return 0;
++     return n;
++    }
++    return 0;
++   };
++   vector<int> hp=humans;
++   auto after=live;
++   for(int i=0;i<m;i++)if(act[i]!='.'){
++    int h=humans[i];
++    if(act[i]>='a'){int p=nb[h][find(BUILD,BUILD+4,act[i])-BUILD];after[p/S]&=~(1U<<(p%S));}
++    else hp[i]=nb[h][find(MOVE,MOVE+4,act[i])-MOVE];
++   }
++   int best=scoreReady(after,hp);
++   if(best>0||(CAP_QUICK_EXPAND>=2&&turn>=235)){
++    int other=valid&~petmask&~roomTarget;
++    for(int add=other;add;add=(add-1)&other){
++     int mask=add|roomTarget;
++     if(!good(mask))continue;
++     int predicted=0;
++     for(int w=mask;w;w&=w-1)predicted+=area[countr_zero((unsigned)w)];
++     if(predicted+10<best)continue;
++     vector<pair<int,int>> gates;
++     auto blocked=live;
++     bool reject=false;
++     for(auto [p,e]:aperture)if((mask&e)&&(e&~mask)){
++      if(block[p]){reject=true;break;}
++      int people=0;
++      for(int i=0;i<m;i++)if(dir(humans[i],p)>=0)people|=1<<i;
++      if(!people){reject=true;break;}
++      gates.emplace_back(p,people);blocked[p/S]&=~(1U<<(p%S));
++     }
++     if(reject||gates.empty()||gates.size()>size_t(m))continue;
++     int val=scoreReady(blocked,humans);
++     if(val<=best)continue;
++     sort(gates.begin(),gates.end(),[](auto a,auto b){return popcount((unsigned)a.second)<popcount((unsigned)b.second);});
++     string next(m,'.');
++     auto seat=[&](auto&& self,int k,int used)->bool{
++      if(k==(int)gates.size())return true;
++      auto [p,opts]=gates[k];
++      for(int bit=opts&~used;bit;bit&=bit-1){
++       int pick=bit&-bit,i=countr_zero((unsigned)pick);
++       if(self(self,k+1,used|pick)){next[i]=BUILD[dir(humans[i],p)];return true;}
++      }
++      return false;
++     };
++     if(seat(seat,0,0)){
++      best=val;act=next;
++     }
++    }
++   }
++  }
+   return count(act.begin(),act.end(),'.')<m;
+  }
+  string plan(){

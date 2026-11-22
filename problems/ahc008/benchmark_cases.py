@@ -55,7 +55,7 @@ def playback(actions_file, trace_file):
         assert num == 300
 
 
-def evaluate(tester, binary, case, trace, timeout, snapshots=None, interval=50):
+def evaluate(tester, binary, case, trace, timeout, snapshots=None, interval=50, final_components=None):
     out, err, rc, wall = run([tester, binary], case, timeout)
     match = re.fullmatch(rb"Score = (\d+)\s*", err)
     if rc is None:
@@ -72,7 +72,8 @@ def evaluate(tester, binary, case, trace, timeout, snapshots=None, interval=50):
         raise RuntimeError(f"recorded-action playback disagrees for {binary}: {check_rc}, {check_err[:300]!r}")
     commands = [x for x in out.decode().splitlines() if not x.startswith("#")]
     score, humans, walls, largest = replay(case.decode(), trace.read_text().splitlines(),
-                                           commands, topology=True, snapshots=snapshots, interval=interval)
+                                           commands, topology=True, snapshots=snapshots, interval=interval,
+                                           final_components=final_components)
     if score != int(match[1]):
         raise RuntimeError(f"independent score {score} differs from tester {match[1]!r}")
     return score, wall, humans, walls, largest, hashlib.sha256(out).hexdigest(), "ok"
@@ -87,6 +88,7 @@ def main():
     p.add_argument("--count", type=int, default=100)
     p.add_argument("--timeout", type=float, default=3.0)
     p.add_argument("--telemetry", type=Path)
+    p.add_argument("--capture-topology", type=Path, help="write terminal capture area metrics to this extra CSV")
     p.add_argument("--interval", type=int, default=50)
     a = p.parse_args()
     if a.interval <= 0 or a.count <= 0:
@@ -101,6 +103,7 @@ def main():
     if len(cases) != a.count:
         p.error(f"expected {a.count} case files, got {len(cases)}")
     telemetry = []
+    capture_rows = []
     data = {k: [] for k in models}
     digest = hashlib.sha256()
     with tempfile.TemporaryDirectory() as td, a.csv.open("x", newline="") as f:
@@ -117,9 +120,19 @@ def main():
                 def collect(turn, groups):
                     telemetry.append({"case": case_path.name, "model": label, "turn": turn,
                                       "groups": groups})
+                def collect_capture(groups):
+                    capture_rows.append((case_path.name, label, sum(h > 0 for h, _, _ in groups),
+                        sum(area for h, area, k in groups if h and not k),
+                        sum(area for h, area, k in groups if k and not h),
+                        sum(area for h, area, k in groups if h and k),
+                        sum(k for h, _, k in groups if h),
+                        sum(k for h, _, k in groups if not h),
+                        max((area for h, area, k in groups if k and not h), default=0),
+                        json.dumps(groups, separators=(",", ":"))))
                 score, wall, people, walls, largest, action_sha, status = evaluate(a.tester.resolve(), models[label],
                     case, Path(td) / "relay.txt", a.timeout,
-                    snapshots=collect if a.telemetry else None, interval=a.interval)
+                    snapshots=collect if a.telemetry else None, interval=a.interval,
+                    final_components=collect_capture if a.capture_topology else None)
                 free = sum(k == 0 for _, k in people)
                 all_free = bool(people) and free == len(people)
                 h = len(people)
@@ -134,6 +147,13 @@ def main():
         with a.telemetry.open("x") as tf:
             for row in telemetry:
                 tf.write(json.dumps(row, separators=(",", ":"))+"\n")
+    if a.capture_topology:
+        with a.capture_topology.open("x", newline="") as cf:
+            cw = csv.writer(cf, lineterminator="\n")
+            cw.writerow(("case", "model", "human_components", "distinct_safe_area",
+                "distinct_pet_only_area", "distinct_mixed_area", "distinct_residual_pets",
+                "isolated_pets", "largest_pet_only_area", "groups_humans_area_pets"))
+            cw.writerows(capture_rows)
     report = {"case_count": len(cases), "case_set_sha256": digest.hexdigest(), "models": {}}
     base = next(iter(models))
     for label, rows in data.items():

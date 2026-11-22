@@ -1,0 +1,189 @@
+diff --git a/problems/ahc008/capture_first_submission.cpp b/problems/ahc008/room_harvest.cpp
+index 0950f01..98c74a3 100644
+--- a/problems/ahc008/capture_first_submission.cpp
++++ b/problems/ahc008/room_harvest.cpp
+@@ -1071,16 +1071,34 @@ struct Game {
+  }
+ 
+ #ifndef CAP_GRID
+-#define CAP_GRID 4
++#define CAP_GRID 3
+ #endif
+ #ifndef CAP_READY
+-#define CAP_READY 150
++#define CAP_READY 155
+ #endif
+ #ifndef CAP_START
+-#define CAP_START 150
++#define CAP_START 165
+ #endif
+ #ifndef CAP_DOG
+-#define CAP_DOG 0
++#define CAP_DOG 1
++#endif
++#ifndef CAP_HARVEST
++#define CAP_HARVEST 0
++#endif
++#ifndef CAP_HARVEST_TO
++#define CAP_HARVEST_TO 247
++#endif
++#ifndef CAP_LAYOUT
++#define CAP_LAYOUT 0
++#endif
++#ifndef CAP_FLOOR
++#define CAP_FLOOR 0
++#endif
++#ifndef CAP_LAYOUT
++#define CAP_LAYOUT 0
++#endif
++#ifndef CAP_FLOOR_DECAY
++#define CAP_FLOOR_DECAY 2
+ #endif
+ #ifndef CAP_RET
+ #define CAP_RET 8
+@@ -1100,17 +1118,80 @@ struct Game {
+    starts[i]=i?((30*i)/n+1):0;
+    ends[i]=i==n-1?29:(30*(i+1))/n-1;
+   }
++  vector<int> cols=starts,cend=ends;
++  if(CAP_LAYOUT&&n==4){
++   vector<array<int,4>> sizes;
++   for(int a=4;a<=10;a++)for(int b=4;b<=10;b++)for(int c=4;c<=10;c++){
++    int d=27-a-b-c;
++    if(d<4||d>10)continue;
++    if(CAP_LAYOUT==1&&max({a,b,c,d})-min({a,b,c,d})>4)continue;
++    if(CAP_LAYOUT==2&&max({a,b,c,d})<9)continue;
++    sizes.push_back({a,b,c,d});
++   }
++   array<double,V> heat{};
++   for(auto pet:pets){
++    vector<pair<int,double>> ww;
++    double norm=0;
++    double sig=pet.t==1?4.:pet.t==2?5.7:pet.t==3?6.5:6.;
++    for(int q=0;q<V;q++){
++     double dx=q/S-pet.p/S,dy=q%S-pet.p%S;
++     double m=exp(-(dx*dx+dy*dy)/(2*sig*sig));
++     if(pet.t==4){
++      double h=0.;
++      for(int p:humans){double x=q/S-p/S,y=q%S-p%S;h+=exp(-(x*x+y*y)/68.0);}
++      m=.45*m+.55*h/humans.size();
++     }
++     norm+=m;ww.emplace_back(q,m);
++    }
++    for(auto [q,w]:ww)heat[q]+=w/norm;
++   }
++   double ps[31][31]{};
++   for(int x=0;x<S;x++)for(int y=0;y<S;y++)
++    ps[x+1][y+1]=heat[pos(x,y)]+ps[x][y+1]+ps[x+1][y]-ps[x][y];
++   auto rect=[&](int r,int c,int b,int d){return ps[b][d]-ps[r][d]-ps[b][c]+ps[r][c];};
++   double best=-1;
++   for(auto x:sizes)for(auto y:sizes){
++    double z=0.;
++    int xx=0;
++    double mass[4][4];
++    for(int i=0;i<4;i++){
++     int yy=0;
++     for(int j=0;j<4;j++){
++      mass[i][j]=rect(xx,yy,xx+x[i],yy+y[j]);yy+=y[j]+1;
++     }
++     xx+=x[i]+1;
++    }
++    for(int i=0;i<4;i++)for(int j=0;j<4;j++){
++     int a=x[i]*y[j];
++     z+=a*a*exp(-mass[i][j])*.96;
++     if(i<3){
++      int b=(x[i]+x[i+1])*y[j];
++      z+=b*b*exp(-mass[i][j]-mass[i+1][j])*.22;
++     }
++     if(j<3){
++      int b=x[i]*(y[j]+y[j+1]);
++      z+=b*b*exp(-mass[i][j]-mass[i][j+1])*.22;
++     }
++    }
++    if(z>best){best=z;
++     for(int i=0,r=0,c=0;i<4;i++){
++      starts[i]=r;ends[i]=r+x[i]-1;r+=x[i]+1;
++      cols[i]=c;cend[i]=c+y[i]-1;c+=y[i]+1;
++     }
++    }
++   }
++  }
+   for(int u=0;u<n;u++)for(int v=0;v<n;v++){
+    int id=u*n+v;
+-   for(int x=starts[u];x<=ends[u];x++)for(int y=starts[v];y<=ends[v];y++){
++   for(int x=starts[u];x<=ends[u];x++)for(int y=cols[v];y<=cend[v];y++){
+     rcell[pos(x,y)]=id;rarea[id]++;
+    }
+    if(u+1<n){
+-    int y=(starts[v]+ends[v])/2,p=pos(ends[u]+1,y);
++    int y=(cols[v]+cend[v])/2,p=pos(ends[u]+1,y);
+     rdooridx[p]=rdoor.size();rdoor.push_back({p,id,(u+1)*n+v});
+    }
+    if(v+1<n){
+-    int x=(starts[u]+ends[u])/2,p=pos(x,ends[v]+1);
++    int x=(starts[u]+ends[u])/2,p=pos(x,cend[v]+1);
+     rdooridx[p]=rdoor.size();rdoor.push_back({p,id,u*n+v+1});
+    }
+   }
+@@ -1185,6 +1266,52 @@ struct Game {
+   }
+   vector<int> roomAdj(rnr);
+   for(auto [p,mask]:aperture)for(int j=0;j<rnr;j++)if(mask>>j&1)roomAdj[j]|=mask;
++  if(CAP_HARVEST&&turn<CAP_HARVEST_TO){
++   int occupied=0;
++   for(int i=0;i<m;i++)if(!captiveHuman(i)){
++    int id=rcell[humans[i]];if(id>=0)occupied|=1<<id;
++    else for(int q:nb[humans[i]])if(q>=0&&rcell[q]>=0)occupied|=1<<rcell[q];
++   }
++   vector<int> eligible;
++   for(int i=0;i<rnr;i++)if(!(occupied>>i&1)&&pop[i]&&area[i])eligible.push_back(i);
++   Bitboard::Rows live{};
++   for(int p=0;p<V;p++)if(group[p]==root)live[p/S]|=1u<<(p%S);
++   double best=0.;
++   int picked=0;vector<pair<int,int>> tasks;
++   auto select=[&](int drop){
++    vector<pair<int,int>> gates;
++    auto open=live;int eta=0,ban=0;
++    for(auto [p,e]:aperture)if((drop&e)&&(e&~drop)){
++     int distance=999;
++     for(int j=0;j<m;j++)if(!captiveHuman(j))for(int q:nb[p])
++      if(q>=0&&!wall[q]&&(rcell[q]<0||!(drop>>rcell[q]&1))){
++       int d=workers[j].bfs.distance(q);if(d>=0)distance=min(distance,d);
++      }
++     eta=max(eta,distance);ban+=block[p];
++     gates.emplace_back(p,100);open[p/S]&=~(1u<<(p%S));
++    }
++    if(gates.empty()||gates.size()>size_t(3+CAP_HARVEST)||eta>10||ban>2)return;
++    Bitboard::Rows patch{};
++    int size=0,kept=0,np=0;
++    while(Bitboard::pop_first(open,patch,size)){
++     if(!(patch[humans[h0]/S]>>(humans[h0]%S)&1u))continue;
++     for(int i=0;i<m;i++)if(!captiveHuman(i)&&!(patch[humans[i]/S]>>(humans[i]%S)&1u))return;
++     kept=size;
++     for(auto pet:pets)np+=bool(patch[pet.p/S]>>(pet.p%S)&1u);
++     break;
++    }
++    int cap=animals-np,loss=currentCt[root]-kept;
++    if(cap<=0||kept<=0||loss>CAP_HARVEST*110) return;
++    double val=cap*22./(1.+eta*.16+gates.size()*.17+ban*.3+loss*.006);
++    if(val>best){best=val;picked=drop;tasks=move(gates);}
++   };
++   for(int i:eligible)select(1<<i);
++   if(CAP_HARVEST>=2)for(int i:eligible)for(int j:eligible)if(j>i&&(roomAdj[i]>>j&1))select((1<<i)|(1<<j));
++   if(picked){
++    auto proposed=roomBuild(tasks,valid&~picked,true);
++    if(count(proposed.begin(),proposed.end(),'.')<m){act=proposed;return true;}
++   }
++  }
+   auto good=[&](int bits){
+    if(!bits||bits&~valid||bits&petmask)return false;
+    int reached=bits&-bits;
+@@ -1213,6 +1340,8 @@ struct Game {
+      exit++;danger+=block[p];
+     }
+     if(!exit)continue;
++    const int minimum=max(0,CAP_FLOOR-max(0,turn-145)*CAP_FLOOR_DECAY);
++    if(ar<minimum)continue;
+     int travel=0,maxd=0;
+     for(int i=0;i<m;i++)if(!captiveHuman(i)){
+      int d=999;

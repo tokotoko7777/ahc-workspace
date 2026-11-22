@@ -1,0 +1,105 @@
+diff --git a/problems/ahc008/capture_first_submission.cpp b/problems/ahc008/capture_synchronous.cpp
+index 0950f01..9c5cb37 100644
+--- a/problems/ahc008/capture_first_submission.cpp
++++ b/problems/ahc008/capture_synchronous.cpp
+@@ -1091,6 +1091,16 @@ struct Game {
+  array<int,V> rcell{}, rdooridx{};
+  int rarea[16]{}, rnr=0, roomTarget=0, roomAge=-1000;
+  bool roomReady=false, roomGot=false;
++ int penRoom=-1, penSince=-1000, penCount=0;
++#ifndef CAP_PEN_START
++#define CAP_PEN_START 70
++#endif
++#ifndef CAP_PEN_END
++#define CAP_PEN_END 223
++#endif
++#ifndef CAP_PEN_MIN
++#define CAP_PEN_MIN 2
++#endif
+  void createRooms(){
+   roomReady=true;rcell.fill(-1);rdooridx.fill(-1);
+   int n=CAP_GRID, nr=n*n;
+@@ -1185,6 +1195,83 @@ struct Game {
+   }
+   vector<int> roomAdj(rnr);
+   for(auto [p,mask]:aperture)for(int j=0;j<rnr;j++)if(mask>>j&1)roomAdj[j]|=mask;
++  if(turn>=CAP_PEN_START&&turn<CAP_PEN_END){
++   struct PenChoice{int room,cap,loss,eta; vector<array<int,3>> jobs;};
++   auto choosePen=[&](int dropped)->optional<PenChoice>{
++    if(pop[dropped]<CAP_PEN_MIN)return nullopt;
++    for(int h:humans)if(rcell[h]==dropped)return nullopt;
++    auto clear=Bitboard::Rows{};
++    for(int p=0;p<V;p++)if(group[p]==root)clear[p/S]|=1U<<(p%S);
++    vector<int> gates;
++    for(auto [p,e]:aperture)if((e>>dropped&1)&&(e&~(1<<dropped))){
++     gates.push_back(p);clear[p/S]&=~(1U<<(p%S));
++    }
++    if(gates.empty()||gates.size()>4u||gates.size()>humans.size())return nullopt;
++    Bitboard::Rows piece{};
++    int a=0,remain=0,remainPets=0;
++    while(Bitboard::pop_first(clear,piece,a)){
++     int h=humans[h0];if(!(piece[h/S]>>(h%S)&1U))continue;
++     for(int p:humans)if(!(piece[p/S]>>(p%S)&1U))return nullopt;
++     for(auto p:pets)remainPets+=bool(piece[p.p/S]>>(p.p%S)&1U);
++     remain=a;break;
++    }
++    int cap=animals-remainPets,loss=currentCt[root]-remain;
++    if(cap<CAP_PEN_MIN||remain==0||loss>90)return nullopt;
++    vector<vector<array<int,4>>> options(gates.size());
++    for(int k=0;k<(int)gates.size();k++){
++     int w=gates[k];
++     for(int i=0;i<m;i++){
++      int bd=999,bp=-1;
++      for(int p:nb[w])if(p>=0&&(piece[p/S]>>(p%S)&1U)){
++       int d=workers[i].bfs.distance(p);if(d>=0&&d<bd)bd=d,bp=p;
++      }
++      if(bp>=0&&bd<=11)options[k].push_back({bd,i,w,bp});
++     }
++     if(options[k].empty())return nullopt;
++     sort(options[k].begin(),options[k].end());
++    }
++    vector<array<int,3>> job,best;
++    int bestKey=99999,bestETA=99;
++    auto assign=[&](auto&& self,int k,int used,int sum,int mx)->void{
++     if(mx*12+sum>=bestKey)return;
++     if(k==(int)options.size()){bestKey=mx*12+sum;bestETA=mx;best=job;return;}
++     for(auto [d,i,w,p]:options[k])if(!(used>>i&1)){
++      job.push_back({i,w,p});self(self,k+1,used|(1<<i),sum+d,max(mx,d));job.pop_back();
++     }
++    };
++    assign(assign,0,0,0,0);
++    if(best.empty())return nullopt;
++    return PenChoice{dropped,cap,loss,bestETA,move(best)};
++   };
++   optional<PenChoice> pick;
++   if(penRoom>=0&&turn-penSince<13)pick=choosePen(penRoom);
++   if(!pick){
++    double best=-1.;
++    for(int j=0;j<rnr;j++)if(pop[j]>=CAP_PEN_MIN){
++     auto candidate=choosePen(j);
++     if(!candidate)continue;
++     double v=candidate->cap*20./(1.+candidate->eta*.22+candidate->loss*.005+candidate->jobs.size()*.12);
++     if(v>best){best=v;pick=move(candidate);}
++    }
++    if(pick){penRoom=pick->room;penSince=turn;}
++   }
++   if(pick){
++    bool close=true;
++    for(auto [i,w,p]:pick->jobs)close&=humans[i]==p&&!block[w];
++    if(close){
++     for(auto [i,w,p]:pick->jobs)act[i]=BUILD[dir(p,w)];
++     penRoom=-1;penCount++;
++     return true;
++    }
++    if(turn-penSince<12){
++     int moving=0;
++     for(auto [i,w,p]:pick->jobs)if(humans[i]!=p){
++      int q=workers[i].bfs.first_step(p);if(q>=0&&q!=humans[i])act[i]=MOVE[dir(humans[i],q)],moving++;
++     }
++     if(moving||turn-penSince<3)return true;
++    }
++   }
++  }
+   auto good=[&](int bits){
+    if(!bits||bits&~valid||bits&petmask)return false;
+    int reached=bits&-bits;
