@@ -99,3 +99,14 @@ g++ -std=c++23 problems/ahc008/mincut_terminal_submission.cpp -o mincut_terminal
 The separate terminal lateflow experiment instead added irregular min-cut boundaries to straight/diagonal seam candidates. It improved frozen generated100 from `1,483,627,404` to `1,499,386,783`, but it regressed practice100 from `1,338,602,186` to `1,271,033,404`; not adopted. See corresponding replay CSV/JSON and source diff `lateflow.patch` against the verified accelerated v2. Two opposed-gate shared-wall tunnels, rolling thin chambers, and simultaneous dog/other-animal work crews also fell below the development control.
 
 On distributed practice100, accelerated v2 `1,338,602,186` → terminal `1,343,054,260` (8 wins, 92 ties, 100/100 legal, max 0.419332 s). The direct prefix comparison confirmed 100 identical first-299-action sequences.
+
+### Best distributed-practice snapshot: accelerated Flex + terminal
+
+The same exact terminal optimizer applied to the accelerated Flex base gives `flex_terminal_submission.cpp` (GNU C++23, standalone). Official v3 tester plus independent recorded-action replay:
+
+| 100-case set | Accelerated Flex | Flex + terminal | Wins / losses | Max direct tester wall |
+|---|---:|---:|---:|---:|
+| Frozen generated | 1,453,107,690 | **1,460,793,810** | 13 / 0 | 0.499905 s |
+| Distributed practice | 1,459,735,698 | **1,465,133,201** | 11 / 0 | 0.450158 s |
+
+All 200 runs are legal. This is 4,798,200,135 below the requested practice reference and does not satisfy the merge threshold. The score comparisons are local and set-specific; no AtCoder submission and no merge were made. The original v2, flexible alternative, and both exact terminal variants remain separately versioned for further research. Main unresolved issue is the inherent area lost in isolation, not execution time.
