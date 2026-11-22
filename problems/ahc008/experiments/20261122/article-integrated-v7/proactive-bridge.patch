@@ -1,0 +1,144 @@
+--- integrated.cpp
++++ integrated.cpp
+@@ -1795,6 +1795,79 @@
+   return out;
+  }
+  static int comp(int a,const array<int,V>& group){return group[a];}
++ struct Crossing {
++  int actor=-1,tube=-1;
++  array<int,8> route{};
++  bool retreat=false;
++  bool reserves(int t)const{return actor>=0&&tube==t;}
++ };
++ Crossing crossing;
++ struct BridgeReport{int turn,kind,worker,tube,from,to,supply;};
++ vector<BridgeReport> bridgeReport;
++ void continueBridge(bitset<V>& used,bitset<V>& moveTo){
++  if(crossing.actor<0)return;
++  auto &c=crossing;
++  const int h=c.actor,x=humans[h];
++  int k=find(c.route.begin(),c.route.end(),x)-c.route.begin();
++  if(k==8||k==7||(k==0&&c.retreat)){
++   bridgeReport.push_back({turn,k==7?1:2,h,c.tube,x,x,0});
++   c.actor=c.tube=-1;return;
++  }
++  if(!c.retreat&&any_of(c.route.begin()+k+1,c.route.end(),[&](int p){return wall[p];})){
++   if(k==0){
++    bridgeReport.push_back({turn,2,h,c.tube,x,x,0});
++    c.actor=c.tube=-1;return;
++   }
++   c.retreat=true;
++  }
++  int p=c.route[k+(c.retreat?-1:1)];
++  used[h]=true;
++  if(!wall[p]){
++   act[h]=MOVE[dir(x,p)];moveTo[p]=true;
++   bridgeReport.push_back({turn,3,h,c.tube,x,p,0});
++  }else bridgeReport.push_back({turn,4,h,c.tube,x,x,0}); // defensive only
++ }
++ void maybeStartBridge(const vector<int>& ready,bitset<V>& used,
++     const bitset<V>& build,bitset<V>& moveTo,const bitset<V>& pairedTubes){
++  if(crossing.actor>=0||turn<101||turn>152||
++     any_of(ready.begin(),ready.end(),[](int q){return !q;}))return;
++  const auto lane=[&](int p){return bankRot?p/S:p%S;};
++  array<bool,V> occ{};
++  array<int,S> pop{};
++  for(int p:humans)occ[p]=true,++pop[lane(p)];
++  for(Pet p:pets)occ[p.p]=true;
++  const auto open=[&](const TubeBank& q){
++   return !wall[q.g]&&!wall[q.k]&&!build[q.g]&&!build[q.k]&&
++    none_of(q.inner.begin(),q.inner.end(),[&](int p){return wall[p]||build[p];});
++  };
++  int best=0,i0=-1,m0=-1,dir0=0;
++  for(int i=0;i<int(banks.size());i++){
++   const auto& x=banks[i];
++   if(pairedTubes[i]||!open(x)||occ[x.g]||occ[x.k]||
++     any_of(x.inner.begin(),x.inner.end(),[&](int p){return occ[p];}))continue;
++   for(int a=0;a<2;a++){
++    int f=a?x.h:x.l,e=a?x.l:x.h;
++    if(pop[lane(e)]||pop[lane(f)]<2)continue;
++    int supply=0;
++    for(int j=0;j<int(banks.size());j++)if(j!=i&&open(banks[j])){
++     auto& y=banks[j];
++     supply+=((lane(y.l)==lane(e)&&md(y.l,e)<=3)||(lane(y.h)==lane(e)&&md(y.h,e)<=3));
++    }
++    if(supply<=best)continue;
++    for(int m=0;m<int(humans.size());m++)
++     if(!used[m]&&act[m]=='.'&&humans[m]==f){
++      best=supply;i0=i;m0=m;dir0=a;break;
++     }
++   }
++  }
++  if(i0<0)return;
++  const auto& x=banks[i0];
++  crossing={m0,i0,{x.l,x.g,x.inner[0],x.inner[1],x.inner[2],x.inner[3],x.k,x.h},false};
++  if(dir0)reverse(crossing.route.begin(),crossing.route.end());
++  bridgeReport.push_back({turn,0,m0,i0,crossing.route.front(),crossing.route.back(),best});
++  continueBridge(used,moveTo);
++ }
++
+  string integratedBankPlan(){
+   prep();
+   const int m=humans.size(),n=banks.size();
+@@ -1830,6 +1903,8 @@
+   }
+ 
+   if(turn>=bankRelease){integratedMode[turn]=4;dogPhase=9;return plan();}
++  continueBridge(usedPeople,moveTo);
++  bitset<V> pairedTubes;
+   vector<int> ready(n),enabled(n),count(n);
+   array<int,4> local{};int total=0;
+   for(int k=0;k<n;k++){
+@@ -1844,9 +1919,9 @@
+   integratedReady[turn]=total;
+   // Exact immediate closures as a distinct, unconditional optimization.
+   vector<vector<BankJob>> immediate(n),jobs(n);
+-  for(int k=0;k<n;k++)if(enabled[k]&&count[k]&&!block[banks[k].g]&&!block[banks[k].k]){
++  for(int k=0;k<n;k++)if(!crossing.reserves(k)&&enabled[k]&&count[k]&&!block[banks[k].g]&&!block[banks[k].k]){
+    const auto& x=banks[k];
+-   for(int a=0;a<m;a++)if(humans[a]==x.l)for(int b=0;b<m;b++)if(humans[b]==x.h)
++   for(int a=0;a<m;a++)if(!usedPeople[a]&&humans[a]==x.l)for(int b=0;b<m;b++)if(!usedPeople[b]&&humans[b]==x.h)
+     immediate[k].push_back({k,a,b,0,double(count[k])});
+   }
+   if(any_of(immediate.begin(),immediate.end(),[](const auto& x){return !x.empty();})){
+@@ -1870,7 +1945,7 @@
+    struct Pair{int a,b,d;};
+    vector<vector<Pair>> pairInfo(n);
+    int maxEta=0;
+-   for(int k=0;k<n;k++)if(ready[k]&&!wall[banks[k].g]&&!wall[banks[k].k]&&!build[banks[k].g]){
++   for(int k=0;k<n;k++)if(!crossing.reserves(k)&&ready[k]&&!wall[banks[k].g]&&!wall[banks[k].k]&&!build[banks[k].g]){
+     const auto& x=banks[k];
+     for(int a=0;a<m;a++)if(!usedPeople[a]&&paths[a].d[x.l]>=0&&paths[a].d[x.l]<=Horizon)
+      for(int b=0;b<m;b++)if(a!=b&&!usedPeople[b]&&paths[b].d[x.h]>=0&&paths[b].d[x.h]<=Horizon){
+@@ -1923,6 +1998,7 @@
+    previousTube.fill(-1);previousDoor.fill(-1);priorPlan=true;
+    if(any_of(jobs.begin(),jobs.end(),[](const auto& x){return !x.empty();})){
+     for(auto j:packBankJobs(jobs,partial?1:m/2)){
++     pairedTubes[j.tube]=true;
+      const auto& x=banks[j.tube];
+      for(auto [i,goal]:{pair{j.a,x.l},pair{j.b,x.h}}){
+       usedPeople[i]=true;previousTube[i]=j.tube;previousDoor[i]=goal;
+@@ -1958,7 +2034,10 @@
+     used[p]=true;usedPeople[i]=true;
+    }
+   }
+-  if(scheduled&&!partial)parkUnassigned(ready,paths,usedPeople,build,moveTo,service);
++  if(scheduled&&!partial){
++   maybeStartBridge(ready,usedPeople,build,moveTo,pairedTubes);
++   parkUnassigned(ready,paths,usedPeople,build,moveTo,service);
++  }
+   return act;
+  }
+  void parkUnassigned(const vector<int>& ready,const array<BankPath,10>& paths,bitset<V> usedPeople,
+@@ -2585,6 +2664,11 @@
+   for(int t=0;t<300;t++)if(g.integratedMode[t]||g.integratedReady[t]||g.integratedLocks[t])
+    f<<t<<" "<<g.integratedMode[t]<<" "<<g.integratedReady[t]<<" "<<g.integratedLocks[t]<<'\n';
+  }
++ if(const char* p=getenv("AHC008_BRIDGE_LOG")){
++  ofstream f(p);
++  for(const auto& e:g.bridgeReport)f<<e.turn<<" "<<e.kind<<" "<<e.worker<<" "<<e.tube<<" "<<e.from
++     <<" "<<e.to<<" "<<e.supply<<'\n';
++ }
+  if(const char* p=getenv("AHC008_GLOBAL_CLEAR_LOG")){
+   ofstream f(p);f<<stopTurn<<'\n';
+  }
