@@ -1,0 +1,15 @@
+{
+  "verified": 30,
+  "supports_missing_lane": 3497,
+  "support_states": 3497,
+  "support_cases": 30,
+  "sustainable_factual_opportunity_states": 1267,
+  "factual_witnesses": 99,
+  "factual_cases": 19,
+  "factual_event_ids": 73,
+  "factual_distinct_final_missed": 4,
+  "strict_witnesses": 62,
+  "strict_distinct_final_missed": 3,
+  "strict_final_missed_cases": 3,
+  "strict_gate_preserving_distinct": 3
+}
