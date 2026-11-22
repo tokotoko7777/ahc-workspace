@@ -1,0 +1,40 @@
+{
+  "case_count": 100,
+  "case_set_sha256": "172355e38ed8eec7e142f6786872ac46b3fbda2e6362c64bc483f5498d327324",
+  "models": {
+    "prior": {
+      "solver_sha256": "32ac0cc6da11628f8d5fbfb1e5ad62cdf2a403b2565ed1c28d6f54b7320fb8bb",
+      "score_sum": 1207401200,
+      "failed": 0,
+      "max_wall": 0.484818943999926,
+      "median_wall": 0.22136693649986228,
+      "pet_free_cases": 7,
+      "pet_free_humans": 472,
+      "observed_humans": 740,
+      "mean_pet_free_area": 159.614406779661,
+      "mean_human_area": 176.9756756756757,
+      "mean_reachable_pets": 1.3972972972972972,
+      "perfect_pet_exclusion_cap_with_fixed_humans": 1921313143,
+      "perfect_pet_exclusion_and_placement_cap": 4592888932,
+      "wins_vs_first": 0,
+      "losses_vs_first": 0
+    },
+    "thirds": {
+      "solver_sha256": "f9414de6f2d5479bb3a08dfa0fadb6a20c3ad1aa7757dec9701b8bda1ba966d3",
+      "score_sum": 1209418509,
+      "failed": 0,
+      "max_wall": 1.2746755699999994,
+      "median_wall": 0.29527517000019543,
+      "pet_free_cases": 5,
+      "pet_free_humans": 406,
+      "observed_humans": 740,
+      "mean_pet_free_area": 178.56650246305418,
+      "mean_human_area": 182.82027027027027,
+      "mean_reachable_pets": 1.4391891891891893,
+      "perfect_pet_exclusion_cap_with_fixed_humans": 1980589469,
+      "perfect_pet_exclusion_and_placement_cap": 4504666717,
+      "wins_vs_first": 49,
+      "losses_vs_first": 35
+    }
+  }
+}

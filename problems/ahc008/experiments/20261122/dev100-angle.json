@@ -1,0 +1,57 @@
+{
+  "case_count": 100,
+  "case_set_sha256": "a8ab949e83e685ae47ff3b3711116790bfba4093906774c9643c75f347559322",
+  "models": {
+    "prior": {
+      "solver_sha256": "32ac0cc6da11628f8d5fbfb1e5ad62cdf2a403b2565ed1c28d6f54b7320fb8bb",
+      "score_sum": 1756057674,
+      "failed": 0,
+      "max_wall": 0.47772922900003323,
+      "median_wall": 0.2272510665000027,
+      "pet_free_cases": 5,
+      "pet_free_humans": 545,
+      "observed_humans": 790,
+      "mean_pet_free_area": 206.64770642201836,
+      "mean_human_area": 210.37974683544303,
+      "mean_reachable_pets": 1.0367088607594936,
+      "perfect_pet_exclusion_cap_with_fixed_humans": 2344375143,
+      "perfect_pet_exclusion_and_placement_cap": 3960333386,
+      "wins_vs_first": 0,
+      "losses_vs_first": 0
+    },
+    "half": {
+      "solver_sha256": "af666e70d74d431c88ddf3099bf898137f2f0d6e97b0edc9e9e71d3daca2ca64",
+      "score_sum": 1693171758,
+      "failed": 0,
+      "max_wall": 0.6700731149999228,
+      "median_wall": 0.25599602750003214,
+      "pet_free_cases": 5,
+      "pet_free_humans": 487,
+      "observed_humans": 790,
+      "mean_pet_free_area": 211.52772073921972,
+      "mean_human_area": 213.09493670886076,
+      "mean_reachable_pets": 1.1240506329113924,
+      "perfect_pet_exclusion_cap_with_fixed_humans": 2362674041,
+      "perfect_pet_exclusion_and_placement_cap": 4040555603,
+      "wins_vs_first": 36,
+      "losses_vs_first": 37
+    },
+    "thirds": {
+      "solver_sha256": "f9414de6f2d5479bb3a08dfa0fadb6a20c3ad1aa7757dec9701b8bda1ba966d3",
+      "score_sum": 1785185703,
+      "failed": 0,
+      "max_wall": 1.544717958000092,
+      "median_wall": 0.3053160445001595,
+      "pet_free_cases": 6,
+      "pet_free_humans": 520,
+      "observed_humans": 790,
+      "mean_pet_free_area": 220.58461538461538,
+      "mean_human_area": 230.46962025316455,
+      "mean_reachable_pets": 1.259493670886076,
+      "perfect_pet_exclusion_cap_with_fixed_humans": 2567084446,
+      "perfect_pet_exclusion_and_placement_cap": 4057777824,
+      "wins_vs_first": 48,
+      "losses_vs_first": 32
+    }
+  }
+}
