@@ -1,0 +1,79 @@
+--- problems/ahc008/capture_first_submission.cpp
++++ problems/ahc008/capture_first_submission.cpp
+@@ -1248,6 +1248,63 @@
+   act=roomBuild(targets,roomTarget,true);
+   return count(act.begin(),act.end(),'.')<m;
+  }
++#ifdef AHC008_PARTIAL_TREE
++ // Fixed NW 2x2 macro tree: close 0--1, retain 0--4 as room 0's
++ // only operational portal. All post-cut membership is actual-grid BFS.
++ int treeSpent=0;
++ bool treeSeparable(int cycle,int gate,bitset<V>& interior){
++  int q=pos(3,3);
++  if(wall[q])return false;
++  array<int,V> work;
++  int end=1;work[0]=q;interior.set(q);
++  for(int i=0;i<end;i++)for(int n:nb[work[i]])if(n>=0&&!wall[n]&&!interior[n]&&n!=cycle&&n!=gate){
++   if(rcell[n]!=0)return false;
++   interior.set(n);work[end++]=n;
++  }
++  return true;
++ }
++ string partialTree(string baseline){
++  constexpr int maxDiversions=6, earliest=40, latest=122;
++  if(CAP_GRID!=4||!roomReady||roomTarget||turn<earliest||turn>latest||treeSpent>=maxDiversions)return baseline;
++  const int cycle=pos(3,7),gate=pos(7,3);
++  if(wall[gate])return baseline;
++  bitset<V> leaf;
++  if(!treeSeparable(cycle,gate,leaf))return baseline;
++  if(none_of(pets.begin(),pets.end(),[&](Pet p){return leaf[p.p];}))return baseline;
++  if(any_of(humans.begin(),humans.end(),[&](int p){return leaf[p];}))return baseline;
++  int targetWall=wall[cycle]?gate:cycle;
++  bitset<V> building,walking;
++  for(int i=0;i<int(humans.size());i++){
++   char c=baseline[i];if(c=='.')continue;
++   auto key=islower(c)?BUILD:MOVE;
++   int dst=nb[humans[i]][find(key,key+4,c)-key];
++   if(dst<0)continue;
++   if(islower(c))building.set(dst);else walking.set(dst);
++  }
++  if(walking[gate]||walking[cycle]||building[targetWall])return baseline;
++  for(int p=0;p<V;p++)if(leaf[p]&&walking[p])return baseline;
++  // At most one worker may be detached from normal scaffold work. Require
++  // a short route from the current outside, never traverse the target wall.
++  int best=1e9,who=-1,to=-1;
++  for(int i=0;i<int(humans.size());i++){
++   if(captiveHuman(i))continue;
++   int h=humans[i];
++   for(int stance:nb[targetWall])if(stance>=0&&!leaf[stance]&&!wall[stance]&&!building[stance]){
++    int dd=workers[i].bfs.distance(stance);
++    if(dd<0||dd>3||dd+1>maxDiversions-treeSpent)continue;
++    if(block[targetWall]&&dd==0)continue;
++    int step=dd==0?targetWall:workers[i].bfs.first_step(stance);
++    if(step<0||(dd&&(step==targetWall||step==gate||step==cycle||leaf[step]||building[step])))continue;
++    int pri=dd*5+(baseline[i]!='.')*3;
++    if(pri<best){best=pri;who=i;to=step;}
++   }
++  }
++  if(who<0)return baseline;
++  ++treeSpent;
++  baseline[who]=to==targetWall?BUILD[dir(humans[who],to)]:MOVE[dir(humans[who],to)];
++  return baseline;
++ }
++#endif
+  string plan(){
+   prep();
+ #ifdef AHC008_ADAPTIVE_FLEX
+@@ -1621,7 +1678,11 @@
+  ios::sync_with_stdio(false);cin.tie(nullptr);
+  Game g;g.init(argc,argv);
+  for(;g.turn<300;g.turn++){
+-  g.act=g.terminal(g.tacticalGate(g.repair(g.plan())));
++  string action=g.plan();
++#ifdef AHC008_PARTIAL_TREE
++  action=g.partialTree(move(action));
++#endif
++  g.act=g.terminal(g.tacticalGate(g.repair(move(action))));
+   cout<<g.act<<'\n'<<flush;
+   if(!g.advance())break;
+  }
