@@ -1475,3 +1475,7 @@ S字でも犬・猫を含め4マスに合法に隔離できた。各S字系列�
 
 - [独立カーネル](https://github.com/tokotoko7777/ahc-workspace/blob/56d74d64b862a5491347742204cc4f858a936cd0/problems/ahc008/experiments/20261122/article-capture/terry-chase-csr/RESULT.md): 通れないマスを除いたCSR最大流で、実戦再生175局面と合成300局面の流量・切断・行動が完全一致。行動決定のCPU−53.2%／−38.0%。
 - [100ケース×2の統合比較](https://github.com/tokotoko7777/ahc-workspace/blob/56d74d64b862a5491347742204cc4f858a936cd0/problems/ahc008/experiments/20261122/article-capture/terry-chase-csr/INTEGRATION.md): 同じ試行回数で全行動と得点一致、全体のCPU−25.64%／−25.10%。通常の時間制限では配布100のうち1件で方針が変わり、6,152,805,559→6,151,694,448点（全頭100件維持）。別生成100は+555,555点。高速化部品を保存し、得点版は変更しない。
+
+### AHC008: 固定8試行による終盤の判定は不採用（2026-11-23 JST）
+
+- 新規559ケースのうち275ターンで対象が残った最初の100件を[条件付きで比較](https://github.com/tokotoko7777/ahc-workspace/blob/387d14a9588b54a87f359a3041d4e67b4f6eddc6/problems/ahc008/experiments/20261122/article-capture/terry-terminal-k8/RESULT.md)。現行版5,258,994,445点（全頭78、有効77）、全件追い込み5,081,952,780点（79、75）、固定8組の平均による選択5,125,505,557点（74、73）。8組中7組以上勝つまで切り替えない案は4,705,611,111点（57、56）。いずれも配布100とは異なる条件で、切替ルール・得点版は変更しない。
