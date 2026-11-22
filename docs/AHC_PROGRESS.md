@@ -1431,3 +1431,11 @@ S字でも犬・猫を含め4マスに合法に隔離できた。各S字系列�
 | 公式配布100 | 6,093,833,333 → **6,152,805,559** | **98→100** | **2→0** |
 
 全600回で公式テスタ・公式再生・独立採点一致。配布の目標点までの数値差は110,527,777。次は全頭を維持して人の面積を増やす。本番と配布は別条件、順位未判定、mainは無変更。
+
+### AHC008 全頭捕獲後の面積改善：柵と配置選び
+
+[間仕切りの後回し](https://github.com/tokotoko7777/ahc-workspace/blob/3841bd49d09907146d44ffca1d8cc15df0acbfdf/problems/ahc008/experiments/20261122/article-capture/terry-brace-valves/TIMING_RESULT.md)は、採用版の未使用100の最終盤面では固定状態に限り平均10.88マスの余地があったが、現実の手順に沿って元の捕獲までに建てられるのは必要666件中440（66.1%）のみで実装採点なし。[門を1マス内側にする案](https://github.com/tokotoko7777/ahc-workspace/blob/51a7fdbf10ddac0a2ae75c25dacad2c2a80d18e4/problems/ahc008/experiments/20261122/article-capture/terry-inward-online/RESULT.md)も、事前の実装で選んだ238回のうち78回でだけ元の次手に合致し、50%基準を満たさず不採用。
+
+[人が分断される柵のうち一つを省く案](https://github.com/tokotoko7777/ahc-workspace/blob/64bc56e6ec73569843118ad922490b8fe823096c/problems/ahc008/experiments/20261122/article-capture/terry-chase-no-split/RESULT.md)は新規100で全手・得点一致、実際の省略は0件で不採用。[つながった人員の通路を保護する終盤カット](https://github.com/tokotoko7777/ahc-workspace/blob/31750ac463061814a6a755bb6ac1924c799003af/problems/ahc008/experiments/20261122/article-capture/terry-chase-tree-protect/RESULT.md)は、既存の独立テープ375状態に検証候補4件／2盤面で証拠数不足。どちらも配布は未実施。
+
+[既存5配置をすべて同一条件で比較した台帳](https://github.com/tokotoko7777/ahc-workspace/blob/328ed81d07400c36846cd7c39275fe02e6f2a942/problems/ahc008/experiments/20261122/article-capture/terry-area-map-atlas/RESULT.md)では、新規生成100×5を終盤切替なしで公式・独立採点。原配置でも全頭捕獲する盤面だけ、別の全頭配置を事後選択すると32盤面で合計1,193、全100平均11.93マスの余地。ただし元map2を一律map3に変えると全頭28→19。この試算は配置を実際に選ぶ方法でも、通常設定での得点更新でもない。次は因果的に観測できる初期の人配置と施工・配員順の条件で、安全な切替を検証。配布の最高は引き続き **6,152,805,559・全頭100**、mainは無変更。
