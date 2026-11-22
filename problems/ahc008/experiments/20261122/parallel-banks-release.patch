@@ -1,0 +1,9 @@
+--- problems/ahc008/tactical_gate_submission.cpp
++++ problems/ahc008/tactical_gate_submission.cpp
+@@ -1659,0 +1660 @@
++ if(argc>2&&atoi(argv[2])==275)g.bankRelease=275;
+@@ -1662 +1663,3 @@
+-  g.act=g.terminal(g.tacticalGate(g.repair(g.bankMode?g.bankPlan():g.plan())));
++  string q=g.repair(g.bankMode?g.bankPlan():g.plan());
++  if(!g.bankMode||g.turn>=g.bankRelease)q=g.tacticalGate(move(q));
++  g.act=g.terminal(q);
