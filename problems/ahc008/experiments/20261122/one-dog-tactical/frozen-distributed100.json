@@ -1,0 +1,263 @@
+{
+  "overall": {
+    "n": 100,
+    "score_w_t_l": [
+      9,
+      87,
+      4
+    ],
+    "byte_identical": 87,
+    "models": {
+      "original": {
+        "score": 1512932629,
+        "all_clear": 10,
+        "clear_humans": 419,
+        "humans": 736,
+        "area_all_human_mean": 117.00815217391305,
+        "distinct_safe_area": 13319,
+        "residual_species": [
+          68,
+          62,
+          64,
+          264,
+          51
+        ],
+        "exact4_species": [
+          0,
+          0,
+          3,
+          0,
+          0
+        ],
+        "wait_walk_build": [
+          78713,
+          130485,
+          11602
+        ],
+        "prefix": {
+          "": 0,
+          "wall": 0,
+          "guard": 0,
+          "build": 0,
+          "walk": 0,
+          "wait": 0,
+          "exact_dog": 0,
+          "exact_other": 0
+        },
+        "max_wall": 0.43858044700027676
+      },
+      "edge": {
+        "score": 1556844226,
+        "all_clear": 20,
+        "clear_humans": 418,
+        "humans": 736,
+        "area_all_human_mean": 120.22554347826087,
+        "distinct_safe_area": 13414,
+        "residual_species": [
+          57,
+          53,
+          57,
+          252,
+          48
+        ],
+        "exact4_species": [
+          0,
+          0,
+          2,
+          12,
+          0
+        ],
+        "wait_walk_build": [
+          79038,
+          130139,
+          11623
+        ],
+        "prefix": {
+          "": 612,
+          "wall": 158,
+          "guard": 283,
+          "build": 102,
+          "walk": 2513,
+          "wait": 2281,
+          "exact_dog": 12,
+          "exact_other": 0
+        },
+        "max_wall": 0.44788678099939716
+      }
+    }
+  },
+  "one": {
+    "n": 13,
+    "score_w_t_l": [
+      9,
+      0,
+      4
+    ],
+    "byte_identical": 0,
+    "models": {
+      "original": {
+        "score": 258505070,
+        "all_clear": 0,
+        "clear_humans": 82,
+        "humans": 104,
+        "area_all_human_mean": 171.09615384615384,
+        "distinct_safe_area": 2487,
+        "residual_species": [
+          11,
+          10,
+          7,
+          13,
+          6
+        ],
+        "exact4_species": [
+          0,
+          0,
+          1,
+          0,
+          0
+        ],
+        "wait_walk_build": [
+          11596,
+          17967,
+          1637
+        ],
+        "prefix": {
+          "": 0,
+          "wall": 0,
+          "guard": 0,
+          "build": 0,
+          "walk": 0,
+          "wait": 0,
+          "exact_dog": 0,
+          "exact_other": 0
+        },
+        "max_wall": 0.36645299200245063
+      },
+      "edge": {
+        "score": 302416667,
+        "all_clear": 10,
+        "clear_humans": 81,
+        "humans": 104,
+        "area_all_human_mean": 193.8653846153846,
+        "distinct_safe_area": 2582,
+        "residual_species": [
+          0,
+          1,
+          0,
+          1,
+          3
+        ],
+        "exact4_species": [
+          0,
+          0,
+          0,
+          12,
+          0
+        ],
+        "wait_walk_build": [
+          11921,
+          17621,
+          1658
+        ],
+        "prefix": {
+          "": 612,
+          "wall": 158,
+          "guard": 283,
+          "build": 102,
+          "walk": 2513,
+          "wait": 2281,
+          "exact_dog": 12,
+          "exact_other": 0
+        },
+        "max_wall": 0.35902689499926055
+      }
+    }
+  },
+  "other": {
+    "n": 87,
+    "score_w_t_l": [
+      0,
+      87,
+      0
+    ],
+    "byte_identical": 87,
+    "models": {
+      "original": {
+        "score": 1254427559,
+        "all_clear": 10,
+        "clear_humans": 337,
+        "humans": 632,
+        "area_all_human_mean": 108.10759493670886,
+        "distinct_safe_area": 10832,
+        "residual_species": [
+          57,
+          52,
+          57,
+          251,
+          45
+        ],
+        "exact4_species": [
+          0,
+          0,
+          2,
+          0,
+          0
+        ],
+        "wait_walk_build": [
+          67117,
+          112518,
+          9965
+        ],
+        "prefix": {
+          "": 0,
+          "wall": 0,
+          "guard": 0,
+          "build": 0,
+          "walk": 0,
+          "wait": 0,
+          "exact_dog": 0,
+          "exact_other": 0
+        },
+        "max_wall": 0.43858044700027676
+      },
+      "edge": {
+        "score": 1254427559,
+        "all_clear": 10,
+        "clear_humans": 337,
+        "humans": 632,
+        "area_all_human_mean": 108.10759493670886,
+        "distinct_safe_area": 10832,
+        "residual_species": [
+          57,
+          52,
+          57,
+          251,
+          45
+        ],
+        "exact4_species": [
+          0,
+          0,
+          2,
+          0,
+          0
+        ],
+        "wait_walk_build": [
+          67117,
+          112518,
+          9965
+        ],
+        "prefix": {
+          "": 0,
+          "wall": 0,
+          "guard": 0,
+          "build": 0,
+          "walk": 0,
+          "wait": 0,
+          "exact_dog": 0,
+          "exact_other": 0
+        },
+        "max_wall": 0.44788678099939716
+      }
+    }
+  }
+}

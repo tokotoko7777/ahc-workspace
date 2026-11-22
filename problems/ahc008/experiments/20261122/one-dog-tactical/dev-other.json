@@ -1,0 +1,263 @@
+{
+  "overall": {
+    "n": 18,
+    "score_w_t_l": [
+      0,
+      18,
+      0
+    ],
+    "byte_identical": 18,
+    "models": {
+      "original": {
+        "score": 257711153,
+        "all_clear": 1,
+        "clear_humans": 50,
+        "humans": 132,
+        "area_all_human_mean": 103.51515151515152,
+        "distinct_safe_area": 1855,
+        "residual_species": [
+          13,
+          18,
+          13,
+          56,
+          9
+        ],
+        "exact4_species": [
+          1,
+          0,
+          0,
+          0,
+          0
+        ],
+        "wait_walk_build": [
+          14131,
+          23364,
+          2105
+        ],
+        "prefix": {
+          "": 0,
+          "wall": 0,
+          "guard": 0,
+          "build": 0,
+          "walk": 0,
+          "wait": 0,
+          "exact_dog": 0,
+          "exact_other": 0
+        },
+        "max_wall": null
+      },
+      "edge": {
+        "score": 257711153,
+        "all_clear": 1,
+        "clear_humans": 50,
+        "humans": 132,
+        "area_all_human_mean": 103.51515151515152,
+        "distinct_safe_area": 1855,
+        "residual_species": [
+          13,
+          18,
+          13,
+          56,
+          9
+        ],
+        "exact4_species": [
+          1,
+          0,
+          0,
+          0,
+          0
+        ],
+        "wait_walk_build": [
+          14131,
+          23364,
+          2105
+        ],
+        "prefix": {
+          "": 0,
+          "wall": 0,
+          "guard": 0,
+          "build": 0,
+          "walk": 0,
+          "wait": 0,
+          "exact_dog": 0,
+          "exact_other": 0
+        },
+        "max_wall": null
+      }
+    }
+  },
+  "one": {
+    "n": 0,
+    "score_w_t_l": [
+      0,
+      0,
+      0
+    ],
+    "byte_identical": 0,
+    "models": {
+      "original": {
+        "score": 0,
+        "all_clear": 0,
+        "clear_humans": 0,
+        "humans": 0,
+        "area_all_human_mean": 0.0,
+        "distinct_safe_area": 0,
+        "residual_species": [
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "exact4_species": [
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "wait_walk_build": [
+          0,
+          0,
+          0
+        ],
+        "prefix": {
+          "": 0,
+          "wall": 0,
+          "guard": 0,
+          "build": 0,
+          "walk": 0,
+          "wait": 0,
+          "exact_dog": 0,
+          "exact_other": 0
+        },
+        "max_wall": null
+      },
+      "edge": {
+        "score": 0,
+        "all_clear": 0,
+        "clear_humans": 0,
+        "humans": 0,
+        "area_all_human_mean": 0.0,
+        "distinct_safe_area": 0,
+        "residual_species": [
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "exact4_species": [
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "wait_walk_build": [
+          0,
+          0,
+          0
+        ],
+        "prefix": {
+          "": 0,
+          "wall": 0,
+          "guard": 0,
+          "build": 0,
+          "walk": 0,
+          "wait": 0,
+          "exact_dog": 0,
+          "exact_other": 0
+        },
+        "max_wall": null
+      }
+    }
+  },
+  "other": {
+    "n": 18,
+    "score_w_t_l": [
+      0,
+      18,
+      0
+    ],
+    "byte_identical": 18,
+    "models": {
+      "original": {
+        "score": 257711153,
+        "all_clear": 1,
+        "clear_humans": 50,
+        "humans": 132,
+        "area_all_human_mean": 103.51515151515152,
+        "distinct_safe_area": 1855,
+        "residual_species": [
+          13,
+          18,
+          13,
+          56,
+          9
+        ],
+        "exact4_species": [
+          1,
+          0,
+          0,
+          0,
+          0
+        ],
+        "wait_walk_build": [
+          14131,
+          23364,
+          2105
+        ],
+        "prefix": {
+          "": 0,
+          "wall": 0,
+          "guard": 0,
+          "build": 0,
+          "walk": 0,
+          "wait": 0,
+          "exact_dog": 0,
+          "exact_other": 0
+        },
+        "max_wall": null
+      },
+      "edge": {
+        "score": 257711153,
+        "all_clear": 1,
+        "clear_humans": 50,
+        "humans": 132,
+        "area_all_human_mean": 103.51515151515152,
+        "distinct_safe_area": 1855,
+        "residual_species": [
+          13,
+          18,
+          13,
+          56,
+          9
+        ],
+        "exact4_species": [
+          1,
+          0,
+          0,
+          0,
+          0
+        ],
+        "wait_walk_build": [
+          14131,
+          23364,
+          2105
+        ],
+        "prefix": {
+          "": 0,
+          "wall": 0,
+          "guard": 0,
+          "build": 0,
+          "walk": 0,
+          "wait": 0,
+          "exact_dog": 0,
+          "exact_other": 0
+        },
+        "max_wall": null
+      }
+    }
+  }
+}
