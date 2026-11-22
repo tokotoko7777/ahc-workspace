@@ -1,0 +1,312 @@
+{
+  "stay225": {
+    "all": {
+      "cases": 100,
+      "score": 1513278103,
+      "max_wall": 0.6797248050024791,
+      "final4": 946,
+      "direct_bank": 938,
+      "final4_species": [
+        156,
+        150,
+        140,
+        293,
+        207
+      ],
+      "direct_species": [
+        149,
+        149,
+        140,
+        293,
+        207
+      ],
+      "total_residual_at_own_cutoff": 548,
+      "final_residual": 378,
+      "final_safe_union": 5554,
+      "cleared_humans": 135,
+      "humans": 736,
+      "all_clear": 12,
+      "mean_safe_area_per_human": 53.94777380952381
+    },
+    "triggered": {
+      "cases": 88,
+      "score": 902347547,
+      "max_wall": 0.6797248050024791,
+      "final4": 834,
+      "direct_bank": 826,
+      "final4_species": [
+        144,
+        137,
+        117,
+        258,
+        178
+      ],
+      "direct_species": [
+        137,
+        136,
+        117,
+        258,
+        178
+      ],
+      "total_residual_at_own_cutoff": 526,
+      "final_residual": 370,
+      "final_safe_union": 1730,
+      "cleared_humans": 80,
+      "humans": 638,
+      "all_clear": 6,
+      "mean_safe_area_per_human": 17.849742965367966
+    },
+    "omitted": {
+      "cases": 12,
+      "score": 610930556,
+      "max_wall": 0.5473655829991912,
+      "final4": 112,
+      "direct_bank": 112,
+      "final4_species": [
+        12,
+        13,
+        23,
+        35,
+        29
+      ],
+      "direct_species": [
+        12,
+        13,
+        23,
+        35,
+        29
+      ],
+      "total_residual_at_own_cutoff": 22,
+      "final_residual": 8,
+      "final_safe_union": 3824,
+      "cleared_humans": 55,
+      "humans": 98,
+      "all_clear": 6,
+      "mean_safe_area_per_human": 318.6666666666667
+    }
+  },
+  "rescue160": {
+    "all": {
+      "cases": 100,
+      "score": 1953389032,
+      "max_wall": 0.6215923939998902,
+      "final4": 700,
+      "direct_bank": 688,
+      "final4_species": [
+        103,
+        97,
+        99,
+        263,
+        138
+      ],
+      "direct_species": [
+        97,
+        96,
+        96,
+        262,
+        137
+      ],
+      "total_residual_at_own_cutoff": 798,
+      "final_residual": 230,
+      "final_safe_union": 11156,
+      "cleared_humans": 279,
+      "humans": 736,
+      "all_clear": 31,
+      "mean_safe_area_per_human": 109.29149603174604
+    },
+    "triggered": {
+      "cases": 88,
+      "score": 1342458476,
+      "max_wall": 0.6215923939998902,
+      "final4": 588,
+      "direct_bank": 576,
+      "final4_species": [
+        91,
+        84,
+        76,
+        228,
+        109
+      ],
+      "direct_species": [
+        85,
+        83,
+        73,
+        227,
+        108
+      ],
+      "total_residual_at_own_cutoff": 776,
+      "final_residual": 222,
+      "final_safe_union": 7332,
+      "cleared_humans": 224,
+      "humans": 638,
+      "all_clear": 25,
+      "mean_safe_area_per_human": 80.7403363997114
+    },
+    "omitted": {
+      "cases": 12,
+      "score": 610930556,
+      "max_wall": 0.5457217969997146,
+      "final4": 112,
+      "direct_bank": 112,
+      "final4_species": [
+        12,
+        13,
+        23,
+        35,
+        29
+      ],
+      "direct_species": [
+        12,
+        13,
+        23,
+        35,
+        29
+      ],
+      "total_residual_at_own_cutoff": 22,
+      "final_residual": 8,
+      "final_safe_union": 3824,
+      "cleared_humans": 55,
+      "humans": 98,
+      "all_clear": 6,
+      "mean_safe_area_per_human": 318.6666666666667
+    }
+  },
+  "tactical": {
+    "all": {
+      "cases": 100,
+      "score": 1512932629,
+      "max_wall": 0.48800431700146873,
+      "final4": 3,
+      "direct_bank": 0,
+      "final4_species": [
+        0,
+        0,
+        3,
+        0,
+        0
+      ],
+      "direct_species": [
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "total_residual_at_own_cutoff": 0,
+      "final_residual": 509,
+      "final_safe_union": 13319,
+      "cleared_humans": 419,
+      "humans": 736,
+      "all_clear": 10,
+      "mean_safe_area_per_human": 115.52997222222223
+    },
+    "triggered": {
+      "cases": 88,
+      "score": 1262028070,
+      "max_wall": 0.48800431700146873,
+      "final4": 3,
+      "direct_bank": 0,
+      "final4_species": [
+        0,
+        0,
+        3,
+        0,
+        0
+      ],
+      "direct_species": [
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "total_residual_at_own_cutoff": 0,
+      "final_residual": 460,
+      "final_safe_union": 10849,
+      "cleared_humans": 352,
+      "humans": 638,
+      "all_clear": 10,
+      "mean_safe_area_per_human": 107.7840413059163
+    },
+    "omitted": {
+      "cases": 12,
+      "score": 250904559,
+      "max_wall": 0.4179625889992167,
+      "final4": 0,
+      "direct_bank": 0,
+      "final4_species": [
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "direct_species": [
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "total_residual_at_own_cutoff": 0,
+      "final_residual": 49,
+      "final_safe_union": 2470,
+      "cleared_humans": 67,
+      "humans": 98,
+      "all_clear": 0,
+      "mean_safe_area_per_human": 172.33346560846562
+    }
+  },
+  "stay225→rescue160": {
+    "score": {
+      "wins": 60,
+      "ties": 12,
+      "losses": 28,
+      "delta": 440110929
+    },
+    "final4": {
+      "wins": 1,
+      "ties": 15,
+      "losses": 84,
+      "delta": -246
+    },
+    "fewer_residual": {
+      "wins": 60,
+      "ties": 23,
+      "losses": 17,
+      "delta": 148
+    },
+    "final_safe_union": {
+      "wins": 31,
+      "ties": 55,
+      "losses": 14,
+      "delta": 5602
+    }
+  },
+  "tactical→rescue160": {
+    "score": {
+      "wins": 54,
+      "ties": 0,
+      "losses": 46,
+      "delta": 440456403
+    },
+    "final4": {
+      "wins": 100,
+      "ties": 0,
+      "losses": 0,
+      "delta": 697
+    },
+    "fewer_residual": {
+      "wins": 74,
+      "ties": 9,
+      "losses": 17,
+      "delta": 279
+    },
+    "final_safe_union": {
+      "wins": 29,
+      "ties": 17,
+      "losses": 54,
+      "delta": -2163
+    }
+  }
+}

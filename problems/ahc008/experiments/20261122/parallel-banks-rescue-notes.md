@@ -88,3 +88,84 @@ and untouched tactical
 Run same wrapper with `--case-count 100 --with-tactical`, then
 parallel_banks_rescue_summary.py for exact trigger-cohort and paired
 summary. `gzip -cd` recovers the CSV.
+
+## Official tester v3 distributed practice100, frozen readback
+
+Identical .cpp algorithm and the **same compiled validation binary** as
+the independent generated100. No parameter changes. Reference
+tactical reproduces its previously frozen score exactly. All 300 official
+legal and exact online replays. Every original t0–159 action matches
+across the bank variants; 88 trigger, 12 entire untouched action
+sequences remain byte-identical. No AtCoder submission or hidden
+system result.
+
+| Measure (official distributed100) | Stay225 | Rescue160 | Untouched tactical |
+|---|---:|---:|---:|
+| Official score | 1,513,278,103 | 1,953,389,032 | 1,512,932,629 |
+| Direct bank exact4 | 938 | 688 | n/a |
+| Final exact4 (all sources) | 946 | 700 | 3 |
+| Final reachable pets | 378 | 230 | 509 |
+| All-clear cases | 12 | 31 | 10 |
+| Pet-free people | 135/736 | 279/736 | 419/736 |
+| Sum of distinct final safe union areas | 5554 | 11156 | 13319 |
+| Mean of per-case per-person actual safe area | 53.95 | 109.29 | 115.53 |
+| Maximum official tool seconds | .680 | .622 | .488 |
+
+Pairs for ordinary score: stay→rescue 60/12/28, tactical→rescue
+54/0/46. Rescue wins final compact count in all 100 cases versus
+tactical. Practice is different from uniform generated: tactical
+keeps more of the people and more total area safe on average than
+rescue, even while clearing both fewer whole cases and capturing
+fewer pets. This is an alternate way to score, not strict domination.
+At their own cutoff total reachable 548→798; their fallbacks remove
+170→568. Direct rescue captures by cow/pig/rabbit/dog/cat
+97/96/96/262/137. Final exact4 103/97/99/263/138.
+
+Promote to the default **research-only score baseline** because it
+beats the fixed competitors on both same-case heldout comparisons.
+Preserve ordinary stable banks as reference for the stronger strictly
+four-cell capture count, and preserve untouched tactical separately.
+No main merge; still well below the user's 6,263,333,336 target.
+No separate change tested to pick between regimes or to compare
+unconditional release; do not infer threshold tuning from this pair.
+
+### Standalone candidate
+
+`parallel-banks-rescue-research.cpp` contains the single-file GNU
+C++23 source with actual GCC optimization pragma and fast input.
+The **only difference** from the frozen executable's source is the
+two argument defaults: no arguments selects the tested `5 1` branch.
+Before packaging, verify first trigger and first omitted witness on
+each validation corpus (four in total): exact SHA256 actions and
+score all equal archived runs. See
+parallel-banks-rescue-standalone-smoke.csv. Nominal benchmark totals
+above came from the original frozen executable, not the packaged
+probe. Build/run without custom flags or runtime args:
+
+    g++ -std=c++23 parallel-banks-rescue-research.cpp -o rescue
+
+The archived CSVs and JSON summaries preserve every baseline
+and both frozen populations; decompress with `gzip -cd`. Reproduce
+with the tester/commands above, `--case-count 100 --with-tactical`.
+
+### Next untested candidate: last reachable animal only
+
+Follow the idea of a deliberately different last-animal finish in the
+user-authorized [simanman write-up](https://simanman.hatenablog.com/entry/2022/02/28/074838).
+Keep the complete early rescue behavior unchanged. Late, only when the
+actual connected retained human region has **exactly one** reachable
+animal, evaluate a nonrectangular area4–48 using existing bank walls and
+at most 5–6 extra walls, with assigned exterior workers and a bounded
+8–12-turn approach. Require a genuine resident, recheck every legal
+wall/actual human exit/official current score at commit, and preserve
+the existing fallback when no opportunity exists. The score doubles
+on removing that last pet if area is unchanged, so a somewhat larger
+cage and work budget can be rational now even though 4–24 and three
+walls barely activated in earlier broad cleanup. First verify prevalence
+and real staging routes on the frozen traces; do not tune window bounds
+from either saved100. Still unimplemented; no non-regression promised.
+
+A secondary unrelated option is a 1–2-step assist by genuinely idle
+spare workers to an already-staffed compact tube before t160, with
+no redirection of the core pairs or budget taken from rescue. Audit
+its opportunity rate before any separate live test.
