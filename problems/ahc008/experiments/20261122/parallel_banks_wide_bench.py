@@ -26,7 +26,8 @@ def count(hist,kinds,meta):
     first={};captured=set();legal_first={}; delays=[]
     blocks=[0]*5
     ready5=-1
-    nbank=len(tubes)//12
+    nbank={26:2,36:3,48:4}[len(tubes)]
+    perbank=len(tubes)//nbank
     lanes=tuple(shift+7*i for i in range(nbank+1))
     crawled=sum(B[(r*30+c if not rot else c*30+r)] for r in range(30) for c in lanes)
     cross=sum(B[(r*30+c if not rot else c*30+r)] for r in (0,29)
@@ -55,7 +56,7 @@ def count(hist,kinds,meta):
         live=[0]*nbank
         for wi,(ls,g,k,rs,body,side) in enumerate(tubes):
             ready=side&old==side
-            if ready:first.setdefault(wi,t);live[wi//12]+=1
+            if ready:first.setdefault(wi,t);live[wi//perbank]+=1
             if old&(B[g]|B[k]):continue
             if t==stop:continue
             if body&pbits and ready:row['ready_animal_windows']+=1
