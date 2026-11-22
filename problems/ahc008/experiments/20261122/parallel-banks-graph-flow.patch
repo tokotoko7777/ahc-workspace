@@ -1,0 +1,59 @@
+--- problems/ahc008/experiments/20261122/parallel-banks-rescue-research.cpp
++++ problems/ahc008/experiments/20261122/parallel-banks-graph-flow-experiment.cpp
+@@ -747 +747,5 @@
+- Pen cutPocket(int center, int rr, const vector<bool>& elig, const vector<int>& nearest) {
++ bool graphPocket=false;
++ int flowAttempts=0,flowVertices=0,flowFeasible=0,flowChosen=0,flowGraphBFS=0;
++ Pen cutPocket(int center, int rr, const vector<bool>& elig, const vector<int>& nearest, const array<int,V>* graph) {
++  ++flowAttempts;
++  auto distance=[&](int p){return graph?(*graph)[p]:md(p,center);};
+@@ -758 +762 @@
+-   for (int c=max(0,y-dy);c<=min(S-1,y+dy);c++) if(group[pos(r,c)]==fid) {
++   for (int c=max(0,y-dy);c<=min(S-1,y+dy);c++) if(group[pos(r,c)]==fid && distance(pos(r,c))<=radius) {
+@@ -762,0 +767 @@
++  flowVertices+=cells.size();
+@@ -766 +771 @@
+-   const int id=ids[p],d=md(p,center);
++   const int id=ids[p],d=distance(p);
+@@ -793 +798 @@
+-   int d=md(p,center);
++   int d=distance(p);
+@@ -794,0 +800 @@
++   ++flowVertices;
+@@ -802 +808 @@
+-   for(int q:nb[p])if(q>=0&&group[q]==fid&&md(q,center)<=rr+flowSpare)
++   for(int q:nb[p])if(q>=0&&group[q]==fid&&distance(q)<=rr+flowSpare)
+@@ -813,0 +820 @@
++  ++flowFeasible;
+@@ -874,0 +882,16 @@
++    const bool inMaze=graphPocket&&bankMode&&turn>=bankRelease;
++    array<int,V> gd{};
++    array<int,V+1> core{};
++    if(inMaze){
++     ++flowGraphBFS;
++     gd.fill(V+1);
++     const int radius=min(V-1,flowMax+flowSpare);
++     int q[V],n=1;q[0]=c;gd[c]=0;
++     for(int j=0;j<n;j++){
++      const int p=q[j],d=gd[p];
++      ++core[d+1];
++      if(d>=radius)continue;
++      for(int v:nb[p])if(v>=0&&!wall[v]&&gd[v]==V+1)q[n++]=v,gd[v]=d+1;
++     }
++     for(int d=1;d<=radius+1;d++)core[d]+=core[d-1];
++    }
+@@ -885,2 +908,2 @@
+-     int inner=0;
+-     for(int r=max(0,c/S-rr+1);r<=min(S-1,c/S+rr-1);++r){
++     int inner=inMaze?core[rr]:0;
++     if(!inMaze)for(int r=max(0,c/S-rr+1);r<=min(S-1,c/S+rr-1);++r){
+@@ -902 +925 @@
+-     auto p=cutPocket(c,rr,eligible,nearest);
++     auto p=cutPocket(c,rr,eligible,nearest,inMaze?&gd:nullptr);
+@@ -924 +947 @@
+-   if(keep.cx>=0){ret=pockets.size();pockets.push_back(move(keep));}
++   if(keep.cx>=0){++flowChosen;ret=pockets.size();pockets.push_back(move(keep));}
+@@ -1764,0 +1788 @@
++ g.graphPocket=argc>3&&atoi(argv[3])!=0;
+@@ -1771,0 +1796 @@
++ if(const char *p=getenv("AHC008_GRAPH_FLOW_LOG")){ofstream f(p);f<<g.flowAttempts<<" "<<g.flowVertices<<" "<<g.flowFeasible<<" "<<g.flowChosen<<" "<<g.flowGraphBFS<<'\n';}
