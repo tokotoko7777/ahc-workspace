@@ -54,3 +54,22 @@ area=4 first isolations at the identical action, with zero mismatches;
 the same holds for v2 in both cohorts. The flaw is a potential
 classification/eligibility issue, not an observed mismatch. No source
 change in this validation.
+
+## Frozen untouched generated100, same v4 source
+
+The one frozen paired holdout uses `independent100-seeds.txt` with official
+v3 `gen` and compares directly to global-clear. All 200 are official
+tester/replay legal. Global-clear→v4 on the identical inputs:
+1,748,184,767→2,519,824,436 (66 wins and 34 losses); all-clear33→41
+(25 gains, 17 losses, 16 both, 42 neither); distinct residual222→152;
+true exact4 710→830; actual nonrectangular4–48 237→218;
+clean union9112→15488; final clean humans284→351.
+Max measured wall .589→.870s and median .347→.616s. Lastcap chambers
+account for 22 actual isolations and eight all-clear transitions on their
+own actions. All 814 planned bank animals over 782 closure turns match
+physical exact-four captures as checked by `check_lock_area.py`.
+No hidden system test or competition score was measured.
+
+For a direct one-file retrieval, `gzip -dc integrated.cpp.gz > integrated.cpp`
+restores the exact tested v4 SHA above; no runtime args. Paired ledgers
+are recovered by concatenating decompressed A and headerless B chunks.
