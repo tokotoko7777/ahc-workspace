@@ -1479,3 +1479,8 @@ S字でも犬・猫を含め4マスに合法に隔離できた。各S字系列�
 ### AHC008: 固定8試行による終盤の判定は不採用（2026-11-23 JST）
 
 - 新規559ケースのうち275ターンで対象が残った最初の100件を[条件付きで比較](https://github.com/tokotoko7777/ahc-workspace/blob/387d14a9588b54a87f359a3041d4e67b4f6eddc6/problems/ahc008/experiments/20261122/article-capture/terry-terminal-k8/RESULT.md)。現行版5,258,994,445点（全頭78、有効77）、全件追い込み5,081,952,780点（79、75）、固定8組の平均による選択5,125,505,557点（74、73）。8組中7組以上勝つまで切り替えない案は4,705,611,111点（57、56）。いずれも配布100とは異なる条件で、切替ルール・得点版は変更しない。
+
+### AHC008: 猫の履歴予測は方向で改善、選択への導入は未採用（2026-11-23 JST）
+
+- [方向予測の確認](https://github.com/tokotoko7777/ahc-workspace/blob/17c77028d6ee998971a5d76e3a01dd16cbac79c6/problems/ahc008/experiments/20261122/article-capture/terry-target-active275/RESULT.md)は終盤に猫が残った45ケースのうち34件で予測誤差が改善。犬は5ケースのみで判定を行わなかった。
+- [終盤方針の再評価](https://github.com/tokotoko7777/ahc-workspace/blob/17c77028d6ee998971a5d76e3a01dd16cbac79c6/problems/ahc008/experiments/20261122/article-capture/terry-cat-prior-terminal/RESULT.md)は保存済みの実測ラベルを選び直した比較で、均一な目的地からの予測より+46,388,889点相当・全頭+2。独立した試行組で安定して改善した判断は3件で、事前基準4件未達。得点版は6,152,805,559点・全頭100件のまま。
