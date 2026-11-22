@@ -1,0 +1,71 @@
+--- problems/ahc008/experiments/20261122/parallel-banks-narrow-rescue-research.cpp
++++ problems/ahc008/experiments/20261122/parallel-banks-evac-audit.cpp
+@@ -521,0 +522,59 @@
++ bool evacuationAudit=false;
++ void observeEvac(int root,int keep,const vector<int>& toBuild,int originalEta,int queued){
++  if(!evacuationAudit)return;
++  vector<int> inside;
++  for(int q=0;q<V;q++)if(linTag[q]==linStamp&&linLabel[q]==keep)inside.push_back(q);
++  vector<int> evac;
++  int mobile=0,already=0,decoy=0,other=0,maxEnd=0,nearWalls=0,nearCrew=0;
++  for(int w=0;w<int(humans.size());w++){
++   if(captiveHuman(w)){++decoy;continue;}
++   if(group[humans[w]]!=root){++other;continue;}
++   ++mobile;
++   int h=humans[w];
++   if(linTag[h]==linStamp&&linLabel[h]==keep){++already;continue;}
++   int d=999;
++   for(int p:inside){int z=workers[w].bfs.distance(p);if(z>=0)d=min(d,z);}
++   maxEnd=max(maxEnd,d);evac.push_back(w);
++  }
++  bitset<V> currBuild;
++  for(int j=0;j<int(humans.size());j++)if(islower(act[j])){
++   int q=nb[humans[j]][find(BUILD,BUILD+4,act[j])-BUILD];
++   if(q>=0)currBuild[q]=1;
++  }
++  int allegedBlocked=0,routeDelay=0;
++  if(!evac.empty()&&currBuild.any()){
++   // Multi-source shortest after proposed same-turn walls only. Pending gates
++   // in the rest of the planned barrier remain open for evacuation.
++   int q[V],n=0;array<int,V> d;d.fill(-1);
++   for(int p:inside)if(!currBuild[p])q[n++]=p,d[p]=0;
++   for(int i=0;i<n;i++)for(int p:nb[q[i]])if(p>=0&&d[p]<0&&!wall[p]&&!currBuild[p])
++    q[n++]=p,d[p]=d[q[i]]+1;
++   for(int w:evac){
++    int old=999;
++    for(int p:inside){int z=workers[w].bfs.distance(p);if(z>=0)old=min(old,z);}
++    int newd=d[humans[w]];
++    if(newd<0)++allegedBlocked;
++    else routeDelay=max(routeDelay,newd-old);
++   }
++  }
++  bitset<16> posWorkers;
++  for(int p:toBuild){
++   int best=999;
++   for(int q:nb[p])if(q>=0&&linTag[q]==linStamp&&linLabel[q]==keep){
++    for(int w=0;w<int(humans.size());w++){
++     int h=humans[w];
++     if(captiveHuman(w)||group[h]!=root||linTag[h]!=linStamp||linLabel[h]!=keep)continue;
++     int d=workers[w].bfs.distance(q);
++     if(d>=0)best=min(best,d),posWorkers[w]=1;
++    }
++   }
++   if(best<999)++nearWalls;
++  }
++  nearCrew=posWorkers.count();
++  if(const char* path=getenv("AHC008_EVAC_AUDIT")){
++   ofstream f(path,ios::app);
++   f<<turn<<" "<<lineId<<" "<<lineStart<<" "<<originalEta<<" "<<toBuild.size()<<" "<<queued<<" "<<mobile<<" "<<already<<" "<<other<<" "<<decoy<<" "<<maxEnd<<" "<<routeDelay<<" "<<allegedBlocked<<" "<<nearWalls<<" "<<nearCrew<<" "<<(inside.empty()?-1:inside.front());
++   for(int p:toBuild)f<<" "<<p;
++   f<<"\n";
++  }
++ }
+@@ -534,0 +594 @@
++  int auditEta=-1;
+@@ -604 +664 @@
+-      if(v>best){best=v;lineId=j;lineBase=i;line.at=e;lineH=root;lineStart=turn;toBuild=move(w);}
++      if(v>best){best=v;lineId=j;lineBase=i;line.at=e;lineH=root;lineStart=turn;toBuild=move(w);auditEta=eta;}
+@@ -707,0 +768 @@
++  observeEvac(root,keep,toBuild,auditEta,nb);
+@@ -1785,0 +1847 @@
++ g.evacuationAudit=getenv("AHC008_EVAC_AUDIT")!=nullptr;

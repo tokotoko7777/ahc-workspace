@@ -1,0 +1,48 @@
+{
+  "verified_cases": 30,
+  "selected_ticks": 2267,
+  "commit_calls": [
+    486,
+    29
+  ],
+  "evac_required_calls": [
+    227,
+    29
+  ],
+  "significant_eta_calls": [
+    25,
+    16
+  ],
+  "significant_completed": [
+    9,
+    8
+  ],
+  "significant_not_completed": [
+    16,
+    10
+  ],
+  "deadline_fail": [
+    1,
+    1
+  ],
+  "actual_route_removed": [
+    0,
+    0
+  ],
+  "actual_route_delayed": [
+    75,
+    18
+  ],
+  "proposed_route_removed": [
+    71,
+    8
+  ],
+  "no_current_builder_at_commit": [
+    6,
+    6
+  ],
+  "no_kept_side_stance_for_all_jobs": [
+    69,
+    27
+  ]
+}
