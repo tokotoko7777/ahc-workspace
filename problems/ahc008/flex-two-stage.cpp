@@ -1,0 +1,950 @@
+#pragma GCC optimize("O3")
+#include <bits/stdc++.h>
+#include "../../library/bit-grid-components.hpp"
+#include "../../library/flat-grid-first-step-bfs.hpp"
+#include "../../library/max-flow.hpp"
+using namespace std;
+namespace {
+constexpr int S=30, V=S*S;
+constexpr char MOVE[]="UDLR", BUILD[]="udlr";
+array<array<int,4>,V> nb;
+int pos(int a,int b) {return a*S+b;}
+int dir(int a,int b) {for(int d=0;d<4;d++)if(nb[a][d]==b)return d; return -1;}
+int md(int a,int b){return abs(a/S-b/S)+abs(a%S-b%S);}
+struct Pet {int p,t;};
+struct Pen {vector<int> wall,gate,inside; int cap=0, cx=-1, cy=-1; bool captured=false;};
+struct Worker {
+ FlatGridFirstStepBfs bfs{S,S};
+ vector<pair<int,int>> moves;
+};
+struct Game {
+ vector<Pet> pets; vector<int> humans; vector<Pen> pens; vector<Worker> workers;
+ array<unsigned char,V> wall{}, avoid{}, block{}, need{};
+ string act;
+ int turn=0, cap_mode=0, layout=1, nslots=6, width=6, length=30, mouths=8;
+ void init(int argc,char** argv) {
+  if(argc>1) layout=atoi(argv[1]);
+  if(argc>2) nslots=atoi(argv[2]);
+  if(argc>3) width=atoi(argv[3]);
+  if(argc>4) length=atoi(argv[4]);
+  if(argc>5) mouths=atoi(argv[5]);
+  if(argc>6) cap_mode=atoi(argv[6]);
+  if(argc>7) lineTurn=atoi(argv[7]);
+  if(argc>8) lineMax=atoi(argv[8]);
+  if(argc>9) lineSmart=atoi(argv[9]);
+  if(argc>10) cohesion=atoi(argv[10]);
+  if(argc>11) multi=atoi(argv[11]);
+  if(argc>12) secdist=atoi(argv[12]);
+  if(argc>13) multiMin=atoi(argv[13]);
+  if(argc>14) flowMode=atoi(argv[14]);
+  if(argc>15) flowMin=atoi(argv[15]);
+  if(argc>16) flowMax=atoi(argv[16]);
+  if(argc>17) flowPen=atoi(argv[17]);
+  if(argc>18) flowSpare=atoi(argv[18]);
+  if(argc>19) minKeep=atoi(argv[19]);
+  if(argc>20) keepRelax=atoi(argv[20]);
+  if(argc>21) petsPivot=atoi(argv[21]);
+  if(argc>22) priorLen=atoi(argv[22]);
+  for(int x=0;x<S;x++)for(int y=0;y<S;y++)
+   nb[pos(x,y)]={x?pos(x-1,y):-1,x<S-1?pos(x+1,y):-1,y?pos(x,y-1):-1,y<S-1?pos(x,y+1):-1};
+  int n,m,r,c,t;cin>>n; pets.resize(n);
+  for(auto &p:pets){cin>>r>>c>>t;p={pos(r-1,c-1),t};}
+  cin>>m; humans.resize(m); workers.resize(m);
+  for(int& p:humans){cin>>r>>c;p=pos(r-1,c-1);}
+  form();
+ }
+ int phase=0, target=-1, radius=3, tag=0, limit=20, bestPrev=0;
+ int phase2=0, target2=-1, bestPrev2=0;
+ int multi=2, secdist=13, multiMin=3;
+ int minKeep=450, keepRelax=7, petsPivot=0, priorLen=3;
+ int flowMode=1, flowMin=2, flowMax=5, flowPen=3, flowSpare=8, staticPocketCount=0;
+ array<unsigned char,V> globalset{}, globalmoved{};
+ int dogPhase=0, dogMode=0, dogStart=0, dogClosed=0, dogAnchor=-1, dogGate=-1, dogOut=-1, dogDecoy=-1;
+ int dogInsideDist=9, dogSide=0, dogCount=0, dogSaveLimit=18;
+ vector<int> dogWalls, dogInside;
+ array<unsigned char,V> dogMask{};
+ bool captiveHuman(int i) const {return dogDecoy==i&&dogClosed;}
+ void designDog(){
+  dogMode=layout;
+  if(!dogMode||count_if(pets.begin(),pets.end(),[](Pet p){return p.t==4;})==0){dogPhase=9;return;}
+  double best=-1e9;
+  for(int z=0;z<4;z++)for(int dep=max(4,width+4);dep<=min(18,width+9);dep++){
+   int ax=z&1?29:0, ay=z&2?29:0;
+   double cost=0,extra=0;
+   for(int p:humans)cost+=md(p,pos(ax,ay))*.19;
+   for(auto p:pets){
+    int d=md(p.p,pos(ax,ay));
+    if(p.t==4)cost+=d*.30;
+    else {
+     double scale=p.t==1?3.4:p.t==2?4.8:p.t==3?5.3:8.6;
+     extra+=1./(1.+exp((d-dep+1)/scale));
+    }
+   }
+   double v=-cost+extra*(tag<=1?12:20) -(dep+1)*dep*.13;
+   if(best<v)best=v,dogSide=z,dogInsideDist=dep;
+  }
+  auto cell=[&](int x,int y){return pos((dogSide&1)?29-x:x,(dogSide&2)?29-y:y);};
+  for(int x=0;x<=dogInsideDist;x++)for(int y=0;y<=dogInsideDist-x;y++){
+   if(x+y==dogInsideDist){
+    if(x==dogInsideDist/2)dogGate=cell(x,y),dogOut=cell(x+1,y);
+    else dogWalls.push_back(cell(x,y));
+   }else dogInside.push_back(cell(x,y)),dogMask[cell(x,y)]=1;
+  }
+  dogAnchor=cell(0,0);
+ }
+
+ vector<Pen> pockets;
+ array<int,V> group{}, seen{}, currentCt{};
+ int groupN=0;
+
+ struct Separator {vector<int> come; int mode=0, from=0, at=0;};
+ vector<Separator> separators;
+ int lineId=-1, lineStart=0, lineH=0, lineBase=0;
+ int lineTurn=205, lineMax=21, lineSmart=0;
+ int linStamp=0, cohesion=1;
+#ifdef AHC008_FAST_SEAM
+ using Bitboard = BitGridComponents<S,S>;
+ Bitboard::Rows seam_rows{};
+ int seam_root=-1;
+#endif
+ clock_t started=clock();
+ bool overBudget() const {return clock()-started>1.65*CLOCKS_PER_SEC;}
+ array<int,V> linTag{}, linLabel{};
+ array<int,V> forbid{};
+ int qline[V], lcount[V], lanimals[V];
+ double linePrev=0.;
+ bool validLine(int p,int d){
+  int r=p/S+d/3-1,c=p%S+d%3-1;
+  return r>=0&&r<S&&c>=0&&c<S;
+ }
+ void finiteLines(){
+  for(int dx=0;dx<=1;dx++)for(int dy=-1;dy<=1;dy++){
+   if(!dx&&dy!=1)continue;
+   for(int r=0;r<S;r++)for(int c=0;c<S;c++){
+    int y=r-dx,x=c-dy;
+    if(y>=0&&y<S&&x>=0&&x<S)continue;
+    Separator ls;
+    for(y=r,x=c;y>=0&&y<S&&x>=0&&x<S;y+=dx,x+=dy)ls.come.push_back(pos(y,x));
+    if(ls.come.size()>=3)separators.push_back(move(ls));
+   }
+  }
+ }
+ double rawscore(){
+  vector<int> pp(groupN);
+  for(auto p:pets)pp[group[p.p]]++;
+  double v=0;for(int k=0;k<(int)humans.size();k++)
+   if(!captiveHuman(k))v+=ldexp(currentCt[group[humans[k]]],-pp[group[humans[k]]]);
+  return v;
+ }
+ pair<double,int> testLine(const vector<int>& line, int root, bool keep, int delay, int minArea = 6){
+  ++linStamp;
+  int labels=0;
+#ifdef AHC008_FAST_SEAM
+  if (seam_root!=root) {
+   seam_root=root; seam_rows.fill(0);
+   for (int p=0;p<V;++p) if (group[p]==root) seam_rows[p/S] |= 1u<<(p%S);
+  }
+  auto remaining=seam_rows;
+  for (int p:line) remaining[p/S] &= ~(1u<<(p%S));
+  array<int,20> pet_label;
+  pet_label.fill(-1);
+  Bitboard::Rows piece{};
+  int n;
+  while (Bitboard::pop_first(remaining,piece,n)) {
+   lcount[labels]=n; lanimals[labels]=0;
+   for (int j=0;j<(int)pets.size();++j) {
+    const int p=pets[j].p;
+    if (piece[p/S]>>(p%S)&1u) { pet_label[j]=labels; ++lanimals[labels]; }
+   }
+   if (keep) for (int r=0;r<S;++r) for (unsigned m=piece[r];m;m&=m-1) {
+    const int p=r*S+countr_zero(m);
+    linTag[p]=linStamp;linLabel[p]=labels;
+   }
+   ++labels;
+  }
+#else
+  for(int p:line)forbid[p]=1;
+  for(int p=0;p<V;p++)if(group[p]==root&&!forbid[p]&&linTag[p]!=linStamp){
+   int n=1;qline[0]=p;linTag[p]=linStamp;linLabel[p]=labels;
+   for(int i=0;i<n;i++)for(int q:nb[qline[i]])if(q>=0&&!forbid[q]&&group[q]==root&&linTag[q]!=linStamp)
+    linTag[q]=linStamp,linLabel[q]=labels,qline[n++]=q;
+   lcount[labels]=n;lanimals[labels++]=0;
+  }
+  for(int p:line)forbid[p]=0;
+#endif
+  if(labels<2)return {0.,-1};
+  int target=-1;
+  double best=0;
+#ifndef AHC008_FAST_SEAM
+  for(auto p:pets)if(group[p.p]==root&&linTag[p.p]==linStamp)lanimals[linLabel[p.p]]++;
+#endif
+  for(int k=0;k<labels;k++){
+#ifdef AHC008_FLOOR_SIDE
+   if(lcount[k]<max(6,minArea))continue;
+#else
+   if(lcount[k]<6)continue;
+#endif
+   double v=ldexp(lcount[k],-lanimals[k]);
+   if(delay&&lineSmart>0) {
+    double extra=0;
+    for(int j=0;j<(int)pets.size();++j){
+     const auto p=pets[j];
+#ifdef AHC008_FAST_SEAM
+     if(pet_label[j]<0 || pet_label[j]==k)continue;
+#else
+     if(group[p.p]!=root||linTag[p.p]!=linStamp||linLabel[p.p]==k)continue;
+#endif
+     int d=99;for(int w:line)d=min(d,md(p.p,w));
+     if(d<=delay/2+2)extra+=std::max(0.,1.-double(d)/double(delay/2+3))*(p.t>=4?1.3:.7);
+    }
+    v/=1.+extra*.32;
+   }
+   if(v>best)best=v,target=k;
+  }
+  return {best,target};
+ }
+ vector<int> makeLine(const Separator& s,int root,int a,int b) {
+  vector<int> v;
+  for(int i=a;i<b;i++){int p=s.come[i];if(group[p]==root)v.push_back(p);}
+  return v;
+ }
+#ifdef AHC008_WIGGLE
+ int fixedSeparators=0;
+#endif
+ bool latePlan(){
+  if(turn<lineTurn||overBudget())return false;
+  int hm=humans.size(),root=-1;
+  for(int i=0;i<hm;i++)if(!captiveHuman(i)&&(root<0||currentCt[group[humans[i]]]>currentCt[root]))root=group[humans[i]];
+  if(root<0)return false;
+  int bn=0;for(auto p:pets)bn+=group[p.p]==root;
+  if(!bn)return false;
+  if(petsPivot>0&&turn<280&&lineId<0&&bn>=petsPivot&&turn<lineTurn+15)return false;
+  double current=ldexp(currentCt[root],-bn);
+  int areaReq=std::min(minKeep,currentCt[root]*85/100);
+  areaReq=max(0,areaReq-max(0,turn-lineTurn)*keepRelax);
+  if(turn>=281)areaReq=max(0,areaReq-(turn-281)*10);
+  vector<int> toBuild;
+  if(lineId>=0){
+   toBuild=makeLine(separators[lineId],lineH,lineBase,separators[lineId].at);
+   if(toBuild.empty()||turn-lineStart>=35||lineH!=root)lineId=-1;
+   else {
+    auto [benefit,id]=testLine(toBuild,root,false,0,areaReq);
+    if(id<0||benefit<current*(turn<280?1.06:1.02)||lcount[id]<areaReq){lineId=-1;}
+   }
+  }
+  if(lineId<0){
+   double best=0.;
+   int limit=min(lineMax,(299-turn)*max(1,int(hm)-1));
+   array<int,V> nearwall{}, etd{};
+   for(int p=0;p<V;p++) if(group[p]==root){
+#ifdef AHC008_WIGGLE
+    if (p/S==0||p/S==S-1||p%S==0||p%S==S-1) nearwall[p]=1;
+#endif
+    for(int k=0;k<9;k++)if(k!=4&&validLine(p,k)&&wall[p+(k/3-1)*S+k%3-1])nearwall[p]=1;
+    int d=99;
+    for(int u=0;u<hm;u++)if(!captiveHuman(u))for(int q:nb[p])if(q>=0&&!wall[q]){
+     int vv=workers[u].bfs.distance(q);
+     if(vv>=0)d=min(d,vv);
+    }
+    etd[p]=d;
+   }
+   unordered_set<uint64_t> hashes;
+#ifdef AHC008_TWO_STAGE
+   struct FirstLeg { double value, snapshot; int id, begin, end, eta; vector<int> wall; };
+   array<optional<FirstLeg>,5> first_legs; // stratified by retained area
+#endif
+#ifdef AHC008_WIGGLE
+   if (fixedSeparators == 0) fixedSeparators=separators.size();
+   separators.resize(fixedSeparators);
+   vector<pair<double,vector<int>>> starting_shapes;
+#endif
+   for(int j=0;j<(int)separators.size();j++){
+    if(j%8==0&&overBudget())break;
+    auto& line=separators[j];
+    int n=line.come.size();
+    for(int i=0;i<n;i++){
+     if(group[line.come[i]]!=root)continue;
+     if(i>0&&!nearwall[line.come[i]])continue;
+     int added=0,maxEta=0;
+     uint64_t hash=0;
+     for(int e=i+1;e<=n;e++){
+      int p=line.come[e-1];
+      if(group[p]!=root)break;
+      added++;
+      if(added>limit)break;
+      maxEta=max(maxEta,etd[p]);
+      uint64_t z=p+0x9e3779b97f4a7c15ULL;
+      z=(z^(z>>30))*0xbf58476d1ce4e5b9ULL;
+      z=(z^(z>>27))*0x94d049bb133111ebULL;
+      hash^=z^(z>>31);
+      if(e<n&&!nearwall[line.come[e-1]])continue;
+      int eta=maxEta;
+      if(!hashes.insert(hash).second)continue;
+      auto w=makeLine(line,root,i,e);
+      eta+=((int)w.size()+hm-1)/hm*2;
+      if(turn+eta>=300)continue;
+      auto [benefit,id]=testLine(w,root,false,eta,areaReq);
+#ifdef AHC008_WIGGLE
+      if(id>=0 && benefit>current && lcount[id]+60>=areaReq && w.size()>=3) {
+       const double estimated=(benefit-current)/(1.+eta*.13+w.size()*.07)+lcount[id]*priorLen*.007;
+       if(starting_shapes.size()<4 || estimated>starting_shapes.back().first) {
+        starting_shapes.emplace_back(estimated,w);
+        sort(starting_shapes.begin(),starting_shapes.end(),[](const auto& a,const auto& b) {return a.first>b.first;});
+        if(starting_shapes.size()>4) starting_shapes.pop_back();
+       }
+      }
+#endif
+      if(id<0||benefit<current*1.05||lcount[id]<areaReq)continue;
+      double v=(benefit-current)/(1.+eta*.13+w.size()*.07);
+      if(priorLen) v+=lcount[id]*priorLen*.007;
+#ifdef AHC008_TWO_STAGE
+      if(turn+eta<=275) {
+       const int area_bin=min(4,5*lcount[id]/max(1,currentCt[root]));
+       auto& leg=first_legs[area_bin];
+       if(!leg || v>leg->value) leg=FirstLeg{v,benefit,j,i,e,eta,w};
+      }
+#endif
+      if(v>best){best=v;lineId=j;lineBase=i;line.at=e;lineH=root;lineStart=turn;toBuild=move(w);}
+     }
+    }
+   }
+#ifdef AHC008_TWO_STAGE
+   for(const auto& leg:first_legs) {
+    if(!leg || overBudget())continue;
+    const auto [firstVal,keepId]=testLine(leg->wall,root,true,0);
+    if(keepId<0)continue;
+    Bitboard::Rows virtual_area{};
+    for(int p=0;p<V;++p)if(linTag[p]==linStamp&&linLabel[p]==keepId)
+     virtual_area[p/S]|=1u<<(p%S);
+    const auto inside=[&](int p){return (virtual_area[p/S]>>(p%S))&1u;};
+    int minArea=max(6,areaReq-(leg->eta+10)*keepRelax);
+    double future=0.;
+    for(int jj=0;jj<int(separators.size());++jj) {
+     if(jj%16==0 && overBudget())break;
+     const auto& r=separators[jj].come;
+     for(int a=0;a<int(r.size());){
+      if(!inside(r[a])){++a;continue;}
+      int b=a,hops=0;
+      while(b<int(r.size())&&inside(r[b])){
+       hops=max(hops,etd[r[b]]);
+       ++b;
+      }
+      const int len=b-a;
+      int eta2=max(3,hops-int(leg->eta)/2)+((len+hm-1)/hm)*2;
+      if(len<=min(12,limit) && turn+leg->eta+eta2<299) {
+       auto left=virtual_area;
+       for(int z=a;z<b;++z)left[r[z]/S]&=~(1u<<(r[z]%S));
+       int n=0,parts=0;
+       double val=0.;
+       Bitboard::Rows piece{};
+       while(Bitboard::pop_first(left,piece,n)){
+        ++parts;
+        if(n<minArea)continue;
+        int np=0;
+        for(auto pet:pets) np+=(piece[pet.p/S]>>(pet.p%S))&1u;
+        val=max(val,ldexp(n,-np));
+       }
+       if(parts>=2)future=max(future,(val-firstVal)/(1.+(leg->eta+eta2)*.20+len*.12));
+      }
+      a=b;
+     }
+    }
+    const double v=leg->value+future*(AHC008_TWO_STAGE==2?1.0:0.55);
+    if(v>best) {
+     best=v;lineId=leg->id;lineBase=leg->begin;
+     separators[lineId].at=leg->end;lineH=root;lineStart=turn;toBuild=leg->wall;
+    }
+   }
+#endif
+#ifdef AHC008_WIGGLE
+   vector<int> wiggle_best;
+   const auto near8=[](int a,int b) {
+    return a!=b&&abs(a/S-b/S)<=1&&abs(a%S-b%S)<=1;
+   };
+   for (auto& [start_score,shape]:starting_shapes) {
+    if (overBudget()) break;
+    double local=0;
+    vector<int> head=shape;
+    for (int round=0;round<2;round++) {
+     vector<int> next_head;
+     for (int i=0;i<int(head.size());i++) for (int len=1;len<=min(3,int(head.size())-i);len++)
+      for (int d=0;d<4;d++) {
+       auto w=head;
+       bool ok=true;
+       for (int k=i;k<i+len;k++) {
+        const int q=nb[head[k]][d];
+        if(q<0||group[q]!=root){ok=false;break;}
+        w[k]=q;
+       }
+       if(!ok || !nearwall[w.front()] || !nearwall[w.back()])continue;
+       if(i>0&&!near8(w[i-1],w[i]))continue;
+       if(i+len<int(w.size())&&!near8(w[i+len-1],w[i+len]))continue;
+       int eta=0;
+       bitset<V> used;
+       uint64_t hash=0;
+       for(int p:w) {
+        if(used[p]){ok=false;break;}
+        used[p]=true;
+        eta=max(eta,etd[p]);
+        uint64_t z=p+0x9e3779b97f4a7c15ULL;
+        z=(z^(z>>30))*0xbf58476d1ce4e5b9ULL;
+        z=(z^(z>>27))*0x94d049bb133111ebULL;
+        hash^=z^(z>>31);
+       }
+       if(!ok || !hashes.insert(hash).second)continue;
+       eta+=((int)w.size()+hm-1)/hm*2;
+       if(turn+eta>=300)continue;
+       auto [benefit,id]=testLine(w,root,false,eta,areaReq);
+       if(id<0||benefit<current*1.05||lcount[id]<areaReq)continue;
+       double v=(benefit-current)/(1.+eta*.13+w.size()*.07);
+       if(priorLen) v+=lcount[id]*priorLen*.007;
+       if(v>local){local=v;next_head=w;}
+       if(v>best){best=v;wiggle_best=move(w);}
+      }
+     if(next_head.empty())break;
+     head=move(next_head);
+    }
+   }
+   if(!wiggle_best.empty()) {
+    lineId=separators.size();lineBase=0;lineH=root;lineStart=turn;
+    Separator s;s.come=wiggle_best;s.at=wiggle_best.size();
+    separators.push_back(move(s));toBuild=move(wiggle_best);
+   }
+#endif
+  }
+  if(lineId<0)return false;
+  auto [gain,keep]=testLine(toBuild,root,true,0,areaReq);
+  if(keep<0){lineId=-1;return false;}
+  array<unsigned char,V> proposed{},moved{},selected{};
+  for(int p:toBuild)selected[p]=1;
+  vector<pair<int,int>> evacuate;
+  bool canClose=true;
+  for(int i=0;i<hm;i++)if(group[humans[i]]==root&&!captiveHuman(i)){
+   int h=humans[i];
+   if(linTag[h]==linStamp&&linLabel[h]==keep)continue;
+   canClose=false;
+   int best=999,next=-1;
+   for(int p=0;p<V;p++)if(linTag[p]==linStamp&&linLabel[p]==keep){
+    int d=workers[i].bfs.distance(p);
+    if(d>=0&&d<best)best=d,next=workers[i].bfs.first_step(p);
+   }
+   if(next>=0&&next!=h)evacuate.emplace_back(i,next);
+  }
+  for(auto [i,p]:evacuate){
+   act[i]=MOVE[dir(humans[i],p)];moved[p]=1;
+  }
+  vector<tuple<int,int,int,int>> jobs;
+  for(int p:toBuild)for(int i=0;i<hm;i++)if(act[i]=='.'&&!captiveHuman(i)&&group[humans[i]]==root){
+   for(int q:nb[p])if(q>=0&&!selected[q]&&!wall[q]&&linTag[q]==linStamp&&linLabel[q]==keep){
+    int d=workers[i].bfs.distance(q);
+    if(d<0)continue;
+    jobs.emplace_back(-7*d-block[p]*(d==0?19:6),i,p,q);
+   }
+  }
+  sort(jobs.rbegin(),jobs.rend());
+  int nb=0,remain=toBuild.size();
+  array<unsigned char,V> assigned{};
+  for(auto [priority,i,p,q]:jobs)if(act[i]=='.'&&!assigned[p]){
+   int h=humans[i];
+   if(q==h){
+    if(block[p]||moved[p]||(!canClose&&nb+1>=remain))continue;
+    proposed[p]=1;act[i]=BUILD[dir(h,p)];nb++;
+   }else{
+    int next=workers[i].bfs.first_step(q);
+    if(next<0||proposed[next])continue;
+    act[i]=MOVE[dir(h,next)];moved[next]=1;
+   }
+   assigned[p]=1;
+  }
+  return true;
+ }
+ void form(){
+  radius=nslots; limit=length; tag=mouths; designDog(); finiteLines();
+  for(int x=0;x<S;x++)for(int y=0;y<S;y++)for(int rr:{2,3,4,5,6,7}){
+   Pen z;
+   z.cx=pos(x,y);z.cy=rr;
+   for(int r=max(0,x-rr);r<=min(29,x+rr);r++)for(int c=max(0,y-rr);c<=min(29,y+rr);c++){
+    int d=abs(x-r)+abs(y-c);
+    if(d==rr)z.wall.push_back(pos(r,c));
+    if(d<rr)z.inside.push_back(pos(r,c));
+   }
+   pockets.push_back(move(z));
+  }
+  staticPocketCount=pockets.size();
+ }
+ void prep(){
+#ifdef AHC008_FAST_SEAM
+  seam_root=-1;
+#endif
+  act=string(humans.size(),'.');
+  block=wall;need.fill(0);avoid.fill(0);
+  for(auto p:pets){
+   block[p.p]=1;
+   for(int q:nb[p.p])if(q>=0)block[q]=1;
+  }
+  for(int p:humans)block[p]=1;
+  for(int i=0;i<(int)humans.size();i++)workers[i].bfs.run(humans[i],[&](int p){return !wall[p];});
+  group.fill(-1);groupN=0;
+  int k[900],n=0;
+  for(int p=0;p<V;p++)if(!wall[p]&&group[p]<0){
+   n=1;k[0]=p;group[p]=groupN;
+   for(int i=0;i<n;i++)for(int q:nb[k[i]])if(q>=0&&!wall[q]&&group[q]<0)group[q]=groupN,k[n++]=q;
+   currentCt[groupN++]=n;
+  }
+ }
+#ifdef AHC008_FLOW_REUSE
+ MaxFlow<int> flowWorkspace{V*2+2};
+#endif
+ Pen cutPocket(int center, int rr, const vector<bool>& elig, const vector<int>& nearest) {
+  Pen z;
+#ifdef AHC008_FLOW_COMPACT
+  const int fid=group[center], radius=rr+flowSpare, x=center/S, y=center%S;
+  constexpr int INF=1'000'000;
+  array<int,V> ids;
+  ids.fill(-1);
+  vector<int> cells;
+  cells.reserve(min(V,(2*radius+1)*(2*radius+1)));
+  for (int r=max(0,x-radius);r<=min(S-1,x+radius);r++) {
+   const int dy=radius-abs(x-r);
+   for (int c=max(0,y-dy);c<=min(S-1,y+dy);c++) if(group[pos(r,c)]==fid) {
+    ids[pos(r,c)]=cells.size();
+    cells.push_back(pos(r,c));
+   }
+  }
+  const int src=2*cells.size(),sink=src+1;
+  MaxFlow<int> f(sink+1);
+  for(int p:cells) {
+   const int id=ids[p],d=md(p,center);
+   int c=30+min(20,nearest[p])*3+block[p]*(flowMode==2?12:4);
+   if(flowMode==4)c=36+min(20,nearest[p])*2+block[p]*5;
+   if(d<rr)c=INF;
+   f.add_edge(2*id,2*id+1,c);
+   f.add_edge(2*id+1,sink,flowPen);
+   if(d<rr)f.add_edge(src,2*id,INF);
+   if(d==radius)f.add_edge(2*id+1,sink,INF);
+   for(int q:nb[p])if(q>=0&&ids[q]>=0)
+    f.add_edge(2*id+1,2*ids[q],INF);
+  }
+  if(f.flow(src,sink,INF)>=INF)return z;
+  auto v=f.min_cut(src);
+  for(int p:cells)if(v[2*ids[p]]) {
+   if(v[2*ids[p]+1]) z.inside.push_back(p);
+   else z.wall.push_back(p);
+  }
+#else
+  int fid=group[center],src=V*2,sink=V*2+1;
+  int INF=1'000'000;
+#ifdef AHC008_FLOW_REUSE
+  auto& f=flowWorkspace;
+  f.clear_edges();
+#else
+  MaxFlow<int> f(V*2+2);
+#endif
+  for(int p=0;p<V;p++)if(group[p]==fid){
+   int d=md(p,center);
+   if(d>rr+flowSpare)continue;
+   int c=30+min(20,nearest[p])*3+block[p]*(flowMode==2?12:4);
+   if(flowMode==4)c=36+min(20,nearest[p])*2+block[p]*5;
+   if(d<rr) c=INF;
+   f.add_edge(2*p,2*p+1,c);
+   f.add_edge(2*p+1,sink,flowPen);
+   if(d<rr)f.add_edge(src,2*p,INF);
+   if(d==rr+flowSpare)f.add_edge(2*p+1,sink,INF);
+   for(int q:nb[p])if(q>=0&&group[q]==fid&&md(q,center)<=rr+flowSpare)
+    f.add_edge(2*p+1,2*q,INF);
+  }
+  int minc=f.flow(src,sink,INF);
+  if(minc>=INF)return z;
+  auto v=f.min_cut(src);
+  for(int p=0;p<V;p++)if(v[2*p]){
+   if(v[2*p+1])z.inside.push_back(p);
+   else z.wall.push_back(p);
+  }
+#endif
+  if(z.inside.size()>75||z.wall.size()>32||z.wall.empty())return Pen{};
+  z.cx=center;z.cy=rr;
+  return z;
+ }
+ int select(vector<bool> eligible, int excluded=-1){
+  vector<int> apos,at;vector<int> groups(groupN);
+  for(int k=0;k<(int)humans.size();k++)if(eligible[k])groups[group[humans[k]]]++;
+  for(auto p:pets)if(groups[group[p.p]])apos.push_back(p.p),at.push_back(p.t);
+  if(apos.empty())return -1;
+  int ret=-1;
+  double best=-1e9;
+  for(int i=0;i<staticPocketCount;i++) {
+   auto& z=pockets[i];if(z.cy>radius)continue;
+   if(excluded>=0){
+    auto& orig=pockets[excluded];
+    if(md(z.cx,orig.cx)<max(z.cy+orig.cy+2,secdist))continue;
+   }
+   double pd=1e9, pbenefit=0;
+   int arr=999;
+   for(int k=0;k<(int)humans.size();k++) if(eligible[k]) {
+    int d=workers[k].bfs.distance(z.cx);
+    if(d>=0)arr=min(arr,d);
+   }
+   if(arr>=18)continue;
+   int left=0,blockct=0,area=0,hct=0, adjacentwalls=0;
+   for(int q:z.wall){left+=!wall[q];blockct+=block[q]&&!wall[q];}
+   if(!left)continue;
+   for(int q:z.inside)if(!wall[q]){
+    area++;
+    for(int q2:nb[q])if(q2<0||wall[q2])adjacentwalls++;
+   }
+   for(int q:humans)if(md(q,z.cx)<z.cy)hct++;
+   if(!area)continue;
+   for(int j=0;j<(int)apos.size();j++){
+    if(group[apos[j]]!=group[z.cx]&&group[z.cx]>=0)continue;
+    int d=md(apos[j],z.cx);
+    pd=min(pd,double(d));
+    double u=at[j]==4?0.65:at[j]==1?1.24:1.0;
+    pbenefit+=u*max(0.,1.5-(double(d))/double(z.cy+1));
+   }
+   if(pd>z.cy+1)continue;
+   double v=(pbenefit*30.0+adjacentwalls*0.10)/(1.+arr*.07+left*.095+blockct*.03)-area*.17+min(hct,3)*.5;
+   if(tag==2)v-=area*.33;
+   if(tag==3)v+=min(z.cy-2,2)*3;
+   if(tag==7)v+=min(z.cy-2,3)*2.5;
+   if(tag==8)v+=min(z.cy-2,4)*2;
+   if(tag==9)v+=min(z.cy-2,5)*1.4;
+   if(tag==4)v+=(z.cy-2)*max(0.,(100.-turn)/35.);
+   if(tag==5)v+=hct*1.5;
+   if(tag==6)v+=(z.cy-2)*1.6;
+   if(best<v)best=v,ret=i;
+  }
+  if(flowMode&&!overBudget()){
+   vector<int> nearest(V,100);
+   for(int p=0;p<V;p++)if(group[p]>=0)for(int i=0;i<(int)humans.size();i++)if(eligible[i]){
+    int d=workers[i].bfs.distance(p);
+    if(d>=0)nearest[p]=min(nearest[p],d);
+   }
+   Pen keep;
+   for(int c:apos){
+    if(nearest[c]>15)continue;
+    if(excluded>=0 && md(c,pockets[excluded].cx)<max(flowMax+pockets[excluded].cy+2,secdist))continue;
+    for(int rr=flowMin;rr<=flowMax;rr++){
+     if(overBudget())break;
+#ifdef AHC008_FLOW_PRUNE
+     double pb=0.;
+     for(int j=0;j<(int)apos.size();j++){
+      int d=md(apos[j],c);
+      if(d>rr+2)continue;
+      double u=at[j]==4?.65:at[j]==1?1.24:1.;
+      pb+=u*max(0.,1.5-double(d)/double(rr+1));
+     }
+     int inner=0;
+     for(int r=max(0,c/S-rr+1);r<=min(S-1,c/S+rr-1);++r){
+      const int dy=rr-1-abs(r-c/S);
+      for(int col=max(0,c%S-dy);col<=min(S-1,c%S+dy);++col)
+       inner+=group[pos(r,col)]==group[c];
+     }
+     double upper=(pb*30.)/(1.+nearest[c]*.07+.095)-inner*.17;
+     if(tag==3)upper+=min(rr-2,2)*3;
+     if(tag==7)upper+=min(rr-2,3)*2.5;
+     if(tag==8)upper+=min(rr-2,4)*2;
+     if(tag==9)upper+=min(rr-2,5)*1.4;
+     if(flowMode==3)upper+=2.;
+     if(flowMode==4)upper+=.85;
+     // Every core vertex is protected by infinite capacity. The
+     // evaluated candidate must retain at least one finite-cost wall.
+     if(upper<best-1e-9)continue;
+#endif
+     auto p=cutPocket(c,rr,eligible,nearest);
+     if(p.wall.empty())continue;
+#ifndef AHC008_FLOW_PRUNE
+     double pb=0.;
+     for(int j=0;j<(int)apos.size();j++){
+      int d=md(apos[j],p.cx);
+      if(d>p.cy+2)continue;
+      double u=at[j]==4?.65:at[j]==1?1.24:1.;
+      pb+=u*max(0.,1.5-double(d)/double(p.cy+1));
+     }
+#endif
+     int b=0; for(int q:p.wall)b+=block[q];
+     double v=(pb*30.)/(1.+nearest[c]*.07+p.wall.size()*.095+b*.03)-p.inside.size()*.17;
+     if(tag==3)v+=min(p.cy-2,2)*3;
+     if(tag==7)v+=min(p.cy-2,3)*2.5;
+     if(tag==8)v+=min(p.cy-2,4)*2;
+     if(tag==9)v+=min(p.cy-2,5)*1.4;
+     if(flowMode==3)v+=2.;
+     if(flowMode==4)v+=1.-.15*p.wall.size();
+     if(v>best){keep=move(p);best=v;}
+    }
+   }
+   if(keep.cx>=0){ret=pockets.size();pockets.push_back(move(keep));}
+  }
+  return ret;
+ }
+ bool dogPlan(){
+  if(dogPhase>=9)return false;
+  vector<int> ls;
+  for(int w:dogWalls)if(!wall[w])ls.push_back(w);
+  int hm=humans.size(), dins=0, dogFar=0, dnum=0, pins=0, hin=0;
+  for(auto p:pets){
+   int inside=dogMask[p.p];
+   pins+=inside;
+   if(p.t==4){dins+=inside; dnum++; dogFar+=inside&&md(p.p,dogGate)>=4;}
+  }
+  for(int h:humans)hin+=dogMask[h];
+  auto walk=[&](int i,int p,auto& placed){
+   int h=humans[i],q=workers[i].bfs.first_step(p);
+   if(q>=0&&q!=h&&!placed[q])act[i]=MOVE[dir(h,q)];
+  };
+  array<unsigned char,V> placed{}, moved{};
+  if(dogPhase==0){
+   if(ls.empty())dogPhase=1;
+   else {
+    vector<tuple<int,int,int,int>> choices;
+    for(int i=0;i<hm;i++)for(int w:ls)for(int q:nb[w]){
+     if(q<0||wall[q]||q==dogGate||find(dogWalls.begin(),dogWalls.end(),q)!=dogWalls.end())continue;
+     int d=workers[i].bfs.distance(q);
+     if(d<0)continue;
+     int key=-7*d-dogMask[q]*2-block[w]*(d==0?18:6);
+     choices.emplace_back(key,i,q,w);
+    }
+    sort(choices.rbegin(),choices.rend());
+    for(auto [key,i,q,w]:choices)if(act[i]=='.'&&!placed[w]){
+     if(humans[i]==q){
+      if(!block[w]&&!moved[w])act[i]=BUILD[dir(q,w)],placed[w]=1;
+     }else if(!moved[w]){
+      walk(i,q,placed);
+      if(act[i]!='.')moved[nb[humans[i]][find(MOVE,MOVE+4,act[i])-MOVE]]=1;
+     }
+    }
+    for(int i=0;i<hm;i++)if(act[i]=='.')walk(i,dogAnchor,placed);
+    if(turn<70)return true;
+    dogPhase=9;return false;
+   }
+  }
+  if(dogPhase==1){
+   bool trigger=dins==dnum && (dogFar==dnum || turn>95);
+   if(turn>130)trigger=dins>=max(1,dnum-1);
+   if(turn>150)trigger=dins>0;
+   if(trigger)dogPhase=2,dogStart=turn,dogCount=dins;
+   else if(turn>=155){dogPhase=9;return false;}
+   else {for(int i=0;i<hm;i++)walk(i,dogAnchor,placed);return true;}
+  }
+  if(dogPhase==2){
+   if(dogDecoy<0 && dogMode!=2){
+    int best=10000;
+    for(int i=0;i<hm;i++){int d=workers[i].bfs.distance(dogAnchor); if(d>=0&&d<best)best=d,dogDecoy=i;}
+   }
+   int outside=-1;
+   for(int i=0;i<hm;i++)if(i!=dogDecoy&&humans[i]==dogOut){outside=i;break;}
+   bool can=outside>=0&&!block[dogGate]&&dins>0&&(dins>=dogCount||turn>dogStart+dogSaveLimit)&&
+            hin==(dogDecoy>=0&&dogMask[humans[dogDecoy]]);
+   for(int i=0;i<hm;i++){
+    if(i==dogDecoy)walk(i,dogAnchor,placed);
+    else if(can&&i==outside){act[i]=BUILD[dir(dogOut,dogGate)];}
+    else walk(i,dogOut,placed);
+   }
+   if(can){dogClosed=1; dogPhase=9;}
+   else if(turn>dogStart+50){dogDecoy=-1;dogPhase=9;return false;}
+   return true;
+  }
+  return false;
+ }
+ void pocketPlan(vector<bool> canWork, int &target,int &phase,int& bestPrev,int excluded){
+  need.fill(0);avoid.fill(0);
+  if(target>=0){
+   auto& z=pockets[target];
+   int remain=0;
+   for(int p:z.wall)remain+=!wall[p];
+   if(!remain){target=-1;}
+   else if(turn-phase>=limit || (excluded>=0&&md(z.cx,pockets[excluded].cx)<max(z.cy+pockets[excluded].cy+2,secdist)))target=-1;
+   else if(turn-phase>=5&&remain>=bestPrev-1){
+    int d=999;
+    for(auto p:pets)d=min(d,md(p.p,z.cx));
+    if(d>z.cy+1)target=-1;
+   }
+  }
+  if(target<0){
+   target=select(canWork,excluded);phase=turn;
+   if(target<0)return;
+   bestPrev=0;
+   for(int p:pockets[target].wall)bestPrev+=!wall[p];
+  }
+  auto& z=pockets[target];
+  for(int p:z.wall)need[p]=1;
+  for(int p:z.inside)avoid[p]=1;
+  int humans_in=0, animal_in=0,remain=0;
+  for(int p:z.wall)remain+=!wall[p];
+  for(int i=0;i<(int)humans.size();i++)if(!captiveHuman(i))humans_in+=avoid[humans[i]];
+  for(auto p:pets)animal_in+=avoid[p.p];
+  if(!animal_in&&turn-phase>=5){
+   int mdist=999;
+   for(auto p:pets)if(group[p.p]>=0&&currentCt[group[p.p]]>=40)mdist=min(mdist,md(z.cx,p.p));
+   if(mdist>z.cy+3){target=-1;return;}
+  }
+  struct Job {int p,v;};
+  vector<Job> jobs;
+  for(int p:z.wall)if(!wall[p])jobs.push_back({p,100-2*block[p]});
+  vector<tuple<int,int,int,int>> pairings;
+  for(int j=0;j<(int)jobs.size();j++){
+   auto job=jobs[j];int p=job.p;
+   for(int i=0;i<(int)humans.size();i++)if(canWork[i]&&act[i]=='.'){
+    int best=-1,key=-100000;
+    for(int q:nb[p])if(q>=0&&!wall[q]&&!avoid[q]&&!need[q]){
+     int d=workers[i].bfs.distance(q);
+     if(d<0)continue;
+     int f=job.v-6*d-block[p]*(d==0?22:5);
+     if(f>key)best=q,key=f;
+    }
+    if(best>=0)pairings.emplace_back(key,i,j,best);
+   }
+  }
+  sort(pairings.rbegin(),pairings.rend());
+  auto& set=globalset;auto& moved=globalmoved;
+  vector<bool> busy(humans.size()), assigned(jobs.size());
+  int builds=0;
+  for(auto [key,i,j,q]:pairings)if(!busy[i]&&!assigned[j]) {
+   int p=jobs[j].p,h=humans[i];
+   if(h==q){
+    if(block[p]||moved[p]||set[p]||(humans_in&&builds+1>=remain))continue;
+    act[i]=BUILD[dir(h,p)];set[p]=1;builds++;
+   }else{
+    int next=workers[i].bfs.first_step(q);
+    if(next<0||set[next])continue;
+    act[i]=MOVE[dir(h,next)];moved[next]=1;
+   }
+   busy[i]=true;assigned[j]=true;
+  }
+  for(int i=0;i<(int)humans.size();i++)if(canWork[i]&&act[i]=='.'&&!busy[i]&&avoid[humans[i]]) {
+   int h=humans[i],best=-1,key=99999;
+   for(int p=0;p<V;p++)if(!avoid[p]&&!need[p]&&!wall[p]){
+    int d=workers[i].bfs.distance(p);
+    if(d>=0&&d<key){int q=workers[i].bfs.first_step(p);if(q>=0&&!set[q])key=d,best=q;}
+   }
+   if(best>=0)act[i]=MOVE[dir(h,best)],moved[best]=1;
+  }
+  return;
+ }
+
+ string plan(){
+  prep();
+#ifdef AHC008_ADAPTIVE_FLEX
+  if(turn==205) {
+   int principal=-1;
+   for(int i=0;i<int(humans.size());i++)if(!captiveHuman(i)) {
+    int c=group[humans[i]];
+    if(principal<0 || currentCt[c]>currentCt[principal])principal=c;
+   }
+   int animals=0,cats=0;
+   for(auto p:pets)if(group[p.p]==principal) {++animals;cats+=p.t==5;}
+   bool delay_big_cut=principal>=0 && currentCt[principal]>=480 && animals<=5 && cats<=2;
+#if AHC008_ADAPTIVE_FLEX==2
+   delay_big_cut=principal>=0 && currentCt[principal]>=500 && animals<=6;
+#endif
+   if(!delay_big_cut) {lineTurn=210;minKeep=0;keepRelax=0;priorLen=0;}
+  }
+#endif
+  if(dogPlan())return act;
+  if(latePlan())return act;
+  globalset.fill(0);globalmoved.fill(0);
+  int hm=humans.size(), free=0, pop=0;
+  vector<bool> p1(hm),p2(hm);
+  for(int i=0;i<hm;i++)if(!captiveHuman(i))p1[i]=true,free++;
+  for(auto p:pets)if(group[p.p]==group[humans[dogClosed&&dogDecoy==0]])pop++;
+  if(multi==0||free<2*multiMin||(multi>=2&&turn>=210)||pop<3){
+   pocketPlan(p1,target,phase,bestPrev,-1);
+   return act;
+  }
+  if(target<0){
+   target=select(p1);phase=turn;bestPrev=0;
+   if(target<0)return act;
+   for(int p:pockets[target].wall)bestPrev+=!wall[p];
+  }
+  vector<pair<int,int>> rank;
+  int cc=pockets[target].cx;
+  for(int i=0;i<hm;i++)if(p1[i]){
+   int d=workers[i].bfs.distance(cc);
+   if(d<0)d=md(cc,humans[i])+5;
+   int k=d;
+   if(target2>=0){
+    int d2=workers[i].bfs.distance(pockets[target2].cx);
+    if(d2<0)d2=md(pockets[target2].cx,humans[i])+5;
+    k=d-d2;
+   }
+   rank.push_back({k,i});
+  }
+  sort(rank.begin(),rank.end());
+  int mainWorkers=(free+1)/2;
+  if(multi>=3)mainWorkers=free-multiMin;
+  for(int j=mainWorkers;j<free;j++)p1[rank[j].second]=false,p2[rank[j].second]=true;
+  pocketPlan(p1,target,phase,bestPrev,target2);
+  pocketPlan(p2,target2,phase2,bestPrev2,target);
+  return act;
+ }
+ string repair(string q){
+  if(!cohesion)return q;
+  int hm=humans.size();
+  array<unsigned char,V> testwall=wall;
+  int after[12];
+  for(int i=0;i<hm;i++){
+   after[i]=humans[i];
+   if(q[i]=='.')continue;
+   if(q[i]<'a')after[i]=nb[humans[i]][find(MOVE,MOVE+4,q[i])-MOVE];
+   else testwall[nb[humans[i]][find(BUILD,BUILD+4,q[i])-BUILD]]=1;
+  }
+  int parent=-1;
+  for(int i=0;i<hm;i++)if(!captiveHuman(i)&&(parent<0||currentCt[group[after[i]]]>currentCt[group[after[parent]]]))parent=i;
+  if(parent<0)return q;
+  int root=group[after[parent]];
+  auto reach=[&](){
+   static array<int,V> seen{};
+   static int stamp=0;
+   int bfs[900],n=1;
+   bfs[0]=after[parent];seen[after[parent]]=++stamp;
+   for(int i=0;i<n;i++)for(int p:nb[bfs[i]])if(p>=0&&!testwall[p]&&seen[p]!=stamp)
+    seen[p]=stamp,bfs[n++]=p;
+   int nc=0;for(int i=0;i<hm;i++)if(!captiveHuman(i)&&group[after[i]]==root)nc+=seen[after[i]]==stamp;
+   return make_pair(nc,n);
+  };
+  int goal=0;for(int i=0;i<hm;i++)if(!captiveHuman(i)&&group[after[i]]==root)goal++;
+  auto pass=reach();
+  if(pass.first==goal)return q;
+  for(int l=0;l<hm;l++){
+   int best=-1;
+   auto bmake=pass;
+   for(int i=0;i<hm;i++)if(q[i]>='a'){
+    int p=nb[humans[i]][find(BUILD,BUILD+4,q[i])-BUILD];
+    testwall[p]=0;auto s=reach();testwall[p]=1;
+    if(bmake<s)bmake=s,best=i;
+   }
+   if(best<0){for(int i=0;i<hm;i++)if(q[i]>='a')q[i]='.';break;}
+   int p=nb[humans[best]][find(BUILD,BUILD+4,q[best])-BUILD];
+   testwall[p]=0;q[best]='.';pass=bmake;
+   if(pass.first==goal)break;
+  }
+  return q;
+ }
+ bool advance(){
+  for(int i=0;i<(int)humans.size();i++) if(act[i]!='.'){
+   if(islower(act[i]))wall[nb[humans[i]][find(BUILD,BUILD+4,act[i])-BUILD]]=1;
+   else humans[i]=nb[humans[i]][find(MOVE,MOVE+4,act[i])-MOVE];
+  }
+  string m;
+  for(auto &p:pets){
+   if(!(cin>>m))return false;
+   for(char x:m)if(x!='.')p.p=nb[p.p][find(MOVE,MOVE+4,x)-MOVE];
+  }
+  return true;
+ }
+};
+}
+int main(int argc,char**argv){
+ ios::sync_with_stdio(false);cin.tie(nullptr);
+ Game g;g.init(argc,argv);
+ for(;g.turn<300;g.turn++){
+  g.act=g.repair(g.plan());
+  cout<<g.act<<'\n'<<flush;
+  if(!g.advance())break;
+ }
+#ifdef HAB_DIAG
+ array<int,6> active{}; g.workers[0].bfs.run(g.humans[0],[&](int p){return !g.wall[p];});
+ int a=0;for(int p=0;p<V;p++)a+=g.workers[0].bfs.distance(p)>=0;
+ for(auto pp:g.pets)if(g.workers[0].bfs.distance(pp.p)>=0)active[pp.t]++;
+ cerr<<"diag "<<a;for(int i=1;i<=5;i++)cerr<<" "<<active[i]; cerr<<"\n";
+#endif
+}
