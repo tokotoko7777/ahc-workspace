@@ -1,0 +1,132 @@
+{
+  "models": {
+    "control": {
+      "cases": 100,
+      "score_sum": 1512932629,
+      "max_wall_s": 0.445063,
+      "median_wall_s": 0.2568545,
+      "final_four": 3,
+      "final_four_species": [
+        0,
+        0,
+        3,
+        0,
+        0
+      ],
+      "residual_pets": 509,
+      "all_clear": 10
+    },
+    "fixed-square": {
+      "cases": 100,
+      "score_sum": 1250699651,
+      "max_wall_s": 0.523525,
+      "median_wall_s": 0.3158575,
+      "final_four": 32,
+      "final_four_species": [
+        17,
+        6,
+        8,
+        1,
+        0
+      ],
+      "residual_pets": 526,
+      "all_clear": 5,
+      "capture4": 20,
+      "full_preparation_zero": 78,
+      "full_legal_ready": 27,
+      "full_legal_two_or_more_gates": 9,
+      "shell_built": 481,
+      "active_crew_moves": 2844,
+      "early_crew_waits": 599,
+      "diverted_commands": 6520,
+      "diverted_original_walls": 526,
+      "seals": 18,
+      "multiwall_seals": 0,
+      "capture_species": [
+        13,
+        2,
+        4,
+        1,
+        0
+      ],
+      "median_ready": 16
+    },
+    "deferred-square": {
+      "cases": 100,
+      "score_sum": 1476533852,
+      "max_wall_s": 0.515863,
+      "median_wall_s": 0.3021505,
+      "final_four": 26,
+      "final_four_species": [
+        16,
+        5,
+        4,
+        0,
+        1
+      ],
+      "residual_pets": 516,
+      "all_clear": 11,
+      "capture4": 17,
+      "full_preparation_zero": 44,
+      "full_legal_ready": 17,
+      "full_legal_two_or_more_gates": 1,
+      "shell_built": 478,
+      "active_crew_moves": 3622,
+      "early_crew_waits": 187,
+      "diverted_commands": 4334,
+      "diverted_original_walls": 322,
+      "seals": 17,
+      "multiwall_seals": 1,
+      "capture_species": [
+        10,
+        3,
+        4,
+        0,
+        0
+      ],
+      "median_ready": 14.0
+    }
+  },
+  "paired": {
+    "fixed-square\u2192deferred-square": {
+      "score": {
+        "net": 225834201,
+        "win": 53,
+        "tie": 1,
+        "loss": 46
+      },
+      "final_four": {
+        "net": -6,
+        "win": 11,
+        "tie": 70,
+        "loss": 19
+      },
+      "fewer_residual": {
+        "net": 10,
+        "win": 45,
+        "tie": 21,
+        "loss": 34
+      }
+    },
+    "control\u2192deferred-square": {
+      "score": {
+        "net": -36398777,
+        "win": 45,
+        "tie": 0,
+        "loss": 55
+      },
+      "final_four": {
+        "net": 23,
+        "win": 21,
+        "tie": 77,
+        "loss": 2
+      },
+      "fewer_residual": {
+        "net": -7,
+        "win": 40,
+        "tie": 29,
+        "loss": 31
+      }
+    }
+  }
+}
