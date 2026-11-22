@@ -1,0 +1,112 @@
+--- problems/ahc008/experiments/20261122/parallel-banks-rescue-research.cpp
++++ problems/ahc008/experiments/20261122/parallel-banks-wide-rescue-experiment.cpp
+@@ -1077,4 +1077,5 @@
+- int rescueMode=0,residual160=-1;
+- array<int,4> laneCrew{-1,-1,-1,-1};
+- array<int,3> oldPlan{-1,-1,-1};
+- array<int,3> planAge{};
++ int rescueMode=0,residual160=-1,bankN=3;
++ bool wideRescue=false;
++ array<int,5> laneCrew{-1,-1,-1,-1,-1};
++ array<int,4> oldPlan{-1,-1,-1,-1};
++ array<int,4> planAge{};
+@@ -1084,0 +1086,2 @@
++  if(wideRescue&&humans.size()>=7)bankN=4;
++  const vector<int> offsets=bankN==3?vector<int>{2,4,6}:vector<int>{0,1};
+@@ -1086 +1089 @@
+-  for(int z=0;z<2;z++)for(int a:{2,4,6}){
++  for(int z=0;z<2;z++)for(int a:offsets){
+@@ -1093 +1096 @@
+-    for(int j=0;j<3;j++)for(int k=2;k<=5;k++)d=min(d,abs(y-(a+7*j+k)));
++    for(int j=0;j<bankN;j++)for(int k=2;k<=5;k++)d=min(d,abs(y-(a+7*j+k)));
+@@ -1096 +1099 @@
+-   for(int j=0;j<4;j++){
++   for(int j=0;j<=bankN;j++){
+@@ -1105 +1108 @@
+-  for(int j=0;j<3;j++){
++  for(int j=0;j<bankN;j++){
+@@ -1123 +1126 @@
+-  array<int,4> q{};
++  array<int,5> q{-1,-1,-1,-1,-1};
+@@ -1126 +1129 @@
+-   if(j==4){gain=score;laneCrew=q;return;}
++   if(j==bankN+1){gain=score;laneCrew=q;return;}
+@@ -1129 +1132 @@
+-    for(const auto &x:banks)if(x.b==clamp(j,0,2)){
++    for(const auto &x:banks)if(x.b==clamp(j,0,bankN-1)){
+@@ -1140 +1143 @@
+-  array<int,3> tubes{};
++  array<int,4> tubes{};
+@@ -1142 +1145 @@
+-  int total=tubes[0]+tubes[1]+tubes[2];
++  int total=accumulate(tubes.begin(),tubes.end(),0);
+@@ -1144,3 +1147,3 @@
+-  if(laneN>=2&&total<24)return;
+-  array<bool,3> skipped{};
+-  for(int pass=0;pass<3;pass++){
++  if(laneN>=2&&total<8*bankN)return;
++  array<bool,4> skipped{};
++  for(int pass=0;pass<bankN;pass++){
+@@ -1148,2 +1151,2 @@
+-   array<int,4> best{};
+-   for(int j=0;j<3;j++){
++   array<int,5> best{};
++   for(int j=0;j<bankN;j++){
+@@ -1167 +1170 @@
+-   if(total<24)return;
++   if(total<8*bankN)return;
+@@ -1171,2 +1174,2 @@
+- array<array<int,4>,2> zoneCrew{};
+- array<array<int,3>,2> zonePlan{},zoneAge{};
++ array<array<int,5>,2> zoneCrew{};
++ array<array<int,4>,2> zonePlan{},zoneAge{};
+@@ -1180,2 +1183,3 @@
+-  for(int i=0;i<4;i++){
+-   bool split=(m>=8)||(i==1||i==2);
++  for(int i=0;i<=bankN;i++){
++   bool full=m>=2*(bankN+1);
++   bool split=bankN==3?(full||i==1||i==2):(full||(m>=9?i!=2:i==1||i==2));
+@@ -1183 +1187 @@
+-    jobs.emplace_back(i,0,bp(m>=8?7:9,bankShift+7*i));
++    jobs.emplace_back(i,0,bp(full?7:9,bankShift+7*i));
+@@ -1213 +1217 @@
+-  array<Pick,6> picks;
++  array<Pick,8> picks;
+@@ -1232 +1236 @@
+-   auto &p=picks[3*z+j];
++   auto &p=picks[bankN*z+j];
+@@ -1236 +1240 @@
+-  for(int mask=1;mask<64;mask++){
++  for(int mask=1;mask<(1<<(2*bankN));mask++){
+@@ -1238 +1242 @@
+-   for(int i=0;i<6;i++)if(mask>>i&1){
++   for(int i=0;i<2*bankN;i++)if(mask>>i&1){
+@@ -1246,2 +1250,2 @@
+-  for(int t=0;t<6;t++)if(selected>>t&1){
+-   auto p=picks[t];const auto &x=banks[p.t];int z=t/3,j=t%3;
++  for(int t=0;t<2*bankN;t++)if(selected>>t&1){
++   auto p=picks[t];const auto &x=banks[p.t];int z=t/bankN,j=t%bankN;
+@@ -1312,2 +1316,2 @@
+-   array<double,3> value{-1.,-1.,-1.};
+-   array<int,3> selected{-1,-1,-1};
++   array<double,4> value{-1.,-1.,-1.,-1.};
++   array<int,4> selected{-1,-1,-1,-1};
+@@ -1334,2 +1338,14 @@
+-   bool center=value[1]>max(0.,value[0])+max(0.,value[2]);
+-   for(int j=0;j<3;j++)if(selected[j]>=0&&(j==1)==center&&value[j]>.20){
++   int selectedMask=0;
++   if(bankN==3)selectedMask=value[1]>max(0.,value[0])+max(0.,value[2])?2:5;
++   else {
++    double best=0.;
++    for(int mask=1;mask<(1<<bankN);mask++)if(!(mask&(mask<<1))){
++     double sum=0.;bool valid=true;
++     for(int j=0;j<bankN;j++)if(mask>>j&1){
++      if(value[j]<=.20)valid=false;
++      sum+=value[j];
++     }
++     if(valid&&sum>best)best=sum,selectedMask=mask;
++    }
++   }
++   for(int j=0;j<bankN;j++)if(selected[j]>=0&&(selectedMask>>j&1)&&value[j]>.20){
+@@ -1764,0 +1781 @@
++ g.wideRescue=argc>3&&atoi(argv[3])!=0;
