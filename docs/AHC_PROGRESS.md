@@ -26,7 +26,7 @@
 | [AHC005](https://atcoder.jp/contests/ahc005/tasks/ahc005_a) | 配布100件で目標達成。13:00切替に備え最良版凍結 | 配布目標 **22,318,770**。本番値の出典: [AtCoder提供データ](https://huggingface.co/datasets/SakanaAI/ALE-Bench/blob/main/ahc005.zip) | 2スタート版 **23,020,218**（目標+701,448、基準+96,961）、全件完全可視・帰着 | 配布seed 0–99、公式・独立一致、最長2.812822秒。本番100件とは別。追加未使用100件は22,122,939 | [最良ソース・比較・再現](https://github.com/tokotoko7777/ahc-workspace/tree/6d9d59bf76cb921bba15c12e19ec6f6188bdb401/problems/ahc005/experiments/official100) |
 | [AHC006](https://atcoder.jp/contests/ahc006/tasks/ahc006_a) | 公式配布100件で目標達成、未使用100件で検証 | 配布目標 **2,220,425点超え**（[本番1位の参照値](https://huggingface.co/datasets/SakanaAI/ALE-Bench/blob/main/ahc006.zip)） | 幾何候補＋厳密な前計算高速化 **2,238,273**（目標+17,848、基準+159,865） | 配布seed 0–99、合法・公式独立一致100件、最長1.856995秒。本番とは別。未使用別100件2,226,481（比較版2,230,236） | [最良コード・ケース別・再現](https://github.com/tokotoko7777/ahc-workspace/tree/cbebfc73c5260374eb0af7c76fe6f10e0754c32a/problems/ahc006/experiments/official100)。配布最良は研究枝に保存。 |
 | [AHC007](https://atcoder.jp/contests/ahc007/tasks/ahc007_a) | **本番同一150件で首位超え**・[PR #4](https://github.com/tokotoko7777/ahc-workspace/pull/4) main統合済 | **14,241,733,941** 点（[AtCoder提供の順位データ](https://huggingface.co/datasets/SakanaAI/ALE-Bench/blob/main/ahc007.zip)） | 符号付きボトルネック推定 **14,248,878,730** (+7,144,789)。公式配布150件 **14,255,819,331** (基準+71,513,945) | [本番同一ケース根拠](https://openreview.net/pdf?id=JCjGvbsOmQ)。本番150件を凍結版で盲検し、対話tester・vis・独立採点一致、最長0.308726秒。未調整別150件も14,249,050,741 | [main上の最良コード・再現](https://github.com/tokotoko7777/ahc-workspace/tree/9fb81532ac1f2092309b1e2887756e6c590c9c4d/problems/ahc007)・[研究枝](https://github.com/tokotoko7777/ahc-workspace/tree/a545fe5aa083eac8a6c6bf4533147df1840a8596/problems/ahc007/experiments/focus)。次の仮説: 安い辺の買いすぎと棄却コストの差を、疎な代替カットに限り厳密化。 |
-| [AHC008](https://atcoder.jp/contests/ahc008/tasks/ahc008_a) | ローカル改善・本番未判定 | **121,980,050,607** 点（[AtCoder 提供の順位データ](https://huggingface.co/datasets/SakanaAI/ALE-Bench/blob/main/ahc008.zip)） | 公式配布100件・最高 **1,459,735,698**（別案）。標準v2 **1,338,602,186**、初期259,408,028。目標 6,263,333,336（[ユーザー提示の採点結果](https://atcoder.jp/contests/ahc008/submissions/29654603)） | 公式対話テスタ v3、配布100と本番2,000は別扱い、3秒 | [並行囲いの作業ブランチ](https://github.com/tokotoko7777/ahc-workspace/tree/codex/ahc008-habitat-20261122)・[独立検証](https://github.com/tokotoko7777/ahc-workspace/tree/codex/ahc008-benchmark-20261122) |
+| [AHC008](https://atcoder.jp/contests/ahc008/tasks/ahc008_a) | ローカル改善・本番未判定 | **121,980,050,607** 点（[AtCoder 提供の順位データ](https://huggingface.co/datasets/SakanaAI/ALE-Bench/blob/main/ahc008.zip)） | 公式配布100件・現標準 **1,465,133,201**。旧標準v2 **1,338,602,186**、初期259,408,028。目標 6,263,333,336（[ユーザー提示の採点結果](https://atcoder.jp/contests/ahc008/submissions/29654603)） | 公式対話テスタ v3、配布100と本番2,000は別扱い、3秒 | [並行囲いの作業ブランチ](https://github.com/tokotoko7777/ahc-workspace/tree/codex/ahc008-habitat-20261122)・[独立検証](https://github.com/tokotoko7777/ahc-workspace/tree/codex/ahc008-benchmark-20261122) |
 | [AHC009](https://atcoder.jp/contests/ahc009/tasks/ahc009_a) | 着手・未判定 | **7,547,834,181** 点（[AtCoder 提供の順位データ](https://huggingface.co/datasets/SakanaAI/ALE-Bench/blob/main/ahc009.zip)） | 確率 DP 版: 公開 100 件 7,214,943,739 | 本番との同一性は未確認 | ローカル保存・公開確認待ち |
 | [AHC010](https://atcoder.jp/contests/ahc010/tasks/ahc010_a) | ローカル改善・本番未判定 | **20,218,968** 点（[AtCoder 提供の順位データ](https://huggingface.co/datasets/SakanaAI/ALE-Bench/blob/main/ahc010.zip)） | 協調回転版: 未調整 10 件平均 56,482 | 本番 100 件、2 秒。配布入力との同一性未確認 | [問題別ブランチ](https://github.com/tokotoko7777/ahc-workspace/tree/8e99892f7dc12317ba365750a15a2a7c072b3731) |
 | [AHC011](https://atcoder.jp/contests/ahc011/tasks/ahc011_a) | ローカル改善・本番未判定 | **2,691,447,336** 点（[AtCoder 提供の順位データ](https://huggingface.co/datasets/SakanaAI/ALE-Bench/blob/main/ahc011.zip)） | 局所回転追加: 未調整 15 件 6,060,235 | 本番公開 3,000 シード、3 秒 | ローカル保存・公開確認待ち |
@@ -1049,3 +1049,22 @@ AHC056は[公式採点CSV](https://img.atcoder.jp/ahc_standings/ahc056/result.cs
 終盤の面積上限は標準版で仮に全ペットなし全員最適位置でも配布100で4.296B。
 次は観測後に囲いを一から作るより、既存壁に接続する入口付きの短い通路を用意し、
 入った瞬間に閉鎖できる配置を検証する。本番2,000件は未使用、mainに変更なし。
+
+
+### AHC008 1時間時点: 面積優先を広い未調整入力で確認し、最終ターンを厳密評価
+
+前段の面積優先 v3 高速版を、設定固定後に別の新規100ケース×3組で v2 と比較。
+全3組で v3 が上、300件合計3,944,389,606→4,385,937,511（+11.2%）、全件合法。
+[各ケースの計測、種、単一ソース](https://github.com/tokotoko7777/ahc-workspace/tree/edd579baeffc1a978718a3fc03c7b8a9fd631090/problems/ahc008/experiments/20261122)。
+
+配布練習100件の最新は **1,465,133,201**（最長.450秒、100件合法）。
+高速 v3 の最終1ターンだけ、壁と移動の合法な同時組合せを候補として比較する。
+全100件で最初の299行動が同一。11件改善・89件同点。
+独立生成100では1,453,107,690→1,460,793,810（13改善、悪化なし、最長.500秒）。
+[現最良の単一C++23](https://github.com/tokotoko7777/ahc-workspace/blob/b448004e5c2c8df8972487a16396b8d23e0ec6b2/problems/ahc008/flex_terminal_submission.cpp)、
+[再現と検証](https://github.com/tokotoko7777/ahc-workspace/tree/b448004e5c2c8df8972487a16396b8d23e0ec6b2/problems/ahc008/experiments/20261122)。
+配布ケース目標6,263,333,336に未達。本番2,000件未使用、mainに変更なし。
+
+事前に仕切りを作る別チーム案は未調整100で得点を落として不採用。
+次は独立作業とせず、既存の仕切り・留まっている作業者を使って完成間際の候補を
+評価し、作業の競合と残す面積を同時に見直す。
