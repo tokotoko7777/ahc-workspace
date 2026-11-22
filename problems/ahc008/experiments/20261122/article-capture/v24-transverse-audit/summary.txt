@@ -1,0 +1,4 @@
+natural Counter({'geometry': 410, 'prebuild_turns': 0}) {'visit': [2, 1], 'legal': [2, 1], 'otherwise_missed': [2, 1], 'idle_eta2': [0, 0], 'idle_now': [0, 0], 'prior_prep_followed_by_visit': [0, 0], 'prior_prep_followed_by_legal_eta2': [0, 0]}
+old_plug Counter({'geometry': 0}) {'visit': [0, 0], 'legal': [0, 0], 'otherwise_missed': [0, 0], 'idle_eta2': [0, 0], 'idle_now': [0, 0], 'prior_prep_followed_by_visit': [0, 0], 'prior_prep_followed_by_legal_eta2': [0, 0]}
+new_plug Counter({'geometry': 530, 'prebuild_turns': 0}) {'visit': [3, 2], 'legal': [0, 0], 'otherwise_missed': [0, 0], 'idle_eta2': [0, 0], 'idle_now': [0, 0], 'prior_prep_followed_by_visit': [0, 0], 'prior_prep_followed_by_legal_eta2': [0, 0]}
+destroys_live_rail Counter({'geometry': 1618, 'prebuild_turns': 0}) {'visit': [9, 7], 'legal': [4, 4], 'otherwise_missed': [2, 2], 'idle_eta2': [0, 0], 'idle_now': [0, 0], 'prior_prep_followed_by_visit': [0, 0], 'prior_prep_followed_by_legal_eta2': [0, 0]}
