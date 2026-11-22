@@ -1,0 +1,166 @@
+--- last_capture.hpp
++++ last_capture.hpp
+@@ -1,6 +1,8 @@
+ #pragma once
+ #include <algorithm>
+ #include <array>
++#include <cassert>
++#include <utility>
+ #include <bit>
+ #include <cstdlib>
+ #include <limits>
+@@ -63,6 +65,11 @@
+  Config cfg{};
+  struct Shape{std::vector<int> cut;Board can{};int kept=0,trapped=0,cost=0;double value=-1;};
+  Shape active;
++ int teamFocus=-1,teamDeadline=300;
++ unsigned teamMask=~0u;
++ bool teamMode()const{return teamFocus>=0;}
++ bool teamAllowed(int i)const{return !teamMode()||(teamMask>>i&1);}
++ int teamArea=0;
+  int began=-1, deadline=-1, total=0, retryAt=0, finalSince=-1;
+  int attempts=0, actions=0, placed=0, closes=0, escapes=0, lanePlans=0, retreatPlans=0, protectionTier=0;
+  std::array<int,10> pref{};
+@@ -92,19 +99,46 @@
+   }
+   return true;
+  }
++ bool certifyTeam(const Shape& z,const Board& wall,const std::vector<Pet>& pets,const Board& root){
++  if(!teamMode())return true;
++  int focus=pets[teamFocus].p;
++  if(!root[focus]||z.can[focus])return false;
++  Board op=walkable(wall);
++  for(int p:z.cut)op[p]=0;
++  BFS b;
++  const int area=b.run(focus,op);
++  if(area<4||area>48)return false;
++  int loR=S,hiR=-1,loC=S,hiC=-1;
++  for(int p=0;p<V;p++)if(b.d[p]>=0){
++   loR=std::min(loR,p/S);hiR=std::max(hiR,p/S);
++   loC=std::min(loC,p%S);hiC=std::max(hiC,p%S);
++  }
++  if(area==(hiR-loR+1)*(hiC-loC+1))return false;
++  teamArea=area;
++  // No extra large animal compartment may hide behind a small target pen.
++  for(auto p:pets)if(root[p.p]&&!z.can[p.p]&&b.d[p.p]<0){
++   BFS component;
++   const int other=component.run(p.p,op);
++   if(other<=0||other>48)return false;
++  }
++  return true;
++ }
+  Shape search(int turn,const Board& wall,const Board& main,int size,
+               const std::vector<int>& humans,const std::vector<Pet>& pets,const Board& protect){
+   auto blocked=occupied(humans,pets);
+   std::vector<BFS> ds(humans.size());
+   auto open=walkable(wall);
+-  for(size_t i=0;i<humans.size();++i)ds[i].run(humans[i],open);
++  for(size_t i=0;i<humans.size();++i)if(teamAllowed(i))ds[i].run(humans[i],open);
+   std::array<int,V> eta;eta.fill(90);
+-  for(int p=0;p<V;++p)if(main[p])for(int q:neighbors(p))if(q>=0&&main[q])for(auto &b:ds)
+-    if(b.d[q]>=0)eta[p]=std::min(eta[p],b.d[q]);
++  for(int p=0;p<V;++p)if(main[p])for(int q:neighbors(p))if(q>=0&&main[q])for(int i=0;i<(int)ds.size();i++)
++    if(teamAllowed(i)&&ds[i].d[q]>=0)eta[p]=std::min(eta[p],ds[i].d[q]);
+   std::vector<int> ap;
+-  for(auto a:pets)if(main[a.p])ap.push_back(a.p);
++  if(teamMode()){if(main[pets[teamFocus].p])ap.push_back(pets[teamFocus].p);}
++  else for(auto a:pets)if(main[a.p])ap.push_back(a.p);
+   Shape best;
+-  const int n=ap.size(),H=humans.size(),horizon=std::min({299-turn,cfg.maxAttempt,cfg.maxTotal-total});
++  const int n=ap.size(),H=teamMode()?std::popcount(teamMask):int(humans.size());
++  if(!H||!n)return best;
++  const int horizon=std::min({299-turn,teamDeadline-turn,cfg.maxAttempt,cfg.maxTotal-total});
+   if(horizon<2)return best;
+   Board protectedNow=protect;
+   for(int h:humans)protectedNow[h]=1;
+@@ -131,7 +165,8 @@
+    if(!possible||f.maxflow(s,t)>=INF)continue;
+    Shape z;
+    for(int p=0;p<V;++p)if(main[p]&&dist[p]<R&&f.d[p*2]>=0&&f.d[p*2+1]<0)z.cut.push_back(p);
+-   if(z.cut.empty()||int(z.cut.size())>cfg.maxWalls||!certify(z,wall,humans,pets,main))continue;
++   if(z.cut.empty()||int(z.cut.size())>cfg.maxWalls||(teamMode()&&int(z.cut.size())>H)
++      ||!certify(z,wall,humans,pets,main)||!certifyTeam(z,wall,pets,main))continue;
+    int required=std::min(cfg.minArea,size*7/10);
+    if(z.kept<required||z.kept*100<size*(z.trapped==1?65:45))continue;
+    int far=0,near=0,left=0;
+@@ -153,8 +188,12 @@
+   Board root{};
+   for(int p=0;p<V;++p)root[p]=rootB.d[p]>=0;
+   int reachable=0;for(auto a:pets)reachable+=root[a.p];
+-  if(!reachable||reachable>cfg.maxPet){if(began>=0)reset(turn);return std::nullopt;}
+-  if(began>=0&&(turn>=deadline||total>=cfg.maxTotal||!certify(active,wall,humans,pets,root))){
++  if(!reachable||(!teamMode()&&reachable>cfg.maxPet)||
++     (teamMode()&&!root[pets[teamFocus].p])){
++   if(began>=0)reset(turn);
++   return std::nullopt;
++  }
++  if(began>=0&&(turn>=deadline||total>=cfg.maxTotal||!certify(active,wall,humans,pets,root)||!certifyTeam(active,wall,pets,root))){
+    if(turn<deadline)++escapes;
+    reset(turn);
+   }
+@@ -168,7 +207,7 @@
+    }
+    if(active.value<0){reset(turn);return std::nullopt;}
+    ++(protectionTier==1?lanePlans:retreatPlans);
+-   began=turn;deadline=std::min({300,turn+cfg.maxAttempt,turn+cfg.maxTotal-total});++attempts;
++   began=turn;deadline=std::min({300,teamDeadline,turn+cfg.maxAttempt,turn+cfg.maxTotal-total});++attempts;
+   }
+   auto blocked=occupied(humans,pets);
+   std::vector<int> todo;
+@@ -179,7 +218,7 @@
+   for(int i=0;i<M;++i)nav[i].run(humans[i],active.can);
+   struct Job{int stand=-1,d=INF;};
+   std::vector<std::vector<Job>> job(M,std::vector<Job>(K));
+-  for(int j=0;j<K;++j)for(int i=0;i<M;++i)for(int q:neighbors(todo[j])){
++  for(int j=0;j<K;++j)for(int i=0;i<M;++i)if(teamAllowed(i))for(int q:neighbors(todo[j])){
+    if(q<0||nav[i].d[q]<0)continue;
+    if(nav[i].d[q]<job[i][j].d)job[i][j]={q,nav[i].d[q]};
+   }
+@@ -234,7 +273,7 @@
+   // Prep: dispatch whole crew from the known final exterior. A path never
+   // touches a prospective wall or the eventual animal component.
+   std::vector<std::tuple<int,int,int>> order;
+-  for(int j=0;j<K;++j)for(int i=0;i<M;++i){
++  for(int j=0;j<K;++j)for(int i=0;i<M;++i)if(teamAllowed(i)){
+    int d=job[i][j].d;if(d>=INF||(!d&&blocked[todo[j]]))continue;
+    int score=(d==0?100:0)-8*d-15*blocked[todo[j]]+3*(pref[i]==todo[j]);
+    order.emplace_back(score,i,j);
+@@ -252,4 +291,38 @@
+   return out;
+  }
+ };
++inline std::optional<std::string> composeTeam(Planner& kept,Planner&& trial,
++ const Board& wall,const std::vector<int>& humans,const std::vector<Pet>& pets,
++ const std::string& ordinary,const std::string& proposal){
++ assert(humans.size()==ordinary.size()&&humans.size()==proposal.size());
++ auto orig=Planner::walkable(wall);
++ BFS f;f.run(humans[0],orig);
++ Board root{};
++ for(int i=0;i<V;i++)root[i]=f.d[i]>=0;
++ auto blocked=Planner::occupied(humans,pets);
++ Board merged=wall;
++ std::vector<int> after=humans;
++ std::string used=ordinary;
++ for(int i=0;i<(int)used.size();i++){
++  if(trial.teamAllowed(i))used[i]=proposal[i];
++  char c=used[i];if(c=='.')continue;
++  const auto chars=c>='a'?BUILD:MOVE;
++  int d=std::find(chars,chars+4,c)-chars;
++  if(d>=4)return std::nullopt;
++  int q=neighbors(humans[i])[d];
++  if(q<0||wall[q])return std::nullopt;
++  if(c>='a'){
++   if(blocked[q]||merged[q])return std::nullopt;
++   merged[q]=1;
++  }else after[i]=q;
++ }
++ for(int q:after)if(merged[q])return std::nullopt;
++ // All merged moves must lie in the actual retained component when
++ // the whole candidate is eventually built; includes all p2 walls.
++ if(!Planner::certify(trial.active,merged,after,pets,root)
++      ||!trial.certifyTeam(trial.active,merged,pets,root))return std::nullopt;
++ kept=std::move(trial);
++ return used;
++}
++
+ }
