@@ -1,0 +1,37 @@
+{
+  "verified": 30,
+  "banks": 80,
+  "ready5": 80,
+  "ever_staffed": 77,
+  "ever_exact4": 75,
+  "ready5_median": 35.5,
+  "after_ready_staff_median": 19,
+  "after_ready_capture_median": 35,
+  "actual_brace_workers": 219,
+  "workers_reachable_reposition": 52,
+  "alternate_deltas": {
+    "poses": 90,
+    "cases": 20,
+    "workers": 28
+  },
+  "preserves_paid": {
+    "poses": 11,
+    "cases": 4,
+    "workers": 5
+  },
+  "other_guard_factual": {
+    "poses": 3,
+    "cases": 3,
+    "workers": 3
+  },
+  "prior_to_actual_first_staff": {
+    "poses": 1,
+    "cases": 1,
+    "workers": 1
+  },
+  "actual_legal_occupied": {
+    "poses": 0,
+    "cases": 0,
+    "workers": 0
+  }
+}
