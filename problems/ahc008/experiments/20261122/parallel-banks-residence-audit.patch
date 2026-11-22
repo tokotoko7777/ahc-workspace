@@ -1,0 +1,36 @@
+--- problems/ahc008/experiments/20261122/parallel-banks-narrow-rescue-research.cpp
++++ problems/ahc008/experiments/20261122/parallel-banks-residence-audit.cpp
+@@ -816,0 +817 @@
++ int residenceSerial=0;
+@@ -821,0 +823,10 @@
++  auto logPath=getenv("AHC008_RESIDENCE_AUDIT");
++  struct AuditOption{double priority;Pen pen;bool flow;};
++  vector<AuditOption> options;
++  auto pushOption=[&](const Pen& p,double priority,bool flow){
++   if(!logPath||(options.size()>=5&&priority<options.back().priority))return;
++   for(auto &r:options)if(r.pen.wall==p.wall)return;
++   options.push_back({priority,p,flow});
++   stable_sort(options.begin(),options.end(),[](auto& l,auto& r){return l.priority>r.priority;});
++   if(options.size()>5)options.pop_back();
++  };
+@@ -862,0 +874 @@
++   pushOption(z,v,false);
+@@ -920,0 +933 @@
++     pushOption(p,v,true);
+@@ -924,0 +938,16 @@
++  }
++  if(logPath&&ret>=0){
++   ofstream f(logPath,ios::app);f<<setprecision(12);
++   const auto &chosen=pockets[ret];
++   unsigned ww=0;for(int i=0;i<int(eligible.size());i++)if(eligible[i])ww|=1u<<i;
++   auto emit=[&](const Pen& p,double score,bool flow,bool actual){
++    f<<turn<<" "<<residenceSerial<<" "<<actual<<" "<<flow<<" "<<score<<" "<<p.cx<<" "<<p.cy<<" "<<ww<<" "<<p.wall.size();
++    for(int v:p.wall)f<<" "<<v;
++    f<<" "<<p.inside.size();
++    for(int v:p.inside)f<<" "<<v;
++    f<<"\n";
++   };
++   emit(chosen,best,ret>=staticPocketCount,true);
++   int n=0;
++   for(auto& opt:options)if(opt.pen.wall!=chosen.wall&&n++<3)emit(opt.pen,opt.priority,opt.flow,false);
++   ++residenceSerial;
