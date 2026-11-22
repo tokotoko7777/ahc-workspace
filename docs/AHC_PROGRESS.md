@@ -1470,3 +1470,8 @@ S字でも犬・猫を含め4マスに合法に隔離できた。各S字系列�
 - 元の75室を維持して16室を3マス片側入口へ、予定柵+2。[設営テスト](https://github.com/tokotoko7777/ahc-workspace/blob/bf1029d63bb7b56df202eee7268ce784a62d0a2d/problems/ahc008/experiments/20261122/article-capture/terry-single-runs/NORMALIZATION.md)では予定柵になる作業位置から5件の行き詰まりを特定、外の足場へ移して35/35通過。別100の[実測](https://github.com/tokotoko7777/ahc-workspace/blob/bf1029d63bb7b56df202eee7268ce784a62d0a2d/problems/ahc008/experiments/20261122/article-capture/terry-single-runs/LIVE_RESULT.md)は6,049,960,322→5,994,050,593、全頭95→94。両版全頭の変更70ケースでも面積平均−4.186マス、不採用。
 - [154本の再生](https://github.com/tokotoko7777/ahc-workspace/blob/bf1029d63bb7b56df202eee7268ce784a62d0a2d/problems/ahc008/experiments/20261122/article-capture/terry-single-runs/pipeline/RESULT.md)では100ターンまでに奥柵1,209/1,232完成。使える対象室は1,106→1,129でも、100〜159ターンの同じ3マスへの進入が1,117→411（個体410→167）。早期設営や収容面積だけでなく、通り抜けの維持も条件にする。
 - 配布100ケース採用版は **6,152,805,559点、全頭100ケース**、歴史上の別ケース目標に数値で110,527,777差。本番1位判定は保留。次: 元の通り抜けを残したまま、既存の短期担当を奪わず4〜6ターン先の捕獲位置へ先回りできるか調べる。
+
+### AHC008: 終盤の最大流を高速化、得点版とは別に保存（2026-11-23 JST）
+
+- [独立カーネル](https://github.com/tokotoko7777/ahc-workspace/blob/56d74d64b862a5491347742204cc4f858a936cd0/problems/ahc008/experiments/20261122/article-capture/terry-chase-csr/RESULT.md): 通れないマスを除いたCSR最大流で、実戦再生175局面と合成300局面の流量・切断・行動が完全一致。行動決定のCPU−53.2%／−38.0%。
+- [100ケース×2の統合比較](https://github.com/tokotoko7777/ahc-workspace/blob/56d74d64b862a5491347742204cc4f858a936cd0/problems/ahc008/experiments/20261122/article-capture/terry-chase-csr/INTEGRATION.md): 同じ試行回数で全行動と得点一致、全体のCPU−25.64%／−25.10%。通常の時間制限では配布100のうち1件で方針が変わり、6,152,805,559→6,151,694,448点（全頭100件維持）。別生成100は+555,555点。高速化部品を保存し、得点版は変更しない。
