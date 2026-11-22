@@ -1,0 +1,59 @@
+--- problems/ahc008/experiments/20261122/parallel-banks-narrow-rescue-research.cpp
++++ problems/ahc008/experiments/20261122/parallel-banks-bent-rescue.cpp
+@@ -1078 +1078,2 @@
+- bool narrowRescue=false;
++ bool narrowRescue=false,bentBanks=false;
++ int bankStride=7;
+@@ -1085,0 +1087,2 @@
++  bentBanks=bentBanks&&humans.size()>=7;
++  if(bentBanks)bankN=4,bankStride=6;
+@@ -1087 +1090 @@
+-  const vector<int> offsets=bankN==3?vector<int>{2,4,6}:vector<int>{4,8,12};
++  const vector<int> offsets=bentBanks?vector<int>{2}:bankN==3?vector<int>{2,4,6}:vector<int>{4,8,12};
+@@ -1096 +1099 @@
+-    for(int j=0;j<bankN;j++)for(int k=2;k<=5;k++)d=min(d,abs(y-(a+7*j+k)));
++    for(int j=0;j<bankN;j++)for(int k=2;k<=(bentBanks?4:5);k++)d=min(d,abs(y-(a+bankStride*j+k)));
+@@ -1101 +1104 @@
+-    for(int h:humans)q=min(q,md(h,bp(14,a+7*j)));
++    for(int h:humans)q=min(q,md(h,bp(14,a+bankStride*j)));
+@@ -1109 +1112,13 @@
+-   int a=bankShift+7*j;
++   int a=bankShift+bankStride*j;
++   if(bentBanks){
++    for(int r=2;r<=26;r+=3){
++     TubeBank t{j,r,bp(r,a),bp(r,a+1),bp(r+1,a+5),bp(r+1,a+6),
++       {bp(r,a+2),bp(r,a+3),bp(r+1,a+3),bp(r+1,a+4)},{}};
++     bitset<V> side;
++     for(int p:t.inner)for(int q:nb[p])
++      if(q>=0&&q!=t.g&&q!=t.k&&find(t.inner.begin(),t.inner.end(),q)==t.inner.end())side[q]=1;
++     for(int p=0;p<V;p++)if(side[p])t.side.push_back(p),needed[p]=1;
++     banks.push_back(move(t));
++    }
++    continue;
++   }
+@@ -1133 +1148 @@
+-     int p=bp(x.r,bankShift+7*j),d=workers[k].bfs.distance(p);
++     int p=bentBanks?(j==bankN?x.h:x.l):bp(x.r,bankShift+bankStride*j),d=workers[k].bfs.distance(p);
+@@ -1187 +1202 @@
+-   bool split=bankN==3?(full||i==1||i==2):(full||(i==side||i==side+1));
++   bool split=bentBanks?(full||(m>=9?i!=2:i==1||i==2)):bankN==3?(full||i==1||i==2):(full||(i==side||i==side+1));
+@@ -1189,3 +1204,3 @@
+-    jobs.emplace_back(i,0,bp(full?7:9,bankShift+7*i));
+-    jobs.emplace_back(i,1,bp(19,bankShift+7*i));
+-   }else jobs.emplace_back(i,2,bp(13,bankShift+7*i));
++    jobs.emplace_back(i,0,bp(full?7:9,bankShift+bankStride*i));
++    jobs.emplace_back(i,1,bp(19,bankShift+bankStride*i));
++   }else jobs.emplace_back(i,2,bp(13,bankShift+bankStride*i));
+@@ -1223 +1238 @@
+-   const auto &x=banks[i];int j=x.b,z=(x.r>=14);
++   const auto &x=banks[i];int j=x.b,z=((bankRot?x.l%S:x.l/S)>=14),zr=((bankRot?x.h%S:x.h/S)>=14);
+@@ -1225 +1240 @@
+-   int a=zoneCrew[z][j],b=zoneCrew[z][j+1];
++   int a=zoneCrew[z][j],b=zoneCrew[zr][j+1];
+@@ -1370,2 +1385,2 @@
+-    int axis=bankRot?(p/S):(p%S),r=bankRot?p%S:p/S,start=axis-((axis-bankShift-2)%7);
+-    for(int k=0;k<4;k++)if(start+k>=0&&start+k<S)progress+=wall[bp(r,start+k)];
++    int axis=bankRot?(p/S):(p%S),r=bankRot?p%S:p/S,start=axis-((axis-bankShift-2)%bankStride);
++    for(int k=0;k<(bentBanks?3:4);k++)if(start+k>=0&&start+k<S)progress+=wall[bp(r,start+k)];
+@@ -1785,0 +1801 @@
++ g.bentBanks=argc>4&&atoi(argv[4])!=0;
