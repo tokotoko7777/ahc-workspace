@@ -85,3 +85,9 @@
 | AHC008 | 固定巡回経路の作業区間分担 | 通常の最小費用割当では終了時刻の最大値も区間の連続性も最適化できない | [route_makespan.hpp](experiments/ahc008/construction_partition/route_makespan.hpp) で、三角不等式が成り立つ場合に到達可能な最長接頭辞だけを部分集合DPで管理 | [使い方・3,000回の愚直比較](experiments/ahc008/construction_partition/)。全部の柵を作る時刻と、最初の捕獲区画が使える時刻は別目的。前者を最小化した現行実験は不採用、補助部品は提案として保存。 |
 
 速度差で自前実装に戻した場合は条件と計測値を、変換が必要だった場合は入力・出力の型や契約を記録する。汎用化した項目には使用例とテストへのリンクを添える。
+
+### AHC008 囲い候補の連結成分
+
+| 問題 | 部品 | 不便 | 実際の回避策 | 改善案・状況 |
+|---|---|---|---|---|
+| AHC008 | `BitGridComponents` | 柵が変わらない数ターンに同じ囲いを毎回分割し直していた | 柵と元連結領域の世代内で候補ごとの分割結果を保持し、移動する動物だけ再集計 | [盤面世代キャッシュの汎用化案](https://github.com/tokotoko7777/ahc-workspace/blob/be1cefb260f7f47b683f780eca2db2db603be3e0/docs/LIBRARY_PROPOSAL_GENERATION_TOPOLOGY_CACHE.md)。AHC008の配布・未使用100で全行動一致、ケース別の時間改善中央値10.21%／10.68%。もう一つの利用例が見つかるまでは共有API化しない。 |
