@@ -1,0 +1,108 @@
+--- problems/ahc008/tactical_gate_submission.cpp
++++ problems/ahc008/tactical_gate_submission.cpp
+@@ -1264,0 +1265,87 @@
++ int starterMode=0,starterBank=-1,starterRow=-1,starterNominal=-1,starterSkips=0;
++ array<int,2> starterCrew{-1,-1},starterCur{};
++ struct StartJob{int stance,a,b;};
++ array<vector<StartJob>,2> starterJobs;
++ bitset<V> starterWalls, braceOnly;
++ array<int,V> starterD(int p,const bitset<V>& extra={})const{
++  array<int,V>d;d.fill(999);
++  int chain[V],n=1;chain[0]=p;d[p]=0;
++  for(int k=0;k<n;k++)for(int q:nb[chain[k]])if(q>=0&&!braceOnly[q]&&!extra[q]&&d[q]==999)
++   d[q]=d[chain[k]]+1,chain[n++]=q;
++  return d;
++ }
++ void assignStarter(){
++  if(!starterMode)return;
++  for(int p:bankWalls)braceOnly[p]=1;
++  vector<array<int,V>> init;
++  for(int h:humans)init.push_back(starterD(h));
++  int best=1e9;
++  for(int bank=0;bank<3;bank++)for(int start=3;start<=17;start+=2)for(int rev=0;rev<2;rev++){
++   vector<StartJob> jobs;
++   for(int k=0;k<3;k++){
++    int r=start+4*(rev?2-k:k);
++    for(int s=0;s<4;s++){
++     int col=bankShift+7*bank+2+(((k&1)^rev)?3-s:s);
++     jobs.push_back({bp(r,col),bp(r-1,col),bp(r+1,col)});
++    }
++   }
++   vector<int> pref(12);
++   for(int k=1;k<12;k++)pref[k]=pref[k-1]+starterD(jobs[k-1].stance)[jobs[k].stance];
++   int interest=0;
++   for(auto p:pets){
++    int d=999;
++    for(int r=start;r<=start+8;r+=2)for(int j=3;j<=4;j++)d=min(d,md(p.p,bp(r,bankShift+7*bank+j)));
++    interest+=d<=4;
++   }
++   for(int i=0;i<int(humans.size());i++)for(int j=0;j<int(humans.size());j++)if(i!=j)
++   for(int k=1;k<12;k++){
++    int a=init[i][jobs[0].stance]+2*k+pref[k-1];
++    int b=init[j][jobs[k].stance]+2*(12-k)+pref[11]-pref[k];
++    int eta=max(a,b),score=eta*8-2*interest;
++    if(score>=best)continue;
++    best=score;starterBank=bank;starterRow=start;starterNominal=eta;starterCrew={i,j};
++    starterJobs[0].assign(jobs.begin(),jobs.begin()+k);
++    starterJobs[1].assign(jobs.begin()+k,jobs.end());
++    starterWalls.reset();
++    for(auto j:jobs){starterWalls[j.a]=1;starterWalls[j.b]=1;}
++   }
++  }
++ }
++ bool starterWork(bitset<V>& build,bitset<V>& moveTo){
++  if(starterBank<0||turn>=55)return false;
++  bool unfinished=false;
++  for(int p:bankWalls)if(starterWalls[p]&&!wall[p])unfinished=true;
++  if(!unfinished)return false;
++  bitset<V> no=build;for(int p=0;p<V;p++)if(wall[p])no[p]=1;
++  for(int i=0;i<2;i++){
++   int w=starterCrew[i],h=humans[w];
++   if(act[w]!='.'||find(laneCrew.begin(),laneCrew.end(),w)!=laneCrew.end())continue;
++   auto move=[&](int goal){
++    auto d=starterD(goal,no);int best=999,step=-1;
++    for(int q:nb[h])if(q>=0&&!braceOnly[q]&&!no[q]&&d[q]<best)best=d[q],step=q;
++    if(step<0)return false;
++    act[w]=MOVE[dir(h,step)];moveTo[step]=1;return true;
++   };
++   auto buildCell=[&](int p){
++    if(block[p]||build[p]||wall[p]||moveTo[p])return false;
++    int d=dir(h,p);if(d<0)return false;
++    act[w]=BUILD[d];build[p]=1;no[p]=1;return true;
++   };
++   for(auto &k=starterCur[i];k<int(starterJobs[i].size());k++){
++    auto z=starterJobs[i][k];
++    if((wall[z.a]||build[z.a])&&(wall[z.b]||build[z.b]))continue;
++    if(h!=z.stance){if(move(z.stance))break;}
++    else if(buildCell(z.a)||buildCell(z.b))break;
++    starterSkips++;
++   }
++   if(act[w]!='.')continue;
++   // The block is the goal: repair any leftover local cell, not an
++   // unrelated segment after the planned sweep has skipped a blocker.
++   auto d=starterD(h,no);int best=999,pick=-1,st=-1;
++   for(int p:bankWalls)if(starterWalls[p]&&!wall[p]&&!block[p]&&!moveTo[p]&&!build[p])
++    for(int q:nb[p])if(q>=0&&!braceOnly[q]&&!no[q]&&d[q]<best)best=d[q],pick=p,st=q;
++   if(pick>=0){if(h==st)buildCell(pick);else move(st);}
++  }
++  return true;
++ }
++
+@@ -1339,0 +1427 @@
++   bool first=starterWork(build,moveTo);
+@@ -1341 +1429 @@
+-   for(int p:bankWalls)if(!wall[p]){
++   for(int p:bankWalls)if(!wall[p]&&!(first&&starterWalls[p])){
+@@ -1345 +1433 @@
+-    for(int i=0;i<m;i++)if(act[i]=='.'&&(zonesActive?!zoneUsed[i]:find(laneCrew.begin(),laneCrew.end(),i)==laneCrew.end()))
++    for(int i=0;i<m;i++)if(act[i]=='.'&&(!first||(i!=starterCrew[0]&&i!=starterCrew[1]))&&(zonesActive?!zoneUsed[i]:find(laneCrew.begin(),laneCrew.end(),i)==laneCrew.end()))
+@@ -1756,0 +1845 @@
++ g.starterMode=argc>2?atoi(argv[2]):0;
+@@ -1757,0 +1847 @@
++ g.assignStarter();
+@@ -1762,0 +1853,5 @@
++ }
++ if(const char *p=getenv("AHC008_STARTER_LOG")){
++  ofstream f(p);f<<g.starterBank<<" "<<g.starterRow<<" "<<g.starterNominal<<" "<<g.starterSkips;
++  for(int p=0;p<V;p++)if(g.starterWalls[p])f<<" "<<p;
++  f<<"\n";
