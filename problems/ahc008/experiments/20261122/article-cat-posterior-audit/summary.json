@@ -1,0 +1,125 @@
+{
+  "verified": 30,
+  "nll_rows": 11592,
+  "nll": [
+    0.8796824870681949,
+    0.5098243226231958
+  ],
+  "nll_case_count": 29,
+  "nll_cat_count": 90,
+  "rows": 2690,
+  "cases": 29,
+  "cats": 90,
+  "brier_inside": [
+    0.043598777372712456,
+    0.03924666267719303
+  ],
+  "brier_legal": [
+    0.035865407829932465,
+    0.03281234089349327
+  ],
+  "brier_staffed": [
+    0.028638167461078747,
+    0.02577845165378268
+  ],
+  "auc_legal": [
+    0.8877323681119452,
+    0.9195058347377559
+  ],
+  "shape_rank": {
+    "win": 1367,
+    "loss": 971,
+    "tie": 9,
+    "comparable": 9,
+    "rank": [
+      0.7777777777777778,
+      0.7777777777777778
+    ]
+  },
+  "case_cluster": {
+    "win": 25,
+    "loss": 4,
+    "tie": 0,
+    "comparable": 27,
+    "rank": [
+      0.8999486523174256,
+      0.9273265598584319
+    ]
+  },
+  "pet_cluster": {
+    "win": 68,
+    "loss": 22,
+    "tie": 0,
+    "comparable": 68,
+    "rank": [
+      0.9091208010397684,
+      0.9283841278783463
+    ]
+  },
+  "max_diag_obs": 0.078498,
+  "max_diag_forecast": 0.227448,
+  "max_diag_wall": 1.1751692550024018,
+  "positive": {
+    "inside": {
+      "rows": 154,
+      "cases": 28,
+      "cats": 73,
+      "otherwise_final_missed": 3,
+      "otherwise_final_missed_cases": 3
+    },
+    "legal": {
+      "rows": 122,
+      "cases": 27,
+      "cats": 68,
+      "otherwise_final_missed": 3,
+      "otherwise_final_missed_cases": 3
+    },
+    "actual_stance": {
+      "rows": 101,
+      "cases": 26,
+      "cats": 63,
+      "otherwise_final_missed": 0,
+      "otherwise_final_missed_cases": 0
+    },
+    "matched_stance": {
+      "rows": 91,
+      "cases": 26,
+      "cats": 59,
+      "otherwise_final_missed": 0,
+      "otherwise_final_missed_cases": 0
+    },
+    "acted": {
+      "rows": 101,
+      "cases": 26,
+      "cats": 63,
+      "otherwise_final_missed": 0,
+      "otherwise_final_missed_cases": 0
+    }
+  },
+  "by_horizon": {
+    "1": {
+      "rows": 327,
+      "legal": 64,
+      "brier": [
+        0.13021554998433757,
+        0.11372493367124158
+      ]
+    },
+    "2": {
+      "rows": 987,
+      "legal": 34,
+      "brier": [
+        0.03170001187496447,
+        0.029378497879372793
+      ]
+    },
+    "3": {
+      "rows": 1376,
+      "legal": 24,
+      "brier": [
+        0.016431359372856117,
+        0.016046923173008685
+      ]
+    }
+  }
+}
