@@ -1,0 +1,3 @@
+8291a045a7d89f0322644e4f0cf8cfadd7bd725f0a1ce0abe568779eafd3e0df  contact/solve.cpp
+afd36419644ba18a02f4fe4314696e60470095f8b6d06d69603709d2b3ec1afe  makespan/solve.cpp
+8b3196943259acde744f80bc9de72ec4ace0b63bac08d2f48804065a1835c4b2  forecast/solve.cpp
