@@ -1,0 +1,186 @@
+--- problems/ahc008/tactical_gate_submission.cpp
++++ problems/ahc008/tactical_gate_submission.cpp
+@@ -312,0 +313,86 @@
++#include <algorithm>
++#include <bit>
++#include <cstdint>
++#include <limits>
++#include <span>
++#include <stdexcept>
++#include <vector>
++
++namespace route_makespan {
++using Cost = std::int64_t;
++struct Segment { int worker, first, last; }; // [first,last)
++struct Plan { Cost makespan; std::vector<Segment> segments; };
++
++// A fixed directed walk visits every task in order. travel[h][l] is the
++// time for worker h to reach the stand for task l before construction.
++// Require travel[h][l+1] <= travel[h][l] + next[l], e.g. distances in
++// the same open graph in which the prescribed walk is valid. Then a worker
++// who could cover [l,r) can start at any later available prefix <=r
++// without finishing later, so one furthest reachable prefix per mask suffices.
++// No waiting, blocking pets, or dynamic walls are modeled.
++inline Plan solve(std::span<const Cost> work, std::span<const Cost> next,
++                  const std::vector<std::vector<Cost>>& travel) {
++    constexpr auto inf = std::numeric_limits<Cost>::max() / 8;
++    int n = static_cast<int>(work.size()), m = static_cast<int>(travel.size());
++    if (n == 0) return {0, {}};
++    if (next.size()!=work.size() || m<=0 || m>20) throw std::invalid_argument("invalid dimensions");
++    std::vector<Cost> before(n+1), through(n);
++    for (int j=0;j<n;++j) {
++        if (work[j]<0 || next[j]<0 || work[j]>=inf || next[j]>=inf || before[j]>=inf)
++            throw std::invalid_argument("invalid or overflowing walk cost");
++        through[j]=before[j]+work[j];
++        before[j+1]=through[j]+next[j];
++    }
++    for (const auto& row:travel) {
++        if (static_cast<int>(row.size())!=n) throw std::invalid_argument("bad approach size");
++        for (int j=0;j<n;++j) {
++            if (row[j]<0 || row[j]>=inf ||
++                (j && row[j]>row[j-1]+next[j-1]))
++                throw std::invalid_argument("approach violates route triangle bound");
++        }
++    }
++    const int states=1<<m;
++    auto reachable = [&](Cost budget, bool rebuild) -> std::vector<Segment> {
++        std::vector<std::vector<int>> advance(m, std::vector<int>(n));
++        for (int h=0;h<m;++h) {
++            // The right endpoint cannot decrease as l increases.
++            int end=0;
++            for (int l=0;l<n;++l) {
++                end=std::max(end,l);
++                while(end<n && through[end]-before[l]+travel[h][l]<=budget)++end;
++                advance[h][l]=end;
++            }
++        }
++        std::vector<int> far(states,-1), prev(states,-1);
++        far[0]=0;
++        for (int mask=0;mask<states;++mask) {
++            if (far[mask]<0) continue;
++            if (far[mask]==n) {
++                if(!rebuild) return {{-1,0,n}};
++                std::vector<Segment> plan;
++                while(mask) {
++                    int p=prev[mask];
++                    plan.push_back({std::countr_zero(static_cast<unsigned>(p^mask)),far[p],far[mask]});
++                    mask=p;
++                }
++                std::reverse(plan.begin(),plan.end());
++                return plan;
++            }
++            const int l=far[mask];
++            for (int h=0;h<m;++h) if(!(mask>>h&1)) {
++                int nxt=mask|1<<h,r=advance[h][l];
++                if (r>l && r>far[nxt]) { far[nxt]=r; prev[nxt]=mask; }
++            }
++        }
++        return {};
++    };
++    Cost lo=-1, hi=inf+through.back();
++    for (auto &row:travel) hi=std::min(hi,row[0]+through.back());
++    while(hi-lo>1) {
++        Cost mid=lo+(hi-lo)/2;
++        if(reachable(mid,false).empty())lo=mid;else hi=mid;
++    }
++    return {hi,reachable(hi,true)};
++}
++}
++
+@@ -1264,0 +1351,86 @@
++ int bankRouteMode=0,routeNominal=-1,routeRecipe=-1,routeBlocked=0,routeBuilt=0,routeSteps=0;
++ struct BraceTask{int stance,up,down;};
++ array<vector<BraceTask>,10> routes;
++ array<int,10> curRoute{};
++ bitset<V> braceSet;
++ array<int,V> braceDist(int start,const bitset<V>& extra={})const{
++  array<int,V> d;d.fill(999);
++  int q[V],n=1;q[0]=start;d[start]=0;
++  for(int i=0;i<n;i++)for(int v:nb[q[i]])if(v>=0&&!braceSet[v]&&!extra[v]&&d[v]==999)
++   d[v]=d[q[i]]+1,q[n++]=v;
++  return d;
++ }
++ void planBraceRoutes(){
++  if(!bankRouteMode)return;
++  for(int p:bankWalls)braceSet[p]=1;
++  using route_makespan::Cost;
++  vector<array<int,V>> approach;
++  for(int h:humans)approach.push_back(braceDist(h));
++  vector<array<int,V>> known(V);
++  bitset<V> got;
++  for(int mode=0;mode<16;mode++){
++   vector<pair<int,int>> passes;
++   if(mode&1){
++    for(int i=0;i<7;i++)for(int j=0;j<3;j++)passes.emplace_back((i&1)?2-j:j,(mode&4)?6-i:i);
++   }else{
++    for(int j=0;j<3;j++)for(int i=0;i<7;i++)passes.emplace_back((mode&4)?2-j:j,(j&1)?6-i:i);
++   }
++   if(mode&8)reverse(passes.begin(),passes.end());
++   vector<BraceTask> list;
++   vector<Cost> work,walk;
++   for(int z=0;z<int(passes.size());z++){
++    auto [j,i]=passes[z];int r=i==6?25:3+4*i;
++    for(int k=0;k<4;k++){
++     int col=bankShift+7*j+2+(((z&1)^bool(mode&2))?3-k:k);
++     int p=bp(r,col);
++     list.push_back({p,i==6?-1:bp(r-1,col),bp(r+1,col)});
++     work.push_back(i==6?1:2);
++    }
++   }
++   for(int i=0;i<int(list.size());i++){
++    int p=list[i].stance;
++    if(!got[p])got[p]=1,known[p]=braceDist(p);
++    walk.push_back(i+1==int(list.size())?0:known[p][list[i+1].stance]);
++   }
++   vector<vector<Cost>> travel(humans.size());
++   for(int i=0;i<int(humans.size());i++)for(auto a:list)travel[i].push_back(approach[i][a.stance]);
++   auto plan=route_makespan::solve(work,walk,travel);
++   if(routeNominal<0||plan.makespan<routeNominal){
++    routeNominal=plan.makespan;routeRecipe=mode;
++    for(auto &r:routes)r.clear();
++    for(auto [k,l,r]:plan.segments)routes[k].assign(list.begin()+l,list.begin()+r);
++   }
++  }
++ }
++ void routeBraceActions(bitset<V>&build,bitset<V>&moveTo){
++  if(!bankRouteMode)return;
++  bitset<V> unavailable=build;
++  for(int p=0;p<V;p++)if(wall[p])unavailable[p]=1;
++  for(int i=0;i<int(humans.size());i++)if(act[i]=='.'&&
++     (zonesActive?!zoneUsed[i]:find(laneCrew.begin(),laneCrew.end(),i)==laneCrew.end())){
++   auto &k=curRoute[i];
++   for(;k<int(routes[i].size());k++){
++    auto a=routes[i][k];
++    bool empty=true;
++    for(int p:{a.up,a.down})if(p>=0&&!wall[p]&&!build[p])empty=false;
++    if(empty)continue;
++    int h=humans[i];
++    if(h!=a.stance){
++     auto d=braceDist(a.stance,unavailable);
++     int best=999,q=-1;
++     for(int v:nb[h])if(v>=0&&!braceSet[v]&&!unavailable[v]&&d[v]<best)best=d[v],q=v;
++     if(q<0){routeBlocked++;continue;}
++     act[i]=MOVE[dir(h,q)];moveTo[q]=1;routeSteps++;
++     break;
++    }
++    for(int p:{a.up,a.down})if(p>=0&&!wall[p]&&!build[p]&&!block[p]&&!moveTo[p]){
++     act[i]=BUILD[dir(h,p)];build[p]=1;unavailable[p]=1;routeBuilt++;break;
++    }
++    if(act[i]!='.')break;
++    // A blocked stand is allowed to finish any feasible half first,
++    // and then passed over. Idle workers can take old greedy repair jobs.
++    routeBlocked++;
++   }
++  }
++ }
++
+@@ -1339,0 +1512 @@
++   routeBraceActions(build,moveTo);
+@@ -1756,0 +1930 @@
++ g.bankRouteMode=argc>2?atoi(argv[2]):0;
+@@ -1757,0 +1932 @@
++ g.planBraceRoutes();
+@@ -1762,0 +1938,3 @@
++ }
++ if(const char *p=getenv("AHC008_ROUTE_LOG")){
++  ofstream f(p);f<<g.routeNominal<<" "<<g.routeRecipe<<" "<<g.routeBuilt<<" "<<g.routeSteps<<" "<<g.routeBlocked<<"\n";
