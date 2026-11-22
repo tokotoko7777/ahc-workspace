@@ -94,3 +94,16 @@ official generator, and the extracted untouched `tools/in` in the
 other run. Exact per-case gzip ledgers include legality implicit in the
 replay assertions, timings, individual action hashes and capture counts.
 JSON ledgers reproduce via `parallel_banks_narrow_rescue_summary.py`.
+
+## Score-first research standalone
+
+`parallel-banks-narrow-rescue-research.cpp` is the same policy as the
+frozen experimental `5 1 1` binary, with **only** the third option's
+default changed to enabled. The fallback by visible M remains inside the
+code. GNU C++23, actual source `#pragma GCC optimize("O3")`, fast I/O,
+and no runtime arguments are needed. The first M<=6 and M>=7 case in
+each frozen100 were replayed with the no-argument executable and all four
+scores and exact action SHA256s matched; see the standalone smoke CSV.
+The previous `parallel-banks-rescue-research.cpp` stays the immutable
+historical three-bank comparator. This is the score-first research
+nomination, not a contest submission or main-branch replacement.
