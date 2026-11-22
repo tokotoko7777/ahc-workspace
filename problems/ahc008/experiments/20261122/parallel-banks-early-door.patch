@@ -1,0 +1,86 @@
+--- problems/ahc008/tactical_gate_submission.cpp
++++ problems/ahc008/tactical_gate_submission.cpp
+@@ -1169,0 +1170,65 @@
++ int reservBank=-1,reservNear=-1,reservFar=-1,reservStance=-1,reservWorker=-1,reservExpiry=-1;
++ pair<int,int> bankOuterStep(int h,int stance,const TubeBank& tube)const{
++  if(h==stance)return {0,h};
++  int d[V],q[V],first[V],n=1;fill(d,d+V,-1);q[0]=h;d[h]=0;first[h]=h;
++  for(int i=0;i<n;i++)for(int v:nb[q[i]])if(v>=0&&!wall[v]&&v!=tube.g&&v!=tube.k&&
++                    find(tube.inner.begin(),tube.inner.end(),v)==tube.inner.end()&&d[v]<0){
++   d[v]=d[q[i]]+1;first[v]=i==0?v:first[q[i]];
++   if(v==stance)return {d[v],first[v]};
++   q[n++]=v;
++  }
++  return {999,-1};
++ }
++ void bankReserve(vector<int>const&ready,bitset<V>&build,bitset<V>&moveTo,bitset<16>&held){
++  if(bankMode!=4||turn<bankStaffTurn)return;
++  auto go=[&](int i,int p,int h){
++   held[i]=1;
++   if(h!=p&&p>=0&&!build[p]&&act[i]=='.')act[i]=MOVE[dir(h,p)],moveTo[p]=1;
++  };
++  if(reservBank>=0){
++   auto &x=banks[reservBank];
++   bool prey=any_of(pets.begin(),pets.end(),[&](Pet p){return find(x.inner.begin(),x.inner.end(),p.p)!=x.inner.end();});
++   bool bodyHuman=any_of(humans.begin(),humans.end(),[&](int p){return find(x.inner.begin(),x.inner.end(),p)!=x.inner.end();});
++   if(!wall[reservNear]||wall[reservFar]||turn>reservExpiry||!prey||bodyHuman){
++    reservBank=-1;
++   }else {
++    int w=reservWorker,h=humans[w];
++    if(act[w]!='.')return;
++    if(h==reservStance&&!block[reservFar]&&!moveTo[reservFar]){
++     act[w]=BUILD[dir(h,reservFar)];held[w]=1;build[reservFar]=1;
++    }else{
++     auto [d,p]=bankOuterStep(h,reservStance,x);
++     if(d<=2)go(w,p,h);
++    }
++    return;
++   }
++  }
++  if(turn>bankRelease-5)return;
++  int best=-1,id=-1,left=-1,right=-1,first=-1,far=-1,stance=-1,path=-1,eta=-1;
++  for(int i=0;i<int(banks.size());i++){
++   auto &x=banks[i];
++   if(!ready[i]||wall[x.g]||wall[x.k]||build[x.g]||build[x.k])continue;
++   if(any_of(humans.begin(),humans.end(),[&](int p){return find(x.inner.begin(),x.inner.end(),p)!=x.inner.end();}))continue;
++   int count=0;for(auto p:pets)count+=p.t<=3&&(p.p==x.inner[1]||p.p==x.inner[2]);
++   if(!count)continue;
++   for(int z=0;z<2;z++){
++    int a=z?x.h:x.l,b=z?x.l:x.h,g=z?x.k:x.g,k=z?x.g:x.k;
++    if(block[g]||moveTo[g])continue;
++    int who=-1;
++    for(int j=0;j<int(humans.size());j++)if(act[j]=='.'&&humans[j]==a){who=j;break;}
++    if(who<0)continue;
++    for(int j=0;j<int(humans.size());j++)if(j!=who&&act[j]=='.'){
++     auto [d,p]=bankOuterStep(humans[j],b,x);
++     if(d>2||(d==0&&!block[k])||(d>0&&build[p]))continue;
++     int value=100*count-10*d-(block[k]?2:0);
++     if(value<=best)continue;
++     best=value;id=i;left=who;right=j;first=g;far=k;stance=b;path=p;eta=d;
++    }
++   }
++  }
++  if(id<0)return;
++  reservBank=id;reservNear=first;reservFar=far;reservStance=stance;reservWorker=right;reservExpiry=turn+eta+2;
++  act[left]=BUILD[dir(humans[left],first)];build[first]=1;held[left]=1;
++  go(right,path,humans[right]);
++ }
++
+@@ -1177 +1242 @@
+-  if((laneCrew[0]<0&&turn>=bankStaffTurn)||(bankMode==3&&turn==bankStaffTurn))assignBanks();
++  if((laneCrew[0]<0&&turn>=bankStaffTurn)||(bankMode>=3&&turn==bankStaffTurn))assignBanks();
+@@ -1191 +1256 @@
+-  if(bankMode==3)stageBanks(ready);
++  if(bankMode>=3)stageBanks(ready);
+@@ -1206,0 +1272,2 @@
++  bitset<16> held;
++  bankReserve(ready,build,moveTo,held);
+@@ -1214 +1281 @@
+-    if(a<0||b<0||act[a]!='.'||act[b]!='.')continue;
++    if(a<0||b<0||held[a]||held[b]||act[a]!='.'||act[b]!='.')continue;
+@@ -1235 +1302 @@
+-    for(auto [w,t]:{pair{laneCrew[j],x.l},pair{laneCrew[j+1],x.h}})if(act[w]=='.'&&humans[w]!=t){
++    for(auto [w,t]:{pair{laneCrew[j],x.l},pair{laneCrew[j+1],x.h}})if(!held[w]&&act[w]=='.'&&humans[w]!=t){
+@@ -1248 +1315 @@
+-    for(int i=0;i<m;i++)if(act[i]=='.'&&find(laneCrew.begin(),laneCrew.end(),i)==laneCrew.end())
++    for(int i=0;i<m;i++)if(!held[i]&&act[i]=='.'&&find(laneCrew.begin(),laneCrew.end(),i)==laneCrew.end())
