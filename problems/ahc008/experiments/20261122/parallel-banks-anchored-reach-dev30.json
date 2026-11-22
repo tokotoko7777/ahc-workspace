@@ -1,0 +1,16 @@
+{
+  "verified": 30,
+  "events": 500,
+  "stages": {
+    "none_at_most7": 476,
+    "already_routed": 1,
+    "identical_mask": 21,
+    "novel_compact": 2
+  },
+  "novel_nonrect_events": 1,
+  "novel_nonrect_cases": 1,
+  "novel_nonrect_routed": 0,
+  "novel_nonrect_routed_cases": 0,
+  "novel_missed_routed": 0,
+  "novel_missed_cases": 0
+}
