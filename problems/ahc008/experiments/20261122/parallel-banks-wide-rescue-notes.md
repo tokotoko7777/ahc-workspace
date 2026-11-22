@@ -58,3 +58,39 @@ g++ -std=c++23 /tmp/ahc008-wide-rescue.cpp -o /tmp/ahc008-wide-rescue
 python "$D/parallel_banks_wide_rescue_bench.py" "$HARNESS" "$TESTER" /tmp/ahc008-rescue /tmp/ahc008-wide-rescue "$WIDE_DEV/eligible" /tmp/eligible.csv
 python "$D/parallel_banks_wide_rescue_bench.py" "$HARNESS" "$TESTER" /tmp/ahc008-rescue /tmp/ahc008-wide-rescue "$WIDE_DEV/low" /tmp/low.csv --case-count 8 --low-workers
 ```
+
+## Frozen untouched uniform100: reject
+
+The executable, parameters and visible M>=7 inclusion rule were frozen
+before creating this independent official-generator cohort (seed list in
+`parallel-banks-wide-rescue-fresh100-seeds.txt`; same dev binary SHA256
+`36bcfbb8e444a4f27183a0a13593263b36d4b50a0db2aca2d1dc62ac41d68cc4`).
+All 200 tester runs were legal, replay byte-identical, exact scores matched.
+
+| Fresh uniform100 | 3-bank rescue | 4-bank when M>=7 |
+|---|---:|---:|
+| Official v3 sum, all 100 | 1777795382 | 1584247350 |
+| Official v3 sum, 64 eligible only | 1425495183 | 1231947151 |
+| Direct, atomic exact-four captures | 670 | 686 |
+| Final exact-four animal count | 688 | 698 |
+| t160 reachable residual | 875 | 866 |
+| Final residual | 243 | 288 |
+| Cases fully clear | 32 | 22 |
+| Distinct clean area sum | 10603 | 8717 |
+| Median/max wall seconds | .380/.612 | .469/1.020 |
+
+Eligible W/T/L 27/0/37, clear-case wins/losses 13/23. Thirty-six low-worker
+cases have exactly matching complete action bytes and selected geometry;
+frozen verification does not infer equivalence from scores alone. The
+development aggregate improvement did not replicate; after cutoff more
+animals remained reachable and safe area fell despite increased exact-four
+capture. The denser geometry and different trajectories reach different
+tactical states. This A/B does not identify their separate causal effects.
+Keep original rescue default; do not retune by M-stratum or run official
+distributed100 for this rejected branch. Score delta uncertainty is
+descriptive bootstrap on matched cases, not evidence of improvement.
+
+Fresh replay: use the accompanying seed file as the sole argument to the
+official generator, then replace the development input directory with the
+generated `in` and pass `--mixed --case-count 100`. JSON reproduces from
+the CSV with `parallel_banks_wide_rescue_summary.py`.
