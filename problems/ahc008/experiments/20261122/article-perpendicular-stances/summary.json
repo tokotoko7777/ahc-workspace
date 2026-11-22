@@ -1,0 +1,31 @@
+{
+  "verified": 30,
+  "counts": {
+    "legal_prepared_tube_turns": 1135,
+    "not_chosen": 910
+  },
+  "any": {
+    "witnesses": 4,
+    "cases": 3,
+    "animals": 3,
+    "earlier": 3,
+    "final_missed": 1,
+    "final_missed_cases": 1
+  },
+  "preserve_all_old_gate": {
+    "witnesses": 4,
+    "cases": 3,
+    "animals": 3,
+    "earlier": 3,
+    "final_missed": 1,
+    "final_missed_cases": 1
+  },
+  "preserve_every_wall": {
+    "witnesses": 4,
+    "cases": 3,
+    "animals": 3,
+    "earlier": 3,
+    "final_missed": 1,
+    "final_missed_cases": 1
+  }
+}
