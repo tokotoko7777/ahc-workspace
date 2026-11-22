@@ -1,0 +1,53 @@
+--- problems/ahc008/experiments/20261122/parallel-banks-rescue-research.cpp
++++ problems/ahc008/experiments/20261122/parallel-banks-direction-rescue-experiment.cpp
+@@ -1210,0 +1211,19 @@
++ int bankDirection=0;
++ array<int,32> petBefore{},petFirst{};
++ array<long long,2> dirSignals{};
++ double bankDirectionGain(int i,const TubeBank& x){
++  if(!bankDirection||turn<bankStaffTurn||pets[i].t<4)return 1.;
++  int current=pets[i].p,start=petBefore[i],first=petFirst[i];
++  if(start==first)return 1.;
++  int a=bankRot?start/S:start%S,b=bankRot?first/S:first%S,c=bankRot?current/S:current%S;
++  int rr=bankRot?current%S:current/S,pr=bankRot?start%S:start/S;
++  if(abs(rr-x.r)>1||abs(pr-x.r)>1||a==b)return 1.;
++  int g=bankRot?x.g/S:x.g%S,h=bankRot?x.k/S:x.k%S;
++  if(min(abs(c-g),abs(c-h))>3||min(abs(a-g),abs(a-h))>3)return 1.;
++  int middle=g+h;
++  if((2*a-middle)*(2*b-middle)<0)return 1.;
++  int d=abs(2*a-middle),e=abs(2*b-middle);
++  if(d==e)return 1.;
++  dirSignals[d>e?0:1]++;
++  return d>e?1.6:.5;
++ }
+@@ -1223 +1242,2 @@
+-   for(auto p:pets){
++   for(int pi=0;pi<int(pets.size());pi++){
++    auto p=pets[pi];
+@@ -1227,2 +1247,3 @@
+-    if(d==0)val+=eta<=1?12.:6.;
+-    else val+=(p.t>=3?3.7:4.8)/(1.+.65*d+.14*d*d);
++    double bias=bankDirectionGain(pi,x);
++    if(d==0)val+=bias*(eta<=1?12.:6.);
++    else val+=bias*(p.t>=3?3.7:4.8)/(1.+.65*d+.14*d*d);
+@@ -1323 +1344,2 @@
+-    for(auto p:pets){
++    for(int pi=0;pi<int(pets.size());pi++){
++     auto p=pets[pi];
+@@ -1327,2 +1349,3 @@
+-     if(d==0)val+=eta<=1?12.:6.;
+-     else val+=(p.t>=3?3.7:4.8)/(1.+.65*d+.14*d*d);
++     double bias=bankDirectionGain(pi,x);
++    if(d==0)val+=bias*(eta<=1?12.:6.);
++     else val+=bias*(p.t>=3?3.7:4.8)/(1.+.65*d+.14*d*d);
+@@ -1752,2 +1775,4 @@
+-  for(auto &p:pets){
+-   if(!(cin>>m))return false;
++  for(int i=0;i<int(pets.size());i++){
++   auto &p=pets[i];if(!(cin>>m))return false;
++   petBefore[i]=petFirst[i]=p.p;
++   if(!m.empty()&&m[0]!='.')petFirst[i]=nb[p.p][find(MOVE,MOVE+4,m[0])-MOVE];
+@@ -1764,0 +1790 @@
++ g.bankDirection=argc>3?atoi(argv[3]):0;
+@@ -1771,0 +1798 @@
++ if(const char *p=getenv("AHC008_DIR_LOG")){ofstream f(p);f<<g.dirSignals[0]<<" "<<g.dirSignals[1]<<"\n";}
