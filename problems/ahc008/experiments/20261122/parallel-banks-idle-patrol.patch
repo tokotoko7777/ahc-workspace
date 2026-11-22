@@ -1,0 +1,93 @@
+--- problems/ahc008/experiments/20261122/parallel-banks-rescue-research.cpp
++++ problems/ahc008/experiments/20261122/parallel-banks-idle-patrol-experiment.cpp
+@@ -1210,0 +1211,72 @@
++ bool bankPatrol=false;
++ bitset<16> bankBusy;
++ bitset<32> bayPursued;
++ int patrolEligible=0,patrolApplied=0,patrolTurns=0,patrolActual=0;
++ string rawPatrol;
++ bitset<16> justPatrolled;
++ void recordBankPair(const TubeBank& x,int a,int b){
++  if(!bankPatrol||turn<bankStaffTurn)return;
++  bankBusy[a]=bankBusy[b]=1;
++  int d1=workers[a].bfs.distance(x.l),d2=workers[b].bfs.distance(x.h);
++  if(d1<0||d2<0)return;
++  int eta=max(d1,d2);
++  for(int i=0;i<int(pets.size());i++)
++   if(group[pets[i].p]==group[x.l]&&min(md(pets[i].p,x.inner[1]),md(pets[i].p,x.inner[2]))<=6+eta/2)
++    bayPursued[i]=1;
++ }
++ void patrolBanks(const vector<int>& ready,const bitset<V>& build,const bitset<V>& moveTo){
++  if(!bankPatrol||turn<bankStaffTurn||overBudget())return;
++  auto row=[&](int p){return bankRot?p%S:p/S;};
++  auto col=[&](int p){return bankRot?p/S:p%S;};
++  struct Option{int pet=-1,to=-1,val=0;};
++  vector<int> crew;
++  vector<array<Option,32>> options;
++  for(int i=0;i<int(humans.size());i++){
++   if(bankBusy[i]||act[i]!='.')continue;
++   int anchor=-1;
++   if(zonesActive){if(zoneUsed[i])anchor=zoneAnchor[i];}
++   else for(int j=0;j<4;j++)if(laneCrew[j]==i)anchor=bp(13,bankShift+7*j);
++   const int h=humans[i];
++   if(anchor<0||col(h)!=col(anchor))continue;
++   const int hr=row(h),ar=row(anchor),z=col(h);
++   const auto inHalf=[&](int r){return ar==13||((r>=14)==(ar>=14));};
++   if(!inHalf(hr))continue;
++   array<Option,32> op{};bool has=false;
++   for(int j=0;j<int(banks.size());j++){
++    const auto& x=banks[j];
++    if(!ready[j]||wall[x.g]||wall[x.k]||build[x.g]||build[x.k])continue;
++    if(col(x.l)!=z&&col(x.h)!=z)continue;
++    if(abs(x.r-hr)>3||x.r==hr||!inHalf(x.r))continue;
++    int to=bp(hr+(x.r>hr?1:-1),z);
++    if(wall[to]||build[to]||moveTo[to])continue;
++    for(int k=0;k<int(pets.size());k++)if(!bayPursued[k]&&group[pets[k].p]==group[h]){
++     int d=min(md(pets[k].p,x.inner[1]),md(pets[k].p,x.inner[2]));
++     if(d>3)continue;
++     int value=16-3*d-abs(x.r-hr);
++     if(value>op[k].val){op[k]={k,to,value};has=true;}
++    }
++   }
++   if(has){crew.push_back(i);options.push_back(op);}
++  }
++  if(crew.empty())return;
++  patrolEligible+=crew.size();
++  const int n=crew.size(),z=1<<n;
++  struct State {int val=-1;array<int,10> to{};};
++  vector<State> dp(z);dp[0].val=0;
++  for(int j=0;j<int(pets.size());j++)if(!bayPursued[j]){
++   for(int mask=z-1;mask>=0;mask--)if(dp[mask].val>=0)
++    for(int i=0;i<n;i++)if(!(mask>>i&1)&&options[i][j].val>0){
++     auto opt=options[i][j];const int next=mask|1<<i;
++     if(dp[mask].val+opt.val<=dp[next].val)continue;
++     dp[next]=dp[mask];dp[next].val+=opt.val;dp[next].to[i]=opt.to;
++    }
++  }
++  const int pick=max_element(dp.begin(),dp.end(),[](auto&a,auto&b){return a.val<b.val;})-dp.begin();
++  if(pick)++patrolTurns;
++  bitset<V> reserved;
++  for(int i=0;i<n;i++)if(pick>>i&1){
++   int w=crew[i],to=dp[pick].to[i];
++   if(reserved[to])continue;
++   reserved[to]=1;act[w]=MOVE[dir(humans[w],to)];justPatrolled[w]=1;rawPatrol[w]=act[w];++patrolApplied;
++  }
++ }
+@@ -1248,0 +1321 @@
++   recordBankPair(x,p.a,p.b);
+@@ -1267,0 +1341 @@
++  bankBusy.reset();bayPursued.reset();justPatrolled.reset();rawPatrol=act;
+@@ -1306,0 +1381,3 @@
++   if(bankPatrol&&turn>=bankStaffTurn)
++    for(int pi=0;pi<int(pets.size());pi++)
++     if(find(x.inner.begin(),x.inner.end(),pets[pi].p)!=x.inner.end())bayPursued[pi]=1;
+@@ -1338,0 +1416 @@
++    recordBankPair(x,laneCrew[j],laneCrew[j+1]);
+@@ -1375,0 +1454 @@
++  patrolBanks(ready,build,moveTo);
+@@ -1764,0 +1844 @@
++ g.bankPatrol=argc>3&&atoi(argv[3])!=0;
+@@ -1767,0 +1848 @@
++  for(int i=0;i<int(g.act.size());i++)if(g.justPatrolled[i]&&g.act[i]==g.rawPatrol[i])++g.patrolActual;
+@@ -1771,0 +1853 @@
++ if(const char *p=getenv("AHC008_PATROL_LOG")){ofstream f(p);f<<g.patrolEligible<<" "<<g.patrolApplied<<" "<<g.patrolActual<<" "<<g.patrolTurns<<"\n";}
