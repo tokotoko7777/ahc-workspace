@@ -33,3 +33,22 @@ real4 236 unchanged, irregular4–48 63 unchanged, score866,421,245→
 .873→.885s. This weak win in all-head count does not justify replacing
 v4 by itself; opposite residue and area direction and only five
 discordant cases. No tuning based on individual IDs.
+
+## Matched frozen official distributed practice100, unchanged variant
+
+All100 exact v4 archived official action hashes and both t0–100 prefixes
+matched; all200 official legal/recorded playback scores are exact.
+21 active cases, 24 starts and completed crossings (168 moves), 79
+inactive complete byte identity. v4→v7 all-clear33→36 (5 gained,2 lost,
+31 both,62 neither); residual166→165; actual exact4 814→822; irregular
+4–48 207→204; score2,598,735,635→2,655,369,894; retained-area ceiling
+−0.68%; max wall .986→.946s (runtime sample, no performance claim).
+Substantive whole-head gains retained 521,436,648 mean clean cells,
+largest initial isolation components 94,127,16 respectively.
+The other gained cases retained179 and36; 36-cell case is refuge-like
+and first isolated five pets into a single 630-cell room. Lost clear
+cases retained168 and624 in v4. Counts therefore don't imply uniformly
+compact fully cleared cases. Exact residual distribution, per-case pen
+areas at first separation and gained/lost people-weighted area are in
+the paired report. Check via `paired_analysis.py V7_LEDGER V4_LEDGER`;
+concatenate decompressed A+B pieces (B headerless).
