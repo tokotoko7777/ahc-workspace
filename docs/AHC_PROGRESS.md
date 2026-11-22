@@ -1439,3 +1439,10 @@ S字でも犬・猫を含め4マスに合法に隔離できた。各S字系列�
 [人が分断される柵のうち一つを省く案](https://github.com/tokotoko7777/ahc-workspace/blob/64bc56e6ec73569843118ad922490b8fe823096c/problems/ahc008/experiments/20261122/article-capture/terry-chase-no-split/RESULT.md)は新規100で全手・得点一致、実際の省略は0件で不採用。[つながった人員の通路を保護する終盤カット](https://github.com/tokotoko7777/ahc-workspace/blob/31750ac463061814a6a755bb6ac1924c799003af/problems/ahc008/experiments/20261122/article-capture/terry-chase-tree-protect/RESULT.md)は、既存の独立テープ375状態に検証候補4件／2盤面で証拠数不足。どちらも配布は未実施。
 
 [既存5配置をすべて同一条件で比較した台帳](https://github.com/tokotoko7777/ahc-workspace/blob/328ed81d07400c36846cd7c39275fe02e6f2a942/problems/ahc008/experiments/20261122/article-capture/terry-area-map-atlas/RESULT.md)では、新規生成100×5を終盤切替なしで公式・独立採点。原配置でも全頭捕獲する盤面だけ、別の全頭配置を事後選択すると32盤面で合計1,193、全100平均11.93マスの余地。ただし元map2を一律map3に変えると全頭28→19。この試算は配置を実際に選ぶ方法でも、通常設定での得点更新でもない。次は因果的に観測できる初期の人配置と施工・配員順の条件で、安全な切替を検証。配布の最高は引き続き **6,152,805,559・全頭100**、mainは無変更。
+
+### AHC008: 終盤の初手再利用を採用（2026-11-23 JST）
+
+- 最新の採用版: [固定回数・通常時間の検証記録](https://github.com/tokotoko7777/ahc-workspace/blob/2043b6b508cf97c73e91c5bf47e4fae650a16783/problems/ahc008/experiments/20261122/article-capture/terry-first-chase-reuse/DEFAULT_VALIDATION.md)。作業ブランチは `codex/ahc008-article-capture`。歴史上の比較目標は 6,263,333,336、配布100ケースの現ベストは **6,152,805,559**（全頭100件）。試験入力は異なるので本番順位の判定は引き続き未判定。
+- 同じ終盤試行の最初の一手だけを再利用。同一作業量で終盤試行ありケースの CPU 時間 −5.14% / −5.82%。通常の時間枠で全200組の行動と得点が同一。公式配布100ケースの試行620→657、別生成100ケース874→956、別生成の全頭は97件。
+- [待機者の重複担当削減](https://github.com/tokotoko7777/ahc-workspace/blob/2043b6b508cf97c73e91c5bf47e4fae650a16783/problems/ahc008/experiments/20261122/article-capture/terry-idle-cap2/RESULT.md) は60件で準備行動を変えたが新しい翌手の捕獲0件。[両端の妨害込み確率](https://github.com/tokotoko7777/ahc-workspace/blob/2043b6b508cf97c73e91c5bf47e4fae650a16783/problems/ahc008/experiments/20261122/article-capture/terry-joint-next-gate/RESULT.md) はBrier誤差改善0.00725、事前基準0.010未達。いずれも不採用。
+- 次: 別生成100ケースで残った4頭を公式再生の同一軌跡で分類し、失敗がどの工程で起きたかを切り分ける。設営分担DPでは有効な上界だけで枝刈りし、復元の同点規則も含めて同一性を検証する。
