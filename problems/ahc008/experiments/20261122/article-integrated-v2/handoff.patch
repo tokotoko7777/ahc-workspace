@@ -1,0 +1,34 @@
+--- integrated.cpp
++++ integrated.cpp
+@@ -1548,7 +1548,7 @@
+  }
+ 
+  lastcap::Planner finalCapture;
+- int bankMode=0,bankRot=0,bankShift=4,bankStarted=0,bankRelease=235;
++ int bankMode=0,bankRot=0,bankShift=4,bankStarted=0,bankRelease=225;
+  int rescueMode=0,residual160=-1,bankN=3;
+  bool narrowRescue=false;
+  array<int,5> laneCrew{-1,-1,-1,-1,-1};
+@@ -1794,7 +1794,12 @@
+   array<bool,V> service{};
+   for(int h:humans){hum[h]=1;service[group[h]]=true;}
+   for(Pet p:pets)rem+=service[group[p.p]];
+-  if(turn==160)residual160=rem;
++  if(turn==160){
++   const int aisle=group[bp(0,bankShift)];
++   residual160=0;
++   for(Pet p:pets)residual160+=group[p.p]==aisle;
++   if(rescueMode&&residual160>4)bankRelease=160;
++  }
+ 
+   if(turn>=180&&rem>0&&rem<=2&&!overBudget()){
+    vector<lastcap::Pet> alive;
+@@ -1816,7 +1821,7 @@
+    }
+   }
+ 
+-  if(turn>=235){bankRelease=235;integratedMode[turn]=4;dogPhase=9;return plan();}
++  if(turn>=bankRelease){integratedMode[turn]=4;dogPhase=9;return plan();}
+   vector<int> ready(n),enabled(n),count(n);
+   array<int,4> local{};int total=0;
+   for(int k=0;k<n;k++){
