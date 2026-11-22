@@ -1,0 +1,130 @@
+{
+  "tactical": {
+    "total": 100,
+    "all_clear": 10,
+    "all": {
+      "human_components": {
+        "mean": 1.81,
+        "median": 2.0
+      },
+      "distinct_safe_area": {
+        "mean": 133.19,
+        "median": 114.0
+      },
+      "distinct_pet_only_area": {
+        "mean": 437.4,
+        "median": 456.5
+      },
+      "distinct_mixed_area": {
+        "mean": 183.97,
+        "median": 120.0
+      },
+      "distinct_residual_pets": {
+        "mean": 5.09,
+        "median": 5.0
+      },
+      "isolated_pets": {
+        "mean": 9.77,
+        "median": 9.5
+      },
+      "largest_pet_only_area": {
+        "mean": 229.48,
+        "median": 214.0
+      }
+    },
+    "all_clear_only": {
+      "human_components": {
+        "mean": 1,
+        "median": 1.0
+      },
+      "distinct_safe_area": {
+        "mean": 122.4,
+        "median": 128.0
+      },
+      "distinct_pet_only_area": {
+        "mean": 614,
+        "median": 610.0
+      },
+      "distinct_mixed_area": {
+        "mean": 0,
+        "median": 0.0
+      },
+      "distinct_residual_pets": {
+        "mean": 0,
+        "median": 0.0
+      },
+      "isolated_pets": {
+        "mean": 14.1,
+        "median": 12.5
+      },
+      "largest_pet_only_area": {
+        "mean": 268.3,
+        "median": 258.0
+      }
+    }
+  },
+  "capture4": {
+    "total": 100,
+    "all_clear": 98,
+    "all": {
+      "human_components": {
+        "mean": 1.01,
+        "median": 1.0
+      },
+      "distinct_safe_area": {
+        "mean": 82.1,
+        "median": 49.0
+      },
+      "distinct_pet_only_area": {
+        "mean": 651.67,
+        "median": 699.0
+      },
+      "distinct_mixed_area": {
+        "mean": 14.97,
+        "median": 0.0
+      },
+      "distinct_residual_pets": {
+        "mean": 0.36,
+        "median": 0.0
+      },
+      "isolated_pets": {
+        "mean": 14.5,
+        "median": 15.0
+      },
+      "largest_pet_only_area": {
+        "mean": 645.11,
+        "median": 698.0
+      }
+    },
+    "all_clear_only": {
+      "human_components": {
+        "mean": 1,
+        "median": 1.0
+      },
+      "distinct_safe_area": {
+        "mean": 83.76530612244898,
+        "median": 49.0
+      },
+      "distinct_pet_only_area": {
+        "mean": 664.969387755102,
+        "median": 699.0
+      },
+      "distinct_mixed_area": {
+        "mean": 0,
+        "median": 0.0
+      },
+      "distinct_residual_pets": {
+        "mean": 0,
+        "median": 0.0
+      },
+      "isolated_pets": {
+        "mean": 14.795918367346939,
+        "median": 15.0
+      },
+      "largest_pet_only_area": {
+        "mean": 658.2755102040817,
+        "median": 698.5
+      }
+    }
+  }
+}
