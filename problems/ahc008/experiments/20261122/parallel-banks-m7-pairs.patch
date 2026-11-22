@@ -1,0 +1,88 @@
+--- problems/ahc008/experiments/20261122/parallel-banks-narrow-rescue-research.cpp
++++ problems/ahc008/experiments/20261122/parallel-banks-m7-pairs.cpp
+@@ -1273,0 +1274,69 @@
++ bool m7Independent=false,indReady=false;
++ array<int,6> indCrew{},indAnchor{};
++ array<int,3> indTarget{-1,-1,-1},indAge{};
++ void assignIndependent(const vector<int>& ready){
++  int n=1<<int(humans.size());
++  for(int j=0;j<3;j++){
++   int best=999,r=14;
++   for(int i=0;i<int(banks.size());i++)if(banks[i].b==j&&ready[i]&&!wall[banks[i].g]&&!wall[banks[i].k]){
++    if(abs(banks[i].r-14)<best)best=abs(banks[i].r-14),r=banks[i].r;
++   }
++   indAnchor[2*j]=bp(r,bankShift+7*j);indAnchor[2*j+1]=bp(r,bankShift+7*(j+1));
++  }
++  vector<int> dp(n,9999);dp[0]=0;
++  vector<vector<pair<int,int>>> back(6,vector<pair<int,int>>(n,{-1,-1}));
++  for(int j=0;j<6;j++){
++   vector<int> next(n,9999);
++   for(int u=0;u<n;u++)if(dp[u]<9999)for(int w=0;w<int(humans.size());w++)if(!(u>>w&1)){
++    int d=workers[w].bfs.distance(indAnchor[j]);
++    if(d<0)continue;int v=u|1<<w;
++    if(dp[u]+d<next[v])next[v]=dp[u]+d,back[j][v]={u,w};
++   }
++   dp.swap(next);
++  }
++  int at=min_element(dp.begin(),dp.end())-dp.begin();
++  if(dp[at]>=9999)return;
++  for(int j=5;j>=0;j--){auto [u,w]=back[j][at];indCrew[j]=w;at=u;}
++  indReady=true;
++ }
++ void steerIndependent(const vector<int>& ready,const vector<int>& viable,bitset<V>& build,bitset<V>& moveTo){
++  array<double,3> best{-1.,-1.,-1.};
++  array<int,3> points{-1,-1,-1};
++  for(int i=0;i<int(banks.size());i++){
++   const auto &x=banks[i];int j=x.b;
++   if(!ready[i]||wall[x.g]||wall[x.k]||build[x.g]||build[x.k])continue;
++   int a=indCrew[2*j],b=indCrew[2*j+1];
++   if(act[a]!='.'||act[b]!='.')continue;
++   int d1=workers[a].bfs.distance(x.l),d2=workers[b].bfs.distance(x.h);
++   if(d1<0||d2<0||max(d1,d2)>19)continue;
++   int eta=max(d1,d2);double val=0.;
++   for(auto p:pets){
++    if(group[p.p]!=group[x.l])continue;
++    int d=min(md(p.p,x.inner[1]),md(p.p,x.inner[2]));
++    if(d>6+eta/2)continue;
++    if(d==0)val+=eta<=1?12.:6.;
++    else val+=(p.t>=3?3.7:4.8)/(1.+.65*d+.14*d*d);
++   }
++   val=(val+(viable[i]?2.:0.))/(2.+.48*eta+.15*(d1+d2));
++   if(indTarget[j]==i&&turn-indAge[j]<6)val+=.22;
++   if(val>best[j])best[j]=val,points[j]=i;
++  }
++  for(int j=0;j<3;j++){
++   if(points[j]>=0&&best[j]>.20){
++    int i=points[j];auto &x=banks[i];
++    if(indTarget[j]!=i)indTarget[j]=i,indAge[j]=turn;
++    for(auto [w,goal]:{pair{indCrew[2*j],x.l},pair{indCrew[2*j+1],x.h}}){
++     if(humans[w]==goal)continue;
++     int q=workers[w].bfs.first_step(goal);
++     if(q>=0&&!build[q])act[w]=MOVE[dir(humans[w],q)],moveTo[q]=1;
++    }
++   }else for(int i=2*j;i<=2*j+1;i++){
++    int w=indCrew[i];if(act[w]!='.')continue;
++    int p=humans[w],dest=indAnchor[i];
++    int x=bankRot?p/S:p%S,y=bankRot?dest/S:dest%S;
++    if(x==y)continue;
++    int q=workers[w].bfs.first_step(dest);
++    if(q>=0&&q!=p&&!build[q])act[w]=MOVE[dir(p,q)],moveTo[q]=1;
++   }
++  }
++ }
+@@ -1288 +1357 @@
+-  if(bankMode==5&&turn==bankStaffTurn)assignBankZones();
++  if(bankMode==5&&turn==bankStaffTurn&&!m7Independent)assignBankZones();
+@@ -1301,0 +1371,3 @@
++  if(m7Independent&&turn==bankStaffTurn){
++   assignIndependent(ready);if(!indReady)assignBankZones();
++  }
+@@ -1318 +1390,2 @@
+-  if(zonesActive)steerBankZones(ready,viable,build,moveTo);
++  if(indReady)steerIndependent(ready,viable,build,moveTo);
++  else if(zonesActive)steerBankZones(ready,viable,build,moveTo);
+@@ -1372 +1445 @@
+-    for(int i=0;i<m;i++)if(act[i]=='.'&&(zonesActive?!zoneUsed[i]:find(laneCrew.begin(),laneCrew.end(),i)==laneCrew.end()))
++    for(int i=0;i<m;i++)if(act[i]=='.'&&(indReady?find(indCrew.begin(),indCrew.end(),i)==indCrew.end():zonesActive?!zoneUsed[i]:find(laneCrew.begin(),laneCrew.end(),i)==laneCrew.end()))
+@@ -1785,0 +1859 @@
++ g.m7Independent=argc>4&&atoi(argv[4])!=0&&g.humans.size()==7;
