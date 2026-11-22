@@ -1,0 +1,36 @@
+--- problems/ahc008/experiments/20261122/parallel-banks-narrow-rescue-research.cpp
++++ problems/ahc008/experiments/20261122/parallel-banks-empty-guard-experiment.cpp
+@@ -996,0 +997,27 @@
++ bool conserveEmpty=false;
++ int emptyChecks=0,emptyBlocked=0,emptyAvoidedCells=0;
++ bool isOnlyEmptyLocalClosure(int p,int retained,const array<unsigned char,V>& inside){
++  ++emptyChecks;
++  if(wall[retained]||globalset[retained])return false;
++  bitset<V> tested;
++  auto flood=[&](int start){
++   int q[V],n=1;q[0]=start;tested[start]=1;
++   bitset<V> component;component[start]=1;
++   for(int j=0;j<n;j++)for(int x:nb[q[j]])
++    if(x>=0&&x!=p&&!wall[x]&&!globalset[x]&&!tested[x])
++     q[n++]=x,tested[x]=component[x]=1;
++   return component;
++  };
++  flood(retained);
++  int detached=0;
++  for(int start:nb[p])if(start>=0&&!wall[start]&&!globalset[start]&&!tested[start]){
++   auto comp=flood(start);
++   for(int x=0;x<V;x++)if(comp[x]&&(!inside[x]||globalmoved[x]))return false;
++   for(int x:humans)if(comp[x])return false;
++   for(auto animal:pets)if(comp[animal.p])return false;
++   detached+=comp.count();
++  }
++  if(!detached)return false;
++  ++emptyBlocked;emptyAvoidedCells+=detached;
++  return true;
++ }
+@@ -1053,0 +1081 @@
++    if(conserveEmpty&&bankMode&&turn>=bankRelease&&builds+1>=remain&&isOnlyEmptyLocalClosure(p,q,avoid))continue;
+@@ -1785,0 +1814 @@
++ g.conserveEmpty=argc>4&&atoi(argv[4])!=0;
+@@ -1792,0 +1822 @@
++ if(const char *p=getenv("AHC008_EMPTY_LOG")){ofstream f(p);f<<g.emptyChecks<<" "<<g.emptyBlocked<<" "<<g.emptyAvoidedCells<<"\n";}
