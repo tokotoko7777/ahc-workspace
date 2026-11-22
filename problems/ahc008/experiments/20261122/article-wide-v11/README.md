@@ -1,0 +1,13 @@
+# Article v11 — widened real 1×4 bank coverage (not adopted)
+
+On exact accepted standalone v7, replace M5/6's 2×13 with 3×12 and M7–10's 3×12 with 4×13 straight simultaneous-gate pens. The new high layout has stance columns a+7j with a in {0,1}, and alternating rows 3..27. Both longitudinal crossbars and a connected exterior are available after every gate closes. Widen forecast buffer dynamically. No hunt, guard priority, bank-to-ordinary handoff, finishing or score logic changes.
+
+Decompress the standalone to integrated.cpp. Build with g++ -std=c++23 integrated.cpp -o integrated; no arguments. Build layout-unit.cpp likewise to test full shell and gate topology, all exact-four bodies and passable exterior for M5–10. Source SHA256 9671dcc560c5abfdb4e38a62912b3122bb57b0bc0b3fb17e4429a352e7872118.
+
+Used old generated capture-dev30; 60 official and recorded-action independent legality/scoring checks, all 30 v7 action hashes matched. Run bench_v11.py <replay harness> <official v3 tester> <v7 executable> <v11 executable> <capture-dev30/in> output.csv, with bridge and exact replay utilities from the neighboring archives on PYTHONPATH. No held cohorts used. Optional zone_replay.py sets both arms to frozen v11; all 60 action hashes matched the v11 arm. zone_summary.py reads that full optional output and the original paired ledger. zones-compact.csv.gz retains one observed zone ledger per case (not duplicate rows); logical banks and longitudinal thirds are independent of rotation.
+
+Nominal tubes/shoulders 26/112→36/156 (low), 36/156→52/224 (high); physical ready median t80/100/150 26/29/34→34.5/36.5/39.5 and ready/open t150 25→33.5. Overall full-hunter phase median start t55.5→78; before t101 total engaged mode-2 turns 1310→616. Whole-case all-clear 14→13 (5G/6L), retained safe union ≥300 clear 9→7, residual49→71, first actual exact-four captures236→221 (cats63→44), score829,740,689→664,972,910, max official tester wall .903s→1.011s. Low M lost a clear and its only new clear retained 12 cells. Summary/ledger detail tube readiness by bank and floors.
+
+Initial passive body occupancy is not a sound hard pruning test. Of 269 zone-cases without a passive animal in a tube body at t0, ready bodies later saw 2,671 passive pet-turns and physical exact-four simultaneous seals caught 74 passive and 106 directed species. The 61 zone-cases with an initial passive in-body saw 17 passive/17 directed captures. This describes factual events; removing zones changes later movement and cannot be scored as unchanged.
+
+Two user-authorized narratives only: [TERRY](https://blog.terry-u16.net/entry/ahc008) and [siman](https://simanman.hatenablog.com/entry/2022/02/28/074838). No other contestant materials.

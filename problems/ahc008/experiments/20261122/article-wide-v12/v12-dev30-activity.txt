@@ -1,0 +1,21 @@
+0 cases 30 first_full 78.0 84.0 pre101_full_turns 616 413 full_reversals 33 cases 19 bank_reversals 70 cases 21
+35 30 37.5 11.0
+50 30 39.5 15.0
+80 30 36.0 22.0
+100 30 35.0 22.5
+133 30 32.5 22.0
+150 30 26.5 20.0
+1 cases 10 first_full 98.0 99.5 pre101_full_turns 104 100 full_reversals 3 cases 3 bank_reversals 8 cases 4
+35 10 32.0 8.5
+50 10 33.0 13.0
+80 10 32.5 18.5
+100 10 29.5 21.5
+133 10 28.5 20.0
+150 10 26.0 18.0
+2 cases 20 first_full 75.5 77.0 pre101_full_turns 512 313 full_reversals 30 cases 16 bank_reversals 62 cases 17
+35 20 40.0 12.0
+50 20 44.0 17.0
+80 20 40.0 27.5
+100 20 35.5 25.5
+133 20 34.0 24.5
+150 20 28.5 20.5
