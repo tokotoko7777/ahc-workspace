@@ -1,0 +1,25 @@
+{
+  "verified_cases": 30,
+  "total_calls": 1899,
+  "raw_immediate": {
+    "calls": 3,
+    "turns": 3,
+    "targets": 2,
+    "cases": 2,
+    "sum_extra": 3
+  },
+  "safe_immediate": {
+    "calls": 3,
+    "turns": 3,
+    "targets": 2,
+    "cases": 2,
+    "sum_extra": 3
+  },
+  "conditional_travel": {
+    "calls": 0,
+    "turns": 0,
+    "targets": 0,
+    "cases": 0,
+    "sum_extra": 0
+  }
+}

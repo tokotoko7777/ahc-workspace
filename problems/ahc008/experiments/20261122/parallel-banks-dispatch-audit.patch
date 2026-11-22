@@ -1,0 +1,96 @@
+--- problems/ahc008/experiments/20261122/parallel-banks-narrow-rescue-research.cpp
++++ problems/ahc008/experiments/20261122/parallel-banks-dispatch-audit.cpp
+@@ -996,0 +997,78 @@
++ bool dispatchAudit=false;
++ void dispatchObserve(int id,int phase,int remain,int humanInside,const vector<int>& targets,
++       const vector<tuple<int,int,int,int>>& pairings,const string& inbound,
++       const array<unsigned char,V>& reserved,const array<unsigned char,V>& walking,
++       int greedyBuild,int greedyTravel){
++  if(!dispatchAudit)return;
++  int m=humans.size(),J=targets.size();
++  vector<bitset<32>> immediate(m),travel(m);
++  vector<int> committedJobs;
++  bitset<16> committedWorkers;
++  for(int w=0;w<m;w++)if(inbound[w]=='.'&&islower(act[w])){
++   int p=nb[humans[w]][find(BUILD,BUILD+4,act[w])-BUILD];
++   committedJobs.push_back(p);committedWorkers[w]=1;
++  }
++  assert(int(committedJobs.size())==greedyBuild);
++  for(auto [pri,w,j,q]:pairings){
++   int p=targets[j],h=humans[w];
++   if(h==q){
++    if(!block[p]&&!walking[p]&&!reserved[p])immediate[w][j]=1;
++   }else if(!committedWorkers[w]&&!globalset[p]&&find(committedJobs.begin(),committedJobs.end(),p)==committedJobs.end()){
++    int next=workers[w].bfs.first_step(q);
++    if(next>=0&&!globalset[next])travel[w][j]=1;
++   }
++  }
++  auto maxMatch=[&](const vector<bitset<32>>& edge){
++   vector<int> owner(J,-1);int out=0;
++   for(int w=0;w<m;w++)if(edge[w].any()){
++    bitset<32> seen;
++    auto aug=[&](auto&& self,int i)->bool{
++     for(int j=0;j<J;j++)if(edge[i][j]&&!seen[j]){
++      seen[j]=1;
++      if(owner[j]<0||self(self,owner[j])){owner[j]=i;return true;}
++     }
++     return false;
++    };
++    out+=aug(aug,w);
++   }
++   return out;
++  };
++  int im=min(maxMatch(immediate),remain-(humanInside>0)),possible=0;
++  if(im>greedyBuild){
++   const int minNeeded=greedyBuild+1;
++   bitset<32> hits;
++   bitset<V> finalWalls;
++   for(int p=0;p<V;p++)if(wall[p]||reserved[p])finalWalls[p]=1;
++   auto safe=[&]{
++    array<int,V> comp;comp.fill(-1);
++    int next=0;
++    for(int h:humans)if(comp[h]<0){
++     if(finalWalls[h])return false;
++     int q[V],n=1;q[0]=h;comp[h]=next;
++     for(int j=0;j<n;j++)for(int p:nb[q[j]])if(p>=0&&comp[p]<0&&!finalWalls[p])
++      comp[p]=next,q[n++]=p;
++     next++;
++    }
++    for(int i=0;i<m;i++)for(int j=0;j<i;j++)if(group[humans[i]]==group[humans[j]]&&comp[humans[i]]!=comp[humans[j]])return false;
++    return true;
++   };
++   int invokes=0;
++   auto seek=[&](auto&& self,int w,int done)->bool{
++    if(++invokes>512)return false;
++    if(done==minNeeded)return safe();
++    if(w==m||done+m-w<minNeeded)return false;
++    for(int j=0;j<J;j++)if(immediate[w][j]&&!hits[j]){
++     hits[j]=1;finalWalls[targets[j]]=1;
++     if(self(self,w+1,done+1))return true;
++     hits[j]=0;finalWalls[targets[j]]=0;
++    }
++    return self(self,w+1,done);
++   };
++   possible=seek(seek,0,0);
++  }
++  int tr=maxMatch(travel);
++  if(const char* dest=getenv("AHC008_DISPATCH_AUDIT")){
++   ofstream f(dest,ios::app);
++   f<<turn<<" "<<id<<" "<<phase<<" "<<remain<<" "<<humanInside<<" "<<greedyBuild<<" "<<im<<" "<<possible<<" "<<greedyTravel<<" "<<tr<<"\n";
++  }
++ }
+@@ -1049 +1127,3 @@
+-  int builds=0;
++  string auditActions;array<unsigned char,V> auditWalls{},auditMoves{};
++  if(dispatchAudit){auditActions=act;auditWalls=globalset;auditMoves=globalmoved;}
++  int builds=0,walks=0;
+@@ -1058 +1138 @@
+-    act[i]=MOVE[dir(h,next)];moved[next]=1;
++    act[i]=MOVE[dir(h,next)];moved[next]=1;++walks;
+@@ -1061,0 +1142,4 @@
++  if(dispatchAudit){
++   vector<int> auditJobs;for(auto job:jobs)auditJobs.push_back(job.p);
++   dispatchObserve(target,phase,remain,humans_in,auditJobs,pairings,auditActions,auditWalls,auditMoves,builds,walks);
++  }
+@@ -1785,0 +1870 @@
++ g.dispatchAudit=getenv("AHC008_DISPATCH_AUDIT")!=nullptr;
