@@ -1,0 +1,193 @@
+--- problems/ahc008/tactical_gate_submission.cpp
++++ problems/ahc008/tactical_gate_submission.cpp
+@@ -1072,0 +1073,181 @@
++ struct TubeBank {int b,r,l,g,k,h; array<int,4> inner; vector<int> side;};
++ vector<TubeBank> banks;
++ vector<int> bankWalls;
++ int bankMode=0,bankRot=0,bankShift=4,bankStarted=0,bankRelease=225;
++ array<int,4> laneCrew{-1,-1,-1,-1};
++ array<int,3> oldPlan{-1,-1,-1};
++ array<int,3> planAge{};
++ static constexpr int bankStaffTurn=101;
++ int bp(int x,int y)const{return bankRot?pos(y,x):pos(x,y);}
++ void makeBanks(){
++  if(!bankMode)return;
++  double best=-1e10;
++  for(int z=0;z<2;z++)for(int a:{2,4,6}){
++   bankRot=z;
++   double value=0.;
++   for(auto p:pets){
++    int x=z?p.p%S:p.p/S,y=z?p.p/S:p.p%S;
++    if(x<2||x>26)continue;
++    int d=99;
++    for(int j=0;j<3;j++)for(int k=2;k<=5;k++)d=min(d,abs(y-(a+7*j+k)));
++    value+=1./(1.+.8*d);
++   }
++   for(int j=0;j<4;j++){
++    int q=999;
++    for(int h:humans)q=min(q,md(h,bp(14,a+7*j)));
++    value-=.045*q;
++   }
++   if(value>best)best=value,bankStarted=z,bankShift=a;
++  }
++  bankRot=bankStarted; bankStarted=0;
++  bitset<V> needed;
++  for(int j=0;j<3;j++){
++   int a=bankShift+7*j;
++   for(int r=3;r<=25;r+=2){
++    TubeBank x{j,r,bp(r,a),bp(r,a+1),bp(r,a+6),bp(r,a+7),{},{}};
++    for(int k=0;k<4;k++){
++     x.inner[k]=bp(r,a+2+k);
++     for(int dx:{-1,1}){
++      int q=bp(r+dx,a+2+k);needed[q]=1;x.side.push_back(q);
++     }
++    }
++    banks.push_back(x);
++   }
++  }
++  for(int p=0;p<V;p++)if(needed[p])bankWalls.push_back(p);
++ }
++ void assignBanks(){
++  int m=humans.size();
++  int gain=1e9;
++  array<int,4> q{};
++  auto rec=[&](auto&&self,int j,int used,int score)->void{
++   if(score>=gain)return;
++   if(j==4){gain=score;laneCrew=q;return;}
++   for(int k=0;k<m;k++)if(!(used>>k&1)){
++    int v=999;
++    for(const auto &x:banks)if(x.b==clamp(j,0,2)){
++     int p=bp(x.r,bankShift+7*j),d=workers[k].bfs.distance(p);
++     if(d>=0)v=min(v,d+abs(x.r-14)/4);
++    }
++    q[j]=k;self(self,j+1,used|1<<k,score+v);
++   }
++  };
++  rec(rec,0,0,0);
++ }
++ string bankPlan(){
++  prep();
++  if(turn>=bankRelease){
++   dogPhase=9;
++   return plan();
++  }
++  const int m=humans.size();
++  if(laneCrew[0]<0&&turn>=bankStaffTurn)assignBanks();
++  bitset<V> build,moveTo;
++  vector<int> ready(banks.size()), occupancy(banks.size()), viable(banks.size());
++  int built=0;
++  for(int p:bankWalls)built+=wall[p];
++  for(int i=0;i<int(banks.size());i++){
++   const auto &x=banks[i];
++   ready[i]=all_of(x.side.begin(),x.side.end(),[&](int p){return wall[p];});
++   if(wall[x.g]||wall[x.k])continue;
++   bool human=false;
++   for(int h:humans)human|=find(x.inner.begin(),x.inner.end(),h)!=x.inner.end();
++   for(auto p:pets)if(find(x.inner.begin(),x.inner.end(),p.p)!=x.inner.end())occupancy[i]++;
++   viable[i]=ready[i]&&occupancy[i]&&!human&&!block[x.g]&&!block[x.k];
++  }
++  vector<pair<int,int>> order;
++  for(int i=0;i<int(banks.size());i++)if(viable[i])order.emplace_back(-occupancy[i],i);
++  sort(order.begin(),order.end());
++  for(auto [count,i]:order){
++   const auto &x=banks[i];
++   int a=-1,b=-1;
++   for(int j=0;j<m;j++)if(act[j]=='.'){
++    if(humans[j]==x.l)a=j;
++    if(humans[j]==x.h)b=j;
++   }
++   if(a<0||b<0)continue;
++   act[a]=BUILD[dir(x.l,x.g)];act[b]=BUILD[dir(x.h,x.k)];build[x.g]=1;build[x.k]=1;
++  }
++  // Dedicated lanes do not pass through a tube body. Extra people can keep
++  // building brace cells; before the deadline every unassigned worker does so.
++  if(laneCrew[0]>=0){
++   array<double,3> value{-1.,-1.,-1.};
++   array<int,3> selected{-1,-1,-1};
++   for(int i=0;i<int(banks.size());i++){
++    const auto &x=banks[i];int j=x.b;
++    if(!ready[i]||wall[x.g]||wall[x.k]||build[x.g]||build[x.k])continue;
++    int a=laneCrew[j],b=laneCrew[j+1];
++    if(act[a]!='.'||act[b]!='.')continue;
++    int d1=workers[a].bfs.distance(x.l),d2=workers[b].bfs.distance(x.h);
++    if(d1<0||d2<0||max(d1,d2)>19)continue;
++    int eta=max(d1,d2);
++    double val=0.;
++    for(auto p:pets){
++     if(group[p.p]!=group[x.l])continue;
++     int d=min(md(p.p,x.inner[1]),md(p.p,x.inner[2]));
++     if(d>6+eta/2)continue;
++     if(d==0)val+=eta<=1?12.:6.;
++     else val+=(p.t>=3?3.7:4.8)/(1.+.65*d+.14*d*d);
++    }
++    val=(val+(viable[i]?2.0:0.)) / (2.0+.48*eta+.15*(d1+d2));
++    if(oldPlan[j]==i&&turn-planAge[j]<6)val+=.22;
++    if(val>value[j])value[j]=val,selected[j]=i;
++   }
++   bool center=value[1]>max(0.,value[0])+max(0.,value[2]);
++   for(int j=0;j<3;j++)if(selected[j]>=0&&(j==1)==center&&value[j]>.20){
++    int i=selected[j];
++    if(oldPlan[j]!=i)oldPlan[j]=i,planAge[j]=turn;
++    const auto &x=banks[i];
++    for(auto [w,t]:{pair{laneCrew[j],x.l},pair{laneCrew[j+1],x.h}})if(act[w]=='.'&&humans[w]!=t){
++     int p=workers[w].bfs.first_step(t);
++     if(p>=0&&!build[p])act[w]=MOVE[dir(humans[w],p)],moveTo[p]=1;
++    }
++   }
++  }
++  bool more=turn<bankStaffTurn+32&&built<int(bankWalls.size());
++  if(more){
++   vector<tuple<int,int,int,int>> jobs;
++   for(int p:bankWalls)if(!wall[p]){
++    int progress=0;
++    int axis=bankRot?(p/S):(p%S),r=bankRot?p%S:p/S,start=axis-((axis-bankShift-2)%7);
++    for(int k=0;k<4;k++)if(start+k>=0&&start+k<S)progress+=wall[bp(r,start+k)];
++    for(int i=0;i<m;i++)if(act[i]=='.'&&(laneCrew[0]<0||find(laneCrew.begin(),laneCrew.end(),i)==laneCrew.end()))
++     for(int st:nb[p])if(st>=0&&!wall[st]&&!build[st]){
++      int d=workers[i].bfs.distance(st);
++      if(d<0)continue;
++      if(d==0&&(block[p]||moveTo[p]))continue;
++      int priority=20+2*progress-6*d-(block[p]?15:0);
++      jobs.emplace_back(priority,i,p,st);
++     }
++   }
++   sort(jobs.rbegin(),jobs.rend());
++   bitset<V> used;
++   for(auto [pri,i,p,st]:jobs)if(act[i]=='.'&&!used[p]){
++    int h=humans[i];
++    if(st==h){
++     if(block[p]||build[p]||moveTo[p])continue;
++     act[i]=BUILD[dir(h,p)];build[p]=1;
++    }else{
++     int q=workers[i].bfs.first_step(st);
++     if(q<0||build[q])continue;
++     act[i]=MOVE[dir(h,q)];moveTo[q]=1;
++    }
++    used[p]=1;
++   }
++  }
++  return act;
++ }
++ void bankRecord(){
++  if(!bankMode||turn)return;
++  if(const char *p=getenv("AHC008_BANK_LOG")){
++   ofstream f(p);
++   f<<bankRot<<" "<<bankShift<<" "<<bankRelease<<"\n";
++   for(auto &x:banks){
++    f<<x.b<<" "<<x.r<<" "<<x.l<<" "<<x.g<<" "<<x.k<<" "<<x.h;
++    for(int q:x.inner)f<<" "<<q;
++    for(int q:x.side)f<<" "<<q;
++    f<<"\n";
++   }
++  }
++ }
++
+@@ -1443 +1624,3 @@
+- Game g;g.init(argc,argv);
++ Game g;g.init(1,argv);
++ g.bankMode=argc>1?atoi(argv[1]):0;
++ g.makeBanks();
+@@ -1445 +1628,2 @@
+-  g.act=g.terminal(g.tacticalGate(g.repair(g.plan())));
++  g.act=g.terminal(g.tacticalGate(g.repair(g.bankMode?g.bankPlan():g.plan())));
++  g.bankRecord();
