@@ -1,0 +1,13 @@
+kind,bank,fallback,unisolated
+1,18,44,5
+2,34,48,7
+3,38,58,8
+4,70,8,7
+5,39,38,13
+initial and final reachable 435 40
+compositional trigger 5 bank catches after130 through160 5
+0008.txt,7,1,0,3,8180556
+0013.txt,5,0,1,0,68444444
+0015.txt,7,1,2,0,31333333
+0023.txt,7,0,1,1,24666667
+0025.txt,6,1,1,0,38000000
