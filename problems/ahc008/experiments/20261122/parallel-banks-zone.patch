@@ -1,0 +1,112 @@
+--- problems/ahc008/tactical_gate_submission.cpp
++++ problems/ahc008/tactical_gate_submission.cpp
+@@ -1169,0 +1170,95 @@
++ array<array<int,4>,2> zoneCrew{};
++ array<array<int,3>,2> zonePlan{},zoneAge{};
++ array<int,10> zoneAnchor{};
++ bitset<16> zoneUsed;
++ bool zonesActive=false;
++ void assignBankZones(){
++  const int m=humans.size(),N=1<<m;
++  if(m<6)return;
++  vector<tuple<int,int,int>> jobs;
++  for(int i=0;i<4;i++){
++   bool split=(m>=8)||(i==1||i==2);
++   if(split){
++    jobs.emplace_back(i,0,bp(m>=8?7:9,bankShift+7*i));
++    jobs.emplace_back(i,1,bp(19,bankShift+7*i));
++   }else jobs.emplace_back(i,2,bp(13,bankShift+7*i));
++  }
++  vector<int> dp(N,9999);dp[0]=0;
++  vector<vector<pair<int,int>>> take(jobs.size(),vector<pair<int,int>>(N,{-1,-1}));
++  for(int i=0;i<int(jobs.size());i++){
++   vector<int> next(N,9999);auto [l,z,p]=jobs[i];
++   for(int state=0;state<N;state++)if(dp[state]<9999)for(int w=0;w<m;w++)if(!(state>>w&1)){
++    int d=workers[w].bfs.distance(p);
++    if(d<0)continue;
++    int newmask=state|1<<w;
++    if(dp[state]+d<next[newmask])next[newmask]=dp[state]+d,take[i][newmask]={state,w};
++   }
++   dp.swap(next);
++  }
++  int at=min_element(dp.begin(),dp.end())-dp.begin();
++  if(dp[at]>=9999)return;
++  for(auto& x:zonePlan)x.fill(-1);
++  for(int i=int(jobs.size())-1;i>=0;i--){
++   auto [l,z,p]=jobs[i];auto [pre,w]=take[i][at];
++   if(z==2)zoneCrew[0][l]=zoneCrew[1][l]=w;
++   else zoneCrew[z][l]=w;
++   zoneUsed[w]=1;zoneAnchor[w]=p;
++   at=pre;
++  }
++  zonesActive=true;
++ }
++ void steerBankZones(vector<int>const&ready,vector<int>const&viable,bitset<V>&build,bitset<V>&moveTo){
++  struct Pick {int t=-1,a=-1,b=-1;double value=-1.;};
++  array<Pick,6> picks;
++  for(int i=0;i<int(banks.size());i++){
++   const auto &x=banks[i];int j=x.b,z=(x.r>=14);
++   if(!ready[i]||wall[x.g]||wall[x.k]||build[x.g]||build[x.k])continue;
++   int a=zoneCrew[z][j],b=zoneCrew[z][j+1];
++   if(act[a]!='.'||act[b]!='.')continue;
++   int d1=workers[a].bfs.distance(x.l),d2=workers[b].bfs.distance(x.h);
++   if(d1<0||d2<0||max(d1,d2)>19)continue;
++   int eta=max(d1,d2);
++   double val=0.;
++   for(auto p:pets){
++    if(group[p.p]!=group[x.l])continue;
++    int d=min(md(p.p,x.inner[1]),md(p.p,x.inner[2]));
++    if(d>6+eta/2)continue;
++    if(d==0)val+=eta<=1?12.:6.;
++    else val+=(p.t>=3?3.7:4.8)/(1.+.65*d+.14*d*d);
++   }
++   val=(val+(viable[i]?2.0:0.))/(2.0+.48*eta+.15*(d1+d2));
++   if(zonePlan[z][j]==i&&turn-zoneAge[z][j]<6)val+=.22;
++   auto &p=picks[3*z+j];
++   if(val>p.value)p={i,a,b,val};
++  }
++  double highest=0.;int selected=0;
++  for(int mask=1;mask<64;mask++){
++   double v=0.;int seen=0;bool valid=true;
++   for(int i=0;i<6;i++)if(mask>>i&1){
++    auto p=picks[i];
++    if(p.t<0||p.value<=.20||(seen&((1<<p.a)|(1<<p.b)))){valid=false;break;}
++    seen|=(1<<p.a)|(1<<p.b);v+=p.value;
++   }
++   if(valid&&v>highest)highest=v,selected=mask;
++  }
++  bitset<16> used;
++  for(int t=0;t<6;t++)if(selected>>t&1){
++   auto p=picks[t];const auto &x=banks[p.t];int z=t/3,j=t%3;
++   if(zonePlan[z][j]!=p.t)zonePlan[z][j]=p.t,zoneAge[z][j]=turn;
++   for(auto [w,d]:{pair{p.a,x.l},pair{p.b,x.h}}){
++    used[w]=1;
++    if(humans[w]==d)continue;
++    int q=workers[w].bfs.first_step(d);
++    if(q>=0&&!build[q])act[w]=MOVE[dir(humans[w],q)],moveTo[q]=1;
++   }
++  }
++  for(int w=0;w<int(humans.size());w++)if(zoneUsed[w]&&!used[w]&&act[w]=='.'){
++   int a=humans[w],dest=zoneAnchor[w];
++   int col=bankRot?a/S:a%S,dcol=bankRot?dest/S:dest%S;
++   int r=bankRot?a%S:a/S,dr=bankRot?dest%S:dest/S;
++   if(col==dcol&&(dr==13||((r>=14)==(dr>=14))))continue;
++   int q=workers[w].bfs.first_step(dest);
++   if(q>=0&&q!=a&&!build[q])act[w]=MOVE[dir(a,q)],moveTo[q]=1;
++  }
++ }
++
+@@ -1177 +1272,2 @@
+-  if((laneCrew[0]<0&&turn>=bankStaffTurn)||(bankMode==3&&turn==bankStaffTurn))assignBanks();
++  if((laneCrew[0]<0&&turn>=bankStaffTurn)||(bankMode>=3&&turn==bankStaffTurn))assignBanks();
++  if(bankMode==5&&turn==bankStaffTurn)assignBankZones();
+@@ -1191 +1287 @@
+-  if(bankMode==3)stageBanks(ready);
++  if(bankMode>=3)stageBanks(ready);
+@@ -1207 +1303,2 @@
+-  if(any_of(laneCrew.begin(),laneCrew.end(),[](int i){return i>=0;})){
++  if(zonesActive)steerBankZones(ready,viable,build,moveTo);
++  else if(any_of(laneCrew.begin(),laneCrew.end(),[](int i){return i>=0;})){
+@@ -1248 +1345 @@
+-    for(int i=0;i<m;i++)if(act[i]=='.'&&find(laneCrew.begin(),laneCrew.end(),i)==laneCrew.end())
++    for(int i=0;i<m;i++)if(act[i]=='.'&&(zonesActive?!zoneUsed[i]:find(laneCrew.begin(),laneCrew.end(),i)==laneCrew.end()))
