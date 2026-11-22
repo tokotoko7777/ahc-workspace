@@ -1,0 +1,35 @@
+--- global-clear.cpp
++++ global-clear.cpp
+@@ -361,6 +361,7 @@
+   form();
+  }
+  int phase=0, target=-1, radius=3, tag=0, limit=20, bestPrev=0;
++ int eligibleSingle=0;
+  int phase2=0, target2=-1, bestPrev2=0;
+  int multi=2, secdist=13, multiMin=3;
+  int minKeep=450, keepRelax=7, petsPivot=0, priorLen=3;
+@@ -1475,7 +1476,13 @@
+   vector<bool> p1(hm),p2(hm);
+   for(int i=0;i<hm;i++)if(!captiveHuman(i))p1[i]=true,free++;
+   for(auto p:pets)if(group[p.p]==group[humans[dogClosed&&dogDecoy==0]])pop++;
+-  if(multi==0||free<2*multiMin||(multi>=2&&turn>=210)||pop<3){
++  bool ordinarySingle=multi==0||free<2*multiMin||(multi>=2&&turn>=210)||pop<3;
++  bool singleWindow=bankMode&&bankRelease==160&&turn>=160&&turn<210;
++  if(singleWindow&&!ordinarySingle)++eligibleSingle;
++#ifdef AHC008_SINGLE_CREW
++  ordinarySingle|=singleWindow;
++#endif
++  if(ordinarySingle){
+    pocketPlan(p1,target,phase,bestPrev,-1);
+    return act;
+   }
+@@ -1863,6 +1870,9 @@
+  if(const char *p=getenv("AHC008_SEAM_MEMO_LOG")){
+   ofstream f(p);f<<g.memoQueries<<" "<<g.memoHits<<" "<<g.seamParts.capacity()<<"\n";
+  }
++ if(const char* p=getenv("AHC008_SINGLE_CREW_LOG")){
++  ofstream f(p);f<<g.eligibleSingle<<" "<<g.bankRelease<<'\n';
++ }
+  if(const char *p=getenv("AHC008_RESCUE_LOG")){
+   ofstream f(p);f<<g.residual160<<" "<<g.bankRelease<<"\n";
+  }
