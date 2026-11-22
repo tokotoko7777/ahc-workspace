@@ -1,0 +1,204 @@
+--- problems/ahc008/tactical_gate_submission.cpp
++++ problems/ahc008/tactical_gate_submission.cpp
+@@ -1072,0 +1073,190 @@
++ // One open shell, two shoulder workers and an independent final builder.
++ // Same policy and caps for all three exact-four-cell tetromino families.
++ struct QuadGroove {
++  array<int,4> inner{};
++  vector<int> outside, stance;
++  array<vector<int>,2> jobs;
++  int gate=-1,gh=-1,ga=-1,readyEst=0;
++  int crew[2]{-1,-1};
++ } quad;
++ int quadKind=0,quadReady=-1,quadDone=-1,quadEnd=-1;
++ int quadAlive=-1,quadOwned=0;
++ bitset<V> quadInner,quadReserved;
++ static constexpr int quadMaximum=68,quadSetupDeadline=36,quadHold=27;
++ vector<array<int,4>> quadShapes() const{
++  vector<pair<int,int>> base;
++  if(quadKind==1)base={{0,0},{0,1},{0,2},{0,3}};
++  else if(quadKind==2)base={{0,0},{0,1},{1,0},{1,1}};
++  else base={{0,0},{1,0},{2,0},{2,1}};
++  set<array<int,4>> q;
++  for(int s=0;s<8;s++){
++   vector<pair<int,int>> g;
++   int x0=9,y0=9,maxx=0,maxy=0;
++   for(auto [x,y]:base){
++    if(s&1)swap(x,y);
++    if(s&2)x=-x;
++    if(s&4)y=-y;
++    g.emplace_back(x,y);x0=min(x0,x);y0=min(y0,y);
++   }
++   for(auto &[x,y]:g){x-=x0;y-=y0;maxx=max(maxx,x);maxy=max(maxy,y);}
++   for(int x=0;x+maxx<S;x++)for(int y=0;y+maxy<S;y++){
++    if(x&&y&&x+maxx<S-1&&y+maxy<S-1)continue;
++    array<int,4> a;int n=0;for(auto [i,j]:g)a[n++]=pos(x+i,y+j);
++    sort(a.begin(),a.end());q.insert(a);
++   }
++  }
++  return vector<array<int,4>>(q.begin(),q.end());
++ }
++ void initQuad(){
++  if(!quadKind)return;
++  constexpr int H=quadMaximum;
++  array<array<float,V>,H+1> accum{};
++  for(auto p:pets)accum[0][p.p]+=1;
++  for(auto p:pets){
++   array<float,V> a{},b{};
++   a[p.p]=1.f;
++   int speed=p.t==1?1:p.t==3?3:2;
++   for(int t=1;t<=H;t++){
++    for(int f=0;f<speed;f++){
++     b.fill(0.f);
++     for(int k=0;k<V;k++)if(a[k]>0){
++      int deg=0;for(int u:nb[k])deg+=u>=0;
++      float q=a[k]/deg;
++      for(int u:nb[k])if(u>=0)b[u]+=q;
++     }
++     swap(a,b);
++    }
++    for(int k=0;k<V;k++)accum[t][k]+=a[k];
++   }
++  }
++  for(int t=1;t<=H;t++)for(int k=0;k<V;k++)accum[t][k]+=accum[t-1][k];
++  double highest=-1.;
++  for(auto inner:quadShapes()){
++   bitset<V> body,shell,forbidden;
++   for(int p:inner)body[p]=1;
++   for(int p:inner)for(int q:nb[p])if(q>=0&&!body[q])shell[q]=1;
++   forbidden=body|shell;
++   if(any_of(humans.begin(),humans.end(),[&](int h){return forbidden[h];}))continue;
++   vector<int> gateCells,stance;
++   for(int p=0;p<V;p++)if(shell[p]){
++    int st=-1,best=999;
++    for(int q:nb[p])if(q>=0&&!forbidden[q]){
++     int val=99;
++     for(int h:humans)val=min(val,md(q,h));
++     if(val<best)st=q,best=val;
++    }
++    if(st<0)break;
++    gateCells.push_back(p);stance.push_back(st);
++   }
++   int n=gateCells.size();
++   if(n!=int(shell.count())||n>8||n<3)continue;
++   int m=humans.size();
++   for(int g=0;g<n;g++){
++    int safe=0;for(int p:inner)if(md(p,gateCells[g])>=2)safe|=1<<((p/S+p%S)&1);
++    if(safe!=3)continue;
++    for(int gh=0;gh<m;gh++){
++     int gd=md(humans[gh],stance[g]);
++     if(gd>20)continue;
++     for(int c0=0;c0<m;c0++)if(c0!=gh)for(int c1=c0+1;c1<m;c1++)if(c1!=gh){
++      int hp[2]{humans[c0],humans[c1]},time[2]{};
++      int left=((1<<n)-1)^(1<<g);
++      array<vector<int>,2> jobs;
++      while(left){
++       int best=999,w=-1,p=-1;
++       for(int j=0;j<n;j++)if(left>>j&1)for(int c=0;c<2;c++){
++        int v=time[c]+md(hp[c],stance[j])+1;
++        if(v<best)best=v,w=c,p=j;
++       }
++       jobs[w].push_back(p);left^=1<<p;time[w]=best;hp[w]=stance[p];
++      }
++      int ready=max({gd,time[0],time[1],4});
++      if(ready>25)continue;
++      int stop=min(H,ready+quadHold);
++      auto mass=[&](int p){return (accum[stop][p]-accum[ready-1][p])/(stop-ready+1);};
++      float opportunity=0.f;
++      for(int p:inner)opportunity+=mass(p);
++      opportunity+=.40f*mass(gateCells[g]);
++      float score=opportunity/(1.f+.035f*ready+.012f*(gd+time[0]+time[1]));
++      if(score<=highest)continue;
++      highest=score;quad={};quad.inner=inner;quad.outside=gateCells;quad.stance=stance;
++      quad.jobs=jobs;quad.gate=g;quad.gh=gh;quad.ga=stance[g];quad.readyEst=ready;
++      quad.crew[0]=c0;quad.crew[1]=c1;quadInner=body;quadReserved=forbidden;
++     }
++    }
++   }
++  }
++  quadAlive=quad.gate>=0;
++ }
++ char quadWalk(int h,int target) const{
++  if(h==target)return '.';
++  array<int,V> first;first.fill(-1);
++  int que[V],n=1;que[0]=h;first[h]=h;
++  for(int i=0;i<n;i++)for(int u:nb[que[i]])if(u>=0&&!quadReserved[u]&&!wall[u]&&first[u]<0){
++   first[u]=i==0?u:first[que[i]];
++   if(u==target)return MOVE[dir(h,first[u])];
++   que[n++]=u;
++  }
++  return '.';
++ }
++ string quadPlan(const string &baseline){
++  quadOwned=0;
++  if(!quadKind||quadAlive!=1)return baseline;
++  int gate=quad.outside[quad.gate],m=humans.size();
++  bool ready=true;
++  for(int j=0;j<int(quad.outside.size());j++)if(j!=quad.gate&&!wall[quad.outside[j]])ready=false;
++  if(ready&&quadReady<0)quadReady=turn;
++  if(wall[gate]){quadDone=turn;quadEnd=turn;quadAlive=0;return baseline;}
++  if(turn>=quadMaximum||(!ready&&turn>=quadSetupDeadline)||(ready&&turn-quadReady>=quadHold)){
++   quadEnd=turn;quadAlive=0;return baseline;
++  }
++  if(any_of(quad.inner.begin(),quad.inner.end(),[&](int p){return wall[p];})){
++   quadEnd=turn;quadAlive=0;return baseline;
++  }
++  string chosen=baseline;
++  bitset<V> qBuild,qWalk,crew,protectedStances;
++  for(int p:quad.stance)protectedStances[p]=1;
++  auto replace=[&](int i,char c){
++   chosen[i]=c;crew[i]=1;quadOwned|=1<<i;
++   if(c!='.'){
++    const char *a=c>='a'?BUILD:MOVE;
++    int p=nb[humans[i]][find(a,a+4,c)-a];
++    if(c>='a')qBuild[p]=1;else qWalk[p]=1;
++   }
++  };
++  if(!ready){
++   for(int c=0;c<2;c++)for(int j:quad.jobs[c])if(!wall[quad.outside[j]]){
++    int i=quad.crew[c],body=quad.outside[j],st=quad.stance[j],h=humans[i];
++    replace(i,h!=st?quadWalk(h,st):(block[body]?'.':BUILD[dir(h,body)]));break;
++   }
++  }
++  int g=quad.gh,h=humans[g];
++  bool prey=any_of(pets.begin(),pets.end(),[&](Pet p){return quadInner[p.p];});
++  if(ready){
++   replace(g,h!=quad.ga?quadWalk(h,quad.ga):(prey&&!block[gate]?BUILD[dir(h,gate)]:'.'));
++  }else if(turn+md(h,quad.ga)>=quad.readyEst-1){
++   replace(g,quadWalk(h,quad.ga));
++  }
++  for(int i=0;i<m;i++)if(!crew[i]&&chosen[i]!='.'){
++   char c=chosen[i];auto a=c>='a'?BUILD:MOVE;
++   int p=nb[humans[i]][find(a,a+4,c)-a];
++   if(p<0||quadReserved[p]||qBuild[p]||(c>='a'&&(protectedStances[p]||qWalk[p])))chosen[i]='.';
++  }
++  return chosen;
++ }
++ void quadRecord(string baseline,string output){
++  if(!quadKind)return;
++  const char *path=getenv("AHC008_QUAD_LOG");if(!path)return;
++  std::ofstream f(path,ios::app);
++  if(!f)return;
++  if(turn==0){
++   f<<"meta "<<quadKind<<" "<<quad.gate<<" "<<quad.readyEst<<" "<<quad.gh<<" "<<quad.crew[0]<<" "<<quad.crew[1];
++   if(quad.gate>=0){
++    for(int p:quad.inner)f<<" "<<p;
++    f<<" "<<quad.outside[quad.gate]<<" "<<quad.ga;
++    for(int p:quad.outside)f<<" "<<p;
++   }
++   f<<"\n";
++  }
++  if(turn<quadMaximum+1) f<<turn<<" "<<baseline<<" "<<output<<" "<<quadReady<<" "<<quadDone<<" "<<quadEnd<<" "<<quadOwned<<"\n";
++ }
++
+@@ -1443 +1633,3 @@
+- Game g;g.init(argc,argv);
++ Game g;g.init(1,argv);
++ g.quadKind=argc>1?atoi(argv[1]):0;
++ g.initQuad();
+@@ -1445 +1637,4 @@
+-  g.act=g.terminal(g.tacticalGate(g.repair(g.plan())));
++  string original=g.plan();
++  string actions=g.quadPlan(original);
++  g.act=g.terminal(g.tacticalGate(g.repair(move(actions))));
++  g.quadRecord(original,g.act);
