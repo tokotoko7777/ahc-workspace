@@ -1,0 +1,89 @@
+diff --git a/problems/ahc008/tactical_gate_submission.cpp b/problems/ahc008/tactical_stability.cpp
+index 82f6967..1954d82 100644
+--- a/problems/ahc008/tactical_gate_submission.cpp
++++ b/problems/ahc008/tactical_stability.cpp
+@@ -1177,6 +1177,12 @@ struct Game {
+ #ifndef GATE_GAIN
+ #define GATE_GAIN 10
+ #endif
++#ifndef GATE_STABILITY
++#define GATE_STABILITY 0
++#endif
++#ifndef GATE_EXTRA_STEPS
++#define GATE_EXTRA_STEPS 0
++#endif
+ #ifndef GATE_MOVEPREEMPT
+ #define GATE_MOVEPREEMPT 1
+ #endif
+@@ -1212,6 +1218,56 @@ struct Game {
+   }
+   return res;
+  }
++ double gateStability(Bitboard::Rows real, const vector<pair<int,int>>& moves, const vector<int>& after){
++  auto closed=real;
++  bitset<V> forbidden;
++  for(auto [person,p]:moves){
++   closed[p/S]&=~(1u<<(p%S));forbidden[p]=true;
++   for(int q:nb[p])if(q>=0)forbidden[q]=true;
++  }
++  auto possible=closed;
++  Bitboard::Rows patch{},mobile{};
++  int area;
++  while(Bitboard::pop_first(possible,patch,area)){
++   bool select=false;
++   for(int i=0;i<(int)humans.size();i++)if(!captiveHuman(i)){
++    int q=after[i];if((patch[q/S]>>(q%S))&1u){select=true;break;}
++   }
++   if(select)for(int i=0;i<S;i++)mobile[i]|=patch[i];
++  }
++  auto on=[&](const Bitboard::Rows &q,int p){return (q[p/S]>>(p%S))&1u;};
++  double probability=1.;
++  for(auto pet:pets){
++   int steps=min(4,(pet.t==1?1:pet.t==3?3:2)+GATE_EXTRA_STEPS);
++   bool close=false;
++   for(auto [person,p]:moves)if(md(p,pet.p)<=steps+1){close=true;break;}
++   if(!close)continue; // Cannot change side through a prospective gate or make it illegal.
++   bool side=on(mobile,pet.p);
++   array<double,V> d{},nx{};
++   array<int,V> seen{};
++   vector<int> frontier{pet.p},next;
++   d[pet.p]=1.;
++   for(int t=1;t<=steps;t++){
++    next.clear();
++    for(int p:frontier){
++     int degree=0;
++     for(int q:nb[p])if(q>=0&&on(real,q))degree++;
++     if(!degree){
++      if(seen[p]!=t)seen[p]=t,nx[p]=0.,next.push_back(p);
++      nx[p]+=d[p];
++     }else for(int q:nb[p])if(q>=0&&on(real,q)){
++      if(seen[q]!=t)seen[q]=t,nx[q]=0.,next.push_back(q);
++      nx[q]+=d[p]/degree;
++     }
++    }
++    d.swap(nx);frontier.swap(next);
++   }
++   double pass=0.;
++   for(int p:frontier)if(!forbidden[p]&&on(mobile,p)==side)pass+=d[p];
++   probability*=pass;
++  }
++  return probability;
++ }
+  string tacticalGate(string base) {
+   if(turn<GATE_FROM||turn>=299||overBudget())return base;
+   int hm=humans.size();
+@@ -1344,6 +1400,14 @@ struct Game {
+    }
+   };
+   enumerate(enumerate,0,0,0);
++  if(GATE_STABILITY&&!queue.empty()){
++   auto predicted=after;
++   for(int i=0;i<hm;i++)if(chosenAction[i]!=base[i]){
++    if(chosenAction[i]=='.')predicted[i]=humans[i];
++    else if(chosenAction[i]<'a')predicted[i]=nb[humans[i]][find(MOVE,MOVE+4,chosenAction[i])-MOVE];
++   }
++   if(gateStability(real,queue,predicted)*100.+1e-8<GATE_STABILITY)return base;
++  }
+   if(!queue.empty()){gatePending=move(queue);gateDue=turn+1;gatePrep++;}
+   if(immediateWinner)gateApplied++;
+   return chosenAction;
