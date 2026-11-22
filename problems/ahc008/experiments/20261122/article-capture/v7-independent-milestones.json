@@ -1,0 +1,174 @@
+{
+  "article": {
+    "by_final_residual": {
+      "0": {
+        "cases": 44,
+        "median_first_le2": 240.0,
+        "median_first_exact1": 246,
+        "exact1_by250": 17,
+        "exact1_after275": 4,
+        "jump_to_zero": 11,
+        "median_actionable_turns_at_one": 20.0
+      },
+      "3+": {
+        "cases": 16,
+        "median_first_le2": null,
+        "median_first_exact1": null,
+        "exact1_by250": 0,
+        "exact1_after275": 0,
+        "jump_to_zero": 0,
+        "median_actionable_turns_at_one": 0.0
+      },
+      "1": {
+        "cases": 24,
+        "median_first_le2": 253.0,
+        "median_first_exact1": 280.0,
+        "exact1_by250": 3,
+        "exact1_after275": 14,
+        "jump_to_zero": 0,
+        "median_actionable_turns_at_one": 20.0
+      },
+      "2": {
+        "cases": 16,
+        "median_first_le2": 267.0,
+        "median_first_exact1": null,
+        "exact1_by250": 0,
+        "exact1_after275": 0,
+        "jump_to_zero": 0,
+        "median_actionable_turns_at_one": 0.0
+      }
+    },
+    "threshold_snapshots": {
+      "225": {
+        "le1": [
+          10,
+          8
+        ],
+        "le2": [
+          22,
+          16
+        ],
+        "exact1": [
+          10,
+          8
+        ]
+      },
+      "250": {
+        "le1": [
+          20,
+          17
+        ],
+        "le2": [
+          42,
+          26
+        ],
+        "exact1": [
+          20,
+          17
+        ]
+      },
+      "275": {
+        "le1": [
+          42,
+          32
+        ],
+        "le2": [
+          63,
+          37
+        ],
+        "exact1": [
+          39,
+          29
+        ]
+      }
+    },
+    "retrospective_solve_one_if_no_losses": 68,
+    "retrospective_solve_two_if_no_losses": 84
+  },
+  "baseline": {
+    "by_final_residual": {
+      "0": {
+        "cases": 41,
+        "median_first_le2": 239,
+        "median_first_exact1": 253,
+        "exact1_by250": 14,
+        "exact1_after275": 4,
+        "jump_to_zero": 10,
+        "median_actionable_turns_at_one": 17
+      },
+      "3+": {
+        "cases": 18,
+        "median_first_le2": null,
+        "median_first_exact1": null,
+        "exact1_by250": 0,
+        "exact1_after275": 0,
+        "jump_to_zero": 0,
+        "median_actionable_turns_at_one": 0.0
+      },
+      "1": {
+        "cases": 26,
+        "median_first_le2": 256.0,
+        "median_first_exact1": 287.5,
+        "exact1_by250": 3,
+        "exact1_after275": 17,
+        "jump_to_zero": 0,
+        "median_actionable_turns_at_one": 12.5
+      },
+      "2": {
+        "cases": 15,
+        "median_first_le2": 268,
+        "median_first_exact1": null,
+        "exact1_by250": 0,
+        "exact1_after275": 0,
+        "jump_to_zero": 0,
+        "median_actionable_turns_at_one": 0
+      }
+    },
+    "threshold_snapshots": {
+      "225": {
+        "le1": [
+          8,
+          6
+        ],
+        "le2": [
+          23,
+          15
+        ],
+        "exact1": [
+          8,
+          6
+        ]
+      },
+      "250": {
+        "le1": [
+          17,
+          14
+        ],
+        "le2": [
+          39,
+          24
+        ],
+        "exact1": [
+          17,
+          14
+        ]
+      },
+      "275": {
+        "le1": [
+          39,
+          30
+        ],
+        "le2": [
+          59,
+          33
+        ],
+        "exact1": [
+          36,
+          27
+        ]
+      }
+    },
+    "retrospective_solve_one_if_no_losses": 67,
+    "retrospective_solve_two_if_no_losses": 82
+  }
+}
