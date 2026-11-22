@@ -62,3 +62,33 @@ python "$d/collective_baffle_audit.py" "$HARNESS" "$TESTER" ./cap4 "$CASES"
 python "$d/guard_hub_audit.py" "$HARNESS" "$TESTER" ./cap4 "$CASES"
 python "$d/guard_hub_audit.py" "$HARNESS" "$TESTER" ./cap4 "$CASES" --actual-only
 ```
+
+## Fixed prebuilt hub, actual counterfactual animal moves
+
+A separate pure simulation uses the official v3 Rust Sim without changing
+its human or pet transitions. Pick the lexicographically first minimum-addition
+hub before consulting these movement outcomes, near (3,6) in zero-based
+coordinates. Set its 15 physical surrounding cells blocked at start (+9
+relative to the macro skeleton), leaving gates open. If any initial occupant
+conflicts with a blocked cell, or a human starts inside a pocket or gate, count
+the case as infeasible and report the complete row (15/30 usable). Teleport the
+nearest human to the shared guard stance in both arms (mean open-grid walking
+cost 10.6 turns). Other humans stay put, and both arms use the same original
+case movement seed and initial pet states. The active guard closes one legal
+occupied gate per turn, prioritizing new pet count. The inactive guard does
+not close. Wall build cost is counted geometrically, not simulated; the
+idealized guard can spend all 40 turns here without competing scaffold jobs.
+
+Both arms see four distinct in-pocket pets across 30 rows by turn 40, all
+four in separate cases. At turn 10 the active guard has caught two total,
+still two by 20, and three by 40; no case yields two pets. These same totals
+among the 15 feasible setups suggest the main obstacle remains early arrivals,
+even with a properly staffed guard and true altered animal trajectories.
+Discard this fixed hub as a production topology. This is not a universal
+rejection of adaptive, integrated shared guards.
+
+Copy guard_hub_prebuilt.rs into official v3 tools/src/bin/, then from tools:
+
+    cargo run --release --bin guard_hub_prebuilt -- /path/to/dev30/in
+
+No score or submission candidate changed.
