@@ -1,0 +1,17 @@
+--- problems/ahc008/tactical_gate_submission.cpp
++++ problems/ahc008/tactical_gate_submission.cpp
+@@ -1076,0 +1077 @@
++ int rescueMode=0,residual160=-1;
+@@ -1266,0 +1268,6 @@
++  if(turn==160){
++   const int service=group[bp(0,bankShift)];
++   residual160=0;
++   for(auto p:pets)residual160+=group[p.p]==service;
++   if(rescueMode&&residual160>4)bankRelease=160;
++  }
+@@ -1756,0 +1764 @@
++ g.rescueMode=argc>2?atoi(argv[2]):0;
+@@ -1762,0 +1771,3 @@
++ }
++ if(const char *p=getenv("AHC008_RESCUE_LOG")){
++  ofstream f(p);f<<g.residual160<<" "<<g.bankRelease<<"\n";
