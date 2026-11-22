@@ -1,0 +1,11 @@
+--- integrated.cpp
++++ integrated.cpp
+@@ -1801,7 +1801,7 @@
+    if(rescueMode&&residual160>4)bankRelease=160;
+   }
+ 
+-  if(turn>=180&&rem>0&&rem<=2&&!overBudget()){
++  if(turn>=180&&rem==1&&!overBudget()){
+    vector<lastcap::Pet> alive;
+    for(auto const& p:pets)alive.push_back({p.p,p.t});
+    lastcap::Board roads{},retreat{};
