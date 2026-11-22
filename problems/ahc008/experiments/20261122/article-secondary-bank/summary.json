@@ -1,0 +1,44 @@
+{
+  "verified": 30,
+  "actual_dual_cases": 19,
+  "counts": {
+    "real_dual_turns": 844,
+    "factual_pet_window_0": 143,
+    "factual_pet_window_1": 143,
+    "factual_pet_window_2": 142
+  },
+  "by_eta": {
+    "0": {
+      "witnesses": 1,
+      "cases": 1,
+      "animals": 1,
+      "final_missed": 1,
+      "final_missed_cases": 1,
+      "final_missed_no_secondary_wall_lost": 1,
+      "lost_wall_hist": {
+        "0": 1
+      }
+    },
+    "1": {
+      "witnesses": 0,
+      "cases": 0,
+      "animals": 0,
+      "final_missed": 0,
+      "final_missed_cases": 0,
+      "final_missed_no_secondary_wall_lost": 0,
+      "lost_wall_hist": {}
+    },
+    "2": {
+      "witnesses": 2,
+      "cases": 2,
+      "animals": 2,
+      "final_missed": 0,
+      "final_missed_cases": 0,
+      "final_missed_no_secondary_wall_lost": 0,
+      "lost_wall_hist": {
+        "0": 2
+      }
+    }
+  },
+  "final_missed_total": 1
+}

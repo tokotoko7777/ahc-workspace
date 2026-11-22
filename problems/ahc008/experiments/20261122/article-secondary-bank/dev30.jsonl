@@ -1,0 +1,3 @@
+{"actors":[1,6],"route":[[669,639,609],[850,849,819]],"replaced_secondary_walls":0,"pets":[7],"case":"0016.txt","turn":176,"eta":2,"tube":27,"otherwise_final_missed":[]}
+{"actors":[7,3],"route":[[348],[355]],"replaced_secondary_walls":0,"pets":[8],"case":"0017.txt","turn":160,"eta":0,"tube":28,"otherwise_final_missed":[8]}
+{"actors":[3,7],"route":[[523,493,463],[469,469,470]],"replaced_secondary_walls":0,"pets":[6],"case":"0019.txt","turn":161,"eta":2,"tube":18,"otherwise_final_missed":[]}
