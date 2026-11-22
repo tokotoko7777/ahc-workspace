@@ -1,0 +1,17 @@
+{
+  "verified": 30,
+  "announced": 3052,
+  "status": {
+    "avoidable_path_change": 1107,
+    "arrived": 1893,
+    "phase_exit": 40,
+    "already_sealed": 12
+  },
+  "factual_legal": 7,
+  "factual_legal_cases": 6,
+  "otherwise_final_missed": 0,
+  "otherwise_final_missed_cases": 0,
+  "otherwise_final_missed_no_paid_wall_or_bridge": 0,
+  "otherwise_final_missed_no_paid_wall_or_bridge_cases": 0,
+  "no_other_paired_displacement": 0
+}
