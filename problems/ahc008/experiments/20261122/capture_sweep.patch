@@ -1,0 +1,202 @@
+diff --git a/problems/ahc008/capture_first_submission.cpp b/problems/ahc008/capture_sweep.cpp
+index 0950f01..51705d0 100644
+--- a/problems/ahc008/capture_first_submission.cpp
++++ b/problems/ahc008/capture_sweep.cpp
+@@ -1527,6 +1527,160 @@ struct Game {
+   if(immediateWinner)gateApplied++;
+   return chosenAction;
+  }
++#ifndef CAP_SWEEP_CREW
++#define CAP_SWEEP_CREW 3
++#endif
++#ifndef CAP_SWEEP_BUDGET
++#define CAP_SWEEP_BUDGET 26
++#endif
++#ifndef CAP_SWEEP_DEADLINE
++#define CAP_SWEEP_DEADLINE 116
++#endif
++ int sweepID=-1,sweepStart=-1,sweepChosen=0,sweepWalls=0,sweepEscapes=0,sweepIsolated=0,sweepLost=0,sweepSpent=0;
++ int sweepMiss=0,sweepPetsExact=0;bool sweepHadWall=false;
++ string sweepBaseline;
++ struct SweepPlan {vector<int> wall,inside;int eta=99,nearest=99,cover=0; double val=-1e9;};
++ void auditSweep(){
++  if(sweepID<0)return;
++  int root=group[humans[0]],pet=group[pets[sweepID].p];
++  if(pet>=0&&pet!=root&&all_of(humans.begin(),humans.end(),[&](int h){return group[h]==root;})){
++   if(sweepHadWall)sweepIsolated++;
++   sweepID=-1;sweepMiss=0;sweepHadWall=false;
++  }
++ }
++ string movingSweep(string base){
++  auditSweep();
++  sweepBaseline=base;
++  if(!roomReady||roomTarget||turn<25||turn>=CAP_SWEEP_DEADLINE||sweepSpent>=CAP_SWEEP_BUDGET||overBudget()){
++   if(sweepID>=0){sweepEscapes++;sweepID=-1;}
++   return base;
++  }
++  if(sweepID>=0&&turn-sweepStart>=10){sweepEscapes++;sweepID=-1;}
++  if(sweepID<0&&sweepChosen>=3)return base;
++  int root=group[humans[0]];
++  vector<bool> free(humans.size());
++  bitset<V> placed,moving,afterOccupied;
++  vector<int> after=humans;
++  int people=0;
++  for(int i=0;i<(int)humans.size();i++){
++   int h=humans[i];
++   if(base[i]>='a')placed[nb[h][find(BUILD,BUILD+4,base[i])-BUILD]]=true;
++   else if(!captiveHuman(i)){
++    free[i]=true;people++;
++    if(base[i]!='.')after[i]=nb[h][find(MOVE,MOVE+4,base[i])-MOVE],moving[after[i]]=true;
++   }
++   afterOccupied[after[i]]=true;
++  }
++  if(people<2)return base;
++  vector<int> nearest(V,99);
++  for(int p=0;p<V;p++)if(group[p]==root)for(int i=0;i<(int)humans.size();i++)if(free[i]){
++   int d=workers[i].bfs.distance(p);if(d>=0)nearest[p]=min(nearest[p],d);
++  }
++  auto pick=[&](int id)->SweepPlan{
++   SweepPlan best;
++   if(pets[id].t!=1||group[pets[id].p]!=root)return best;
++   int p=pets[id].p, anchors=0;
++   vector<int> centers{p};
++   int x=p/S,y=p%S;
++   for(int i=-2;i<=2;i++)for(int j=-2;j<=2;j++)if(abs(i)+abs(j)<=2){
++    int xx=x+i,yy=y+j;
++    anchors+=xx<0||xx>=S||yy<0||yy>=S||wall[pos(xx,yy)];
++   }
++   if(anchors<(sweepID==id?1:3))return best;
++   if(nearest[p]>7)return best;
++   for(int q:nb[p])if(q>=0&&!wall[q]&&!placed[q]&&group[q]==root)centers.push_back(q);
++   for(int c:centers){
++    auto z=cutPocket(c,2,free,nearest);
++    if(z.wall.empty()||z.inside.empty()||z.inside.size()>15||z.wall.size()>7)continue;
++    auto in=[&](int p){return find(z.inside.begin(),z.inside.end(),p)!=z.inside.end();};
++    if(!in(p))continue;
++    if(any_of(humans.begin(),humans.end(),in)||any_of(after.begin(),after.end(),in))continue;
++    vector<int> remaining;int risk=0;
++    for(int w:z.wall)if(!placed[w])remaining.push_back(w),risk+=block[w];
++    if(remaining.empty()||remaining.size()>6||risk>4)continue;
++    int maxd=0,mind=99,cover=0;bool legal=true;
++    for(int w:remaining){
++     int eta=99;
++     for(int q:nb[w])if(q>=0&&!wall[q]&&!placed[q]&&!in(q)&&find(z.wall.begin(),z.wall.end(),q)==z.wall.end()){
++      eta=min(eta,nearest[q]);
++     }
++     if(eta>6){legal=false;break;}
++     maxd=max(maxd,eta);mind=min(mind,eta);
++    }
++    if(!legal)continue;
++    for(int q:nb[p])if(q>=0&&!wall[q]&&in(q))cover++;
++    double val=cover*3.-remaining.size()*2.2-maxd*2.1-mind*.8-risk*1.2-z.inside.size()*.12;
++    if(val>best.val)best={move(remaining),move(z.inside),maxd,mind,cover,val};
++   }
++   return best;
++  };
++  SweepPlan selected;
++  if(sweepID>=0)selected=pick(sweepID);
++  if(sweepID>=0&&selected.wall.empty()){
++   if(++sweepMiss>=2){sweepEscapes++;sweepID=-1;sweepHadWall=false;}
++   else return base;
++  }
++  if(sweepID<0){
++   int k=-1;
++   if(sweepChosen>=3)return base;
++   for(int i=0;i<(int)pets.size();i++){
++    auto z=pick(i);
++    if(!z.wall.empty()&&z.val>selected.val){k=i;selected=move(z);}
++   }
++   if(k<0)return base;
++   sweepID=k;sweepStart=turn;sweepChosen++;sweepHadWall=false;
++  }
++  sweepMiss=0;
++  auto in=[&](int p){return find(selected.inside.begin(),selected.inside.end(),p)!=selected.inside.end();};
++  vector<tuple<int,int,int,int>> jobs;
++  for(int w:selected.wall)for(int i=0;i<(int)humans.size();i++)if(free[i])
++   for(int q:nb[w])if(q>=0&&!wall[q]&&!placed[q]&&!in(q)&&find(selected.wall.begin(),selected.wall.end(),q)==selected.wall.end()){
++    int d=workers[i].bfs.distance(q);
++    if(d<0||d>6||(!d&&(block[w]||moving[w])))continue;
++    int value=-7*d-block[w]*4+(md(w,pets[sweepID].p)==2?2:0);
++    jobs.emplace_back(value,i,w,q);
++   }
++  sort(jobs.rbegin(),jobs.rend());
++  bitset<V> usedWall,changedDest;
++  vector<bool> occupied(humans.size());
++  int used=0;
++  for(auto [v,i,w,q]:jobs)if(used<CAP_SWEEP_CREW&&sweepSpent+used<CAP_SWEEP_BUDGET&&!occupied[i]&&!usedWall[w]){
++   int h=humans[i];
++   if(h==q){
++    if(block[w]||moving[w]||changedDest[w])continue;
++    base[i]=BUILD[dir(h,w)];placed[w]=true;
++   }else{
++    int next=workers[i].bfs.first_step(q);
++    if(next<0||placed[next]||in(next))continue;
++    base[i]=MOVE[dir(h,next)];changedDest[next]=true;
++   }
++   if(base[i]==sweepBaseline[i])continue;
++   occupied[i]=true;usedWall[w]=true;used++;
++  }
++  return base;
++ }
++ string finishSweep(string routed){
++  auto fixed=repair(routed);
++  if(sweepBaseline.size()==fixed.size())
++   for(int i=0;i<(int)fixed.size();i++)
++    if(sweepBaseline[i]>='a'&&fixed[i]!=sweepBaseline[i])return sweepBaseline;
++  return fixed;
++ }
++ int sweepReachable(const string& command){
++  auto projected=wall;
++  auto h=humans;
++  for(int i=0;i<(int)h.size();i++)if(command[i]!='.'){
++   if(command[i]>='a')projected[nb[h[i]][find(BUILD,BUILD+4,command[i])-BUILD]]=1;
++   else h[i]=nb[h[i]][find(MOVE,MOVE+4,command[i])-MOVE];
++  }
++  array<unsigned char,V> vis{};
++  int queue[V],n=1;
++  vis[h[0]]=1;queue[0]=h[0];
++  for(int i=0;i<n;i++)for(int q:nb[queue[i]])if(q>=0&&!projected[q]&&!vis[q])vis[q]=1,queue[n++]=q;
++  for(int p:h)if(!vis[p])return -1;
++  int petsNear=0;for(auto pet:pets)petsNear+=vis[pet.p];
++  return petsNear;
++ }
+  string terminal(string baseline){
+   if(!endSearch||turn!=299)return baseline;
+   const int hm=humans.size(), nn=pets.size();
+@@ -1604,6 +1758,18 @@ struct Game {
+   return ret;
+  }
+  bool advance(){
++  if(sweepBaseline.size()==act.size()&&turn<CAP_SWEEP_DEADLINE){
++   bool hasNewWall=false;
++   for(int i=0;i<(int)act.size();i++)if(sweepBaseline[i]!=act[i]){
++    sweepSpent++;
++    if(act[i]>='a'){sweepWalls++;sweepHadWall=true;hasNewWall=true;}
++    if(sweepBaseline[i]>='A'&&sweepBaseline[i]<='Z')sweepLost++;
++   }
++   if(hasNewWall){
++    int basePets=sweepReachable(sweepBaseline),actualPets=sweepReachable(act);
++    if(basePets>=0&&actualPets>=0&&basePets>actualPets)sweepPetsExact+=basePets-actualPets;
++   }
++  }
+   for(int i=0;i<(int)humans.size();i++) if(act[i]!='.'){
+    if(islower(act[i]))wall[nb[humans[i]][find(BUILD,BUILD+4,act[i])-BUILD]]=1;
+    else humans[i]=nb[humans[i]][find(MOVE,MOVE+4,act[i])-MOVE];
+@@ -1621,13 +1787,16 @@ int main(int argc,char**argv){
+  ios::sync_with_stdio(false);cin.tie(nullptr);
+  Game g;g.init(argc,argv);
+  for(;g.turn<300;g.turn++){
+-  g.act=g.terminal(g.tacticalGate(g.repair(g.plan())));
++  g.act=g.terminal(g.tacticalGate(g.finishSweep(g.movingSweep(g.repair(g.plan())))));
+   cout<<g.act<<'\n'<<flush;
+   if(!g.advance())break;
+  }
+ #ifdef GATE_DIAG
+  cerr<<"gate "<<g.gateSearch<<" "<<g.gatePrep<<" "<<g.gateApplied<<"\n";
+ #endif
++#ifdef CAP_SWEEP_DIAG
++ cerr<<"sweep "<<g.sweepChosen<<' '<<g.sweepWalls<<' '<<g.sweepEscapes<<' '<<g.sweepIsolated<<' '<<g.sweepLost<<' '<<g.sweepSpent<<' '<<g.sweepPetsExact<<"\n";
++#endif
+ #ifdef HAB_DIAG
+  array<int,6> active{}; g.workers[0].bfs.run(g.humans[0],[&](int p){return !g.wall[p];});
+  int a=0;for(int p=0;p<V;p++)a+=g.workers[0].bfs.distance(p)>=0;
