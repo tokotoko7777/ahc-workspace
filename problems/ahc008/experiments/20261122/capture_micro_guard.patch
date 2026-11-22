@@ -1,0 +1,187 @@
+diff --git a/problems/ahc008/capture_first_submission.cpp b/problems/ahc008/capture_micro_guard.cpp
+index 0950f01..d55ffc4 100644
+--- a/problems/ahc008/capture_first_submission.cpp
++++ b/problems/ahc008/capture_micro_guard.cpp
+@@ -1527,6 +1527,129 @@ struct Game {
+   if(immediateWinner)gateApplied++;
+   return chosenAction;
+  }
++#ifndef CAP_MICRO_END
++#define CAP_MICRO_END 128
++#endif
++#ifndef CAP_MICRO_HARD
++#define CAP_MICRO_HARD 1
++#endif
++ struct Micro {vector<int> inside,boundary; int gate=-1;};
++ Micro micro;
++ int microSince=0, microChoice=0, microActions=0, microClosed=0, microConfirm=-1;
++ vector<int> microConfirmKinds;
++ array<int,6> microEntry{},microCaught{};
++ array<bool,20> microEntered{};
++ bool microHas(int p) const {
++  return find(micro.inside.begin(),micro.inside.end(),p)!=micro.inside.end();
++ }
++ string microTry(string base){
++  if(!roomReady||roomTarget||turn<25||turn>=CAP_MICRO_END||overBudget())return base;
++  vector<int> idle;
++  for(int i=0;i<(int)humans.size();i++)if(base[i]=='.'&&!captiveHuman(i))idle.push_back(i);
++  if(idle.empty())return base;
++  bitset<V> soonWall,soonMove;
++  for(int i=0;i<(int)humans.size();i++)if(base[i]!='.'){
++   int h=humans[i];
++   if(base[i]>='a')soonWall[nb[h][find(BUILD,BUILD+4,base[i])-BUILD]]=1;
++   else soonMove[nb[h][find(MOVE,MOVE+4,base[i])-MOVE]]=1;
++  }
++  if(micro.gate>=0&&(wall[micro.gate]||turn-microSince>=24))micro={};
++  if(micro.gate<0){
++   double best=-1;
++   for(int id=0;id<rnr;id++){
++    int lx=30,ly=30,hx=-1,hy=-1;
++    for(int p=0;p<V;p++)if(rcell[p]==id)lx=min(lx,p/S),ly=min(ly,p%S),hx=max(hx,p/S),hy=max(hy,p%S);
++    for(int sx:{-1,1})for(int sy:{-1,1})for(int wx:{2,3}){
++     int wy=5-wx;
++     int x=sx>0?lx:hx,y=sy>0?ly:hy;
++     Micro op;
++     if(hx-lx+1<wx||hy-ly+1<wy)continue;
++     bool disqualified=false;
++     for(int i=0;i<wx;i++)for(int j=0;j<wy;j++){
++      int p=pos(x+i*sx,y+j*sy);
++      if(wall[p]||soonWall[p])disqualified=true;
++      op.inside.push_back(p);
++     }
++     if(disqualified)continue;
++     auto in=[&](int p){return find(op.inside.begin(),op.inside.end(),p)!=op.inside.end();};
++     for(int h:humans)if(in(h))disqualified=true;
++     if(disqualified)continue;
++     for(int p:op.inside)for(int q:nb[p])if(q>=0&&!in(q))op.boundary.push_back(q);
++     sort(op.boundary.begin(),op.boundary.end());
++     op.boundary.erase(unique(op.boundary.begin(),op.boundary.end()),op.boundary.end());
++     int support=0,missing=0;
++     for(int p:op.boundary){
++      if(rcell[p]!=id&&!wall[p])disqualified=true;
++      support+=(rcell[p]!=id)||wall[p];
++      missing+=!wall[p]&&!soonWall[p];
++     }
++     if(disqualified||missing<2||missing>5||support<2)continue;
++     for(int p:op.boundary)if(rcell[p]==id&&!wall[p]&&!soonWall[p]){
++      int gd=99,coverage=0;
++      for(int w:nb[p])if(w>=0&&!wall[w]&&!soonWall[w]&&!in(w)&&find(op.boundary.begin(),op.boundary.end(),w)==op.boundary.end()){
++       coverage++;
++       for(int j:idle){int d=workers[j].bfs.distance(w);if(d>=0)gd=min(gd,d);}
++      }
++      if(gd>4||!coverage)continue;
++      double benefit=0.;
++      for(auto pet:pets){
++       int d=md(p,pet.p);
++       if(d>7)continue;
++       double w=(CAP_MICRO_HARD&&(pet.t==1||pet.t==5))?1.7:1.;
++       benefit+=w*max(0,8-d)*.6;
++      }
++      double v=benefit+coverage*.7-gd*1.3-(missing-2)*1.1;
++      if(v>best){best=v;micro=op;micro.gate=p;}
++     }
++    }
++   }
++   if(micro.gate>=0){
++    microSince=turn;microChoice++;microEntered.fill(false);
++   }
++  }
++  if(micro.gate<0)return base;
++  const auto isBoundary=[&](int p){return find(micro.boundary.begin(),micro.boundary.end(),p)!=micro.boundary.end();};
++  int todo=0;
++  for(int p:micro.boundary)todo+=p!=micro.gate&&!wall[p]&&!soonWall[p];
++  vector<int> weights;
++  for(auto p:pets)if(microHas(p.p))weights.push_back(p.t);
++  for(int h:humans)if(microHas(h))return base;
++  if(!todo){
++   int p=micro.gate;
++   if(weights.empty()||block[p]||soonMove[p]||soonWall[p])return base;
++   for(int i:idle)if(dir(humans[i],p)>=0){
++    // Every boundary cell except the proposed gate is already sealed or
++    // already in the base command; no other player is inside the pen.
++    base[i]=BUILD[dir(humans[i],p)];
++    microActions++;microConfirm=p;microConfirmKinds=move(weights);
++    micro={};return base;
++   }
++   return base;
++  }
++  int best=-1000,who=-1,where=-1,want=-1;
++  for(int p:micro.boundary)if(p!=micro.gate&&!wall[p]&&!soonWall[p]){
++   for(int q:nb[p])if(q>=0&&!wall[q]&&!soonWall[q]&&!microHas(q)&&!isBoundary(q)){
++    int support=0;
++    for(int w:nb[q])if(w>=0&&w!=micro.gate&&!wall[w]&&isBoundary(w))support++;
++    for(int i:idle){
++     int d=workers[i].bfs.distance(q);
++     if(d<0||d>5||(d==0&&(block[p]||soonMove[p])))continue;
++     int v=-7*d+2*support-4*block[p];
++     if(v>best)best=v,who=i,where=q,want=p;
++    }
++   }
++  }
++  if(who<0)return base;
++  int h=humans[who];
++  if(h==where){base[who]=BUILD[dir(h,want)];microActions++;}
++  else {
++   int p=workers[who].bfs.first_step(where);
++   if(p>=0&&!soonWall[p]&&!microHas(p)){
++    base[who]=MOVE[dir(h,p)];microActions++;
++   }
++  }
++  return base;
++ }
+  string terminal(string baseline){
+   if(!endSearch||turn!=299)return baseline;
+   const int hm=humans.size(), nn=pets.size();
+@@ -1604,6 +1727,15 @@ struct Game {
+   return ret;
+  }
+  bool advance(){
++  if(microConfirm>=0){
++   bool closed=false;
++   for(int i=0;i<(int)humans.size();i++)if(act[i]>='a'){
++    int d=find(BUILD,BUILD+4,act[i])-BUILD;
++    closed|=nb[humans[i]][d]==microConfirm;
++   }
++   if(closed){microClosed++;for(int k:microConfirmKinds)microCaught[k]++;}
++   microConfirm=-1;microConfirmKinds.clear();
++  }
+   for(int i=0;i<(int)humans.size();i++) if(act[i]!='.'){
+    if(islower(act[i]))wall[nb[humans[i]][find(BUILD,BUILD+4,act[i])-BUILD]]=1;
+    else humans[i]=nb[humans[i]][find(MOVE,MOVE+4,act[i])-MOVE];
+@@ -1611,7 +1743,14 @@ struct Game {
+   string m;
+   for(auto &p:pets){
+    if(!(cin>>m))return false;
+-   for(char x:m)if(x!='.')p.p=nb[p.p][find(MOVE,MOVE+4,x)-MOVE];
++   for(char x:m)if(x!='.'){
++    int before=p.p;
++    p.p=nb[p.p][find(MOVE,MOVE+4,x)-MOVE];
++    int j=&p-pets.data();
++    if(micro.gate>=0&&before==micro.gate&&microHas(p.p)&&!microEntered[j]){
++      microEntered[j]=true;microEntry[p.t]++;
++    }
++   }
+   }
+   return true;
+  }
+@@ -1621,13 +1760,19 @@ int main(int argc,char**argv){
+  ios::sync_with_stdio(false);cin.tie(nullptr);
+  Game g;g.init(argc,argv);
+  for(;g.turn<300;g.turn++){
+-  g.act=g.terminal(g.tacticalGate(g.repair(g.plan())));
++  g.act=g.terminal(g.tacticalGate(g.repair(g.microTry(g.repair(g.plan())))));
+   cout<<g.act<<'\n'<<flush;
+   if(!g.advance())break;
+  }
+ #ifdef GATE_DIAG
+  cerr<<"gate "<<g.gateSearch<<" "<<g.gatePrep<<" "<<g.gateApplied<<"\n";
+ #endif
++#ifdef CAP_MICRO_DIAG
++ cerr<<"micro "<<g.microChoice<<' '<<g.microActions<<' '<<g.microClosed;
++ for(int i=1;i<=5;i++)cerr<<' '<<g.microEntry[i];
++ for(int i=1;i<=5;i++)cerr<<' '<<g.microCaught[i];
++ cerr<<"\n";
++#endif
+ #ifdef HAB_DIAG
+  array<int,6> active{}; g.workers[0].bfs.run(g.humans[0],[&](int p){return !g.wall[p];});
+  int a=0;for(int p=0;p<V;p++)a+=g.workers[0].bfs.distance(p)>=0;
