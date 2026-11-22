@@ -40,3 +40,29 @@ not answered by this short-window upper-bound diagnostic.
 `python bridge.py HARNESS TESTER V4 DEV30 V4_PAIRED_DEV.csv
 friends.jsonl supply.jsonl summary.json`. Keep official reference
 cohort and parser helpers unchanged.
+
+## Strict proactive placement supply
+
+Independently instrumented the exact `usedPeople` reservation immediately
+before ordinary idle parking on v4. The actual observed worker is currently
+outside and already on that tube's entrance stance, is not assigned a pair
+(including holds) or brace job, other source-lane worker already present and
+destination lane presently nominally empty, both tube ends physically open,
+all four body + two gate cells animal/human-free, and destination has
+at least one other genuinely prepared open stance within three cells.
+
+All30 official action hashes/scores reproduce. In t101–152 actual full
+scheduling there are755 actor candidates in18 cases. Requiring every
+planned brace row already completely installed gives561 actor candidates
+at276 unique case-turns in9 cases. 182 of those561 would replace the
+idle-parking move (not an ordinary paid pair or brace). An additional
+hindsight screen preserving future ordinary builds, gate route open and
+donor-lane support throughout all seven crossing moves leaves537 candidates
+in the same9 cases, including166 replaceable idle parking moves.
+No live actions or future-assisted eligibility. This documents supply for a
+possible proactive lane relocation, distinct from short-window chasing.
+
+Generate `python instrument_idle.py V4.cpp audit.cpp`, compile no-args
+`g++ -std=c++23 audit.cpp -o audit`, then
+`python check_idle.py HARNESS THIS_DIRECTORY TESTER audit DEV30
+V4_PAIRED_DEV.csv idle.jsonl idle-summary.json`.

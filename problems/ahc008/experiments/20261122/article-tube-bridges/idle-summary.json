@@ -1,0 +1,27 @@
+{
+  "verified": 30,
+  "activated_full_scheduling": {
+    "candidates": 755,
+    "cases": 18,
+    "independent_case_turns": 406,
+    "parking": 264
+  },
+  "all_braces_ready": {
+    "candidates": 561,
+    "cases": 9,
+    "independent_case_turns": 276,
+    "parking": 182
+  },
+  "hindsight_preserve_all": {
+    "candidates": 723,
+    "cases": 18,
+    "independent_case_turns": 393,
+    "parking": 245
+  },
+  "hindsight_preserve_all_fully_ready": {
+    "candidates": 537,
+    "cases": 9,
+    "independent_case_turns": 267,
+    "parking": 166
+  }
+}
