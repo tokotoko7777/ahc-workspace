@@ -1,0 +1,30 @@
+0000.txt Counter({'prepared_cells': 35, 'safe_prep_cells': 35}) 0
+0001.txt Counter({'prepared_cells': 20, 'safe_prep_cells': 14}) 0
+0002.txt Counter({'prepared_cells': 58, 'safe_prep_cells': 58}) 0
+0003.txt Counter({'prepared_cells': 0}) 0
+0004.txt Counter({'prepared_cells': 17, 'safe_prep_cells': 16}) 0
+0005.txt Counter({'prepared_cells': 63, 'safe_prep_cells': 63}) 0
+0006.txt Counter({'prepared_cells': 23, 'safe_prep_cells': 23}) 0
+0007.txt Counter({'prepared_cells': 12, 'safe_prep_cells': 2}) 0
+0008.txt Counter({'prepared_cells': 4, 'safe_prep_cells': 4}) 0
+0009.txt Counter({'prepared_cells': 0}) 0
+0010.txt Counter({'prepared_cells': 2, 'safe_prep_cells': 2}) 0
+0011.txt Counter({'prepared_cells': 0}) 0
+0012.txt Counter({'prepared_cells': 0}) 0
+0013.txt Counter({'prepared_cells': 0}) 0
+0014.txt Counter({'prepared_cells': 28, 'safe_prep_cells': 28}) 0
+0015.txt Counter({'prepared_cells': 7, 'safe_prep_cells': 6}) 0
+0016.txt Counter({'prepared_cells': 14, 'safe_prep_cells': 13}) 0
+0017.txt Counter({'prepared_cells': 8, 'safe_prep_cells': 8}) 0
+0018.txt Counter({'prepared_cells': 11, 'safe_prep_cells': 11}) 0
+0019.txt Counter({'prepared_cells': 2, 'safe_prep_cells': 2}) 0
+0020.txt Counter({'prepared_cells': 8, 'safe_prep_cells': 8}) 0
+0021.txt Counter({'prepared_cells': 0}) 0
+0022.txt Counter({'prepared_cells': 26, 'safe_prep_cells': 26}) 0
+0023.txt Counter({'prepared_cells': 12, 'safe_prep_cells': 2}) 0
+0024.txt Counter({'prepared_cells': 0}) 0
+0025.txt Counter({'prepared_cells': 0}) 0
+0026.txt Counter({'prepared_cells': 15}) 0
+0027.txt Counter({'prepared_cells': 5}) 0
+0028.txt Counter({'prepared_cells': 20, 'safe_prep_cells': 20}) 0
+0029.txt Counter({'prepared_cells': 6, 'safe_prep_cells': 6}) 0
