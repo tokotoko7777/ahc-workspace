@@ -62,3 +62,19 @@ for either layout; mean 560.49→585.78, median 560→585. Equal physical
 20-gate draws instead favor stock (mean 599.55→583.71, median 600→584).
 These are different physical capacities and neither measures actual
 animals or score. No live fixture promoted.
+
+## Eligible stock cohort check (ledger only)
+
+Filter pinned faithful ledgers by stock NN map2 and M>=8. Practice has
+13/13 full boards with mean actual per-human connected floor 544.46;
+independent has 18/18, 543.56. Of 548 distinct stock catches across the
+31 boards, 520 were already in physical 3–4-cell bodies (220/230
+practice, 300/318 independent). At recorded state indices 161–225,
+113/120 were already in 3–4 cells (47 practice + 66 independent small).
+Scope-specific baseline is therefore already both full and compact here;
+static uniform room packing is not evidence of a live gain. Even
+hypothetically resolving both practice residuals with unchanged human
+areas first, the remaining score gap corresponds to ~1,070 cells across
+practice, requiring >82 additional mean retained cells per eligible
+practice board if map2/M>=8 changes alone carry the rest. The candidate
+remains closed given the +40 actual dry construction deficit.
