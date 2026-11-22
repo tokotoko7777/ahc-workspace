@@ -26,7 +26,7 @@
 | [AHC005](https://atcoder.jp/contests/ahc005/tasks/ahc005_a) | 配布100件で目標達成。13:00切替に備え最良版凍結 | 配布目標 **22,318,770**。本番値の出典: [AtCoder提供データ](https://huggingface.co/datasets/SakanaAI/ALE-Bench/blob/main/ahc005.zip) | 2スタート版 **23,020,218**（目標+701,448、基準+96,961）、全件完全可視・帰着 | 配布seed 0–99、公式・独立一致、最長2.812822秒。本番100件とは別。追加未使用100件は22,122,939 | [最良ソース・比較・再現](https://github.com/tokotoko7777/ahc-workspace/tree/6d9d59bf76cb921bba15c12e19ec6f6188bdb401/problems/ahc005/experiments/official100) |
 | [AHC006](https://atcoder.jp/contests/ahc006/tasks/ahc006_a) | 公式配布100件で目標達成、未使用100件で検証 | 配布目標 **2,220,425点超え**（[本番1位の参照値](https://huggingface.co/datasets/SakanaAI/ALE-Bench/blob/main/ahc006.zip)） | 幾何候補＋厳密な前計算高速化 **2,238,273**（目標+17,848、基準+159,865） | 配布seed 0–99、合法・公式独立一致100件、最長1.856995秒。本番とは別。未使用別100件2,226,481（比較版2,230,236） | [最良コード・ケース別・再現](https://github.com/tokotoko7777/ahc-workspace/tree/cbebfc73c5260374eb0af7c76fe6f10e0754c32a/problems/ahc006/experiments/official100)。配布最良は研究枝に保存。 |
 | [AHC007](https://atcoder.jp/contests/ahc007/tasks/ahc007_a) | **本番同一150件で首位超え**・[PR #4](https://github.com/tokotoko7777/ahc-workspace/pull/4) main統合済 | **14,241,733,941** 点（[AtCoder提供の順位データ](https://huggingface.co/datasets/SakanaAI/ALE-Bench/blob/main/ahc007.zip)） | 符号付きボトルネック推定 **14,248,878,730** (+7,144,789)。公式配布150件 **14,255,819,331** (基準+71,513,945) | [本番同一ケース根拠](https://openreview.net/pdf?id=JCjGvbsOmQ)。本番150件を凍結版で盲検し、対話tester・vis・独立採点一致、最長0.308726秒。未調整別150件も14,249,050,741 | [main上の最良コード・再現](https://github.com/tokotoko7777/ahc-workspace/tree/9fb81532ac1f2092309b1e2887756e6c590c9c4d/problems/ahc007)・[研究枝](https://github.com/tokotoko7777/ahc-workspace/tree/a545fe5aa083eac8a6c6bf4533147df1840a8596/problems/ahc007/experiments/focus)。次の仮説: 安い辺の買いすぎと棄却コストの差を、疎な代替カットに限り厳密化。 |
-| [AHC008](https://atcoder.jp/contests/ahc008/tasks/ahc008_a) | ローカル改善・本番未判定 | **121,980,050,607** 点（[AtCoder 提供の順位データ](https://huggingface.co/datasets/SakanaAI/ALE-Bench/blob/main/ahc008.zip)） | 研究標準v7：公式配布100 **2,655,369,894点・36件全頭隔離**、別seed100 **2,688,102,365点・44件**。目標6,263,333,336点は未達 | 公式対話テスタ・独立再生、配布／生成と本番は別条件、3秒 | [現行コード](https://github.com/tokotoko7777/ahc-workspace/blob/b7bb3d1bcae4c2a22dab85ad6d061841569370e8/problems/ahc008/experiments/20261122/article-capture/solve-v7.cpp)・`codex/ahc008-article-capture` |
+| [AHC008](https://atcoder.jp/contests/ahc008/tasks/ahc008_a) | ローカル改善・本番未判定 | **121,980,050,607** 点（[AtCoder 提供の順位データ](https://huggingface.co/datasets/SakanaAI/ALE-Bench/blob/main/ahc008.zip)） | 新研究標準v24：公式配布100 **3,199,806,134点・47件全頭隔離**、別seed100 **3,285,615,612点・44件**。目標6,263,333,336点は未達 | 公式対話テスタ・独立再生、配布／生成と本番は別条件、3秒 | [現行C++23と再現](https://github.com/tokotoko7777/ahc-workspace/blob/abafd80edf423db5abea3c5725b265cb092233c8/problems/ahc008/experiments/20261122/article-capture/v24-source-release/README.md)・`codex/ahc008-article-capture` |
 | [AHC009](https://atcoder.jp/contests/ahc009/tasks/ahc009_a) | 着手・未判定 | **7,547,834,181** 点（[AtCoder 提供の順位データ](https://huggingface.co/datasets/SakanaAI/ALE-Bench/blob/main/ahc009.zip)） | 確率 DP 版: 公開 100 件 7,214,943,739 | 本番との同一性は未確認 | ローカル保存・公開確認待ち |
 | [AHC010](https://atcoder.jp/contests/ahc010/tasks/ahc010_a) | ローカル改善・本番未判定 | **20,218,968** 点（[AtCoder 提供の順位データ](https://huggingface.co/datasets/SakanaAI/ALE-Bench/blob/main/ahc010.zip)） | 協調回転版: 未調整 10 件平均 56,482 | 本番 100 件、2 秒。配布入力との同一性未確認 | [問題別ブランチ](https://github.com/tokotoko7777/ahc-workspace/tree/8e99892f7dc12317ba365750a15a2a7c072b3731) |
 | [AHC011](https://atcoder.jp/contests/ahc011/tasks/ahc011_a) | ローカル改善・本番未判定 | **2,691,447,336** 点（[AtCoder 提供の順位データ](https://huggingface.co/datasets/SakanaAI/ALE-Bench/blob/main/ahc011.zip)） | 局所回転追加: 未調整 15 件 6,060,235 | 本番公開 3,000 シード、3 秒 | ローカル保存・公開確認待ち |
@@ -1330,3 +1330,17 @@ S字でも犬・猫を含め4マスに合法に隔離できた。各S字系列�
 | 他の大きさでの捕獲 | 499→0頭 | 557→0頭 |
 
 全400実行公式・独立再生一致で、全200のv7対照も凍結済みの行動と得点に一致。v7を研究標準に維持し、mainは変更しない。開発30で統合版の盤面だけv7に戻すと早期4マス捕獲35→103、全頭隔離0→3。さらに従来の終盤処理だけ戻すと3→13（v7は14）で、前半の行動が一致するため終盤の寄与も分離できた。別シードも含めた確認中。記事の実装そのものとの比較ではなく、この再実装についての計測。
+
+### AHC008 v24：施工を優先し、持ち場の割当を毎ターン更新
+
+ユーザーが許可したTERRYさんの提出を静的に確認し、原文の転載・実行はせずに[独立実装の試験記録](https://github.com/tokotoko7777/ahc-workspace/blob/b00f17ea845f49576353b9241e06afd1b7da534e/problems/ahc008/experiments/20261122/article-capture/terry-reference-review/REVIEW.md)を保存。v7の少人数向け2列／通常3列の盤面と従来の終盤補助を残す。担当の柵が一時的に塞がれても捨てず、施工を捕獲予定より先に割り当てる。施工中の残りと最寄り通路マスへの移動を見込み、毎ターン全員の持ち場を割り当て直す。最初の統合版とは別の[単一ファイル・テスト台帳](https://github.com/tokotoko7777/ahc-workspace/tree/abafd80edf423db5abea3c5725b265cb092233c8/problems/ahc008/experiments/20261122/article-capture/v24-source-release)。
+
+| 旧v7→v24 | 公式配布100 | 独立生成100 |
+|---|---:|---:|
+| 得点 | 2,655,369,894→3,199,806,134 | 2,688,102,365→3,285,615,612 |
+| 全頭隔離 | 36→47 | 44→44 |
+| 全頭隔離かつ人平均≥300マス | 25→33 | 26→35 |
+| 100ターンまで／全ターンの4マス捕獲 | 433→505／822→921 | 456→506／837→954 |
+| 最終残留動物 | 165→117 | 139→148 |
+
+400実行は公式合法・独立再生一致、旧v7の入力・行動・得点を全200件照合。新標準のテスタ込み最大は1.073秒。別seedの全頭数が同点、残留は9頭増えたため終盤の改善余地あり。公式配布と独立入力で得点と広い領域を伴う全頭件数が改善したため、v24を研究標準に採用。歴史的1位は本番条件で未判定、mainは変更なし。次は配置負担を増やさない片口4マスや、終盤の最後の1〜2頭を早く隔離する差分を測る。
