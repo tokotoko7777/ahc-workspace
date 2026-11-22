@@ -152,3 +152,9 @@
 |---|---|---|---|---|
 | AHC008 | 順序付きの区間分割DP | 完了は可能でも既知の割当より遅い区間を全走査した | 二種の実行可能な分割を作り、上界を厳密に超える場合だけ打ち切る。同値は従来どおり処理 | [分担DPの上界追加案](https://github.com/tokotoko7777/ahc-workspace/blob/ce94f08fff8196f4485f0795237af69e81aa473a/problems/ahc008/experiments/20261122/article-capture/terry-split-bound/REUSE_PROPOSAL.md)。600個の分担・向き照合。問題側に採用（配布／別100の全体CPU −9.25%／−6.22%）、共通API未変更。 |
 | AHC008 | 時間制限付きロールアウト | 同じ初期状態で決定論的な初手を、全試行で計算した | 行動のみを最初の必要時に計算。乱数付きの遷移・2手目以降には再利用しない | [ロールアウト共通初手案](https://github.com/tokotoko7777/ahc-workspace/blob/ce94f08fff8196f4485f0795237af69e81aa473a/problems/ahc008/experiments/20261122/article-capture/terry-first-chase-reuse/REUSE_PROPOSAL.md)。問題側に採用、通常時間の全200対で全行動・スコア一致。副作用のある決定器は別検証が必要。 |
+
+### AHC008 設営途中に消える作業位置
+
+| 問題 | 部品 | 不便だった点 | 実際の回避策 | 改善案・対応状況 |
+|---|---|---|---|---|
+| AHC008 | 壁の設営計画、固定順序のタスク列 | 新しい柵を既存の列に足すと、その柵自体を後工程の足場にする既存タスクが5件失われた | 対象壁・担当・順序は維持し、予定柵と扉をすべて閉じても使える隣接足場だけへ移した | [作業位置を事前に移す提案](https://github.com/tokotoko7777/ahc-workspace/blob/67a3661cda7615fa16459629d29866401f76fe61/problems/ahc008/experiments/20261122/article-capture/terry-single-runs/REUSE_PROPOSAL.md)。旧失敗5件を含む35件の構築テスト合格。新盤面は別途得点で不採用。共通APIに未実装。 |
