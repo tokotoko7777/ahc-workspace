@@ -37,3 +37,32 @@ Unit for helper: supply v6 header (v1 + v4 + v6 header patches), build
 random subset oracles and real 3-wall/2-person shortest stance routes;
 independent Python additionally verifies every logged dispatch's
 distinct jobs, stance adjacency/BFS, static blockers and actual pen.
+
+## Exact passive conditional follow-up
+
+Estimated only the 14 previously enumerated fixed wall schedules, using
+verified t160 snapshots from nine official baseline replays. No original
+future moves enter the model, and only official independent uniform C/P/R
+substeps are used. At every scheduled human-build phase separately kill
+animal states in the target or orthogonal vicinity of any legal requirement,
+insert scheduled walls before animal substeps, and at final atomic time
+require selected animal inside the genuine target component. Other
+passive animals' legal-survival factors multiply because the fixed wall
+schedule gives independent transitions. Ignore dog/cat block probability,
+additional unsimulated secondary walls and any live adaptive timing.
+This gives an upper bound for the specified simplified fixed plan with
+directed blockers reintroduced, not a bound on another adaptive policy
+or on actual judge RNG. Also compare target-only occupation at the same
+finish horizon without adding any scheduled wall.
+
+Only one of 14 increases target-in-pen-and-own-legality probability vs
+untouched target occupation; mean .0990 vs .2468. Optimistic expected
+success across nine cases is .440 when allowed the best pre-enumerated
+shape per case; best individual .1676 and next .1323. Three cases exactly
+zero. Thus even incorporating the causal effects of this schedule on
+passive walks offers little. No live variant. Same no-activation
+reconstruction and general optimizer remain archived above.
+
+Run `passive_exact.py HARNESS TESTER V4 DEV30 V4_REF.csv
+two-route-dev30.jsonl result.jsonl summary.json` with NumPy available.
+This includes a simple legal-state-elimination/isolated-stay fixture.
