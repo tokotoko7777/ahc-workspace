@@ -1,0 +1,183 @@
+--- integrated.cpp
++++ integrated.cpp
+@@ -1868,6 +1868,148 @@
+   continueBridge(used,moveTo);
+  }
+ 
++ struct WaveTask{int wall,stance;};
++ struct WaveSide{int actor=-1,exit=-1,cost=0;vector<WaveTask> work;};
++ struct WaveBank{int bank=-1,first=-1;array<WaveSide,2> side;bool active=false;};
++ vector<WaveBank> waveSelected;
++ bitset<V> waveFoot;
++ int waveDeadline=0,waveNominal=-1;
++ vector<array<int,6>> waveLog;
++ vector<WaveTask> taskSide(int bank,int first,int side,int order)const{
++  vector<WaveTask> out;
++  const int a=bankShift+7*bank;
++  for(int offset:{order?4:0,order?0:4,2}){
++   const int r=first+offset*2;
++   for(int col: (side?array<int,2>{a+5,a+4}:array<int,2>{a+2,a+3})){
++    int q=bp(r,col);
++    for(int rr:{r-1,r+1})out.push_back({bp(rr,col),q});
++   }
++  }
++  return out;
++ }
++ void chooseWaves(){
++  for(int p:bankWalls)waveFoot[p]=true;
++  const int m=humans.size(),S=1<<m;
++  if(2*bankN>m)return;
++  struct Option{WaveBank bank;int mask,mx,sum;};
++  vector<vector<Option>> choices(bankN);
++  unordered_map<int,BankPath> nav;
++  array<int,V> exempt;exempt.fill(-1);
++  const auto get=[&](int x)->const BankPath&{
++   auto [i,add]=nav.try_emplace(x);
++   if(add)i->second.run(x,waveFoot,exempt);
++   return i->second;
++  };
++  for(int b=0;b<bankN;b++){
++   vector<int> rr;
++   for(auto &x:banks)if(x.b==b)rr.push_back(x.r);
++   for(int j=0;j+4<(int)rr.size();j++){
++    int first=rr[j],a=bankShift+7*b;
++    array<vector<WaveSide>,2> sides;
++    for(int r=0;r<2;r++){
++     int exit=bp(first+4,a+7*r);
++     for(int i=0;i<m;i++){
++      WaveSide best;best.cost=999;
++      for(int order=0;order<2;order++){
++       auto work=taskSide(b,first,r,order);
++       int from=humans[i],time=0;
++       for(auto x:work){
++        int d=get(from).d[x.stance];
++        if(d<0){time=999;break;}
++        time+=d+1;from=x.stance;
++       }
++       int last=get(from).d[exit];
++       if(last>=0&&time+last<best.cost)best={i,exit,time+last,std::move(work)};
++      }
++      sides[r].push_back(std::move(best));
++     }
++    }
++    for(auto &l:sides[0])for(auto &r:sides[1])if(l.actor>=0&&r.actor>=0&&l.actor!=r.actor){
++     WaveBank x{b,first,{l,r},true};
++     choices[b].push_back({std::move(x),(1<<l.actor)|(1<<r.actor),max(l.cost,r.cost),l.cost+r.cost});
++    }
++   }
++  }
++  vector<int> dp(S,999),nxt(S);
++  dp[0]=0;
++  for(int b=0;b<bankN;b++){
++   fill(nxt.begin(),nxt.end(),999);
++   for(int s=0;s<S;s++)if(dp[s]<999)for(auto &x:choices[b])if(!(s&x.mask))
++    nxt[s|x.mask]=min(nxt[s|x.mask],max(dp[s],x.mx));
++   dp.swap(nxt);
++  }
++  const int best=*min_element(dp.begin(),dp.end());
++  if(best>=999)return;
++  waveNominal=best;waveDeadline=min(75,best+12);
++  dp.assign(S,9999);dp[0]=0;
++  vector<vector<pair<int,int>>> back(bankN,vector<pair<int,int>>(S,{-1,-1}));
++  for(int b=0;b<bankN;b++){
++   nxt.assign(S,9999);
++   for(int s=0;s<S;s++)if(dp[s]<9999)for(int j=0;j<(int)choices[b].size();j++){
++    auto &x=choices[b][j];
++    if(s&x.mask||x.mx>best)continue;
++    const int t=s|x.mask,c=dp[s]+x.sum;
++    if(c<nxt[t])nxt[t]=c,back[b][t]={s,j};
++   }
++   dp.swap(nxt);
++  }
++  int at=min_element(dp.begin(),dp.end())-dp.begin();
++  waveSelected.resize(bankN);
++  for(int b=bankN-1;b>=0;b--){
++   auto [s,j]=back[b][at];
++   assert(s>=0&&j>=0);
++   waveSelected[b]=std::move(choices[b][j].bank);at=s;
++  }
++  for(const auto& z:waveSelected)
++   waveLog.push_back({0,0,z.bank,z.first,z.side[0].actor,z.side[1].actor});
++ }
++ void executeWaves(bitset<V>& used,bitset<V>& build,bitset<V>& moveTo,bitset<V>& reserved){
++  if(!turn)chooseWaves();
++  if(waveSelected.empty())return;
++  const auto qty=[&](const WaveBank& z){
++   int n=0;
++   for(auto &s:z.side)for(auto x:s.work)n+=wall[x.wall];
++   return n;
++  };
++  array<int,V> exempt;exempt.fill(-1);
++  bitset<V> avoid=waveFoot|build;
++  for(int p=0;p<V;p++)if(wall[p])avoid[p]=true;
++  for(auto &z:waveSelected)if(z.active){
++   int built=qty(z);
++   bool seated=all_of(z.side.begin(),z.side.end(),[&](auto& s){return humans[s.actor]==s.exit;});
++   if(built==24&&seated){
++    z.active=false;waveLog.push_back({turn,1,z.bank,built,z.side[0].exit,z.side[1].exit});continue;
++   }
++   if(turn>=waveDeadline){
++    z.active=false;waveLog.push_back({turn,2,z.bank,built,-1,-1});continue;
++   }
++   for(auto &s:z.side)for(auto x:s.work)if(!wall[x.wall])reserved[x.wall]=true;
++   vector<array<int,3>> out;
++   for(auto &s:z.side)if(!used[s.actor]){
++    int i=s.actor,h=humans[i];
++    BankPath nav;nav.run(h,avoid,exempt);
++    int target=-1,stand=-1;
++    for(int allow=0;allow<2&&stand<0;allow++)for(auto x:s.work)
++     if(!wall[x.wall]&&!build[x.wall]&&nav.d[x.stance]>=0&&(allow||!block[x.wall])&&
++       !(h==x.stance&&moveTo[x.wall])){
++      stand=x.stance;target=x.wall;break;
++     }
++    if(stand<0){
++     if(nav.d[s.exit]<0)continue;
++     stand=s.exit;
++    }
++    used[i]=true;
++    if(stand==h&&target>=0&&!block[target]&&!moveTo[target]&&!build[target]){
++     act[i]=BUILD[dir(h,target)];build[target]=true;
++    }
++    if(stand!=h){
++     int p=nav.step[stand];
++     if(p>=0&&!build[p])act[i]=MOVE[dir(h,p)],moveTo[p]=true;
++    }
++   }
++  }
++ }
++
+  string integratedBankPlan(){
+   prep();
+   const int m=humans.size(),n=banks.size();
+@@ -1932,6 +2074,8 @@
+     integratedLocks[turn]+=count[j.tube];
+    }
+   }
++  bitset<V> plannedWaves;
++  executeWaves(usedPeople,build,moveTo,plannedWaves);
+   const bool scheduled=turn>=35&&*max_element(local.begin(),local.end())>=5;
+   const bool partial=3*total<2*n && turn<101;
+   array<BankPath,10> paths;
+@@ -2011,7 +2155,7 @@
+   // Untasked workers build local brace frontiers without disrupting a paired hold.
+   if(turn<bankStaffTurn+32){
+    vector<tuple<int,int,int,int>> jobs;
+-   for(int p:bankWalls)if(!wall[p]){
++   for(int p:bankWalls)if(!wall[p]&&!plannedWaves[p]){
+     int progress=0,axis=bankRot?p/S:p%S,r=bankRot?p%S:p/S,start=axis-((axis-bankShift-2)%7);
+     for(int k=0;k<4;k++)if(start+k>=0&&start+k<S)progress+=wall[bp(r,start+k)];
+     for(int i=0;i<m;i++)if(!usedPeople[i])for(int st:nb[p])if(st>=0&&!wall[st]&&!build[st]){
+@@ -2669,6 +2813,13 @@
+   for(const auto& e:g.bridgeReport)f<<e.turn<<" "<<e.kind<<" "<<e.worker<<" "<<e.tube<<" "<<e.from
+      <<" "<<e.to<<" "<<e.supply<<'\n';
+  }
++ if(const char* p=getenv("AHC008_WAVES_LOG")){
++  ofstream f(p);f<<g.waveNominal<<" "<<g.waveDeadline<<'\n';
++  for(auto row:g.waveLog){
++   for(int q:row)f<<q<<" ";
++   f<<'\n';
++  }
++ }
+  if(const char* p=getenv("AHC008_GLOBAL_CLEAR_LOG")){
+   ofstream f(p);f<<stopTurn<<'\n';
+  }
