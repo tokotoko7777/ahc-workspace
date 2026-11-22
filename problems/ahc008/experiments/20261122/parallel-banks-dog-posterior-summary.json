@@ -1,0 +1,223 @@
+{
+  "verified_cases": 30,
+  "all_step": {
+    "rows": 10903,
+    "cases": 26,
+    "positives": null,
+    "metrics": {
+      "post": 0.4302342594026569,
+      "reset": 0.9908962779720071,
+      "heading": 0.8283249723562811
+    },
+    "cases_post_better": {
+      "reset": 26,
+      "heading": 26
+    },
+    "cases_post_worse": {
+      "reset": 0,
+      "heading": 0
+    }
+  },
+  "bank_step": {
+    "rows": 1736,
+    "cases": 20,
+    "positives": null,
+    "metrics": {
+      "post": 0.3831444520433167,
+      "reset": 1.0398511824057912,
+      "heading": 0.8265490717760932
+    },
+    "cases_post_better": {
+      "reset": 20,
+      "heading": 20
+    },
+    "cases_post_worse": {
+      "reset": 0,
+      "heading": 0
+    }
+  },
+  "all_tube": {
+    "safe1": {
+      "rows": 994,
+      "cases": 26,
+      "positives": 210,
+      "metrics": {
+        "post": 0.10478085954491699,
+        "reset": 0.13459219817202453,
+        "heading": 0.12273630665403064
+      },
+      "cases_post_better": {
+        "reset": 25,
+        "heading": 23
+      },
+      "cases_post_worse": {
+        "reset": 1,
+        "heading": 3
+      }
+    },
+    "safe3": {
+      "rows": 994,
+      "cases": 26,
+      "positives": 335,
+      "metrics": {
+        "post": 0.1088848360786341,
+        "reset": 0.19136929040256165,
+        "heading": 0.16002390979009326
+      },
+      "cases_post_better": {
+        "reset": 25,
+        "heading": 24
+      },
+      "cases_post_worse": {
+        "reset": 1,
+        "heading": 2
+      }
+    },
+    "legal1": {
+      "rows": 994,
+      "cases": 26,
+      "positives": 107,
+      "metrics": {
+        "post": 0.09717093332412727,
+        "reset": 0.10705075906116719,
+        "heading": 0.10084821016242601
+      },
+      "cases_post_better": {
+        "reset": 20,
+        "heading": 18
+      },
+      "cases_post_worse": {
+        "reset": 6,
+        "heading": 8
+      }
+    },
+    "legal3": {
+      "rows": 994,
+      "cases": 26,
+      "positives": 226,
+      "metrics": {
+        "post": 0.1314255401763042,
+        "reset": 0.17546966802751135,
+        "heading": 0.15310196716396668
+      },
+      "cases_post_better": {
+        "reset": 22,
+        "heading": 20
+      },
+      "cases_post_worse": {
+        "reset": 4,
+        "heading": 6
+      }
+    },
+    "staffed3": {
+      "rows": 994,
+      "cases": 26,
+      "positives": 139,
+      "metrics": {
+        "post": 0.16054104945562633,
+        "reset": 0.1556169224422085,
+        "heading": 0.14429506806979567
+      },
+      "cases_post_better": {
+        "reset": 11,
+        "heading": 9
+      },
+      "cases_post_worse": {
+        "reset": 15,
+        "heading": 17
+      }
+    }
+  },
+  "post101_tube": {
+    "safe1": {
+      "rows": 415,
+      "cases": 20,
+      "positives": 94,
+      "metrics": {
+        "post": 0.11264204356358322,
+        "reset": 0.13742925998210614,
+        "heading": 0.12722323099038255
+      },
+      "cases_post_better": {
+        "reset": 15,
+        "heading": 16
+      },
+      "cases_post_worse": {
+        "reset": 4,
+        "heading": 4
+      }
+    },
+    "safe3": {
+      "rows": 415,
+      "cases": 20,
+      "positives": 151,
+      "metrics": {
+        "post": 0.11740267960466681,
+        "reset": 0.19000399471487586,
+        "heading": 0.16073487050959304
+      },
+      "cases_post_better": {
+        "reset": 18,
+        "heading": 16
+      },
+      "cases_post_worse": {
+        "reset": 2,
+        "heading": 4
+      }
+    },
+    "legal1": {
+      "rows": 415,
+      "cases": 20,
+      "positives": 49,
+      "metrics": {
+        "post": 0.10782015942734707,
+        "reset": 0.11894532423913266,
+        "heading": 0.11194929613139121
+      },
+      "cases_post_better": {
+        "reset": 13,
+        "heading": 13
+      },
+      "cases_post_worse": {
+        "reset": 6,
+        "heading": 7
+      }
+    },
+    "legal3": {
+      "rows": 415,
+      "cases": 20,
+      "positives": 103,
+      "metrics": {
+        "post": 0.14232573999230055,
+        "reset": 0.18334227440320838,
+        "heading": 0.16125243011800988
+      },
+      "cases_post_better": {
+        "reset": 16,
+        "heading": 15
+      },
+      "cases_post_worse": {
+        "reset": 4,
+        "heading": 5
+      }
+    },
+    "staffed3": {
+      "rows": 415,
+      "cases": 20,
+      "positives": 67,
+      "metrics": {
+        "post": 0.17231221648446102,
+        "reset": 0.16591235893278913,
+        "heading": 0.15482168128972074
+      },
+      "cases_post_better": {
+        "reset": 11,
+        "heading": 9
+      },
+      "cases_post_worse": {
+        "reset": 9,
+        "heading": 11
+      }
+    }
+  }
+}
