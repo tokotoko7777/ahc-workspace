@@ -1,0 +1,64 @@
+{
+  "legal": {
+    "tube_turns": 688,
+    "cases": 25,
+    "unique_missed": 33,
+    "cases_missed": 16,
+    "missed_by_species": {
+      "5": 13,
+      "2": 4,
+      "3": 7,
+      "1": 3,
+      "4": 6
+    },
+    "unique_normally_caught": 87,
+    "already_normally_isolated_events": 4,
+    "already_atomic_events": 2
+  },
+  "staffed": {
+    "tube_turns": 4,
+    "cases": 4,
+    "unique_missed": 1,
+    "cases_missed": 1,
+    "missed_by_species": {
+      "4": 1
+    },
+    "unique_normally_caught": 4,
+    "already_normally_isolated_events": 2,
+    "already_atomic_events": 2
+  },
+  "preserve_walls": {
+    "tube_turns": 4,
+    "cases": 4,
+    "unique_missed": 1,
+    "cases_missed": 1,
+    "missed_by_species": {
+      "4": 1
+    },
+    "unique_normally_caught": 4,
+    "already_normally_isolated_events": 2,
+    "already_atomic_events": 2
+  },
+  "connected": {
+    "tube_turns": 4,
+    "cases": 4,
+    "unique_missed": 1,
+    "cases_missed": 1,
+    "missed_by_species": {
+      "4": 1
+    },
+    "unique_normally_caught": 4,
+    "already_normally_isolated_events": 2,
+    "already_atomic_events": 2
+  },
+  "no_move_lost": {
+    "tube_turns": 1,
+    "cases": 1,
+    "unique_missed": 0,
+    "cases_missed": 0,
+    "missed_by_species": {},
+    "unique_normally_caught": 2,
+    "already_normally_isolated_events": 2,
+    "already_atomic_events": 2
+  }
+}
