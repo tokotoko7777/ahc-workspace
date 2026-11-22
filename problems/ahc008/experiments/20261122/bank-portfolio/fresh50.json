@@ -1,0 +1,216 @@
+{
+  "overall": {
+    "n": 50,
+    "byte_equal": 45,
+    "score_w_t_l": [
+      3,
+      45,
+      2
+    ],
+    "tactical": {
+      "score": 687164134,
+      "safe_humans": 179,
+      "distinct_safe_area": 5234,
+      "all_clear": 2,
+      "residual": 254,
+      "final4": 1,
+      "bank_capture4": 0,
+      "bank_cow": 0,
+      "bank_pig": 0,
+      "bank_rabbit": 0,
+      "bank_dog": 0,
+      "bank_cat": 0,
+      "max_wall": 0.44299867000154336,
+      "mean_safe_area_all_humans": null,
+      "safe_area_quantiles": null
+    },
+    "portfolio": {
+      "score": 776772583,
+      "safe_humans": 163,
+      "distinct_safe_area": 4940,
+      "all_clear": 3,
+      "residual": 244,
+      "final4": 47,
+      "bank_capture4": 45,
+      "bank_cow": 6,
+      "bank_pig": 8,
+      "bank_rabbit": 8,
+      "bank_dog": 15,
+      "bank_cat": 8,
+      "max_wall": 0.5979467779980041,
+      "mean_safe_area_all_humans": null,
+      "safe_area_quantiles": null
+    },
+    "cases": [
+      {
+        "case": "0024.txt",
+        "n": 12,
+        "m": 9,
+        "score_delta": -19703704,
+        "old_safe_people": 8,
+        "new_safe_people": 0
+      },
+      {
+        "case": "0026.txt",
+        "n": 10,
+        "m": 10,
+        "score_delta": 50895139,
+        "old_safe_people": 9,
+        "new_safe_people": 10
+      },
+      {
+        "case": "0045.txt",
+        "n": 11,
+        "m": 10,
+        "score_delta": -8541319,
+        "old_safe_people": 9,
+        "new_safe_people": 0
+      },
+      {
+        "case": "0047.txt",
+        "n": 11,
+        "m": 9,
+        "score_delta": 30958333,
+        "old_safe_people": 0,
+        "new_safe_people": 0
+      },
+      {
+        "case": "0049.txt",
+        "n": 11,
+        "m": 10,
+        "score_delta": 36000000,
+        "old_safe_people": 0,
+        "new_safe_people": 0
+      }
+    ]
+  },
+  "eligible": {
+    "n": 5,
+    "byte_equal": 0,
+    "score_w_t_l": [
+      3,
+      0,
+      2
+    ],
+    "tactical": {
+      "score": 100099884,
+      "safe_humans": 26,
+      "distinct_safe_area": 945,
+      "all_clear": 0,
+      "residual": 16,
+      "final4": 0,
+      "bank_capture4": 0,
+      "bank_cow": 0,
+      "bank_pig": 0,
+      "bank_rabbit": 0,
+      "bank_dog": 0,
+      "bank_cat": 0,
+      "max_wall": 0.44299867000154336,
+      "mean_safe_area_all_humans": null,
+      "safe_area_quantiles": null
+    },
+    "portfolio": {
+      "score": 189708333,
+      "safe_humans": 10,
+      "distinct_safe_area": 651,
+      "all_clear": 1,
+      "residual": 6,
+      "final4": 46,
+      "bank_capture4": 45,
+      "bank_cow": 6,
+      "bank_pig": 8,
+      "bank_rabbit": 8,
+      "bank_dog": 15,
+      "bank_cat": 8,
+      "max_wall": 0.5979467779980041,
+      "mean_safe_area_all_humans": null,
+      "safe_area_quantiles": null
+    },
+    "cases": [
+      {
+        "case": "0024.txt",
+        "n": 12,
+        "m": 9,
+        "score_delta": -19703704,
+        "old_safe_people": 8,
+        "new_safe_people": 0
+      },
+      {
+        "case": "0026.txt",
+        "n": 10,
+        "m": 10,
+        "score_delta": 50895139,
+        "old_safe_people": 9,
+        "new_safe_people": 10
+      },
+      {
+        "case": "0045.txt",
+        "n": 11,
+        "m": 10,
+        "score_delta": -8541319,
+        "old_safe_people": 9,
+        "new_safe_people": 0
+      },
+      {
+        "case": "0047.txt",
+        "n": 11,
+        "m": 9,
+        "score_delta": 30958333,
+        "old_safe_people": 0,
+        "new_safe_people": 0
+      },
+      {
+        "case": "0049.txt",
+        "n": 11,
+        "m": 10,
+        "score_delta": 36000000,
+        "old_safe_people": 0,
+        "new_safe_people": 0
+      }
+    ]
+  },
+  "other": {
+    "n": 45,
+    "byte_equal": 45,
+    "score_w_t_l": [
+      0,
+      45,
+      0
+    ],
+    "tactical": {
+      "score": 587064250,
+      "safe_humans": 153,
+      "distinct_safe_area": 4289,
+      "all_clear": 2,
+      "residual": 238,
+      "final4": 1,
+      "bank_capture4": 0,
+      "bank_cow": 0,
+      "bank_pig": 0,
+      "bank_rabbit": 0,
+      "bank_dog": 0,
+      "bank_cat": 0,
+      "max_wall": 0.4231445219993475,
+      "mean_safe_area_all_humans": null,
+      "safe_area_quantiles": null
+    },
+    "portfolio": {
+      "score": 587064250,
+      "safe_humans": 153,
+      "distinct_safe_area": 4289,
+      "all_clear": 2,
+      "residual": 238,
+      "final4": 1,
+      "bank_capture4": 0,
+      "bank_cow": 0,
+      "bank_pig": 0,
+      "bank_rabbit": 0,
+      "bank_dog": 0,
+      "bank_cat": 0,
+      "max_wall": 0.41800012899693684,
+      "mean_safe_area_all_humans": null,
+      "safe_area_quantiles": null
+    },
+    "cases": []
+  }
+}

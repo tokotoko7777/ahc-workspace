@@ -1,0 +1,488 @@
+{
+  "overall": {
+    "n": 100,
+    "byte_equal": 81,
+    "score_w_t_l": [
+      9,
+      81,
+      10
+    ],
+    "tactical": {
+      "score": 1713301592,
+      "safe_humans": 454,
+      "distinct_safe_area": 15010,
+      "all_clear": 5,
+      "residual": 561,
+      "final4": 8,
+      "bank_capture4": 0,
+      "bank_cow": 0,
+      "bank_pig": 0,
+      "bank_rabbit": 0,
+      "bank_dog": 0,
+      "bank_cat": 0,
+      "max_wall": 0.4873088749991439,
+      "mean_safe_area_all_humans": 141.2175622542595,
+      "safe_area_quantiles": {
+        "0": 0,
+        "10": 0,
+        "25": 0,
+        "50": 103,
+        "75": 236,
+        "90": 369,
+        "100": 645
+      }
+    },
+    "portfolio": {
+      "score": 1697831161,
+      "safe_humans": 366,
+      "distinct_safe_area": 12346,
+      "all_clear": 6,
+      "residual": 533,
+      "final4": 161,
+      "bank_capture4": 153,
+      "bank_cow": 25,
+      "bank_pig": 23,
+      "bank_rabbit": 21,
+      "bank_dog": 44,
+      "bank_cat": 40,
+      "max_wall": 0.6512045800009219,
+      "mean_safe_area_all_humans": 116.84010484927916,
+      "safe_area_quantiles": {
+        "0": 0,
+        "10": 0,
+        "25": 0,
+        "50": 0,
+        "75": 185,
+        "90": 302,
+        "100": 667
+      }
+    },
+    "cases": [
+      {
+        "case": "0000.txt",
+        "n": 10,
+        "m": 9,
+        "score_delta": -10830247,
+        "old_safe_people": 8,
+        "new_safe_people": 0
+      },
+      {
+        "case": "0003.txt",
+        "n": 11,
+        "m": 10,
+        "score_delta": 37134722,
+        "old_safe_people": 9,
+        "new_safe_people": 10
+      },
+      {
+        "case": "0013.txt",
+        "n": 11,
+        "m": 9,
+        "score_delta": 20734567,
+        "old_safe_people": 0,
+        "new_safe_people": 0
+      },
+      {
+        "case": "0015.txt",
+        "n": 12,
+        "m": 9,
+        "score_delta": -12395062,
+        "old_safe_people": 8,
+        "new_safe_people": 0
+      },
+      {
+        "case": "0017.txt",
+        "n": 12,
+        "m": 8,
+        "score_delta": 8451389,
+        "old_safe_people": 0,
+        "new_safe_people": 0
+      },
+      {
+        "case": "0021.txt",
+        "n": 10,
+        "m": 10,
+        "score_delta": -25304167,
+        "old_safe_people": 9,
+        "new_safe_people": 0
+      },
+      {
+        "case": "0022.txt",
+        "n": 11,
+        "m": 8,
+        "score_delta": -15498264,
+        "old_safe_people": 7,
+        "new_safe_people": 0
+      },
+      {
+        "case": "0025.txt",
+        "n": 10,
+        "m": 8,
+        "score_delta": -53240017,
+        "old_safe_people": 7,
+        "new_safe_people": 0
+      },
+      {
+        "case": "0027.txt",
+        "n": 10,
+        "m": 10,
+        "score_delta": 26555556,
+        "old_safe_people": 10,
+        "new_safe_people": 10
+      },
+      {
+        "case": "0028.txt",
+        "n": 11,
+        "m": 9,
+        "score_delta": 11991126,
+        "old_safe_people": 8,
+        "new_safe_people": 8
+      },
+      {
+        "case": "0038.txt",
+        "n": 10,
+        "m": 10,
+        "score_delta": -15179167,
+        "old_safe_people": 9,
+        "new_safe_people": 0
+      },
+      {
+        "case": "0042.txt",
+        "n": 12,
+        "m": 9,
+        "score_delta": 52666667,
+        "old_safe_people": 9,
+        "new_safe_people": 9
+      },
+      {
+        "case": "0044.txt",
+        "n": 12,
+        "m": 8,
+        "score_delta": 9580295,
+        "old_safe_people": 7,
+        "new_safe_people": 0
+      },
+      {
+        "case": "0054.txt",
+        "n": 12,
+        "m": 9,
+        "score_delta": -33315587,
+        "old_safe_people": 8,
+        "new_safe_people": 4
+      },
+      {
+        "case": "0056.txt",
+        "n": 12,
+        "m": 8,
+        "score_delta": 5202257,
+        "old_safe_people": 7,
+        "new_safe_people": 0
+      },
+      {
+        "case": "0059.txt",
+        "n": 12,
+        "m": 8,
+        "score_delta": -1401041,
+        "old_safe_people": 7,
+        "new_safe_people": 0
+      },
+      {
+        "case": "0066.txt",
+        "n": 11,
+        "m": 9,
+        "score_delta": -1864198,
+        "old_safe_people": 8,
+        "new_safe_people": 0
+      },
+      {
+        "case": "0071.txt",
+        "n": 10,
+        "m": 9,
+        "score_delta": -26489198,
+        "old_safe_people": 8,
+        "new_safe_people": 0
+      },
+      {
+        "case": "0099.txt",
+        "n": 11,
+        "m": 9,
+        "score_delta": 7729938,
+        "old_safe_people": 8,
+        "new_safe_people": 8
+      }
+    ]
+  },
+  "eligible": {
+    "n": 19,
+    "byte_equal": 0,
+    "score_w_t_l": [
+      9,
+      0,
+      10
+    ],
+    "tactical": {
+      "score": 600208855,
+      "safe_humans": 137,
+      "distinct_safe_area": 5839,
+      "all_clear": 2,
+      "residual": 65,
+      "final4": 1,
+      "bank_capture4": 0,
+      "bank_cow": 0,
+      "bank_pig": 0,
+      "bank_rabbit": 0,
+      "bank_dog": 0,
+      "bank_cat": 0,
+      "max_wall": 0.455284681997,
+      "mean_safe_area_all_humans": 278.9704142011834,
+      "safe_area_quantiles": {
+        "0": 0,
+        "10": 0,
+        "25": 126,
+        "50": 279,
+        "75": 415,
+        "90": 511,
+        "100": 645
+      }
+    },
+    "portfolio": {
+      "score": 584738424,
+      "safe_humans": 49,
+      "distinct_safe_area": 3175,
+      "all_clear": 3,
+      "residual": 37,
+      "final4": 154,
+      "bank_capture4": 153,
+      "bank_cow": 25,
+      "bank_pig": 23,
+      "bank_rabbit": 21,
+      "bank_dog": 44,
+      "bank_cat": 40,
+      "max_wall": 0.6512045800009219,
+      "mean_safe_area_all_humans": 168.9112426035503,
+      "safe_area_quantiles": {
+        "0": 0,
+        "10": 0,
+        "25": 0,
+        "50": 0,
+        "75": 592,
+        "90": 654,
+        "100": 667
+      }
+    },
+    "cases": [
+      {
+        "case": "0000.txt",
+        "n": 10,
+        "m": 9,
+        "score_delta": -10830247,
+        "old_safe_people": 8,
+        "new_safe_people": 0
+      },
+      {
+        "case": "0003.txt",
+        "n": 11,
+        "m": 10,
+        "score_delta": 37134722,
+        "old_safe_people": 9,
+        "new_safe_people": 10
+      },
+      {
+        "case": "0013.txt",
+        "n": 11,
+        "m": 9,
+        "score_delta": 20734567,
+        "old_safe_people": 0,
+        "new_safe_people": 0
+      },
+      {
+        "case": "0015.txt",
+        "n": 12,
+        "m": 9,
+        "score_delta": -12395062,
+        "old_safe_people": 8,
+        "new_safe_people": 0
+      },
+      {
+        "case": "0017.txt",
+        "n": 12,
+        "m": 8,
+        "score_delta": 8451389,
+        "old_safe_people": 0,
+        "new_safe_people": 0
+      },
+      {
+        "case": "0021.txt",
+        "n": 10,
+        "m": 10,
+        "score_delta": -25304167,
+        "old_safe_people": 9,
+        "new_safe_people": 0
+      },
+      {
+        "case": "0022.txt",
+        "n": 11,
+        "m": 8,
+        "score_delta": -15498264,
+        "old_safe_people": 7,
+        "new_safe_people": 0
+      },
+      {
+        "case": "0025.txt",
+        "n": 10,
+        "m": 8,
+        "score_delta": -53240017,
+        "old_safe_people": 7,
+        "new_safe_people": 0
+      },
+      {
+        "case": "0027.txt",
+        "n": 10,
+        "m": 10,
+        "score_delta": 26555556,
+        "old_safe_people": 10,
+        "new_safe_people": 10
+      },
+      {
+        "case": "0028.txt",
+        "n": 11,
+        "m": 9,
+        "score_delta": 11991126,
+        "old_safe_people": 8,
+        "new_safe_people": 8
+      },
+      {
+        "case": "0038.txt",
+        "n": 10,
+        "m": 10,
+        "score_delta": -15179167,
+        "old_safe_people": 9,
+        "new_safe_people": 0
+      },
+      {
+        "case": "0042.txt",
+        "n": 12,
+        "m": 9,
+        "score_delta": 52666667,
+        "old_safe_people": 9,
+        "new_safe_people": 9
+      },
+      {
+        "case": "0044.txt",
+        "n": 12,
+        "m": 8,
+        "score_delta": 9580295,
+        "old_safe_people": 7,
+        "new_safe_people": 0
+      },
+      {
+        "case": "0054.txt",
+        "n": 12,
+        "m": 9,
+        "score_delta": -33315587,
+        "old_safe_people": 8,
+        "new_safe_people": 4
+      },
+      {
+        "case": "0056.txt",
+        "n": 12,
+        "m": 8,
+        "score_delta": 5202257,
+        "old_safe_people": 7,
+        "new_safe_people": 0
+      },
+      {
+        "case": "0059.txt",
+        "n": 12,
+        "m": 8,
+        "score_delta": -1401041,
+        "old_safe_people": 7,
+        "new_safe_people": 0
+      },
+      {
+        "case": "0066.txt",
+        "n": 11,
+        "m": 9,
+        "score_delta": -1864198,
+        "old_safe_people": 8,
+        "new_safe_people": 0
+      },
+      {
+        "case": "0071.txt",
+        "n": 10,
+        "m": 9,
+        "score_delta": -26489198,
+        "old_safe_people": 8,
+        "new_safe_people": 0
+      },
+      {
+        "case": "0099.txt",
+        "n": 11,
+        "m": 9,
+        "score_delta": 7729938,
+        "old_safe_people": 8,
+        "new_safe_people": 8
+      }
+    ]
+  },
+  "other": {
+    "n": 81,
+    "byte_equal": 81,
+    "score_w_t_l": [
+      0,
+      81,
+      0
+    ],
+    "tactical": {
+      "score": 1113092737,
+      "safe_humans": 317,
+      "distinct_safe_area": 9171,
+      "all_clear": 3,
+      "residual": 496,
+      "final4": 7,
+      "bank_capture4": 0,
+      "bank_cow": 0,
+      "bank_pig": 0,
+      "bank_rabbit": 0,
+      "bank_dog": 0,
+      "bank_cat": 0,
+      "max_wall": 0.4873088749991439,
+      "mean_safe_area_all_humans": 102.02525252525253,
+      "safe_area_quantiles": {
+        "0": 0,
+        "10": 0,
+        "25": 0,
+        "50": 64,
+        "75": 183,
+        "90": 284,
+        "100": 453
+      }
+    },
+    "portfolio": {
+      "score": 1113092737,
+      "safe_humans": 317,
+      "distinct_safe_area": 9171,
+      "all_clear": 3,
+      "residual": 496,
+      "final4": 7,
+      "bank_capture4": 0,
+      "bank_cow": 0,
+      "bank_pig": 0,
+      "bank_rabbit": 0,
+      "bank_dog": 0,
+      "bank_cat": 0,
+      "max_wall": 0.47104127000056906,
+      "mean_safe_area_all_humans": 102.02525252525253,
+      "safe_area_quantiles": {
+        "0": 0,
+        "10": 0,
+        "25": 0,
+        "50": 64,
+        "75": 183,
+        "90": 284,
+        "100": 453
+      }
+    },
+    "cases": []
+  }
+}
