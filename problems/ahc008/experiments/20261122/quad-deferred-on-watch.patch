@@ -1,0 +1,83 @@
+--- problems/ahc008/tactical_gate_submission.cpp
++++ problems/ahc008/tactical_gate_submission.cpp
+@@ -1245,0 +1246,75 @@
++ int quadDeferred=0;
++ string quadDefer(const string &baseline){
++  quadOwned=0;
++  if(!quadKind||quadAlive!=1)return baseline;
++  vector<int> jobs;
++  for(int j=0;j<int(quad.outside.size());j++)if(!wall[quad.outside[j]])jobs.push_back(j);
++  if(jobs.empty()){quadDone=turn;quadEnd=turn;quadAlive=0;return baseline;}
++  if(jobs.size()==1&&quadReady<0)quadReady=turn;
++  if(turn>=quadMaximum||(jobs.size()>1&&turn>=quadSetupDeadline)||(quadReady>=0&&turn-quadReady>=quadWatch)){
++   quadEnd=turn;quadAlive=0;return baseline;
++  }
++  if(any_of(quad.inner.begin(),quad.inner.end(),[&](int p){return wall[p];})){
++   quadEnd=turn;quadAlive=0;return baseline;
++  }
++  const array<int,3> ids{quad.crew[0],quad.crew[1],quad.gh};
++  const bool prey=any_of(pets.begin(),pets.end(),[&](Pet p){return quadInner[p.p];});
++  const int workersNow=jobs.size()<=3?3:2;
++  const int m=humans.size();
++  struct Propose{int j,d;char c;};
++  array<vector<Propose>,3> opt;
++  for(int k=0;k<workersNow;k++){
++   int h=humans[ids[k]],dist[V],fst[V],queue[V];
++   fill(dist,dist+V,-1);dist[h]=0;fst[h]=h;queue[0]=h;int n=1;
++   for(int a=0;a<n;a++)for(int v:nb[queue[a]])if(v>=0&&!wall[v]&&!quadReserved[v]&&dist[v]<0){
++    dist[v]=dist[queue[a]]+1;fst[v]=a==0?v:fst[queue[a]];queue[n++]=v;
++   }
++   opt[k].push_back({-1,0,'.'});
++   for(int j:jobs){
++    int p=quad.outside[j],best=999,st=-1;
++    for(int q:nb[p])if(q>=0&&!quadReserved[q]&&dist[q]>=0&&dist[q]<best)best=dist[q],st=q;
++    if(st<0)continue;
++    if(best==0){
++     if(!block[p])opt[k].push_back({j,0,BUILD[dir(h,p)]});
++     else opt[k].push_back({j,1,'.'});
++    }else opt[k].push_back({j,best,MOVE[dir(h,fst[st])]});
++   }
++  }
++  int best=-1e9;
++  array<Propose,3> pick{},ans{};
++  auto dfs=[&](auto&&self,int w,int used,int launched,int complete,int value)->void{
++   if(w==workersNow){
++    if(complete==int(jobs.size())&&!prey)return;
++    if(complete>2&&complete!=int(jobs.size()))return;
++    if(launched>2&&complete!=int(jobs.size()))return;
++    if(complete==int(jobs.size()))value+=10000;
++    if(value>best){best=value;ans=pick;}
++    return;
++   }
++   for(auto p:opt[w]){
++    if(p.j>=0&&(used>>p.j&1))continue;
++    pick[w]=p;
++    // Ready legal jobs dominate all approach commands. A blocked adjacent
++    // shell job can hold only if no alternative is better.
++    int delta=p.j<0?0:p.d==0?500:50-p.d*2-p.d*p.d/5;
++    self(self,w+1,used|(p.j<0?0:1<<p.j),launched+(p.j>=0),complete+(p.j>=0&&p.d==0),value+delta);
++   }
++  };
++  dfs(dfs,0,0,0,0,0);
++  string chosen=baseline;
++  bitset<V> qBuild,qWalk,stances;
++  for(int j:jobs)for(int p:nb[quad.outside[j]])if(p>=0&&!quadReserved[p])stances[p]=1;
++  for(int k=0;k<workersNow;k++){
++   auto p=ans[k];
++   if(p.j<0)continue;
++   int i=ids[k];quadOwned|=1<<i;chosen[i]=p.c;
++   if(islower(p.c))qBuild[quad.outside[p.j]]=1;
++   else if(isupper(p.c))qWalk[nb[humans[i]][find(MOVE,MOVE+4,p.c)-MOVE]]=1;
++  }
++  for(int i=0;i<m;i++)if(!(quadOwned>>i&1)&&chosen[i]!='.'){
++   char c=chosen[i];const char *a=islower(c)?BUILD:MOVE;
++   int p=nb[humans[i]][find(a,a+4,c)-a];
++   if(p<0||quadReserved[p]||qBuild[p]||(islower(c)&&(stances[p]||qWalk[p])))chosen[i]='.';
++  }
++  return chosen;
++ }
+@@ -1635,0 +1711 @@
++ g.quadDeferred=argc>3?atoi(argv[3]):0;
+@@ -1639 +1715 @@
+-  string actions=g.quadPlan(original);
++  string actions=g.quadDeferred?g.quadDefer(original):g.quadPlan(original);
