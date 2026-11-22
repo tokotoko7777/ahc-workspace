@@ -108,6 +108,7 @@ def main():
     p=argparse.ArgumentParser(description=__doc__)
     for n in ('harness','tester','baseline','pilot','cases','output'):p.add_argument(n,type=Path)
     p.add_argument('--case-count',type=int,default=30)
+    p.add_argument('--with-tactical',action='store_true')
     a=p.parse_args()
     sys.path.insert(0,str(a.harness.resolve()))
     from benchmark_cases import run
@@ -116,10 +117,13 @@ def main():
     for f in sorted(a.cases.glob('*.txt'))[:a.case_count]:
         case=f.read_bytes()
         state=None
-        for model,mode in (('stay225',0),('rescue160',1)):
+        arms=[('stay225',0),('rescue160',1)]
+        if a.with_tactical:arms.append(('tactical',-1))
+        for model,mode in arms:
             with tempfile.TemporaryDirectory() as td:
                 q=Path(td)/'meta';rescue=Path(td)/'rescue'
                 command=[tester,'env',f'AHC008_BANK_LOG={q}',f'AHC008_RESCUE_LOG={rescue}',a.pilot.resolve(),'5',str(mode)]
+                if mode<0:command=[tester,a.baseline.resolve()]
                 act,err,rc,t=run(command,case,3.)
                 match=re.fullmatch(rb'Score = (\d+)\s*',err)
                 assert rc==0 and match,(f.name,model,err)
@@ -132,21 +136,23 @@ def main():
                 kinds,hist,_=observed(case,lines)
                 row=dict(case=f.name,model=model,score=score,time=t,
                          input_sha256=hashlib.sha256(case).hexdigest(),actions_sha256=hashlib.sha256(act).hexdigest())
-                meta=q.read_text()
-                n160,cutoff=map(int,rescue.read_text().split())
-                head,*geom=meta.splitlines()
-                rot,shift,_=map(int,head.split())
-                pair=meta,act.splitlines()[:160],n160
-                if state is None:state=pair;original=act
-                else:assert state==pair,(f.name,'before trigger differs')
-                assert cutoff==(160 if mode and n160>4 else 225)
-                if mode and n160<=4:assert original==act,(f.name,'inactive branch differs')
-                ps,hs,ws=hist[160]
-                grid=ALL^sum(B[idx(w)] for w in ws)
-                realm=flood(sum({B[idx(h)] for h in hs}),grid)
-                assert sum(bool(realm&B[idx(p)]) for p in ps)==n160
-                row.update(count(hist,kinds,'\n'.join([f'{rot} {shift} {cutoff}',*geom])))
-                row.update(cutoff=cutoff,residual160=n160)
+                if mode<0:row.update(count(hist,kinds,None))
+                else:
+                    meta=q.read_text()
+                    n160,cutoff=map(int,rescue.read_text().split())
+                    head,*geom=meta.splitlines()
+                    rot,shift,_=map(int,head.split())
+                    pair=meta,act.splitlines()[:160],n160
+                    if state is None:state=pair;original=act
+                    else:assert state==pair,(f.name,'before trigger differs')
+                    assert cutoff==(160 if mode and n160>4 else 225)
+                    if mode and n160<=4:assert original==act,(f.name,'inactive branch differs')
+                    ps,hs,ws=hist[160]
+                    grid=ALL^sum(B[idx(w)] for w in ws)
+                    realm=flood(sum({B[idx(h)] for h in hs}),grid)
+                    assert sum(bool(realm&B[idx(p)]) for p in ps)==n160
+                    row.update(count(hist,kinds,'\n'.join([f'{rot} {shift} {cutoff}',*geom])))
+                    row.update(cutoff=cutoff,residual160=n160)
                 ps,hs,ws=hist[-1]
                 grid=ALL^sum(B[idx(w)] for w in ws)
                 pbits=sum({B[idx(p)] for p in ps})
