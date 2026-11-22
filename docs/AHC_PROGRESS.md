@@ -1484,3 +1484,9 @@ S字でも犬・猫を含め4マスに合法に隔離できた。各S字系列�
 
 - [方向予測の確認](https://github.com/tokotoko7777/ahc-workspace/blob/17c77028d6ee998971a5d76e3a01dd16cbac79c6/problems/ahc008/experiments/20261122/article-capture/terry-target-active275/RESULT.md)は終盤に猫が残った45ケースのうち34件で予測誤差が改善。犬は5ケースのみで判定を行わなかった。
 - [終盤方針の再評価](https://github.com/tokotoko7777/ahc-workspace/blob/17c77028d6ee998971a5d76e3a01dd16cbac79c6/problems/ahc008/experiments/20261122/article-capture/terry-cat-prior-terminal/RESULT.md)は保存済みの実測ラベルを選び直した比較で、均一な目的地からの予測より+46,388,889点相当・全頭+2。独立した試行組で安定して改善した判断は3件で、事前基準4件未達。得点版は6,152,805,559点・全頭100件のまま。
+
+### AHC008: 停滞時の早期追い込みは全頭捕獲が増えたが不採用（2026-11-23 JST）
+
+- [条件付き新規100ケースの検証](https://github.com/tokotoko7777/ahc-workspace/blob/b32be72d76a33271d7ef5c7dc52a8a231b30d9bb/problems/ahc008/experiments/20261122/article-capture/terry-stalled265/RESULT.md)。255〜265ターンで捕獲が進まなかった局面で、追い込みを265ターンから開始。全頭79→89件、残り23→14頭、ただし得点5,278,344,442→5,264,793,386（−13,551,056点）で、現行版のみ全頭捕獲のケースも5件。両版が全頭捕獲した74ケースでは、得点換算で作業者1人あたり平均約16.44マス減った。公式配布100や本番の順位との直接比較ではない。
+- 現行ベストは公式配布100で **6,152,805,559点・全頭捕獲100件**。作業ブランチは `codex/ahc008-article-capture`。次は方針を変えず、追い込み試行で以降の得点が変わらないことを証明できる状態の早期終了を検証する。
+- [再利用候補のC++23最大流（CSR Dinic）](https://github.com/tokotoko7777/ahc-workspace/blob/fc87aefa93c32c4aa16cd6f5cbbfc1d30441215a/problems/ahc008/experiments/20261122/article-capture/terry-chase-csr/library-candidate/README.md)に使用例とテストを添付。共通ライブラリと得点版には未導入。
