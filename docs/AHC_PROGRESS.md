@@ -1413,3 +1413,9 @@ S字でも犬・猫を含め4マスに合法に隔離できた。各S字系列�
 [固定作業量での検証](https://github.com/tokotoko7777/ahc-workspace/blob/54cf9c1764a4fc02f876106f2ce8f679fc553b39/problems/ahc008/experiments/20261122/article-capture/terry-split-dp/RESULT.md)。担当者集合×仕事の先頭からの件数のDPで、残り人数では終えられない区間を除き、接近距離を前計算し、向きと復元の同点順も維持。360キュー照合・400公式テスタ実行に一致。配布／独立の各100でCPU **30.15%／25.93%短縮**。[汎用化提案](experiments/ahc008/ordered-route-split-dp.md)は別紙、共通APIは無変更。
 
 [通常設定の検証](https://github.com/tokotoko7777/ahc-workspace/blob/791e3a555b05639cf776d0bbdbee49267b25c3d7/problems/ahc008/experiments/20261122/article-capture/terry-split-dp/DEFAULT_VALIDATION.md)では配布100 **6,093,833,333・全頭98/100**、全行動一致、終盤試行499→561。新規生成100は全頭97のまま1件の終盤切替で +20,865,740、試行878→970。通常設定の全400公式テスタと独立再生も一致。より速い同じ解を研究基準として採用。本番は未判定、main無変更。次は追い込みの到達範囲で重複BFSを省く。
+
+### AHC008 追い込み計算の高速化と近い将来の入室
+
+[多始点BFS](https://github.com/tokotoko7777/ahc-workspace/blob/6a2f3e68b93f9f9db4a26a3735371f8cf1e7f075/problems/ahc008/experiments/20261122/article-capture/terry-chase-multisource/RESULT.md)は固定作業量で全手一致、ただし終盤試行あり12件のCPU短縮1.17%で先行基準2%未満。[最大流の確保領域だけを再利用](https://github.com/tokotoko7777/ahc-workspace/blob/d44b9ec1183c68470f1422c034dc04c6a4a88448/problems/ahc008/experiments/20261122/article-capture/terry-flow-reuse/DEFAULT_VALIDATION.md)は400固定作業量ランで全行動・得点一致、終盤試行ありの配布／独立でCPU9.22%／10.38%短縮。通常の配布100は試行570→645・全頭98のまま1件で約155.6万点減。独立100は1件で約33.3万点増、全頭98は同じ。後者はアルゴリズムとして保存するが、採点基準版は設営DP高速版のまま（6,093,833,333）。
+
+[門が閉まるまでの1〜2手を予測に加える案](https://github.com/tokotoko7777/ahc-workspace/blob/aa971413c83f85d2fbee09e021994026d23aab77/problems/ahc008/experiments/20261122/article-capture/terry-first-safe-window/RESULT.md)は独立生成60の事実再生で、他作業を保ちつつ閉められる新しい遅延例が1件のみ、先行基準5件・3盤面未満で本採点なし。次は動物がまだ部屋の外から入ってくる見込みを独立に評価する。mainは無変更、本番未判定。
