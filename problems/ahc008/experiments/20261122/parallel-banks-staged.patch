@@ -1,0 +1,50 @@
+--- problems/ahc008/tactical_gate_submission.cpp
++++ problems/ahc008/tactical_gate_submission.cpp
+@@ -1136,0 +1137,33 @@
++ void stageBanks(const vector<int>& ready){
++  if(turn<35||turn>=bankStaffTurn)return;
++  array<int,3> tubes{};
++  for(int z=0;z<int(banks.size());z++)tubes[banks[z].b]+=ready[z];
++  int total=tubes[0]+tubes[1]+tubes[2];
++  int laneN=count_if(laneCrew.begin(),laneCrew.end(),[](int p){return p>=0;});
++  if(laneN>=2&&total<24)return;
++  array<bool,3> skipped{};
++  for(int pass=0;pass<3;pass++){
++   int chosen=-1,benefit=-1;
++   array<int,4> best{};
++   for(int j=0;j<3;j++){
++    if(skipped[j]||tubes[j]<5||(laneCrew[j]>=0&&laneCrew[j+1]>=0))continue;
++    int who[2]{laneCrew[j],laneCrew[j+1]},outCost=999,left=-1,right=-1;
++    for(int a=0;a<int(humans.size());a++)if(who[0]==a||(who[0]<0&&find(laneCrew.begin(),laneCrew.end(),a)==laneCrew.end()))
++    for(int b=0;b<int(humans.size());b++)if(a!=b&&(who[1]==b||(who[1]<0&&find(laneCrew.begin(),laneCrew.end(),b)==laneCrew.end()))){
++     int dist=999;
++     for(int i=0;i<int(banks.size());i++)if(banks[i].b==j&&ready[i]){
++      int p=workers[a].bfs.distance(banks[i].l),q=workers[b].bfs.distance(banks[i].h);
++      if(p>=0&&q>=0)dist=min(dist,p+q+max(p,q)/2);
++     }
++     if(dist<outCost)outCost=dist,left=a,right=b;
++    }
++    if(left<0||right<0)continue;
++    int gain=5*tubes[j]-outCost+100;
++    if(gain>benefit)benefit=gain,chosen=j,best=laneCrew,best[j]=left,best[j+1]=right;
++   }
++   if(chosen<0)return;
++   laneCrew=best;skipped[chosen]=true;
++   if(total<24)return;
++  }
++ }
++
+@@ -1144 +1177 @@
+-  if(laneCrew[0]<0&&turn>=bankStaffTurn)assignBanks();
++  if((laneCrew[0]<0&&turn>=bankStaffTurn)||(bankMode==3&&turn==bankStaffTurn))assignBanks();
+@@ -1157,0 +1191 @@
++  if(bankMode==3)stageBanks(ready);
+@@ -1173 +1207 @@
+-  if(laneCrew[0]>=0){
++  if(any_of(laneCrew.begin(),laneCrew.end(),[](int i){return i>=0;})){
+@@ -1180 +1214 @@
+-    if(act[a]!='.'||act[b]!='.')continue;
++    if(a<0||b<0||act[a]!='.'||act[b]!='.')continue;
+@@ -1214 +1248 @@
+-    for(int i=0;i<m;i++)if(act[i]=='.'&&(laneCrew[0]<0||find(laneCrew.begin(),laneCrew.end(),i)==laneCrew.end()))
++    for(int i=0;i<m;i++)if(act[i]=='.'&&find(laneCrew.begin(),laneCrew.end(),i)==laneCrew.end())
