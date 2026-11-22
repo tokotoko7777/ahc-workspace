@@ -1,0 +1,222 @@
+--- problems/ahc008/tactical_gate_submission.cpp
++++ problems/ahc008/tactical_gate_submission.cpp
+@@ -312,0 +313,97 @@
++#include <algorithm>
++#include <cstdint>
++#include <limits>
++#include <vector>
++#include <array>
++namespace bank {
++// Score units are milli-pets. 'certain' counts legally closable pets now,
++// not projected ones. 'value' includes future capture, travel and churn.
++struct Order {
++    int tube, leftLane, rightLane, leftWorker, rightWorker;
++    int certain, value;
++};
++struct Chosen {
++    int certain=0, value=0;
++    std::vector<Order> orders;
++};
++inline Chosen choose(int workers, const std::vector<std::vector<Order>>& byTube) {
++    // One option per tube; a bit per human covers shared lanes and permits
++    // independent stations when a lane actually has two humans.
++    struct Score { int certain=-1,value=0; };
++    auto better=[](Score a, Score b){return a.certain>b.certain || (a.certain==b.certain&&a.value>b.value);};
++    const int states=1<<workers;
++    std::vector<Score> dp(states), next(states);
++    std::vector<std::vector<std::pair<int,int>>> origin(byTube.size(),std::vector<std::pair<int,int>>(states,{-1,-1}));
++    dp[0]={0,0};
++    for (int t=0;t<(int)byTube.size();++t) {
++        next=dp;
++        for(int m=0;m<states;++m)if(dp[m].certain>=0)origin[t][m]={m,-1};
++        for (int k=0;k<(int)byTube[t].size();++k) {
++            const auto &o=byTube[t][k];
++            if(o.leftWorker==o.rightWorker||o.leftWorker<0||o.rightWorker<0||
++               o.leftWorker>=workers||o.rightWorker>=workers||(!o.certain&&o.value<=0))continue;
++            const int bits=(1<<o.leftWorker)|(1<<o.rightWorker);
++            for(int m=0;m<states;++m)if(dp[m].certain>=0&&!(m&bits)){
++                Score newScore{dp[m].certain+o.certain,dp[m].value+o.value};
++                if(better(newScore,next[m|bits])){
++                    next[m|bits]=newScore; origin[t][m|bits]={m,k};
++                }
++            }
++        }
++        dp.swap(next);
++    }
++    int m=0;
++    for(int i=0;i<states;++i)if(better(dp[i],dp[m]))m=i;
++    Chosen result{dp[m].certain,dp[m].value,{}};
++    for(int t=(int)byTube.size()-1;t>=0;--t){
++        auto [prev,k]=origin[t][m];
++        if(k>=0)result.orders.push_back(byTube[t][k]);
++        m=prev;
++    }
++    std::reverse(result.orders.begin(),result.orders.end());
++    return result;
++}
++// Distribution over the four interior cells plus the two mouths; mass
++// stepping into an outer lane is discarded. Use observed first-passage
++// transitions or the actual local graph when evaluating a real tube.
++inline double unbiased_mobile_forecast(int x, int stride, int eta, int patience) {
++    if(x<0||x>5||stride<1)return 0.;
++    std::array<double,6> state{}; state[x]=1.;
++    double capture=0;
++    for(int turn=0;turn<=eta+patience;++turn){
++        if(turn>=eta){
++            // [0] and [5] are gates, [1] and [4] are adjacent to their gate.
++            capture+=state[2]+state[3]; state[2]=state[3]=0.;
++        }
++        for(int k=0;k<stride;++k){
++            std::array<double,6> next{};
++            for(int j=0;j<6;++j){
++                if(j>0)next[j-1]+=state[j]*.5;
++                if(j<5)next[j+1]+=state[j]*.5;
++            }
++            state=next;
++        }
++    }
++    return capture;
++}
++// Fixed ETA forecast from marginal states. safe = inside far enough from
++// both gates; blocks = in a gate or any 4-neighbor of either gate.
++// Independence is an approximation for ranking preparations, never used
++// to legalize a build. In particular, a second pet at a mouth vetoes it.
++struct Mass { double safe, blocks; };
++struct Forecast { double pClose, expected; };
++inline Forecast joint(const std::vector<Mass>& pets) {
++    double clear=1., nothing=1., expected=0.;
++    for (int i=0;i<(int)pets.size();++i) {
++        const auto m=pets[i];
++        clear*=1.-m.blocks;
++        nothing*=1.-m.blocks-m.safe;
++        double x=m.safe;
++        for (int j=0;j<(int)pets.size();++j)if(i!=j)x*=1.-pets[j].blocks;
++        expected+=x;
++    }
++    return {std::max(0.,clear-nothing),expected};
++}
++
++}
++
+@@ -1136,0 +1234,114 @@
++ bool bankJoint(const vector<int> &ready,const vector<int> &occupancy,const vector<int> &viable,bitset<V> &build,bitset<V> &moveTo){
++  constexpr int look=4;
++  const int n=banks.size(),m=humans.size();
++  struct Option {int i,j,eta,dist;};
++  vector<vector<Option>> options(n);
++  vector<int> minEta(n,99);
++  vector<bool> currentBody(n);
++  for(int t=0;t<n;t++){
++   auto &x=banks[t];
++   if(!ready[t]||wall[x.g]||wall[x.k])continue;
++   bool inside=any_of(humans.begin(),humans.end(),[&](int h){return find(x.inner.begin(),x.inner.end(),h)!=x.inner.end();});
++   if(inside)continue;
++   for(int i=0;i<m;i++){
++    int d1=workers[i].bfs.distance(x.l);if(d1<0||d1>look)continue;
++    for(int j=0;j<m;j++)if(j!=i){
++     int d2=workers[j].bfs.distance(x.h);if(d2<0||d2>look)continue;
++     int eta=max(d1,d2);
++     if(!eta&&!viable[t])eta=1;
++     minEta[t]=min(eta,minEta[t]);options[t].push_back({i,j,eta,d1+d2});
++    }
++   }
++  }
++  if(none_of(minEta.begin(),minEta.end(),[](int x){return x<99;}))return false;
++  array<vector<vector<float>>,look+1> safe,blockers;
++  for(int h=1;h<=look;h++){
++   safe[h].assign(n,vector<float>(pets.size()));
++   blockers[h].assign(n,vector<float>(pets.size()));
++  }
++  vector<vector<int>> forbidden(n);
++  for(int t=0;t<n;t++)if(minEta[t]<99){
++   auto &x=banks[t];forbidden[t]={x.g,x.k};
++   for(int z:{x.g,x.k})for(int q:nb[z])if(q>=0&&!wall[q])forbidden[t].push_back(q);
++   sort(forbidden[t].begin(),forbidden[t].end());
++   forbidden[t].erase(unique(forbidden[t].begin(),forbidden[t].end()),forbidden[t].end());
++  }
++  for(int pi=0;pi<int(pets.size());pi++){
++   auto p=pets[pi];
++   int d=999;
++   for(int t=0;t<n;t++)if(minEta[t]<99&&group[banks[t].l]==group[p.p])
++    d=min(d,min(md(p.p,banks[t].inner[1]),md(p.p,banks[t].inner[2])));
++   int speed=p.t<=3?p.t:2;
++   if(d>look*speed+4)continue;
++   array<float,V> q{},z{};q[p.p]=1.;
++   for(int h=1;h<=look;h++){
++    for(int k=0;k<speed;k++){
++     z.fill(0);
++     for(int u=0;u<V;u++)if(q[u]>0){
++      int degree=0;for(int v:nb[u])degree+=v>=0&&!wall[v];
++      if(degree)for(int v:nb[u])if(v>=0&&!wall[v])z[v]+=q[u]/degree;
++     }
++     q.swap(z);
++    }
++    for(int t=0;t<n;t++)if(minEta[t]<=h){
++     auto &x=banks[t];safe[h][t][pi]=q[x.inner[1]]+q[x.inner[2]];
++     for(int g:forbidden[t])blockers[h][t][pi]+=q[g];
++    }
++   }
++  }
++  array<vector<float>,look+1> noBlock;
++  for(int h=1;h<=look;h++){
++   noBlock[h].assign(n,1.f);
++   for(int t=0;t<n;t++)if(minEta[t]<=h)for(float x:blockers[h][t])noBlock[h][t]*=clamp(1.f-x,0.f,1.f);
++  }
++  auto weight=[&](int h,int t,int p){
++   float div=1.f-blockers[h][t][p];
++   if(div<=1e-7f){
++    float x=safe[h][t][p];for(int i=0;i<int(pets.size());i++)if(i!=p)x*=clamp(1.f-blockers[h][t][i],0.f,1.f);
++    return x;
++   }
++   return safe[h][t][p]*noBlock[h][t]/div;
++  };
++  // A forecast pet is credited to just one feasible tube. Paired closures
++  // themselves use real current occupancy, independent of this prediction.
++  vector<int> prefer(pets.size(),-1);
++  vector<float> best(pets.size(),0);
++  for(int t=0;t<n;t++)if(minEta[t]<99){
++   bool possible[5]{};
++   for(auto o:options[t])possible[max(1,o.eta)]=true;
++   for(int h=1;h<=look;h++)if(possible[h])for(int pi=0;pi<int(pets.size());pi++){
++    float z=weight(h,t,pi)/(1.f+.24f*h);
++    if(z>best[pi])best[pi]=z,prefer[pi]=t;
++   }
++  }
++  vector<vector<bank::Order>> cand;
++  for(int t=0;t<n;t++)if(minEta[t]<99){
++   vector<bank::Order> a;
++   vector<bool> credited(pets.size());
++   for(int p=0;p<int(pets.size());p++)credited[p]=prefer[p]==t;
++   float win[5]{};
++   for(int h=1;h<=look;h++)if(minEta[t]<=h)for(int p=0;p<int(pets.size());p++)if(credited[p])win[h]+=weight(h,t,p);
++   const auto &x=banks[t];
++   for(auto o:options[t]){
++    bool now=!o.eta;
++    int score=now?0:int(1000.f*win[o.eta]) - 18*o.dist - 22*o.eta;
++    if(!now&&score<85)continue;
++    a.push_back({t,x.b,x.b+1,o.i,o.j,now?occupancy[t]:0,score});
++   }
++   if(!a.empty())cand.push_back(move(a));
++  }
++  auto pick=bank::choose(m,cand);
++  if(pick.orders.empty())return false;
++  for(auto a:pick.orders)if(a.certain){
++   auto &x=banks[a.tube];act[a.leftWorker]=BUILD[dir(x.l,x.g)];act[a.rightWorker]=BUILD[dir(x.h,x.k)];build[x.g]=build[x.k]=1;
++  }
++  for(auto a:pick.orders)if(!a.certain){
++   auto &x=banks[a.tube];
++   for(auto [w,t]:{pair{a.leftWorker,x.l},pair{a.rightWorker,x.h}})if(act[w]=='.'&&humans[w]!=t){
++    int p=workers[w].bfs.first_step(t);
++    if(p>=0&&!build[p])act[w]=MOVE[dir(humans[w],p)],moveTo[p]=1;
++   }
++  }
++  return true;
++ }
++
+@@ -1161 +1372,2 @@
+-  for(auto [count,i]:order){
++  bool joint=bankMode==2&&turn>=bankStaffTurn&&!overBudget();
++  if(!joint)for(auto [count,i]:order){
+@@ -1173 +1385 @@
+-  if(laneCrew[0]>=0){
++  if((!joint||!bankJoint(ready,occupancy,viable,build,moveTo))&&laneCrew[0]>=0){
