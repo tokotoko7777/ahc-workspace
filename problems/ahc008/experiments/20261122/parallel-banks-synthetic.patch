@@ -1,0 +1,233 @@
+--- problems/ahc008/experiments/20261122/parallel-banks-narrow-rescue-research.cpp
++++ problems/ahc008/experiments/20261122/parallel-banks-synthetic.cpp
+@@ -419 +419,7 @@
+- bool overBudget() const {return clock()-started>1.65*CLOCKS_PER_SEC;}
++ bool countBudget=false;
++ mutable int budgetPolls=0,budgetTrips=0;
++ bool overBudget() const {
++  bool past=clock()-started>1.65*CLOCKS_PER_SEC;
++  if(countBudget){++budgetPolls;budgetTrips+=past;}
++  return past;
++ }
+@@ -422 +428 @@
+- int qline[V], lcount[V], lanimals[V];
++ int qline[V]{}, lcount[V]{}, lanimals[V]{};
+@@ -1779,0 +1786,199 @@
++namespace synthetic_continuation {
++constexpr array<uint64_t,4> REPEATS{0xb16b00b5ULL,0x08c0ffeeULL,0xd159d00fULL,0x49a008ffULL};
++uint64_t mix(uint64_t x){
++ x+=0x9e3779b97f4a7c15ULL;x=(x^(x>>30))*0xbf58476d1ce4e5b9ULL;x=(x^(x>>27))*0x94d049bb133111ebULL;
++ return x^(x>>31);
++}
++struct Draw {
++ uint64_t seed;
++ int choose(int n,int pet,int turn,int op)const{
++  if(n<=0)throw runtime_error("empty choice");
++  const uint64_t k=uint64_t(n),limit=-k%k,b=mix(seed^mix((uint64_t(pet)<<32)|(uint64_t(turn)<<12)|op));
++  for(uint64_t s=0;;s++){uint64_t u=mix(b+s);if(u>=limit)return u%k;}
++ }
++};
++
++struct HumanPost {array<unsigned char,V> wall;vector<int> humans;};
++optional<HumanPost> humanPhase(const Game& g){
++ if(g.act.size()!=g.humans.size())return nullopt;
++ HumanPost p{g.wall,g.humans};
++ bitset<V> forbidden;
++ for(int h:g.humans)forbidden[h]=1;
++ for(auto a:g.pets){
++  forbidden[a.p]=1;
++  for(int j:nb[a.p])if(j>=0)forbidden[j]=1;
++ }
++ for(int i=0;i<int(p.humans.size());i++){
++  const char c=g.act[i];if(c=='.')continue;
++  const int h=g.humans[i];
++  if(const char *a=find(BUILD,BUILD+4,c);a!=BUILD+4){
++   int q=nb[h][a-BUILD];
++   if(q<0)continue; // official lowercase off-board action does nothing
++   if(forbidden[q])return nullopt;
++   p.wall[q]=1;
++  }else if(const char *a=find(MOVE,MOVE+4,c);a!=MOVE+4){
++   int q=nb[h][a-MOVE];if(q<0)return nullopt;p.humans[i]=q;
++  }else return nullopt;
++ }
++ for(int q:p.humans)if(p.wall[q])return nullopt;
++ return p;
++}
++
++struct Maze {
++ const array<unsigned char,V>& wall;
++ array<int,V> component;
++ vector<vector<int>> cells;
++ vector<array<short,V>> distanceBank;
++ array<int,V> distanceIds;
++ explicit Maze(const array<unsigned char,V>& w):wall(w){
++  component.fill(-1);distanceIds.fill(-1);
++  for(int i=0;i<V;i++)if(!wall[i]&&component[i]<0){
++   int z=cells.size();cells.emplace_back();auto& a=cells.back();a.push_back(i);component[i]=z;
++   for(int j=0;j<int(a.size());j++)for(int q:nb[a[j]])if(q>=0&&!wall[q]&&component[q]<0)component[q]=z,a.push_back(q);
++   sort(a.begin(),a.end());
++  }
++ }
++ const array<short,V>& distances(int p){
++  int i=distanceIds[p];
++  if(i>=0)return distanceBank[i];
++  distanceIds[p]=distanceBank.size();distanceBank.emplace_back();
++  auto& d=distanceBank.back();d.fill(-1);
++  int q[V],n=1;q[0]=p;d[p]=0;
++  for(int j=0;j<n;j++)for(int v:nb[q[j]])if(v>=0&&!wall[v]&&d[v]<0)q[n++]=v,d[v]=d[q[j]]+1;
++  return d;
++ }
++};
++struct Animals {
++ Draw rng;
++ vector<int> target;
++ int dogFallback=0,dogRetarget=0,catRetarget=0;
++ explicit Animals(uint64_t s):rng{s}{}
++ int dogChoice(const Game& g,const Maze& m,int p,int i,int tick,int op){
++  int a[10],n=0;
++  for(int w=0;w<int(g.humans.size());w++)
++   if(g.humans[w]!=p&&m.component[g.humans[w]]==m.component[p])a[n++]=w;
++  return n?a[rng.choose(n,i,tick,op)]:-1;
++ }
++ int catChoice(const Maze& m,int p,int i,int tick,int op){
++  const auto& a=m.cells[m.component[p]];
++  if(a.size()<2)throw runtime_error("isolated cat");
++  int k=rng.choose(int(a.size())-1,i,tick,op);
++  return a[k]<p?a[k]:a[k+1];
++ }
++ void init(const Game& g){
++  Maze m(g.wall);target.assign(g.pets.size(),-1);
++  for(int i=0;i<int(g.pets.size());i++){
++   auto [p,t]=g.pets[i];
++   if(t==4)target[i]=dogChoice(g,m,p,i,g.turn,0);
++   if(t==5)target[i]=catChoice(m,p,i,g.turn,0);
++  }
++ }
++ int uniform(const Maze& m,int p,int i,int tick,int op)const{
++  int a[4],n=0;
++  for(int q:nb[p])if(q>=0&&!m.wall[q])a[n++]=q;
++  if(!n)throw runtime_error("isolated pet");
++  return a[rng.choose(n,i,tick,op)];
++ }
++ int directed(Maze& m,int p,int endpoint,int i,int tick)const{
++  const auto& d=m.distances(endpoint);
++  int a[4],n=0;
++  for(int q:nb[p])if(q>=0&&d[q]>=0&&d[q]<d[p])a[n++]=q;
++  if(!n)throw runtime_error("missing directed step");
++  return a[rng.choose(n,i,tick,2)];
++ }
++ void advance(Game& g){
++  Maze m(g.wall);
++  for(int i=0;i<int(g.pets.size());i++){
++   int& p=g.pets[i].p;const int type=g.pets[i].t;
++   if(type<=3){for(int sub=0;sub<type;sub++)p=uniform(m,p,i,g.turn,2+sub);continue;}
++   int& t=target[i];
++   const bool dog=type==4;
++   int endpoint=t<0?-1:dog?g.humans[t]:t;
++   if(endpoint<0||endpoint==p||m.component[endpoint]!=m.component[p]){
++    if(dog){++dogRetarget;t=dogChoice(g,m,p,i,g.turn,1);}
++    else{++catRetarget;t=catChoice(m,p,i,g.turn,1);}
++    endpoint=t<0?-1:dog?g.humans[t]:t;
++   }
++   if(endpoint<0){
++    ++dogFallback;
++    p=uniform(m,p,i,g.turn,2);continue;
++   }
++   p=directed(m,p,endpoint,i,g.turn);
++   const bool arrived=p==endpoint;
++   p=uniform(m,p,i,g.turn,3);
++   if(arrived||p==endpoint)t=-1;
++  }
++ }
++};
++long long score(const Game& g){
++ Maze m(g.wall);vector<int> pets(m.cells.size());
++ for(auto p:g.pets)++pets[m.component[p.p]];
++ double score=0.;
++ for(int h:g.humans){int i=m.component[h];score+=(m.cells[i].size()/900.)*ldexp(1.,-pets[i]);}
++ return llround(1e8*score/g.humans.size());
++}
++
++int remainingAt160(const Game& g){
++ Maze m(g.wall);
++ int anc=g.bp(0,g.bankShift),n=0;
++ for(auto p:g.pets)n+=m.component[p.p]==m.component[anc];
++ return n;
++}
++struct Outcome{long long score;double cpu;int budgeted,dogFallback,catRetarget,dogRetarget,polls,trips;};
++Outcome rollout(const Game& observed,const Animals& unknown,bool early){
++ clock_t start=clock();
++ Game sim=observed;sim.started=start;sim.rescueMode=early?1:0;sim.countBudget=true;sim.budgetPolls=sim.budgetTrips=0;
++ Animals animals=unknown;
++ int deadline=0;
++ for(;sim.turn<300;sim.turn++){
++  sim.act=sim.terminal(sim.tacticalGate(sim.repair(sim.bankPlan())));
++  auto post=humanPhase(sim);
++  if(!post)throw runtime_error("rollout illegal human action t="+to_string(sim.turn)+" "+sim.act);
++  sim.wall=post->wall;sim.humans=move(post->humans);
++  animals.advance(sim);
++  deadline+=sim.overBudget();
++ }
++ return {score(sim),double(clock()-start)/CLOCKS_PER_SEC,deadline,animals.dogFallback,animals.catRetarget,animals.dogRetarget,sim.budgetPolls,sim.budgetTrips};
++}
++void offline(Game& g,const char* path){
++ ofstream f(path);
++ const int residual=remainingAt160(g);
++ f<<residual<<" "<<REPEATS.size()<<"\n";
++ if(residual<=4)return;
++ for(auto seed:REPEATS){
++  Animals unknown(seed);unknown.init(g);
++  auto early=rollout(g,unknown,true),stay=rollout(g,unknown,false);
++  f<<seed<<" "<<early.score<<" "<<stay.score<<" "<<setprecision(9)<<early.cpu<<" "<<stay.cpu<<" "
++   <<early.budgeted<<" "<<stay.budgeted<<" "<<early.dogFallback<<" "<<stay.dogFallback<<" "
++   <<early.catRetarget<<" "<<stay.catRetarget<<" "<<early.dogRetarget<<" "<<stay.dogRetarget<<" "<<early.polls<<" "<<stay.polls<<" "<<early.trips<<" "<<stay.trips<<"\n";
++ }
++}
++void fixtures(){
++ Game g;
++ for(int x=0;x<S;x++)for(int y=0;y<S;y++)
++  nb[pos(x,y)]={x?pos(x-1,y):-1,x<S-1?pos(x+1,y):-1,y?pos(x,y-1):-1,y<S-1?pos(x,y+1):-1};
++ int a=pos(5,5),b=pos(5,6),c=pos(5,7),d=pos(5,8),e=pos(5,9);
++ g.wall.fill(1);for(int p:{a,b,c,d,e})g.wall[p]=0;
++ g.humans={e};g.pets={{a,1},{a,2},{a,3}};
++ Animals p(19);p.init(g);p.advance(g);
++ assert(g.pets[0].p==b);
++ assert(g.pets[1].p==a||g.pets[1].p==c);
++ assert(g.pets[2].p==b||g.pets[2].p==d);
++ g.pets={{a,4}};Animals q(23);q.init(g);assert(q.target[0]==0);
++ q.advance(g);assert((g.pets[0].p==a||g.pets[0].p==c)&&q.target[0]==0);
++ g.pets={{a,5}};q.target[0]=c;
++ // With first step forced to b, target c is reset only if the second step reaches it.
++ q.advance(g);assert(g.pets[0].p==a||g.pets[0].p==c);
++ assert(q.target[0]==(g.pets[0].p==c?-1:c));
++ g.wall[c]=1;g.pets={{a,4}};q.target[0]=0;const int f=q.dogFallback;
++ q.advance(g);assert(g.pets[0].p==b&&q.target[0]==-1&&q.dogFallback==f+1);
++ g.wall[c]=0;g.pets={{c,1}};g.humans={a,e};g.act="rl";
++ assert(!humanPhase(g)); // both builds adjacent to pet
++ g.pets.clear();g.humans={a,c};g.act="rL";
++ assert(!humanPhase(g)); // cannot step onto a simultaneous new wall
++ g.humans={a,e};g.act="..";g.pets={{b,1}};
++ assert(humanPhase(g));assert(score(g)==277778); // 5 cells, one pet, two people
++ g.wall[c]=1;
++ assert(score(g)==166667); // person on each side, both two cells; one clean
++}
++}
+@@ -1781,0 +1987 @@
++ if(argc>1&&string_view(argv[1])=="--fixtures"){synthetic_continuation::fixtures();return 0;}
+@@ -1786,0 +1993,2 @@
++ auto shadow=getenv("AHC008_SYNTHETIC_LOG"),validate=getenv("AHC008_VALIDATE_MOVES");
++ if(shadow&&g.rescueMode!=1)return 2;
+@@ -1787,0 +1996,6 @@
++  if(shadow&&g.turn==160){
++   clock_t before=clock();
++   synthetic_continuation::offline(g,shadow);
++   // Only the offline audit is exempt from real replay budget accounting.
++   g.started+=clock()-before;
++  }
+@@ -1789,0 +2004,2 @@
++  auto checked=validate?synthetic_continuation::humanPhase(g):nullopt;
++  if(validate&&!checked)throw runtime_error("official action failed simulator legality");
+@@ -1791,0 +2008 @@
++  if(checked&&(g.wall!=checked->wall||g.humans!=checked->humans))throw runtime_error("official action state mismatch");
+@@ -1792,0 +2010 @@
++ if(validate){ofstream f(validate);f<<synthetic_continuation::score(g)<<"\n";}
