@@ -1,0 +1,2 @@
+# Frozen calibration stopped on startup budget
+Current accepted split-bound source/binary and official tools were hash-pinned before seed generation (see FROZEN.sha256 and SHA256SUMS). All 100 frozen eligible inputs (original map2, M>=8) were probed. Only 8/100 completed all four short native model paths within 650ms, versus required 80; 92 timed out. Report dev/budget-result.json. No paired official labels, risk calibration, confirmation seeds, production policy, or threshold adjustment. A rejected compute envelope is not a conclusion about predictor quality.
