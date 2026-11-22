@@ -1,0 +1,82 @@
+--- compact-corner.single.cpp
++++ compact-late-witness.single.cpp
+@@ -1204,7 +1204,7 @@
+   if(front.started>=0){
+    bool done=true;for(int p:front.cut)done&=wall[p];
+    if(done){
+-    
++    int oldN=compN;
+     // Closed pockets no longer belong to the human root; read each actual
+     // occupied component touched by the original pocket once.
+     bitset<V> pieces;
+@@ -1214,8 +1214,9 @@
+      if(!compWas[i]){++compN;compWas[i]=1;}
+      if(!pieces[g]){pieces[g]=1;++compConfirmed;compArea+=currentCt[g];}
+     }
++    cerr<<"front-done "<<turn<<" new-pets "<<compN-oldN<<" areaTotal "<<compArea<<"\n";
+     ++compFinished;front.started=-1;compLast=turn;
+-   }else if(turn-front.started>=compHorizon){front.started=-1;compLast=turn;}
++   }else if(turn-front.started>=compHorizon){cerr<<"front-deadline "<<turn<<"\n";front.started=-1;compLast=turn;}
+   }
+   if(front.started<0&&(compAttempts>=compCalls||turn%2||turn-compLast<5))return old;
+   auto inside=[&](const Frontage& f,int p){return find(f.shape.begin(),f.shape.end(),p)!=f.shape.end();};
+@@ -1258,24 +1259,23 @@
+    }
+    if(win.cut.empty())return old;
+    front=move(win);front.started=turn;++compAttempts;
++   cerr<<"front-start "<<turn<<" cells "<<front.shape.size()<<" walls "<<front.cut.size()<<" animal ";
++   for(auto p:pets)if(inside(front,p.p)){int d=99;for(int q:front.cut)d=min(d,md(q,p.p));cerr<<p.t<<":"<<d<<",";}
++   cerr<<" station ";
++   for(int q:front.cut)cerr<<etd[q]<<":"<<int(block[q])<<",";
++   cerr<<" footprint ";for(int q:front.shape)cerr<<q<<",";
++   cerr<<"\n";
++
+   }
+   int occupied=0,workerInside=0;
+   for(auto p:pets)occupied+=inside(front,p.p);
+   for(int p:humans)workerInside+=inside(front,p);
+-  int missing=0,near=99;
+-  for(int p:front.cut)if(!wall[p]){
+-   ++missing;
+-   for(auto z:pets)if(group[z.p]==root)near=min(near,md(p,z.p));
+-  }
+-  if(workerInside||(!occupied&&near>3)){front.started=-1;compLast=turn;return old;}
+-  vector<FlatGridFirstStepBfs> route(hm,FlatGridFirstStepBfs(S,S));
+-  for(int i=0;i<hm;++i)route[i].run(humans[i],[&](int p){return p==humans[i]||(!wall[p]&&!inside(front,p)&&!remaining(front,p));});
+-
++  if(!occupied||workerInside){cerr<<"front-abort "<<turn<<" occupied "<<occupied<<" human "<<workerInside<<"\n";front.started=-1;compLast=turn;return old;}
+   struct Job{int z,i,w,stand;};
+   vector<Job> jobs;
+   for(int w:front.cut)if(!wall[w])for(int q:nb[w])if(q>=0&&group[q]==root&&!inside(front,q)&&!remaining(front,q))
+    for(int i=0;i<hm;++i){
+-    int d=route[i].distance(q);
++    int d=workers[i].bfs.distance(q);
+     if(d<0||d>=compHorizon-(turn-front.started)||(!d&&block[w]))continue;
+     int k=-6*d-7*block[w]+3*(old[i]=='.');
+     jobs.push_back({k,i,w,q});
+@@ -1286,14 +1286,13 @@
+   // actions unless they collide with a chosen movement or enter the chamber.
+   bitset<V> built,moved,assigned;int used=0;
+   vector<bool> busy(hm,false);
+-  int newWalls=0;
+   for(auto [z,i,w,q]:jobs)if(!busy[i]&&!assigned[w]&&used<compMax){
+    int h=humans[i];
+    if(h==q){
+-    if(moved[w]||block[w]||(!occupied&&newWalls+1>=missing))continue;
+-    ret[i]=BUILD[dir(h,w)];built.set(w);++compWall;++newWalls;
++    if(moved[w]||block[w])continue;
++    ret[i]=BUILD[dir(h,w)];built.set(w);++compWall;
+    }else {
+-    int to=route[i].first_step(q);
++    int to=workers[i].bfs.first_step(q);
+     if(to<0||built[to]||inside(front,to)||remaining(front,to))continue;
+     ret[i]=MOVE[dir(h,to)];moved.set(to);
+    }
+@@ -1793,6 +1792,7 @@
+   cout<<g.act<<'\n'<<flush;
+   if(!g.advance())break;
+  }
++ cerr<<"rails "<<g.compAttempts<<","<<g.compFinished<<","<<g.compConfirmed<<","<<g.compN<<","<<g.compArea<<","<<g.compWall<<","<<g.compTurns<<"\n";
+ #ifdef GATE_DIAG
+  cerr<<"gate "<<g.gateSearch<<" "<<g.gatePrep<<" "<<g.gateApplied<<"\n";
+ #endif

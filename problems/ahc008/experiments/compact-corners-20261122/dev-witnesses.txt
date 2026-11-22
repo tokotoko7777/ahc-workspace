@@ -1,0 +1,28 @@
+CASE 0007: cell index is zero-based r*30+c
+front-start 122 cells 10 walls 7 animal 2:3, station 3:0,1:0,3:0,0:0,0:0,2:1,2:0, footprint 646,647,648,649,616,617,618,586,587,556,
+front-deadline 128
+front-start 138 cells 6 walls 5 animal 5:1,1:2, station 3:0,1:0,4:1,2:0,0:0, footprint 496,497,498,526,527,528,
+front-abort 142 occupied 0 human 0
+front-start 152 cells 3 walls 3 animal 2:2, station 2:0,0:0,4:0, footprint 441,440,411,
+front-abort 155 occupied 0 human 0
+front-start 196 cells 6 walls 4 animal 2:3, station 1:0,3:0,1:0,1:0, footprint 8,9,10,38,39,68,
+front-done 201 new-pets 1 areaTotal 6
+rails 4,1,1,1,6,11,16
+Score = 4978
+
+CASE 0015: cell index is zero-based r*30+c
+front-start 166 cells 6 walls 5 animal 1:2, station 2:0,2:0,2:0,1:1,1:1, footprint 443,444,413,414,383,384,
+front-done 171 new-pets 1 areaTotal 6
+rails 1,1,1,1,6,5,5
+Score = 5444444
+
+CASE 0021: cell index is zero-based r*30+c
+front-start 124 cells 6 walls 4 animal 2:2, station 1:0,3:0,0:0,0:0, footprint 188,189,190,158,159,128,
+front-done 129 new-pets 1 areaTotal 6
+front-start 144 cells 8 walls 7 animal 4:1,2:2,5:2, station 3:0,2:0,1:1,3:0,3:0,2:0,0:0, footprint 428,429,398,399,368,369,338,339,
+front-abort 147 occupied 0 human 0
+front-start 232 cells 3 walls 3 animal 4:2, station 1:0,0:0,3:0, footprint 488,489,518,
+front-abort 233 occupied 0 human 0
+rails 3,1,1,1,6,9,9
+Score = 5444444
+
