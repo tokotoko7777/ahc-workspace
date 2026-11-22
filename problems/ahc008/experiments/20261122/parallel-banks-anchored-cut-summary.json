@@ -1,0 +1,94 @@
+{
+  "verified": 30,
+  "snapshots": 90,
+  "snapshot_status": {
+    "anchored": 90
+  },
+  "off_anchor": 500,
+  "result": {
+    "strict_all": {
+      "events": 500,
+      "cases": 28,
+      "pets": 221,
+      "ordinarily_missed": 42,
+      "missed_cases": 12
+    },
+    "strict_compact": {
+      "events": 95,
+      "cases": 23,
+      "pets": 70,
+      "ordinarily_missed": 11,
+      "missed_cases": 7
+    },
+    "strict_nonrect": {
+      "events": 70,
+      "cases": 21,
+      "pets": 49,
+      "ordinarily_missed": 7,
+      "missed_cases": 5
+    },
+    "strict_all_now_legal_nonrect": {
+      "events": 70,
+      "cases": 21,
+      "pets": 49,
+      "ordinarily_missed": 7,
+      "missed_cases": 5
+    },
+    "strict_routed": {
+      "events": 1,
+      "cases": 1,
+      "pets": 1,
+      "ordinarily_missed": 0,
+      "missed_cases": 0
+    },
+    "strict_routed_immediate": {
+      "events": 0,
+      "cases": 0,
+      "pets": 0,
+      "ordinarily_missed": 0,
+      "missed_cases": 0
+    },
+    "geometric_all": {
+      "events": 500,
+      "cases": 28,
+      "pets": 221,
+      "ordinarily_missed": 42,
+      "missed_cases": 12
+    },
+    "geometric_compact": {
+      "events": 280,
+      "cases": 27,
+      "pets": 149,
+      "ordinarily_missed": 30,
+      "missed_cases": 9
+    },
+    "geometric_nonrect": {
+      "events": 3,
+      "cases": 3,
+      "pets": 3,
+      "ordinarily_missed": 2,
+      "missed_cases": 2
+    },
+    "geometric_all_now_legal_nonrect": {
+      "events": 1,
+      "cases": 1,
+      "pets": 1,
+      "ordinarily_missed": 0,
+      "missed_cases": 0
+    },
+    "geometric_routed": {
+      "events": 1,
+      "cases": 1,
+      "pets": 1,
+      "ordinarily_missed": 0,
+      "missed_cases": 0
+    },
+    "geometric_routed_immediate": {
+      "events": 0,
+      "cases": 0,
+      "pets": 0,
+      "ordinarily_missed": 0,
+      "missed_cases": 0
+    }
+  }
+}
