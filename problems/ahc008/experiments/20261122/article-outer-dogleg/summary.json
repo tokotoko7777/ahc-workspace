@@ -1,0 +1,17 @@
+{
+  "verified": 30,
+  "counts": {
+    "active_turns": 1770,
+    "brackets": 646,
+    "brackets_full": 92,
+    "occupied_passive": 3
+  },
+  "bracket_cases": 16,
+  "occupied_cases": 2,
+  "occupied_full": 0,
+  "route_six": 0,
+  "route_six_cases": 0,
+  "legal_exact_immediate": 0,
+  "factual_both": 0,
+  "distinct_otherwise_final_missed_feasible": 0
+}
