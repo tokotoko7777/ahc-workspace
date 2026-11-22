@@ -1,0 +1,30 @@
+{
+  "verified": 30,
+  "counts": {
+    "search_turns": 647,
+    "chosen_crew_not_retained": 638,
+    "continued_turns": 1512,
+    "chosen_not_full_case": 415,
+    "chosen_pet_on_proposed_cut": 919,
+    "qualified_proxy": 464,
+    "chosen_too_far": 14,
+    "chosen_no_one_job_per_person": 10,
+    "chosen_short": 16,
+    "chosen_now": 2,
+    "chosen_below_area": 42
+  },
+  "candidates": {
+    "pet_on_proposed_cut": 276,
+    "no_one_job_per_person": 51,
+    "too_far": 27,
+    "crew_not_retained": 86,
+    "not_full_case": 15,
+    "short": 9
+  },
+  "candidate_cases": 12,
+  "overlooked_immediate": 0,
+  "overlooked_immediate_unresolved": 0,
+  "overlooked_short": 9,
+  "overlooked_short_unresolved": 0,
+  "overlooked_short_factual_unresolved": 0
+}
