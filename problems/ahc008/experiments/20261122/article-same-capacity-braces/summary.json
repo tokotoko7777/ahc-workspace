@@ -1,0 +1,15 @@
+{
+  "verified": 30,
+  "ordinary_brace_turns": 1655,
+  "turns_with_actor_choice": 533,
+  "alternatives": 840,
+  "improving_turns": 14,
+  "improving_cases": 14,
+  "max_delta": 14,
+  "first5_gains": 1,
+  "first5_cases": 1,
+  "first5_distinct_banks": 1,
+  "ready_staff_gains": 0,
+  "ready_staff_cases": 0,
+  "max_legal_pre_gains": 0
+}
