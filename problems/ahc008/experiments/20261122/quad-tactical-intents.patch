@@ -1,0 +1,12 @@
+--- problems/ahc008/tactical_gate_submission.cpp
++++ problems/ahc008/tactical_gate_submission.cpp
+@@ -1445,0 +1446,9 @@
++  if(g.turn<68)if(const char* p=getenv("AHC008_TARGET_LIST")){
++   ofstream f(p,ios::app);
++   f<<g.turn;
++   for(int z:{g.target,g.target2})if(z>=0&&z<(int)g.pockets.size()){
++    f<<" | "<<z;
++    for(int p:g.pockets[z].wall)f<<" "<<p;
++   }
++   f<<"\n";
++  }

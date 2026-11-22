@@ -73,3 +73,24 @@ Reproduction after compiling the unchanged baseline separately:
     g++ -std=c++23 problems/ahc008/tactical_gate_submission.cpp -o quad-watch
     python "$d/quad_live_watch_bench.py" "$HARNESS" "$TESTER" ./tactical ./quad-watch "$FRESH_CASES" watch.csv
     python "$d/quad_side_reuse_audit.py" "$HARNESS" "$TESTER" ./tactical "$ORIGINAL_DEV_CASES" reuse.csv
+
+## Planned tactical pocket walls (no action modification)
+
+Log the announced wall lists of `target` and `target2` on unchanged
+tactical turns t0–67. Check all 300 action bytes and official scores
+per case against the separate baseline binary, then independently
+replay. The two target slots are populated in only 12/30 cases (336 of
+2040 total early case-turns); this does not cover other phases that
+do not expose either target slot. Compare every candidate shell to both
+plans separately. Simply intersecting at least two cells gives 2194
+line, 701 square, and 8112 L repeated shape-turns, but none contains
+all the cells of any complete straight ≥2-cell side in a single plan.
+Thus none proceed to tests of actual side creation within six
+turns, ≤3 new jobs, pet presence/reach or available guard stance.
+No production adjustment was justified. Different or co-designed first
+barriers are not ruled out.
+
+Compile a scratch copy of tactical with quad-tactical-intents.patch
+(not the quad-pilot patches), then:
+
+    python quad_planned_side_audit.py "$HARNESS" "$TESTER" ./tactical ./tactical-intents "$ORIGINAL_DEV_CASES" > planned.csv
