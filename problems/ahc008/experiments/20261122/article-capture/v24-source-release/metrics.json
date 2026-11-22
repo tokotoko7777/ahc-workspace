@@ -1,0 +1,80 @@
+{
+  "dev30": {
+    "sha256": "7fea924ad944c66f85b634a0bb2e75de657b0b9ad928bab7a9e2438c61e2eb20",
+    "v7": {
+      "score": 829740689,
+      "all_clear": 14,
+      "final_reachable": 49,
+      "final_exact4": 236,
+      "early4": 114,
+      "full300": 9,
+      "floor_avg": 393.9904666666667,
+      "median_t": 0.6308169454969175,
+      "max_t": 0.8852209210017463
+    },
+    "v24": {
+      "score": 981530056,
+      "all_clear": 15,
+      "final_reachable": 50,
+      "final_exact4": 263,
+      "early4": 143,
+      "full300": 12,
+      "floor_avg": 457.62666666666667,
+      "median_t": 0.5674705669989635,
+      "max_t": 0.9309765180005343
+    },
+    "score_wins": 18
+  },
+  "practice100": {
+    "sha256": "ffce10612bd837edb2116d4883b7e5104e5a464625ce92d3b6edb0d9bf4ef0b5",
+    "v7": {
+      "score": 2655369894,
+      "all_clear": 36,
+      "final_reachable": 165,
+      "final_exact4": 822,
+      "early4": 433,
+      "full300": 25,
+      "floor_avg": 434.41343,
+      "median_t": 0.6319081009969523,
+      "max_t": 0.9706127760000527
+    },
+    "v24": {
+      "score": 3199806134,
+      "all_clear": 47,
+      "final_reachable": 117,
+      "final_exact4": 921,
+      "early4": 505,
+      "full300": 33,
+      "floor_avg": 455.13583,
+      "median_t": 0.5630228645022726,
+      "max_t": 1.0729774100036593
+    },
+    "score_wins": 59
+  },
+  "independent100": {
+    "sha256": "9c06fe1f118630acda9de4db08c35c7fa9188f011c5d218525f3440cee1ab166",
+    "v7": {
+      "score": 2688102365,
+      "all_clear": 44,
+      "final_reachable": 139,
+      "final_exact4": 837,
+      "early4": 456,
+      "full300": 26,
+      "floor_avg": 411.65644,
+      "median_t": 0.6316279165002925,
+      "max_t": 0.9232081209993339
+    },
+    "v24": {
+      "score": 3285615612,
+      "all_clear": 44,
+      "final_reachable": 148,
+      "final_exact4": 954,
+      "early4": 506,
+      "full300": 35,
+      "floor_avg": 439.56489,
+      "median_t": 0.6020200140046654,
+      "max_t": 1.0404281369992532
+    },
+    "score_wins": 57
+  }
+}
