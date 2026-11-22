@@ -1,0 +1,213 @@
+diff --git a/problems/ahc008/capture_first_submission.cpp b/problems/ahc008/capture_notches.cpp
+index 0950f01..9850acd 100644
+--- a/problems/ahc008/capture_first_submission.cpp
++++ b/problems/ahc008/capture_notches.cpp
+@@ -1091,6 +1091,145 @@ struct Game {
+  array<int,V> rcell{}, rdooridx{};
+  int rarea[16]{}, rnr=0, roomTarget=0, roomAge=-1000;
+  bool roomReady=false, roomGot=false;
++#ifndef CAP_NOTCH_COUNT
++#define CAP_NOTCH_COUNT 6
++#endif
++ struct Notch {
++  int gate=-1, host=-1, receiver=-1;
++  vector<int> inside,wall,stance;
++  bool prepared=false,closed=false;
++  array<bool,20> entered{};
++ };
++ vector<Notch> notches;
++ array<int,6> notchEntries{},notchCaught{};
++ int notchPrepared=0,notchSealed=0,notchPending=-1,notchLegalWindows=0,notchNearbyWindows=0,notchIdleWindows=0;
++ void designNotches(){
++  if(!CAP_NOTCH_COUNT)return;
++  vector<pair<double,Notch>> opts;
++  array<int,V> original=rcell;
++  auto has=[](const vector<int>& v,int p){return find(v.begin(),v.end(),p)!=v.end();};
++  for(int gate=0;gate<V;gate++){
++   if(rcell[gate]>=0||rdooridx[gate]>=0)continue;
++   for(int axis:{0,1})for(int sign:{-1,1})for(int wid:{1,2})for(int shear:{-1,1}){
++    auto point=[&](int dep,int across){
++     int r=gate/S+(axis?across:dep*sign);
++     int c=gate%S+(axis?dep*sign:across);
++     return r>=0&&r<S&&c>=0&&c<S?pos(r,c):-1;
++    };
++    int entry=point(-1,0),tip=point(1,0);
++    if(entry<0||tip<0||original[entry]<0||original[tip]<0||original[entry]==original[tip])continue;
++    Notch z;z.gate=gate;z.host=original[entry];z.receiver=original[tip];
++    z.stance={entry};
++    bool ok=true;
++    for(int d=1;d<=3;d++)for(int a=0;a<wid;a++){
++     int p=point(d,a*shear);
++     if(p<0||original[p]!=z.receiver){ok=false;break;}
++     z.inside.push_back(p);
++    }
++    if(!ok)continue;
++    int colors=0;
++    for(int p:z.inside)if(md(p,gate)>=2)colors|=1<<((p/S+p%S)&1);
++    if(colors!=3)continue;
++    for(int p:z.inside)for(int q:nb[p])if(q>=0&&q!=gate&&!has(z.inside,q)){
++     if(rdooridx[q]>=0||(original[q]>=0&&original[q]!=z.receiver)){ok=false;break;}
++     z.wall.push_back(q);
++    }
++    if(!ok)continue;
++    sort(z.wall.begin(),z.wall.end());z.wall.erase(unique(z.wall.begin(),z.wall.end()),z.wall.end());
++    int widthcost=0,route=99;
++    for(int p:z.wall)widthcost+=original[p]>=0;
++    for(auto d:rdoor)if((d.a==z.host&&d.b==z.receiver)||(d.b==z.host&&d.a==z.receiver))route=min(route,md(d.p,gate));
++    if(route<2||route>4)continue;
++    double val=0;
++    for(auto p:pets){
++     int d=md(p.p,gate);
++     val+=max(0,10-d)*(p.t==1||p.t==5?1.4:1.);
++    }
++    int walk=99;
++    for(int p:humans)walk=min(walk,md(gate,p));
++    val-=widthcost*1.05+walk*.8+route*.8;
++    if(wid==2)val+=2.;
++    opts.push_back({val,move(z)});
++   }
++  }
++  sort(opts.begin(),opts.end(),[](const auto& a,const auto& b){
++   if(a.first!=b.first)return a.first>b.first;
++   return a.second.gate<b.second.gate;
++  });
++  auto linked=[&](){
++   array<int,16> counts{};
++   for(int p:rcell)if(p>=0)counts[p]++;
++   for(int i=0;i<rnr;i++){
++    if(counts[i]<20)return false;
++    int q[900],count=1;
++    bitset<V> seen;
++    int p=find(rcell.begin(),rcell.end(),i)-rcell.begin();
++    q[0]=p;seen[p]=true;
++    for(int j=0;j<count;j++)for(int v:nb[q[j]])if(v>=0&&rcell[v]==i&&!seen[v])seen[v]=true,q[count++]=v;
++    if(count!=counts[i])return false;
++   }
++   for(auto d:rdoor){
++    int mask=0;
++    for(int q:nb[d.p])if(q>=0&&rcell[q]>=0)mask|=1<<rcell[q];
++    if(mask!=((1<<d.a)|(1<<d.b)))return false;
++   }
++   for(auto& z:notches)for(int q:z.stance)if(rcell[q]!=z.host)return false;
++   return true;
++  };
++  bitset<V> touched;
++  for(auto& [rank,z]:opts){
++   bool clear=!touched[z.gate];
++   for(int p:z.inside)clear&=!touched[p];
++   for(int p:z.wall)clear&=!touched[p];
++   for(int p:z.stance)clear&=!touched[p];
++   if(!clear)continue;
++   auto old=rcell;
++   rcell[z.gate]=z.host;
++   for(int p:z.inside)rcell[p]=z.host;
++   for(int p:z.wall)rcell[p]=-1;
++   notches.push_back(z);
++   if(!linked()){notches.pop_back();rcell=old;continue;}
++   touched[z.gate]=true;
++   for(int p:z.inside)touched[p]=true;
++   for(int p:z.wall)touched[p]=true;
++   for(int p:z.stance)touched[p]=true;
++   if(notches.size()>=size_t(CAP_NOTCH_COUNT))break;
++  }
++ }
++ string notchClose(string base){
++  if(notches.empty()||turn>=298||overBudget())return base;
++  for(auto &z:notches)if(!z.prepared&&all_of(z.wall.begin(),z.wall.end(),[&](int p){return wall[p];})){
++   z.prepared=true;notchPrepared++;
++  }
++  if(!roomReady)return base;
++  int m=humans.size();
++  bitset<V> baseWalls,baseMoves;
++  vector<int> after=humans;
++  for(int i=0;i<m;i++)if(base[i]!='.'){
++   int h=humans[i],ch=base[i];
++   if(ch>='a')baseWalls[nb[h][find(BUILD,BUILD+4,ch)-BUILD]]=1;
++   else after[i]=nb[h][find(MOVE,MOVE+4,ch)-MOVE],baseMoves[after[i]]=1;
++  }
++  for(int j=0;j<(int)notches.size();j++){
++   auto &z=notches[j];
++   int gate=z.gate;
++   if(!z.prepared||z.closed||wall[gate]||block[gate]||baseWalls[gate])continue;
++   auto inside=[&](int p){return find(z.inside.begin(),z.inside.end(),p)!=z.inside.end();};
++   if(none_of(pets.begin(),pets.end(),[&](auto p){return inside(p.p);}))continue;
++   if(any_of(after.begin(),after.end(),[&](int p){return inside(p)||p==gate;}))continue;
++   notchLegalWindows++;
++   for(int h:humans)if(dir(h,gate)>=0){notchNearbyWindows++;break;}
++   for(int i=0;i<m;i++)if(base[i]=='.'&&dir(humans[i],gate)>=0){notchIdleWindows++;break;}
++   for(int i=0;i<m;i++){
++    int h=humans[i],d=dir(h,gate);
++    if(d<0||base[i]>='a'||inside(h))continue;
++    if(roomTarget&&!(roomTarget>>z.host&1))continue;
++    if(base[i]!='.' && (!roomTarget||rcell[h]!=z.host))continue;
++    base[i]=BUILD[d];notchPending=j;return base;
++   }
++  }
++  return base;
++ }
+  void createRooms(){
+   roomReady=true;rcell.fill(-1);rdooridx.fill(-1);
+   int n=CAP_GRID, nr=n*n;
+@@ -1114,6 +1253,7 @@ struct Game {
+     rdooridx[p]=rdoor.size();rdoor.push_back({p,id,u*n+v+1});
+    }
+   }
++  designNotches();
+   for(int p=0;p<V;p++)if(rcell[p]<0&&rdooridx[p]<0)rwall.push_back(p);
+  }
+  string roomBuild(const vector<pair<int,int>>& targets,int retain,bool closing){
+@@ -1604,6 +1744,17 @@ struct Game {
+   return ret;
+  }
+  bool advance(){
++  if(notchPending>=0){
++   auto& z=notches[notchPending];
++   bool closed=false;
++   for(int i=0;i<(int)humans.size();i++)if(act[i]>='a')
++    closed|=nb[humans[i]][find(BUILD,BUILD+4,act[i])-BUILD]==z.gate;
++   if(closed){
++    z.closed=true;notchSealed++;
++    for(auto p:pets)if(find(z.inside.begin(),z.inside.end(),p.p)!=z.inside.end())notchCaught[p.t]++;
++   }
++   notchPending=-1;
++  }
+   for(int i=0;i<(int)humans.size();i++) if(act[i]!='.'){
+    if(islower(act[i]))wall[nb[humans[i]][find(BUILD,BUILD+4,act[i])-BUILD]]=1;
+    else humans[i]=nb[humans[i]][find(MOVE,MOVE+4,act[i])-MOVE];
+@@ -1611,7 +1762,13 @@ struct Game {
+   string m;
+   for(auto &p:pets){
+    if(!(cin>>m))return false;
+-   for(char x:m)if(x!='.')p.p=nb[p.p][find(MOVE,MOVE+4,x)-MOVE];
++   for(char x:m)if(x!='.'){
++    int before=p.p;
++    p.p=nb[p.p][find(MOVE,MOVE+4,x)-MOVE];
++    for(auto& z:notches)if(z.prepared&&!z.closed&&z.gate==before&&!z.entered[&p-pets.data()]&&find(z.inside.begin(),z.inside.end(),p.p)!=z.inside.end()){
++     z.entered[&p-pets.data()]=true;notchEntries[p.t]++;
++    }
++   }
+   }
+   return true;
+  }
+@@ -1621,13 +1778,20 @@ int main(int argc,char**argv){
+  ios::sync_with_stdio(false);cin.tie(nullptr);
+  Game g;g.init(argc,argv);
+  for(;g.turn<300;g.turn++){
+-  g.act=g.terminal(g.tacticalGate(g.repair(g.plan())));
++  g.act=g.terminal(g.tacticalGate(g.repair(g.notchClose(g.repair(g.plan())))));
+   cout<<g.act<<'\n'<<flush;
+   if(!g.advance())break;
+  }
+ #ifdef GATE_DIAG
+  cerr<<"gate "<<g.gateSearch<<" "<<g.gatePrep<<" "<<g.gateApplied<<"\n";
+ #endif
++#ifdef CAP_NOTCH_DIAG
++ cerr<<"notch "<<g.notches.size()<<' '<<g.notchPrepared<<' '<<g.notchSealed;
++ for(int k=1;k<=5;k++)cerr<<' '<<g.notchEntries[k];
++ for(int k=1;k<=5;k++)cerr<<' '<<g.notchCaught[k];
++ cerr<<' '<<g.notchLegalWindows<<' '<<g.notchNearbyWindows<<' '<<g.notchIdleWindows;
++ cerr<<"\n";
++#endif
+ #ifdef HAB_DIAG
+  array<int,6> active{}; g.workers[0].bfs.run(g.humans[0],[&](int p){return !g.wall[p];});
+  int a=0;for(int p=0;p<V;p++)a+=g.workers[0].bfs.distance(p)>=0;

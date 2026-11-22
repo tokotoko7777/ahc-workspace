@@ -1,0 +1,15 @@
+# Integrated notch anatomy and staffing failure
+
+These six recesses are part of the macro scaffold build queue, not an extra idle worker phase. Each is depth three, width one or two, near a formal inter-room passage, with legal internal poses of both checkerboard colors (necessary for the parity-preserving pig) and a direct exterior guard position. Proposed geometry is accepted only when each of the 16 macro areas is still connected and every existing 24-edge backbone doorway sees exactly its original two assigned regions. A notch closes only after all its other perimeter cells exist, a pet is observed inside, and an already-adjacent builder can legally act without jeopardizing the refuge plan. The same capture4 fixed fallback is used.
+
+Apply capture_notches.patch to a scratch copy of capture_first_submission.cpp and compile GNU C++23; default six recesses. Compile with -DCAP_NOTCH_DIAG for the per-case activation and staffing statistics. On the exact same 30 development seeds as the capture-first pilot:
+
+- All 180 / 180 planned recesses really finished preparation.
+- 148 distinct animal-by-notch entries after preparation: cow 24, pig 42, rabbit 56, dog 12, cat 14.
+- 1,834 notch-turn windows had a prepared occupied notch, no animal blocking the gate, and no person ending the baseline move in the notch or its gate. Only six windows had any eligible geometric neighboring human at turn start; none had an idle adjacent builder. No notch closed.
+- Official tester + independent replay: 30/30 → 29/30 all-clear, 297,777,775 → 259,111,721, all legal, maximum direct tester wall 0.290221 s.
+- On the 29 paired all-clear cases, safe human union 89.00→80.41, total pet-only area 658.79→636.97, largest pet-only component 641.07→625.31. The nominal animal-area reduction is not meaningful compaction: no animal was captured by a notch, extra walls consume area and safe room size decreases. There is one human component in each paired case.
+
+The entry and perimeter prerequisites succeeded; staffing is the decisive bottleneck. Do not spend another parameter sweep waiting for pets in these same recesses, and do not promote the arm or run distributed holdout. Preserve capture4 as the capture-first leader.
+
+Next structurally distinct algorithm to test: reserve a fixed budget for two or three designated workers (not all 16 seams), target an actually observed slow animal already near an existing wall, and progressively sweep a short separating front anchored to the actual walls around that occupied tile. Use the cow's one-step reachable support to shift the front as needed and reuse any already-built shoulder wall; commit final closing only jointly and legally, then return immediately to untouched clean-refuge fallback. Compare conditional capture success per worker-turn, exact total pet-containing area on same-clear pairs, independent all-clear rate, and not merely visits or counts of built walls. This is capture-driven localization, not a further test of passive waiting.
