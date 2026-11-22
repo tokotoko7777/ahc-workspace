@@ -1,0 +1,74 @@
+{
+  "verified": 30,
+  "episodes": 476,
+  "completed": 35,
+  "ever_completed": 67,
+  "attribution": {
+    "late": {
+      "turns": 513,
+      "cases": 29,
+      "weighted_lost": 5831.0,
+      "actual_captured": 91,
+      "empty_detached_area": 125,
+      "broad_turns": 16,
+      "broad_cases": 14,
+      "low_yield_broad_turns": 2,
+      "low_yield_broad_cases": 2
+    },
+    "lastcap": {
+      "turns": 66,
+      "cases": 12,
+      "weighted_lost": 292.0,
+      "actual_captured": 11,
+      "empty_detached_area": 7,
+      "broad_turns": 0,
+      "broad_cases": 0,
+      "low_yield_broad_turns": 0,
+      "low_yield_broad_cases": 0
+    },
+    "pocket": {
+      "turns": 526,
+      "cases": 29,
+      "weighted_lost": 1526.0,
+      "actual_captured": 39,
+      "empty_detached_area": 123,
+      "broad_turns": 0,
+      "broad_cases": 0,
+      "low_yield_broad_turns": 0,
+      "low_yield_broad_cases": 0
+    },
+    "bank": {
+      "turns": 2244,
+      "cases": 30,
+      "weighted_lost": 5435.0,
+      "actual_captured": 235,
+      "empty_detached_area": 0,
+      "broad_turns": 0,
+      "broad_cases": 0,
+      "low_yield_broad_turns": 0,
+      "low_yield_broad_cases": 0
+    },
+    "wrapper": {
+      "turns": 10,
+      "cases": 7,
+      "weighted_lost": 1838.5357142857142,
+      "actual_captured": 14,
+      "empty_detached_area": 1,
+      "broad_turns": 7,
+      "broad_cases": 6,
+      "low_yield_broad_turns": 3,
+      "low_yield_broad_cases": 3
+    },
+    "mixed": {
+      "turns": 0,
+      "cases": 0,
+      "weighted_lost": 0,
+      "actual_captured": 0,
+      "empty_detached_area": 0,
+      "broad_turns": 0,
+      "broad_cases": 0,
+      "low_yield_broad_turns": 0,
+      "low_yield_broad_cases": 0
+    }
+  }
+}
