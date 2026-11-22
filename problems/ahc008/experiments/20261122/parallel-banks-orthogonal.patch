@@ -1,0 +1,227 @@
+--- problems/ahc008/experiments/20261122/parallel-banks-narrow-rescue-research.cpp
++++ problems/ahc008/experiments/20261122/parallel-banks-orthogonal.cpp
+@@ -1083,0 +1084,215 @@
++ bool orthBank=false,orthFull=false;
++ array<int,6> orthEarly{-1,-1,-1,-1,-1,-1};
++ array<int,8> orthCrew{-1,-1,-1,-1,-1,-1,-1,-1};
++ array<int,8> orthAnchor{};
++ array<int,5> orthOld{-1,-1,-1,-1,-1},orthAge{};
++ int oR(int p)const{return bankRot?p%S:p/S;}
++ int oC(int p)const{return bankRot?p/S:p%S;}
++ void makeOrthBanks(){
++  bankShift=4;
++  double best=-1e30;
++  int bestRot=0;
++  for(int rot=0;rot<2;rot++){
++   bankRot=rot;
++   vector<int> body,anchors;
++   for(int b=0;b<3;b++)for(int r=2;r<=14;r+=2)for(int c=6+7*b;c<=9+7*b;c++)body.push_back(bp(r,c));
++   for(int c=3;c<=27;c+=2)for(int r=22;r<=25;r++)body.push_back(bp(r,c));
++   for(int b=0;b<4;b++)anchors.push_back(bp(8,4+7*b));
++   anchors.push_back(bp(20,14));anchors.push_back(bp(27,14));
++   double value=0.;
++   for(auto p:pets){
++    int d=99;for(int x:body)d=min(d,md(p.p,x));
++    value+=1./(1.+.8*d);
++   }
++   for(int x:anchors){
++    int d=99;for(int h:humans)d=min(d,md(h,x));value-=.045*d;
++   }
++   if(value>best)best=value,bestRot=rot;
++  }
++  bankRot=bestRot;
++  bitset<V> needed;
++  auto add=[&](int b,int r,int a,bool lower){
++   auto point=[&](int row,int col){return lower?bp(col,row):bp(row,col);};
++   TubeBank t{b,r,point(r,a),point(r,a+1),point(r,a+6),point(r,a+7),{},{}};
++   for(int i=0;i<4;i++){
++    t.inner[i]=point(r,a+2+i);
++    for(int u:{-1,1}){
++     int p=point(r+u,a+2+i);needed[p]=1;t.side.push_back(p);
++    }
++   }
++   banks.push_back(move(t));
++  };
++  for(int b=0;b<3;b++)for(int r=2;r<=14;r+=2)add(b,r,4+7*b,false);
++  for(int c=3;c<=27;c+=2)add(3,c,20,true);
++  for(int p=0;p<V;p++)if(needed[p])bankWalls.push_back(p);
++ }
++ void startOrthZones(){
++  int m=humans.size(),tasks=m>=8?8:6;
++  for(int j=0;j<4;j++)orthAnchor[j]=bp(8,4+7*j);
++  for(int j=4;j<tasks;j++)orthAnchor[j]=bp(j%2==0?20:27,tasks==6?14:j<6?9:21);
++  int n=1<<m;vector<int> dp(n,9999);dp[0]=0;
++  vector<vector<pair<int,int>>> take(tasks,vector<pair<int,int>>(n,{-1,-1}));
++  for(int j=0;j<tasks;j++){
++   vector<int> next(n,9999);
++   for(int mask=0;mask<n;mask++)if(dp[mask]<9999)
++   for(int w=0;w<m;w++)if(!(mask>>w&1)){
++    int d=workers[w].bfs.distance(orthAnchor[j]);if(d<0)continue;
++    int k=mask|1<<w;
++    if(dp[mask]+d<next[k])next[k]=dp[mask]+d,take[j][k]={mask,w};
++   }
++   dp.swap(next);
++  }
++  int k=min_element(dp.begin(),dp.end())-dp.begin();
++  if(dp[k]>=9999)return;
++  orthFull=true;
++  for(int j=tasks-1;j>=0;j--){auto [old,w]=take[j][k];orthCrew[j]=w;k=old;}
++  orthOld.fill(-1);
++ }
++ void stageOrth(const vector<int>& ready){
++  if(turn<35||turn>=bankStaffTurn)return;
++  array<int,4> counts{};
++  for(int i=0;i<int(banks.size());i++)counts[banks[i].b]+=ready[i];
++  int total=accumulate(counts.begin(),counts.end(),0);
++  if(count_if(orthEarly.begin(),orthEarly.end(),[](int w){return w>=0;})>=2&&total<23)return;
++  for(int iter=0;iter<4;iter++){
++   int best=-1,L=-1,R=-1,left=-1,right=-1;
++   for(int b=0;b<4;b++){
++    int l=b<3?b:4,r=l+1;
++    if(counts[b]<5||(orthEarly[l]>=0&&orthEarly[r]>=0))continue;
++    int ca=orthEarly[l],cb=orthEarly[r];
++    int m=humans.size();
++    auto free=[&](int w){return find(orthEarly.begin(),orthEarly.end(),w)==orthEarly.end();};
++    for(int i=0;i<m;i++)if(i==ca||(ca<0&&free(i)))
++    for(int j=0;j<m;j++)if(i!=j&&(j==cb||(cb<0&&free(j)))){
++     int d=999;
++     for(int k=0;k<int(banks.size());k++)if(ready[k]&&banks[k].b==b){
++      const auto &x=banks[k];
++      int p=workers[i].bfs.distance(x.l),q=workers[j].bfs.distance(x.h);
++      if(p>=0&&q>=0)d=min(d,p+q+max(p,q)/2);
++     }
++     int v=100+5*counts[b]-d;
++     if(v>best)best=v,left=i,right=j,L=l,R=r;
++    }
++   }
++   if(L<0)return;
++   orthEarly[L]=left;orthEarly[R]=right;
++   if(total<23)return;
++  }
++ }
++ string orthPlan(){
++  if(turn==bankStaffTurn)startOrthZones();
++  bitset<V> build,moveTo;
++  vector<int> ready(banks.size()),occupancy(banks.size()),viable(banks.size());
++  for(int i=0;i<int(banks.size());i++){
++   auto &x=banks[i];
++   ready[i]=all_of(x.side.begin(),x.side.end(),[&](int p){return wall[p];});
++   if(wall[x.g]||wall[x.k])continue;
++   for(auto p:pets)if(find(x.inner.begin(),x.inner.end(),p.p)!=x.inner.end())++occupancy[i];
++   bool human=any_of(humans.begin(),humans.end(),[&](int h){return find(x.inner.begin(),x.inner.end(),h)!=x.inner.end();});
++   viable[i]=ready[i]&&occupancy[i]&&!human&&!block[x.g]&&!block[x.k];
++  }
++  stageOrth(ready);
++  vector<pair<int,int>> orders;
++  for(int i=0;i<int(banks.size());i++)if(viable[i])orders.emplace_back(-occupancy[i],i);
++  sort(orders.begin(),orders.end());
++  for(auto [np,i]:orders){
++   auto& x=banks[i];
++   int a=-1,b=-1;
++   for(int j=0;j<int(humans.size());j++)if(act[j]=='.'){
++    if(humans[j]==x.l)a=j;if(humans[j]==x.h)b=j;
++   }
++   if(a<0||b<0)continue;
++   act[a]=BUILD[dir(x.l,x.g)];act[b]=BUILD[dir(x.h,x.k)];build[x.g]=build[x.k]=1;
++  }
++  auto lowerSlot=[&](const TubeBank& x){return orthFull&&humans.size()>=8&&x.r>=14?4:3;};
++  struct Pick{double value=-1.;int tube=-1,a=-1,b=-1;};
++  array<Pick,5> picks;
++  for(int i=0;i<int(banks.size());i++){
++   const auto &x=banks[i];int j=x.b<3?x.b:lowerSlot(x);
++   if(!ready[i]||wall[x.g]||wall[x.k]||build[x.g]||build[x.k])continue;
++   int a=-1,b=-1;
++   if(orthFull){
++    int l=j<3?j:j==3?4:6;a=orthCrew[l];b=orthCrew[l+1];
++   }else{
++    int l=j<3?j:4;a=orthEarly[l];b=orthEarly[l+1];
++   }
++   if(a<0||b<0||act[a]!='.'||act[b]!='.')continue;
++   int d1=workers[a].bfs.distance(x.l),d2=workers[b].bfs.distance(x.h);
++   if(d1<0||d2<0||max(d1,d2)>19)continue;
++   int eta=max(d1,d2);
++   double val=0.;
++   for(auto p:pets){
++    if(group[p.p]!=group[x.l])continue;
++    int d=min(md(p.p,x.inner[1]),md(p.p,x.inner[2]));
++    if(d>6+eta/2)continue;
++    if(d==0)val+=eta<=1?12.:6.;
++    else val+=(p.t>=3?3.7:4.8)/(1.+.65*d+.14*d*d);
++   }
++   val=(val+(viable[i]?2.:0.))/(2.+.48*eta+.15*(d1+d2));
++   if(orthOld[j]==i&&turn-orthAge[j]<6)val+=.22;
++   if(val>picks[j].value)picks[j]={val,i,a,b};
++  }
++  int chosen=0;double highest=0.;
++  for(int mask=1;mask<32;mask++){
++   int seen=0;bool valid=true;double score=0.;
++   for(int i=0;i<5;i++)if(mask>>i&1){
++    auto p=picks[i];
++    if(p.tube<0||p.value<=.2){valid=false;break;}
++    int v=(1<<p.a)|(1<<p.b);
++    if(seen&v){valid=false;break;}
++    seen|=v;score+=p.value;
++   }
++   if(valid&&score>highest)highest=score,chosen=mask;
++  }
++  bitset<16> booked;
++  for(int i=0;i<5;i++)if(chosen>>i&1){
++   auto p=picks[i];const auto &x=banks[p.tube];
++   if(orthOld[i]!=p.tube)orthOld[i]=p.tube,orthAge[i]=turn;
++   for(auto [w,goal]:{pair{p.a,x.l},pair{p.b,x.h}}){
++    booked[w]=1;if(humans[w]==goal)continue;
++    int q=workers[w].bfs.first_step(goal);
++    if(q>=0&&!build[q])act[w]=MOVE[dir(humans[w],q)],moveTo[q]=1;
++   }
++  }
++  if(orthFull)for(int i=0;i<int(orthCrew.size());i++){
++   int w=orthCrew[i];
++   if(w<0||act[w]!='.'||booked[w])continue;
++   int h=humans[w],a=orthAnchor[i];
++   bool right= i<4 ? (oC(h)==oC(a)&&oR(h)<=15)
++                   : (oR(h)==oR(a)&&(humans.size()<8||(oC(h)>=14)==(oC(a)>=14)));
++   if(right)continue;
++   int q=workers[w].bfs.first_step(a);
++   if(q>=0&&q!=h&&!build[q])act[w]=MOVE[dir(h,q)],moveTo[q]=1;
++  }
++  int done=0;for(int p:bankWalls)done+=wall[p];
++  if(turn<bankStaffTurn+32&&done<int(bankWalls.size())){
++   vector<tuple<int,int,int,int>> jobs;
++   for(int p:bankWalls)if(!wall[p]){
++    int r=oR(p),c=oC(p),progress=0;
++    if(r<16){
++     int start=6+7*((c-4)/7);
++     for(int i=0;i<4;i++)progress+=wall[bp(r,start+i)];
++    }else for(int i=0;i<4;i++)progress+=wall[bp(22+i,c)];
++    for(int w=0;w<int(humans.size());w++)if(act[w]=='.'&&
++       (orthFull?find(orthCrew.begin(),orthCrew.end(),w)==orthCrew.end():find(orthEarly.begin(),orthEarly.end(),w)==orthEarly.end()))
++    for(int st:nb[p])if(st>=0&&!wall[st]&&!build[st]){
++     int d=workers[w].bfs.distance(st);
++     if(d<0||(d==0&&(block[p]||moveTo[p])))continue;
++     jobs.emplace_back(20+2*progress-6*d-(block[p]?15:0),w,p,st);
++    }
++   }
++   sort(jobs.rbegin(),jobs.rend());bitset<V> selected;
++   for(auto [v,w,p,st]:jobs)if(act[w]=='.'&&!selected[p]){
++    int h=humans[w];
++    if(st==h){
++     if(block[p]||build[p]||moveTo[p])continue;
++     act[w]=BUILD[dir(h,p)];build[p]=1;
++    }else{
++     int q=workers[w].bfs.first_step(st);if(q<0||build[q])continue;
++     act[w]=MOVE[dir(h,q)];moveTo[q]=1;
++    }
++    selected[p]=1;
++   }
++  }
++  return act;
++ }
+@@ -1085,0 +1301 @@
++  if(orthBank){makeOrthBanks();return;}
+@@ -1277 +1493 @@
+-   const int service=group[bp(0,bankShift)];
++   const int service=group[orthBank?bp(0,0):bp(0,bankShift)];
+@@ -1285,0 +1502 @@
++  if(orthBank)return orthPlan();
+@@ -1785,0 +2003 @@
++ g.orthBank=argc>4&&atoi(argv[4])!=0&&g.humans.size()>=7;

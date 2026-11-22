@@ -27,14 +27,22 @@ def count(hist,kinds,meta):
     blocks=[0]*5
     ready5=-1
     nbank=max(z[0] for z in placements)+1
-    lanes=tuple(sorted({p%30 if not rot else p//30 for z in placements for p in [z[2],z[5]]}))
-    assert len(lanes)==nbank+1
-    crawled=sum(B[(r*30+c if not rot else c*30+r)] for r in range(30) for c in lanes)
-    cross=sum(B[(r*30+c if not rot else c*30+r)] for r in (0,29)
-                 for c in range(30) if c not in lanes)
-    service=crawled|cross
-    for q in (0,29):
+    captured_by_bank=[0]*nbank
+    if len(tubes)==34 and nbank==4:
+        protected=0
+        for l,g,k,r,body,side in tubes:
+            protected|=body|side|B[g]|B[k]
+        service=ALL^protected
         assert flood(service&-service,service)==service
+    else:
+        lanes=tuple(sorted({p%30 if not rot else p//30 for z in placements for p in [z[2],z[5]]}))
+        assert len(lanes)==nbank+1
+        crawled=sum(B[(r*30+c if not rot else c*30+r)] for r in range(30) for c in lanes)
+        cross=sum(B[(r*30+c if not rot else c*30+r)] for r in (0,29)
+                     for c in range(30) if c not in lanes)
+        service=crawled|cross
+        for q in (0,29):
+            assert flood(service&-service,service)==service
     row.update(rot=rot,shift=shift,tubes=len(tubes),target_braces=len(wire),braces_at_staff_epoch=0,braces_at_release=0,
                ready_at_staff_epoch=0,ready_at_release=0,unbuilt_windows=0,unstaffed_windows=0,staffed_windows=0,
                ready_animal_windows=0,gating_by_pet_or_human=0,simultaneous_seals=0,first_seal=-1,repeat_seals_after_first=0,
@@ -77,6 +85,7 @@ def count(hist,kinds,meta):
             assert not (body&sum({B[idx(h)] for h in hn}))
             assert not (inds&captured)
             captured|=inds
+            captured_by_bank[placements[wi][0]]+=len(inds)
             blocks[t//50]+=len(inds)
             delays.extend(t-legal_first[i] for i in inds)
             row['simultaneous_seals']+=1
@@ -91,6 +100,7 @@ def count(hist,kinds,meta):
     row['repeat_seals_after_first']=max(row['simultaneous_seals']-1,0)
     row['ready_median']=statistics.median(first.values()) if first else -1
     row['bank_capture4']=len(captured)
+    row['captures_by_bank']='+'.join(map(str,captured_by_bank))
     row['unique_eligible_animals']=len(legal_first)
     row['unclosed_eligible_animals']=len(set(legal_first)-captured)
     row['median_latency']=statistics.median(delays) if delays else -1
