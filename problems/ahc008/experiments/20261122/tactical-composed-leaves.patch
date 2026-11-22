@@ -1,0 +1,179 @@
+diff --git a/problems/ahc008/tactical_gate_submission.cpp b/problems/ahc008/tactical_multigate.cpp
+index 82f6967..6a6cd9c 100644
+--- a/problems/ahc008/tactical_gate_submission.cpp
++++ b/problems/ahc008/tactical_multigate.cpp
+@@ -1169,32 +1169,38 @@ struct Game {
+   return q;
+  }
+ #ifndef GATE_FROM
+-#define GATE_FROM 245
++#define GATE_FROM 275
+ #endif
+ #ifndef GATE_RETAIN
+-#define GATE_RETAIN 54
++#define GATE_RETAIN 77
+ #endif
+ #ifndef GATE_GAIN
+-#define GATE_GAIN 10
++#define GATE_GAIN 30
+ #endif
+ #ifndef GATE_MOVEPREEMPT
+-#define GATE_MOVEPREEMPT 1
++#define GATE_MOVEPREEMPT 0
++#endif
++#ifndef GATE_MINCUT_LEAF
++#define GATE_MINCUT_LEAF 0
++#endif
++#ifndef GATE_COMPOSE
++#define GATE_COMPOSE 0
+ #endif
+ #ifndef GATE_IMMEDIATE
+ #define GATE_IMMEDIATE 0
+ #endif
+ #ifndef GATE_REDIRECT
+-#define GATE_REDIRECT 1
++#define GATE_REDIRECT 0
+ #endif
+ #ifndef GATE_DURING_LINE
+-#define GATE_DURING_LINE 1
++#define GATE_DURING_LINE 0
+ #endif
+ #ifndef GATE_RISK
+-#define GATE_RISK 2
++#define GATE_RISK 0
+ #endif
+  vector<pair<int,int>> gatePending;
+  int gateDue=-1, gatePrep=0, gateApplied=0, gateSearch=0;
+- struct GateEval {long long score=0; int area=0; bool together=true;};
++ struct GateEval {long long score=0; int area=0, mobileMask=0; bool together=true;};
+  GateEval gateScore(Bitboard::Rows r,const vector<int>& hs) {
+   Bitboard::Rows part{};
+   const int n=pets.size(),m=hs.size();
+@@ -1207,7 +1213,10 @@ struct Game {
+    for(int i=0;i<m;i++)if((part[hs[i]/S]>>(hs[i]%S))&1U)h++,mobile+=!captiveHuman(i);
+    if(!h)continue;
+    if(mobile){res.area=max(res.area,a);if(mobile!=live)res.together=false;}
+-   for(auto p:pets)np+=(part[p.p/S]>>(p.p%S))&1U;
++   for(int j=0;j<n;j++){
++    auto p=pets[j];
++    if((part[p.p/S]>>(p.p%S))&1U){np++;if(mobile)res.mobileMask|=1<<j;}
++   }
+    res.score+=static_cast<long long>(a*h)<<(n-np);
+   }
+   return res;
+@@ -1291,15 +1300,13 @@ struct Game {
+   vector<pair<int,int>> queue;
+   int evals=0;
+   bool immediateWinner=false;
+-  auto enumerate=[&](auto&& self,int begin,int anchors,int risk){
+-   if(evals>=2800||overBudget())return;
+-   if(!chosen.empty()&&anchors>=2){
+-    evals++;
+-    auto score=gateScore(test,after);
+-    if(reserve(score)){
++  struct Leaf {vector<int> gates; int risk=0, captures=0; long long score=0;};
++  vector<Leaf> leaves;
++  auto consider=[&](int risk, bool combined){
+      int plen=chosen.size();
+      vector<pair<int,int>> setup;
+      auto match=[&](auto&& next,int k,int used,int moved)->void{
++      if(combined&&moved>1)return;
+       if(k==plen){
+        if(!moved&&!GATE_IMMEDIATE)return;
+        auto future=after;
+@@ -1332,7 +1339,18 @@ struct Game {
+       }
+      };
+      match(match,0,0,0);
++  };
++  auto enumerate=[&](auto&& self,int begin,int anchors,int risk){
++   if(evals>=2800||overBudget())return;
++   if(!chosen.empty()&&anchors>=2){
++    evals++;
++    auto score=gateScore(test,after);
++    int captures=current.mobileMask&~score.mobileMask;
++    if(GATE_COMPOSE&&captures&&score.together&&score.area*100>=current.area*GATE_RETAIN){
++     Leaf leaf{chosen,risk,captures,score.score};
++     leaves.push_back(move(leaf));
+     }
++    if(reserve(score))consider(risk,false);
+    }
+    if(chosen.size()==3)return;
+    for(int j=begin;j<K;j++){
+@@ -1344,6 +1362,76 @@ struct Game {
+    }
+   };
+   enumerate(enumerate,0,0,0);
++  if(GATE_MINCUT_LEAF&&!overBudget()){
++   const int source=2*V,sink=source+1,inf=100;
++   array<int,V> byCell;byCell.fill(-1);
++   for(int j=0;j<K;j++)byCell[possible[j].p]=j;
++   vector<int> roots;
++   for(int i=0;i<hm;i++)if(!captiveHuman(i)){roots.push_back(i);}
++   if(!roots.empty()){
++    const int root=group[humans[roots[0]]];
++    MaxFlow<int> mf(2*V+2);
++    for(int target=0;target<(int)pets.size();target++){
++     int p=pets[target].p;
++     if(!(current.mobileMask>>target&1)||overBudget())continue;
++     mf.clear_edges();
++     for(int q=0;q<V;q++)if(group[q]==root&&!blockedBit(real,q)){
++      int id=byCell[q],cost=inf;
++      if(id>=0){
++       bool ready=any_of(possible[id].who.begin(),possible[id].who.end(),[&](auto a){return a.second==after[a.first];});
++       cost=20+3*possible[id].risk+(ready?0:2);
++      }
++      mf.add_edge(2*q,2*q+1,cost);
++      for(int u:nb[q])if(u>=0&&group[u]==root&&!blockedBit(real,u))mf.add_edge(2*q+1,2*u,inf);
++     }
++     mf.add_edge(source,2*p+1,inf);
++     for(int i:roots){
++      mf.add_edge(2*humans[i],sink,inf);
++      mf.add_edge(2*after[i],sink,inf);
++     }
++     int flow=mf.flow(source,sink,inf);
++     if(flow>=inf)continue;
++     auto r=mf.min_cut(source);
++     chosen.clear();test=real;int risk=0;
++     for(int j=0;j<K;j++){
++      int q=possible[j].p;
++      if(r[2*q]&&!r[2*q+1]){chosen.push_back(j);remove(test,q);risk+=possible[j].risk;}
++     }
++     if(chosen.empty()||chosen.size()>3)continue;
++     auto score=gateScore(test,after);
++     int captures=current.mobileMask&~score.mobileMask;
++     if(captures&&score.together&&score.area*100>=current.area*GATE_RETAIN)
++      leaves.push_back({chosen,risk,captures,score.score});
++     if(reserve(score))consider(risk,true);
++    }
++   }
++  }
++  if(GATE_COMPOSE&&!overBudget()){
++   sort(leaves.begin(),leaves.end(),[](const auto& a,const auto& b){
++    if(a.score!=b.score)return a.score>b.score;
++    if(a.gates.size()!=b.gates.size())return a.gates.size()<b.gates.size();
++    return a.gates<b.gates;
++   });
++   vector<Leaf> bestLeaves;
++   for(auto& x:leaves){
++    bool found=false;int repeats=0;
++    for(auto &y:bestLeaves)repeats+=x.captures==y.captures;
++    if(repeats>=2)continue;
++    bestLeaves.push_back(move(x));if(bestLeaves.size()>=18)break;
++   }
++   for(int i=0;i<(int)bestLeaves.size();i++)for(int j=0;j<i;j++){
++    auto& a=bestLeaves[i];auto& b=bestLeaves[j];
++    if(overBudget()||a.captures&b.captures||a.gates.size()+b.gates.size()>4)continue;
++    bool distant=true;
++    for(int ga:a.gates)for(int gb:b.gates)
++     if(adjacent8(possible[ga].p,possible[gb].p))distant=false;
++    if(!distant)continue;
++    chosen=a.gates;chosen.insert(chosen.end(),b.gates.begin(),b.gates.end());
++    test=real;
++    for(int k:chosen)remove(test,possible[k].p);
++    if(reserve(gateScore(test,after)))consider(a.risk+b.risk,true);
++   }
++  }
+   if(!queue.empty()){gatePending=move(queue);gateDue=turn+1;gatePrep++;}
+   if(immediateWinner)gateApplied++;
+   return chosenAction;
