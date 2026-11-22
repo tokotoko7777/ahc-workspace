@@ -1,0 +1,18 @@
+--- solve-v7.cpp
++++ low_dual_use.cpp
+@@ -1940,7 +1940,14 @@
+    bitset<V> unavailable=build;
+    array<int,V> body;body.fill(-1);
+    for(int q=0;q<V;q++)unavailable[q]=unavailable[q]||wall[q];
+-   for(int k=0;k<n;k++)if(ready[k])for(int p:banks[k].inner)body[p]=k;
++   for(int k=0;k<n;k++)if(ready[k]){
++    const auto& x=banks[k];
++    // Unlike deleting a central tube permanently, permit short crossings
++    // through an empty, open and currently unreserved center tube.
++    const bool cross=m<=6&&bankN==2&&x.r==15&&!count[k]&&
++       !unavailable[x.g]&&!unavailable[x.k]&&!crossing.reserves(k);
++    if(!cross)for(int p:x.inner)body[p]=k;
++   }
+    for(int i=0;i<m;i++)if(!usedPeople[i])paths[i].run(humans[i],unavailable,body);
+    struct Pair{int a,b,d;};
+    vector<vector<Pair>> pairInfo(n);

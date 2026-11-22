@@ -1,0 +1,12 @@
+--- solve-v7.cpp
++++ low_mid_aisle.cpp
+@@ -1591,6 +1591,9 @@
+   for(int j=0;j<bankN;j++){
+    int a=bankShift+7*j;
+    for(int r=3;r<=(bankN==2?27:25);r+=2){
++    // Keep the inexpensive two-bank layout, but leave a center crossing
++    // that remains usable even after every real 1x4 tube closes.
++    if(narrowRescue&&humans.size()<=6&&r==15)continue;
+     TubeBank x{j,r,bp(r,a),bp(r,a+1),bp(r,a+6),bp(r,a+7),{},{}};
+     for(int k=0;k<4;k++){
+      x.inner[k]=bp(r,a+2+k);

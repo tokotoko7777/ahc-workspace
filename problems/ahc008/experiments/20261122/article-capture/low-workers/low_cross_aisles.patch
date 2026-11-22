@@ -1,0 +1,24 @@
+--- solve-v7.cpp
++++ low_cross_aisles.cpp
+@@ -1566,7 +1566,10 @@
+  int bp(int x,int y)const{return bankRot?pos(y,x):pos(x,y);}
+  void makeBanks(){
+   if(!bankMode)return;
+-  if(narrowRescue&&humans.size()<=6)bankN=2;
++  // M5/6: keep 27 genuine 1x4 tubes, but break every three rows
++  // for two continuous transverse service corridors across all four aisles.
++  const bool crossAisles=narrowRescue&&humans.size()<=6;
++  if(crossAisles)bankN=3;
+   const vector<int> offsets=bankN==3?vector<int>{2,4,6}:vector<int>{4,8,12};
+   double best=-1e10;
+   for(int z=0;z<2;z++)for(int a:offsets){
+@@ -1590,7 +1593,8 @@
+   bitset<V> needed;
+   for(int j=0;j<bankN;j++){
+    int a=bankShift+7*j;
+-   for(int r=3;r<=(bankN==2?27:25);r+=2){
++   for(int r=3;r<=(crossAisles||bankN==2?27:25);r+=2){
++    if(crossAisles&&(r==9||r==11||r==19||r==21))continue;
+     TubeBank x{j,r,bp(r,a),bp(r,a+1),bp(r,a+6),bp(r,a+7),{},{}};
+     for(int k=0;k<4;k++){
+      x.inner[k]=bp(r,a+2+k);

@@ -1,0 +1,14 @@
+--- solve-v11.cpp
++++ wide_stage.cpp
+@@ -1933,7 +1933,10 @@
+    }
+   }
+   const bool scheduled=turn>=35&&*max_element(local.begin(),local.end())>=5;
+-  const bool partial=3*total<2*n && turn<101;
++  // Dispatch before the broad catalog is complete: require the same
++  // number of physically ready positions as the narrower v7, not a
++  // fraction of the unbuilt fringe. Continue building with spare workers.
++  const bool partial=total<(m<=6?18:24) && turn<101;
+   array<BankPath,10> paths;
+   if(scheduled){
+    integratedMode[turn]=partial?1:2;
