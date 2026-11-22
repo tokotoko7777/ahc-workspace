@@ -1,0 +1,190 @@
+{
+  "case": "0002.txt",
+  "input_sha256": "dd335d400a52d56894e7a7073a78331b5e52e8cf39988586b7dfe3ef35c979c1",
+  "baseline_actions_sha256": "c036d6be2d5eff625d624be0a0b44317962131aa5f2bc8194ebee6e362539b07",
+  "turn_zero_based": 104,
+  "animal_index_zero_based": 11,
+  "animal": "pig",
+  "target": [
+    5,
+    5
+  ],
+  "pen_cells": [
+    [
+      4,
+      5
+    ],
+    [
+      4,
+      6
+    ],
+    [
+      5,
+      4
+    ],
+    [
+      5,
+      5
+    ],
+    [
+      6,
+      4
+    ]
+  ],
+  "gates": [
+    [
+      3,
+      6
+    ],
+    [
+      6,
+      3
+    ],
+    [
+      7,
+      4
+    ]
+  ],
+  "all_humans": [
+    [
+      12,
+      7
+    ],
+    [
+      12,
+      13
+    ],
+    [
+      18,
+      11
+    ],
+    [
+      7,
+      3
+    ],
+    [
+      2,
+      11
+    ],
+    [
+      3,
+      7
+    ]
+  ],
+  "guards": [
+    3,
+    5
+  ],
+  "baseline_actions": [
+    "DDLUDL",
+    "DDlRLD",
+    "DDDDDL",
+    "DDLUUD"
+  ],
+  "prob_by_horizon": [
+    0.0,
+    0.75,
+    0.8125,
+    0.84375
+  ],
+  "first_actions_by_horizon": {
+    "1": null,
+    "2": [
+      {
+        "human": 3,
+        "position": [
+          7,
+          3
+        ],
+        "wait_or_move_to": [
+          7,
+          3
+        ],
+        "build_gate": [
+          6,
+          3
+        ]
+      },
+      {
+        "human": 5,
+        "position": [
+          3,
+          7
+        ],
+        "wait_or_move_to": [
+          3,
+          7
+        ],
+        "build_gate": [
+          3,
+          6
+        ]
+      }
+    ],
+    "3": [
+      {
+        "human": 3,
+        "position": [
+          7,
+          3
+        ],
+        "wait_or_move_to": [
+          7,
+          3
+        ],
+        "build_gate": [
+          7,
+          4
+        ]
+      },
+      {
+        "human": 5,
+        "position": [
+          3,
+          7
+        ],
+        "wait_or_move_to": [
+          3,
+          7
+        ],
+        "build_gate": [
+          3,
+          6
+        ]
+      }
+    ],
+    "4": [
+      {
+        "human": 3,
+        "position": [
+          7,
+          3
+        ],
+        "wait_or_move_to": [
+          7,
+          3
+        ],
+        "build_gate": [
+          7,
+          4
+        ]
+      },
+      {
+        "human": 5,
+        "position": [
+          3,
+          7
+        ],
+        "wait_or_move_to": [
+          3,
+          7
+        ],
+        "build_gate": [
+          3,
+          6
+        ]
+      }
+    ]
+  },
+  "vision": "No future pet moves enter dynamic programming. Baseline trace defines the initial state and supplies only retrospective comparison."
+}
