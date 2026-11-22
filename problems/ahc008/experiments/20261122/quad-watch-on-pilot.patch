@@ -1,0 +1,10 @@
+--- problems/ahc008/tactical_gate_submission.cpp
++++ problems/ahc008/tactical_gate_submission.cpp
+@@ -1083 +1083 @@
+- int quadAlive=-1,quadOwned=0;
++ int quadAlive=-1,quadOwned=0,quadWatch=27;
+@@ -1209 +1209 @@
+-  if(turn>=quadMaximum||(!ready&&turn>=quadSetupDeadline)||(ready&&turn-quadReady>=quadHold)){
++  if(turn>=quadMaximum||(!ready&&turn>=quadSetupDeadline)||(ready&&turn-quadReady>=quadWatch)){
+@@ -1634,0 +1635 @@
++ if(argc>2)g.quadWatch=clamp(atoi(argv[2]),1,27);
