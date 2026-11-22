@@ -1,0 +1,40 @@
+{
+  "baseline": {
+    "sum": {
+      "score": 2117108303,
+      "all_clear": 30,
+      "final_reachable": 220,
+      "final_exact4": 706,
+      "exact4_first": 706,
+      "exact_nonrect4to48_first": 224,
+      "residual_turn100": 1230,
+      "residual_turn160": 809,
+      "residual_turn225": 544,
+      "residual_turn275": 330,
+      "clean_people": 286,
+      "clean_union": 11821
+    },
+    "median_clear_turn": 277.0,
+    "median_wall": 0.3326903700035473,
+    "max_wall": 0.5367878320030286
+  },
+  "article": {
+    "sum": {
+      "score": 2427202305,
+      "all_clear": 25,
+      "final_reachable": 177,
+      "final_exact4": 818,
+      "exact4_first": 818,
+      "exact_nonrect4to48_first": 200,
+      "residual_turn100": 1053,
+      "residual_turn160": 705,
+      "residual_turn225": 495,
+      "residual_turn275": 302,
+      "clean_people": 233,
+      "clean_union": 12132
+    },
+    "median_clear_turn": 277,
+    "median_wall": 0.6370593030005693,
+    "max_wall": 0.9946498009958304
+  }
+}

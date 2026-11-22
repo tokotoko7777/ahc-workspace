@@ -34,3 +34,19 @@ all remaining gates wait until the complete matching is both staffed and
 legally buildable. Thus wall-preparation opportunities can be lost before
 a legal last gap, but the present ledger has no per-turn action/abort
 reason to establish that account for an individual trajectory.
+
+## Frozen official distributed practice100 (same exact v2 source)
+
+Official score 2,117,108,303→2,427,202,305 (+14.65%, 53 wins/47 losses).
+True all-animal isolation 30→25 (9 both, 16 new, 21 lost, 54 neither).
+Distinct residual 220→177; actual exact4 capture/terminal 706→818;
+4–48 irregular isolation 224→200; clean union11821→12132; final
+clean humans286→233. Exact4 by species C/P/R/D/cat
+100/104/102/264/136→122/99/109/286/202. New module yielded 24 actual
+isolations on 1,024 owned turns across 65 cases. All200 official/replay
+legal, including exact official score. Max wall .537→.995 s (a v3 compile
+overlapped briefly; use direct values as sampled workload, not pure timing
+signoff). No claim of comparable hidden competition cases or all-clear
+improvement. Reassemble exact ledger with
+`gzip -dc practice100-A.csv.gz practice100-B.csv.gz > practice100.csv`;
+B is the headerless continuation. The archive does not promote a solver.
