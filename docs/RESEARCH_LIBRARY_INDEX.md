@@ -102,3 +102,9 @@
 | やりたいこと | 部品・由来 | 例・検証 |
 | --- | --- | --- |
 | 相対オフセット付きの周期パターンを文字衝突を避けて併合する | [`circular-pattern-components.hpp`](https://github.com/tokotoko7777/ahc-workspace/blob/74c0189dc1bea65370a25ee45a0b74e5b8ddd591/library/circular-pattern-components.hpp)（依存: [`weighted-dsu.hpp`](https://github.com/tokotoko7777/ahc-workspace/blob/74c0189dc1bea65370a25ee45a0b74e5b8ddd591/library/weighted-dsu.hpp)） · AHC004 | [テスト](https://github.com/tokotoko7777/ahc-workspace/blob/74c0189dc1bea65370a25ee45a0b74e5b8ddd591/tests/circular_pattern_components_test.cpp) / [仕様](https://github.com/tokotoko7777/ahc-workspace/blob/74c0189dc1bea65370a25ee45a0b74e5b8ddd591/docs/LIBRARY_REFERENCE.md) |
+
+## 追加提案：観測に基づく実行管理
+
+| やりたいこと | 部品・由来 | 例・検証 |
+| --- | --- | --- |
+| 操作が拒否・未確定になる計画で、確認済みの作業だけを進める | [`observed-task-cursor.hpp`](../library/observed-task-cursor.hpp) · AHC008の試作から独立した案（進捗ブランチ内） | [仕様・再現](OBSERVED_TASK_CURSOR_PROPOSAL.md) / [使用例](../examples/observed_task_cursor_usage.cpp) / [テスト](../tests/observed_task_cursor_test.cpp) |
