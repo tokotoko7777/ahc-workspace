@@ -1524,3 +1524,10 @@ S字でも犬・猫を含め4マスに合法に隔離できた。各S字系列�
 - [同じ担当者で小さい囲いに替える案](https://github.com/tokotoko7777/ahc-workspace/blob/9a3e94b2121a96010f5d3172e2700a60b19638fa/problems/ahc008/experiments/20261122/article-capture/terry-samecrew-compact/RESULT.md)は元の100件を再現、物理的候補203件・56盤面、独立した予測で支持0。 [待機位置の重複を解く案](https://github.com/tokotoko7777/ahc-workspace/blob/61cd903ca20d44f1b7cfa32a6a158306493878ff/problems/ahc008/experiments/20261122/article-capture/terry-idle-spacing/RESULT.md)は50盤面で近づけたが、既存作業を保った3手以内の追加捕獲0。いずれも実戦の得点改善を示さない。
 - [両口1×4と片口L字3マスの局所配置](https://github.com/tokotoko7777/ahc-workspace/blob/d2469261b682d700a01d712d402f4cbe8a11a5f9/problems/ahc008/experiments/20261122/article-capture/terry-mixed-l-packet/RESULT.md)は設営20枚のまま4囲いと両方の偶奇を維持し、捕獲時の入口8→6、囲う面積16→14。ただし通常の通り抜け4→2。 [30行への展開](https://github.com/tokotoko7777/ahc-workspace/blob/c2a422484f920cfbd319fde9bf75e0995a3e5b3f/problems/ahc008/experiments/20261122/article-capture/terry-mixed-bank-band/RESULT.md)は省けたように見えた柵1枚が、誰も入れない1マスに置き換わっていただけで不採用。
 - 既存の囲いで、出口側にいる別の動物だけが入口を塞ぐときの内寄せを次に確認。公式配布100の基準版 **6,152,805,559点・全頭捕獲100件** を維持。
+
+### AHC008: 終盤の狭い切り直しと柵の省略
+
+- 採用版は変更なし。公式配布100ケースは **6,152,805,559点・全頭捕獲100件**、独立生成100ケースは 5,998,857,137点・全頭捕獲97件。目標 6,263,333,336 との差 110,527,777。配布ケースの数値比較で、本番と同じケースではない。
+- [Hall 制約を利用した終盤の切り直し](https://github.com/tokotoko7777/ahc-workspace/blob/e438ff189f9465e36a0339fb2c9b8a508c8ce006/problems/ahc008/experiments/20261122/article-capture/terry-chase-hall/RESULT.md)：現在版の Chase 23盤面・575状態を照合し、同じ動物を隔離できる割当可能な候補を追加で5件（4盤面）発見。盤面ごとの最良改善は計18マスで基準50未満。実プレイ未変更。
+- 全頭捕獲以降に全員待機しても得点は不変（壁の追加で人の領域は広がらない）。現行版と同じ署名済みの公式配布100・独立生成100の行動列で確認済み。配布での初回全頭隔離は中央値228ターン。全頭隔離前に一部の人だけが動物のいない成分にいた場面を、取得済み60記録で調べたところ6ターンで、その成分での壁設置は0。後者は map1 と終盤寄りの調査で、全200件への一般化はしない。
+- Map2/Map3 を途中まで共通設営する案：盤面の厳密な対称変換8通りで、最大共通141柵。それだけで完成する区画は Map2 が0、Map3 が片口14・両口0。両方で同じ配置として使える区画はなく、既存2配置の分岐案は見送り。次は配置の共通化より、片口・両口の役割を同一路線で切り替えられる構造を検討する。
