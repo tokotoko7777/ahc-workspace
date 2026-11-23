@@ -1,0 +1,52 @@
+{
+  "n": 22,
+  "verified_fixed_caps": 22,
+  "sum_historical_pairs": 1184,
+  "fixed_pairs_each": 16,
+  "median_ratio": 0.9109263881035898,
+  "serial_cpu": {
+    "S": 3.955085,
+    "K": 4.0859119999999995,
+    "I": 4.101794
+  },
+  "mean_drift": {
+    "mean_n": 1169270.8380681798,
+    "mean_c": -945200.9034090936
+  },
+  "arm_stats": {
+    "S": {
+      "variance": 0.02716479282624336,
+      "covariance": 0.0015148773598087594,
+      "mean_n": 43706833.98863637,
+      "mean_c": 52552168.61363637,
+      "var_n": 0.021031707333693066,
+      "var_c": 0.00916284021216781,
+      "full_n": 7.5,
+      "full_c": 13.5
+    },
+    "K": {
+      "variance": 0.02776422791235099,
+      "covariance": 0.000746976520079496,
+      "mean_n": 44876104.82670455,
+      "mean_c": 51606967.71022727,
+      "var_n": 0.019375724986888332,
+      "var_c": 0.009882455965621649,
+      "full_n": 8.318181818181818,
+      "full_c": 12.954545454545455
+    },
+    "I": {
+      "variance": 0.029123896041952847,
+      "covariance": 0.0005810388840351353,
+      "mean_n": 43706833.98863637,
+      "mean_c": 52288261.57102273,
+      "var_n": 0.021031707333693066,
+      "var_c": 0.009254266476330049,
+      "full_n": 7.5,
+      "full_c": 13.181818181818182
+    }
+  },
+  "median_pairwise_cpu_ratio": 1.0317858020909028,
+  "wins": 16,
+  "bias": "Archived Map1 or actual Chase late-large capture; outcome-selected archival support",
+  "pass_gate": false
+}

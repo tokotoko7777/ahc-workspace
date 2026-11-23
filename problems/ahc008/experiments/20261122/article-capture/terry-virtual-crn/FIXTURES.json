@@ -1,0 +1,412 @@
+{
+  "pins": {
+    "ahc008_terry_virtual_chase_absorb/practice.native.csv": "0bd17793a6742076fc9a8aecb755162e87560cea1a83daa152e602751a1615e0",
+    "ahc008_terry_oversized_chase/practice-map1/recordings.json": "60bed20803e894501c671536ac15969ce66cc8e0593a4b2eda9eeb3702cb9094",
+    "ahc008_terry_oversized_chase/practice-late/recordings.json": "bffa0c53a02661a667e2006d12aa4b86233399837e85babfc4c1e198023773a6",
+    "ahc008_terry_virtual_chase_absorb/fresh.native.csv": "f76ed91d684707dcfd4d4f34052e6fa748933630f2c8d8279391bec9ccfe5911",
+    "ahc008_terry_oversized_chase/fresh-map1/recordings.json": "2b2075636e9f6f226d933d06f16212b1bd1ca829b02d4d237e7ff08d505aefbf",
+    "ahc008_terry_oversized_chase/fresh-late/recordings.json": "36fab221b64b84d06e900bd64254b21ead90324017b19fff85efcee76ef427a7"
+  },
+  "rows": [
+    {
+      "panel": "practice",
+      "case": "0009.txt",
+      "input": "ahc008_focus_assets/tools/in/0009.txt",
+      "action": "ahc008_terry_oversized_chase/practice-map1/0009.actions",
+      "trace": "ahc008_terry_oversized_chase/practice-map1/0009.trace",
+      "input_sha": "6c13e00c50d633ad24546900a6fb280c1b040f160c812e8346758ba1081ef867",
+      "action_sha": "2b4cf9b50a277d40cde428f6a076dc0dc932f0b2261c835457eff04e275000ea",
+      "trace_sha": "69732d690da336db8e130d50472ac34c27eb5f0f798945e4e31dccbeea83fe5d",
+      "cap": 82,
+      "normal": 4184444467,
+      "chase": 3684366667,
+      "map": 1,
+      "native_mode": 0,
+      "strata": [
+        "map1"
+      ]
+    },
+    {
+      "panel": "practice",
+      "case": "0034.txt",
+      "input": "ahc008_focus_assets/tools/in/0034.txt",
+      "action": "ahc008_terry_oversized_chase/practice-map1/0034.actions",
+      "trace": "ahc008_terry_oversized_chase/practice-map1/0034.trace",
+      "input_sha": "32e69169d167c52990f6d1c6a27852ad448d0b781349d9047d1554e841d955b4",
+      "action_sha": "05097419129c84e10e2e4f5a5a0ef0f3e767220b288993e265595257f3f39992",
+      "trace_sha": "7f5391fa8bb3a1e0f6990a8d58042de08f539280ec315fee5f29b8f4de0ca55c",
+      "cap": 45,
+      "normal": 1611833341,
+      "chase": 1550394444,
+      "map": 1,
+      "native_mode": 0,
+      "strata": [
+        "map1"
+      ]
+    },
+    {
+      "panel": "practice",
+      "case": "0061.txt",
+      "input": "ahc008_focus_assets/tools/in/0061.txt",
+      "action": "ahc008_terry_oversized_chase/practice-map1/0061.actions",
+      "trace": "ahc008_terry_oversized_chase/practice-map1/0061.trace",
+      "input_sha": "9b997f41ba858b00f7191fc05e2caaf52ea033a9ae7b95148d5333d5c0871ea6",
+      "action_sha": "bf7256623ff2f20a6a4069d906e5b5dc640ebe89cce810346f863d7f3de1c2fa",
+      "trace_sha": "82dcf4f411a8ee7af35368793dc7b5b5a532ad2eb21a61d7b828c2541b6d5e92",
+      "cap": 70,
+      "normal": 3204111083,
+      "chase": 3555277771,
+      "map": 1,
+      "native_mode": 1,
+      "strata": [
+        "map1",
+        "late"
+      ]
+    },
+    {
+      "panel": "practice",
+      "case": "0000.txt",
+      "input": "ahc008_focus_assets/tools/in/0000.txt",
+      "action": "ahc008_terry_oversized_chase/practice-late/0000.actions",
+      "trace": "ahc008_terry_oversized_chase/practice-late/0000.trace",
+      "input_sha": "5abab8e864262e0e6c7a0c4ebc61d4e3538111f02c6f2fa274911ac7585d2f73",
+      "action_sha": "a95772a60c1cc74819b50b8204b748bf6f86856e1f1e6cd64c116082a727bfc6",
+      "trace_sha": "f6799bb92841d5a42af388b3543147270e95d50e596707e684c7130905e29bdf",
+      "cap": 56,
+      "normal": 2725333352,
+      "chase": 3463555555,
+      "map": 2,
+      "native_mode": 1,
+      "strata": [
+        "late"
+      ]
+    },
+    {
+      "panel": "practice",
+      "case": "0033.txt",
+      "input": "ahc008_focus_assets/tools/in/0033.txt",
+      "action": "ahc008_terry_oversized_chase/practice-late/0033.actions",
+      "trace": "ahc008_terry_oversized_chase/practice-late/0033.trace",
+      "input_sha": "8bbba65ba3d1e3e4afd0e15e91aaac5df3cd2169945904eeaf5e3a3c7b3eda4f",
+      "action_sha": "a1ee450a33a20b258941930169189b8216976a9a8607dac071e2cdaca7302b1e",
+      "trace_sha": "9a1c88e9af28782ca52fceed186edf46d471f63b47fbf218361c418edfeab8ef",
+      "cap": 50,
+      "normal": 2921666669,
+      "chase": 3269277781,
+      "map": 3,
+      "native_mode": 1,
+      "strata": [
+        "late"
+      ]
+    },
+    {
+      "panel": "practice",
+      "case": "0038.txt",
+      "input": "ahc008_focus_assets/tools/in/0038.txt",
+      "action": "ahc008_terry_oversized_chase/practice-late/0038.actions",
+      "trace": "ahc008_terry_oversized_chase/practice-late/0038.trace",
+      "input_sha": "6728da15abb1a8c02e2e38afb2bce5fab70e095b37c76a99293ab60c0107e02c",
+      "action_sha": "ba2dce87c0717ba81c1d0be5fe21b2ed1ed36e75cca85bb18642e7b65baba948",
+      "trace_sha": "51bbef54b99248b42923557a18b539b5ea4f8e7086426623beb0d91a20a806ab",
+      "cap": 29,
+      "normal": 968666667,
+      "chase": 1524972222,
+      "map": 3,
+      "native_mode": 1,
+      "strata": [
+        "late"
+      ]
+    },
+    {
+      "panel": "practice",
+      "case": "0040.txt",
+      "input": "ahc008_focus_assets/tools/in/0040.txt",
+      "action": "ahc008_terry_oversized_chase/practice-late/0040.actions",
+      "trace": "ahc008_terry_oversized_chase/practice-late/0040.trace",
+      "input_sha": "276a3517d9874232aa3a5c9cccd5aae268a110a546fd6fd0014ed8233d493544",
+      "action_sha": "92d7d5937754e1e7ab7cba45bfc5d9281e758c910fba23ad28688a9b465fe888",
+      "trace_sha": "e7962b1cd29f4c51fd037afbbdcb65bf553cca435d11bc86714c2939124682b9",
+      "cap": 59,
+      "normal": 3247666674,
+      "chase": 3476666664,
+      "map": 2,
+      "native_mode": 1,
+      "strata": [
+        "late"
+      ]
+    },
+    {
+      "panel": "practice",
+      "case": "0081.txt",
+      "input": "ahc008_focus_assets/tools/in/0081.txt",
+      "action": "ahc008_terry_oversized_chase/practice-late/0081.actions",
+      "trace": "ahc008_terry_oversized_chase/practice-late/0081.trace",
+      "input_sha": "779fcff7be589b291fb45daceb473221072df8a683d6e633148d04b51f974496",
+      "action_sha": "eae13d8a30b7538f94f687a5deeb4322c358247ffcbeec9e03018656f45ae767",
+      "trace_sha": "915b72f430e4d639071f6575977854446b46f01f660f12aaea5a0ff11f3945f7",
+      "cap": 42,
+      "normal": 2075222224,
+      "chase": 2385999999,
+      "map": 2,
+      "native_mode": 1,
+      "strata": [
+        "late"
+      ]
+    },
+    {
+      "panel": "practice",
+      "case": "0088.txt",
+      "input": "ahc008_focus_assets/tools/in/0088.txt",
+      "action": "ahc008_terry_oversized_chase/practice-late/0088.actions",
+      "trace": "ahc008_terry_oversized_chase/practice-late/0088.trace",
+      "input_sha": "ed57be1cfba22fa8d736d2baafb2d04eeaa85728d7c21cf26f4ace06b8f3bc4d",
+      "action_sha": "dfc2b6208ea52fc0889b377ed73f566e6f1922e5ab772d2a82dfe35274080778",
+      "trace_sha": "5f58108a06dae7d58bd19e4ec03de201d7f7356186998e3ff25c779791c83bcd",
+      "cap": 42,
+      "normal": 2268555565,
+      "chase": 2469333335,
+      "map": 3,
+      "native_mode": 1,
+      "strata": [
+        "late"
+      ]
+    },
+    {
+      "panel": "practice",
+      "case": "0090.txt",
+      "input": "ahc008_focus_assets/tools/in/0090.txt",
+      "action": "ahc008_terry_oversized_chase/practice-late/0090.actions",
+      "trace": "ahc008_terry_oversized_chase/practice-late/0090.trace",
+      "input_sha": "fd3fac04bc8d9d27a53693d136325f0eeefc1f81e74795b710766978548c7001",
+      "action_sha": "830298003ad31807ee745efed989e8bfe18402244bdb95d4b17e17403d018d73",
+      "trace_sha": "39b5080984078fe32b005c053d890926e5a7e86900dd514706657c456169cf11",
+      "cap": 70,
+      "normal": 3414666685,
+      "chase": 3834888880,
+      "map": 4,
+      "native_mode": 1,
+      "strata": [
+        "late"
+      ]
+    },
+    {
+      "panel": "fresh",
+      "case": "0019.txt",
+      "input": "ahc008_terry_first_chase_reuse/default-fresh100/in/0019.txt",
+      "action": "ahc008_terry_oversized_chase/fresh-map1/0019.actions",
+      "trace": "ahc008_terry_oversized_chase/fresh-map1/0019.trace",
+      "input_sha": "bf033e58fc9434d5e99c68f47e99ee7111585c1427e1030858795e38db6e4988",
+      "action_sha": "a35124e87167819fb8ed00f804c3262daf165d7f952eb60794edebe067acf9ea",
+      "trace_sha": "c0e7120ed974e5b88fa4efe73b97e0eca1c9035e6d9d4e5303411119e777e90e",
+      "cap": 46,
+      "normal": 1622999996,
+      "chase": 2015805553,
+      "map": 1,
+      "native_mode": 1,
+      "strata": [
+        "map1",
+        "late"
+      ]
+    },
+    {
+      "panel": "fresh",
+      "case": "0044.txt",
+      "input": "ahc008_terry_first_chase_reuse/default-fresh100/in/0044.txt",
+      "action": "ahc008_terry_oversized_chase/fresh-map1/0044.actions",
+      "trace": "ahc008_terry_oversized_chase/fresh-map1/0044.trace",
+      "input_sha": "417d2e7858db7827e1c0e1335d734a2fbd1181c13bc40f39737cf4689d95c2f7",
+      "action_sha": "833551bbe719ae9811316621962efd470ff53918dba8d13afa08b52fd489b0ae",
+      "trace_sha": "e0018107dbbddcca4784fd375cdecc95d56aaa64c299ef382b34c2fa730b1b02",
+      "cap": 80,
+      "normal": 3225888859,
+      "chase": 3846566651,
+      "map": 1,
+      "native_mode": 1,
+      "strata": [
+        "map1",
+        "late"
+      ]
+    },
+    {
+      "panel": "fresh",
+      "case": "0090.txt",
+      "input": "ahc008_terry_first_chase_reuse/default-fresh100/in/0090.txt",
+      "action": "ahc008_terry_oversized_chase/fresh-map1/0090.actions",
+      "trace": "ahc008_terry_oversized_chase/fresh-map1/0090.trace",
+      "input_sha": "d9bbaf4714678a00c449e2a38547a191c30475c46e845bbd268c4c13dd72ea7e",
+      "action_sha": "c4235ef7eb86b427775b543824918e37ee318a58df8520769aa842b1c3e46efc",
+      "trace_sha": "46071e0c8e8f628fa0268a6b90084c500e13b0a58aafea9a42dfb3dd029a3d36",
+      "cap": 28,
+      "normal": 823333334,
+      "chase": 884916666,
+      "map": 1,
+      "native_mode": 1,
+      "strata": [
+        "map1"
+      ]
+    },
+    {
+      "panel": "fresh",
+      "case": "0099.txt",
+      "input": "ahc008_terry_first_chase_reuse/default-fresh100/in/0099.txt",
+      "action": "ahc008_terry_oversized_chase/fresh-map1/0099.actions",
+      "trace": "ahc008_terry_oversized_chase/fresh-map1/0099.trace",
+      "input_sha": "90fddc9ac8f42126d461a326457f9face15938d68a61c69fe5578fa762e2d2cb",
+      "action_sha": "ff9b052c45e4f49b02d4b67c2f2e634601ef9097499bbd3be4142aac06382217",
+      "trace_sha": "a77083d023cad7a69ce89205fe50cfe9b072d13e3a1b3ed731483a6dc6610133",
+      "cap": 34,
+      "normal": 796444441,
+      "chase": 1274333336,
+      "map": 1,
+      "native_mode": 1,
+      "strata": [
+        "map1",
+        "late"
+      ]
+    },
+    {
+      "panel": "fresh",
+      "case": "0000.txt",
+      "input": "ahc008_terry_first_chase_reuse/default-fresh100/in/0000.txt",
+      "action": "ahc008_terry_oversized_chase/fresh-late/0000.actions",
+      "trace": "ahc008_terry_oversized_chase/fresh-late/0000.trace",
+      "input_sha": "4c24d337feb0841fa631f7663e29473ba24813c154b88ebf317cec615469db27",
+      "action_sha": "98f0982d09bd1d11a147e299a9b14398d5466be952ee89be93cd891f98101d61",
+      "trace_sha": "a20728c1c76a8087769ff82a0dcf431cf3eee96d377e374bcab0851ca4549de9",
+      "cap": 50,
+      "normal": 1982888890,
+      "chase": 3052705555,
+      "map": 3,
+      "native_mode": 1,
+      "strata": [
+        "late"
+      ]
+    },
+    {
+      "panel": "fresh",
+      "case": "0003.txt",
+      "input": "ahc008_terry_first_chase_reuse/default-fresh100/in/0003.txt",
+      "action": "ahc008_terry_oversized_chase/fresh-late/0003.actions",
+      "trace": "ahc008_terry_oversized_chase/fresh-late/0003.trace",
+      "input_sha": "8eb98b9f7ac8a6e7b0bd5b0ed6e06e37784840b501a6b12e488c34d8b5bc9b46",
+      "action_sha": "a3293d835a7a5b1762503c003ef4270f9f71f7574044b184852e5a09ade35894",
+      "trace_sha": "b056c167e402ea0e86987c96b0bcb0511305424eda1709011c8419970de2ae12",
+      "cap": 56,
+      "normal": 2412055565,
+      "chase": 3062714283,
+      "map": 4,
+      "native_mode": 1,
+      "strata": [
+        "late"
+      ]
+    },
+    {
+      "panel": "fresh",
+      "case": "0026.txt",
+      "input": "ahc008_terry_first_chase_reuse/default-fresh100/in/0026.txt",
+      "action": "ahc008_terry_oversized_chase/fresh-late/0026.actions",
+      "trace": "ahc008_terry_oversized_chase/fresh-late/0026.trace",
+      "input_sha": "3e1cf2341216738205b0d3430fdb2c9cbe2b0fe0112c88dfbc92fec7dc25e876",
+      "action_sha": "7035d5ed5dd4e035144342c9386d0fe1e47001ef58d12f25d29ac56b8add5b83",
+      "trace_sha": "dd00f98159f794991f594b5d98d68a5d1ea6574ce9aa2bb971d5d3f993898881",
+      "cap": 78,
+      "normal": 4036222224,
+      "chase": 4559944433,
+      "map": 2,
+      "native_mode": 1,
+      "strata": [
+        "late"
+      ]
+    },
+    {
+      "panel": "fresh",
+      "case": "0030.txt",
+      "input": "ahc008_terry_first_chase_reuse/default-fresh100/in/0030.txt",
+      "action": "ahc008_terry_oversized_chase/fresh-late/0030.actions",
+      "trace": "ahc008_terry_oversized_chase/fresh-late/0030.trace",
+      "input_sha": "bdfab85e67fb5c7eb0aa45840f4e955eca1781021a09d1f7f2d6e5d15738107a",
+      "action_sha": "4c2250ad990cca23e6473e446e4bfb8b0fe068c27fc07e4b58e55928d1b31363",
+      "trace_sha": "8cc68606aa5611cd62ec44998a024f8413c6576531989fadcad75368866a23e4",
+      "cap": 70,
+      "normal": 3262333319,
+      "chase": 3649611120,
+      "map": 4,
+      "native_mode": 1,
+      "strata": [
+        "late"
+      ]
+    },
+    {
+      "panel": "fresh",
+      "case": "0033.txt",
+      "input": "ahc008_terry_first_chase_reuse/default-fresh100/in/0033.txt",
+      "action": "ahc008_terry_oversized_chase/fresh-late/0033.actions",
+      "trace": "ahc008_terry_oversized_chase/fresh-late/0033.trace",
+      "input_sha": "a4d6a00fa617bc34fef29608ed7d5c9a8831b39b6e2c3b5de37dd99c618f61a0",
+      "action_sha": "2037d2c43a968fd782b101ac6e445c56c711c833a4e77c87bdcddfb8cebdb317",
+      "trace_sha": "f6f7fa9b19e1f0b2df0e660ed1485c30c430dff1b5802751d5bc4d4462530c5f",
+      "cap": 46,
+      "normal": 2369555568,
+      "chase": 2699277782,
+      "map": 2,
+      "native_mode": 1,
+      "strata": [
+        "late"
+      ]
+    },
+    {
+      "panel": "fresh",
+      "case": "0057.txt",
+      "input": "ahc008_terry_first_chase_reuse/default-fresh100/in/0057.txt",
+      "action": "ahc008_terry_oversized_chase/fresh-late/0057.actions",
+      "trace": "ahc008_terry_oversized_chase/fresh-late/0057.trace",
+      "input_sha": "7884b8fdfb935f922a3d8956f929816efa9dd872f71b47165c7f81c9646c5906",
+      "action_sha": "6695675c18b60f80eef4b8bdd78306004854d3e7465dc901b8e6983326911472",
+      "trace_sha": "8eba1b261022f533b41c0b6ef20f2e92cb5220333193ff0178b9cdb7899c4ad9",
+      "cap": 69,
+      "normal": 3127777783,
+      "chase": 4336574072,
+      "map": 3,
+      "native_mode": 1,
+      "strata": [
+        "late"
+      ]
+    },
+    {
+      "panel": "fresh",
+      "case": "0069.txt",
+      "input": "ahc008_terry_first_chase_reuse/default-fresh100/in/0069.txt",
+      "action": "ahc008_terry_oversized_chase/fresh-late/0069.actions",
+      "trace": "ahc008_terry_oversized_chase/fresh-late/0069.trace",
+      "input_sha": "75459e4a141a533a8bd516b146414e6114cb6bf9f8c7bb2e372bc48e4cb384c0",
+      "action_sha": "b7558409f4f7d2d3880ef729237e729cb72e0ee1ffd8fc987202d8cc4b28c6f8",
+      "trace_sha": "519a79302211ae98916530ecb915d64ac8559dcbb0abaccc641f06cd7241c22c",
+      "cap": 50,
+      "normal": 2252611101,
+      "chase": 3027104938,
+      "map": 3,
+      "native_mode": 1,
+      "strata": [
+        "late"
+      ]
+    },
+    {
+      "panel": "fresh",
+      "case": "0096.txt",
+      "input": "ahc008_terry_first_chase_reuse/default-fresh100/in/0096.txt",
+      "action": "ahc008_terry_oversized_chase/fresh-late/0096.actions",
+      "trace": "ahc008_terry_oversized_chase/fresh-late/0096.trace",
+      "input_sha": "4a30995f997bcf6ac586c9e3b60031b9b07356b80345d89d402488de3120c453",
+      "action_sha": "343874456eedaca4ae735b57c2079dd9813ad2c6d91fbee4ad78ef763b582648",
+      "trace_sha": "ec224d3d75203af9e6ec645b0bea4304339e5a4bbbe4d52812b30a4a44391f1e",
+      "cap": 32,
+      "normal": 1394777778,
+      "chase": 1463047622,
+      "map": 2,
+      "native_mode": 1,
+      "strata": [
+        "late"
+      ]
+    }
+  ]
+}
