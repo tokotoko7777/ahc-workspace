@@ -1,0 +1,17 @@
+{
+  "rooms": 74,
+  "preserved_stock_roles": 60,
+  "wall_count": 233,
+  "slab_walls": 44,
+  "all_open_floor": 667,
+  "all_closed_exterior_areas": [
+    43,
+    61,
+    60,
+    60,
+    60
+  ],
+  "own_lock_footprints_and_service": 74,
+  "all_lock_exact_bodies": 74,
+  "both_color_left_bank": 7
+}
