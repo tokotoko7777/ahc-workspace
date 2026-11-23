@@ -1490,3 +1490,9 @@ S字でも犬・猫を含め4マスに合法に隔離できた。各S字系列�
 - [条件付き新規100ケースの検証](https://github.com/tokotoko7777/ahc-workspace/blob/b32be72d76a33271d7ef5c7dc52a8a231b30d9bb/problems/ahc008/experiments/20261122/article-capture/terry-stalled265/RESULT.md)。255〜265ターンで捕獲が進まなかった局面で、追い込みを265ターンから開始。全頭79→89件、残り23→14頭、ただし得点5,278,344,442→5,264,793,386（−13,551,056点）で、現行版のみ全頭捕獲のケースも5件。両版が全頭捕獲した74ケースでは、得点換算で作業者1人あたり平均約16.44マス減った。公式配布100や本番の順位との直接比較ではない。
 - 現行ベストは公式配布100で **6,152,805,559点・全頭捕獲100件**。作業ブランチは `codex/ahc008-article-capture`。次は方針を変えず、追い込み試行で以降の得点が変わらないことを証明できる状態の早期終了を検証する。
 - [再利用候補のC++23最大流（CSR Dinic）](https://github.com/tokotoko7777/ahc-workspace/blob/fc87aefa93c32c4aa16cd6f5cbbfc1d30441215a/problems/ahc008/experiments/20261122/article-capture/terry-chase-csr/library-candidate/README.md)に使用例とテストを添付。共通ライブラリと得点版には未導入。
+
+### AHC008: 得点不変の仮想追い込み打ち切りを採用（2026-11-23 JST）
+
+- 最多の作業者がいる連結領域から動物が消えると、その仮想試行で元の追い込みは以後ずっと待機する。壁・連結領域・人ごとの到達可能な動物数が変わらないため、仮想試行の得点をその場で計算して打ち切る。実際の方針や動物のモデルは変えない。
+- [同じ試行数での対応比較](https://github.com/tokotoko7777/ahc-workspace/blob/79c20f92769c4dbc154bd04c97867db4d0f51046/problems/ahc008/experiments/20261122/article-capture/terry-virtual-chase-absorb/FIXED_RESULT.md): 配布100／別生成100の全行動・得点・判断が一致。CPU −2.86%／−4.23%。
+- [通常2670msの比較](https://github.com/tokotoko7777/ahc-workspace/blob/79c20f92769c4dbc154bd04c97867db4d0f51046/problems/ahc008/experiments/20261122/article-capture/terry-virtual-chase-absorb/NATIVE_RESULT.md): 両方の100で全行動と得点が一致、完了試行670→698／1001→1102。配布100は **6,152,805,559点・全頭100件**、別生成100は5,998,857,137点・全頭97件。高速版を研究の基準に採用し点数記録は据え置き。mainへのマージや本番提出はなし。
