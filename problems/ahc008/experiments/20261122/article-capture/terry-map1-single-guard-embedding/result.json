@@ -1,0 +1,123 @@
+{
+  "oriented_shapes": 136,
+  "old_room_count": 14,
+  "counts": {
+    "near_inboard": 112572,
+    "stock_x_preserved": 6320
+  },
+  "shapes_hash": "cc60197db85a43b153a799663ee4921031e029e227ae84da52d021798f0fecd8",
+  "rows": [
+    {
+      "room": 6,
+      "counts": {
+        "near_inboard": 7444,
+        "stock_x_preserved": 422
+      },
+      "best": null
+    },
+    {
+      "room": 7,
+      "counts": {
+        "near_inboard": 7444,
+        "stock_x_preserved": 422
+      },
+      "best": null
+    },
+    {
+      "room": 16,
+      "counts": {
+        "near_inboard": 8572,
+        "stock_x_preserved": 484
+      },
+      "best": null
+    },
+    {
+      "room": 17,
+      "counts": {
+        "near_inboard": 8572,
+        "stock_x_preserved": 484
+      },
+      "best": null
+    },
+    {
+      "room": 26,
+      "counts": {
+        "near_inboard": 8572,
+        "stock_x_preserved": 484
+      },
+      "best": null
+    },
+    {
+      "room": 27,
+      "counts": {
+        "near_inboard": 8572,
+        "stock_x_preserved": 484
+      },
+      "best": null
+    },
+    {
+      "room": 36,
+      "counts": {
+        "near_inboard": 8572,
+        "stock_x_preserved": 484
+      },
+      "best": null
+    },
+    {
+      "room": 37,
+      "counts": {
+        "near_inboard": 8572,
+        "stock_x_preserved": 484
+      },
+      "best": null
+    },
+    {
+      "room": 46,
+      "counts": {
+        "near_inboard": 8572,
+        "stock_x_preserved": 484
+      },
+      "best": null
+    },
+    {
+      "room": 47,
+      "counts": {
+        "near_inboard": 8572,
+        "stock_x_preserved": 484
+      },
+      "best": null
+    },
+    {
+      "room": 56,
+      "counts": {
+        "near_inboard": 8572,
+        "stock_x_preserved": 484
+      },
+      "best": null
+    },
+    {
+      "room": 57,
+      "counts": {
+        "near_inboard": 8572,
+        "stock_x_preserved": 484
+      },
+      "best": null
+    },
+    {
+      "room": 66,
+      "counts": {
+        "near_inboard": 5982,
+        "stock_x_preserved": 318
+      },
+      "best": null
+    },
+    {
+      "room": 67,
+      "counts": {
+        "near_inboard": 5982,
+        "stock_x_preserved": 318
+      },
+      "best": null
+    }
+  ]
+}
