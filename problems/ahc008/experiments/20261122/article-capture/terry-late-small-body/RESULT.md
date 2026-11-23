@@ -1,0 +1,6 @@
+# Late-Chase large enclosure audit rejected
+On each of the historical distributed/independent panels (100 boards each), every applicable a237 Chase >8 isolated-head board was replayed: 8 and 11 respectively. Each had one focal head label, translated to the actual closure command before pet moves. All verified exact full action SHA, completed work, both virtual sums/mode, official tester/playback and independent score. Exact stock Chase matching was diagnosed without altering any command.
+
+Six geometrically admissible small-body candidates per panel contained all actual newly captured focal IDs and no more than two open frontier cells. No alternative passed the complete builder/command/physical/ID and connectivity checks at H0, H2 or H3 (16 candidate-path wall exclusions in each panel). Measured support is 0 events, 0 boards and 0 exact effective tiles, below predeclared 5/4/20. No earlier-preparation increment, no alternate scorer, no changed policy or causal score evidence. The 19-board conditioned result cannot rule out every terminal policy or enclosure shape.
+
+Artifacts include source transformations, preregistration, verifier, signed receipt and aggregate report, excluding raw tapes, private assembled code, model and executables.
