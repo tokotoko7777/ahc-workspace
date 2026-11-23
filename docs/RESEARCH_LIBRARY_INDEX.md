@@ -108,3 +108,9 @@
 | やりたいこと | 部品・由来 | 例・検証 |
 | --- | --- | --- |
 | 操作が拒否・未確定になる計画で、確認済みの作業だけを進める | [`observed-task-cursor.hpp`](../library/observed-task-cursor.hpp) · AHC008の試作から独立した案（進捗ブランチ内） | [仕様・再現](OBSERVED_TASK_CURSOR_PROPOSAL.md) / [使用例](../examples/observed_task_cursor_usage.cpp) / [テスト](../tests/observed_task_cursor_test.cpp) |
+
+## 追加提案：固定した候補セル集合の連結成分
+
+| やりたいこと | 部品・由来 | 例・検証 |
+| --- | --- | --- |
+| 同じ候補セルの組合せを切り替えて連結成分の面積・独立した重み合計を求める | [`optional-grid-components.hpp`](../library/optional-grid-components.hpp) · AHC008のライブラリ振り返りから独立した案（進捗ブランチ内） | [仕様・再現](OPTIONAL_GRID_COMPONENTS_PROPOSAL.md) / [使用例](../examples/optional_grid_components_usage.cpp) / [テスト](../tests/optional_grid_components_test.cpp) |
