@@ -1531,3 +1531,10 @@ S字でも犬・猫を含め4マスに合法に隔離できた。各S字系列�
 - [Hall 制約を利用した終盤の切り直し](https://github.com/tokotoko7777/ahc-workspace/blob/e438ff189f9465e36a0339fb2c9b8a508c8ce006/problems/ahc008/experiments/20261122/article-capture/terry-chase-hall/RESULT.md)：現在版の Chase 23盤面・575状態を照合し、同じ動物を隔離できる割当可能な候補を追加で5件（4盤面）発見。盤面ごとの最良改善は計18マスで基準50未満。実プレイ未変更。
 - 全頭捕獲以降に全員待機しても得点は不変（壁の追加で人の領域は広がらない）。現行版と同じ署名済みの公式配布100・独立生成100の行動列で確認済み。配布での初回全頭隔離は中央値228ターン。全頭隔離前に一部の人だけが動物のいない成分にいた場面を、取得済み60記録で調べたところ6ターンで、その成分での壁設置は0。後者は map1 と終盤寄りの調査で、全200件への一般化はしない。
 - Map2/Map3 を途中まで共通設営する案：盤面の厳密な対称変換8通りで、最大共通141柵。それだけで完成する区画は Map2 が0、Map3 が片口14・両口0。両方で同じ配置として使える区画はなく、既存2配置の分岐案は見送り。次は配置の共通化より、片口・両口の役割を同一路線で切り替えられる構造を検討する。
+
+### AHC008: 動物の移動で狭い区画に入るまで
+
+- 採用版・点数は変更なし。公式配布100は 6,152,805,559／全頭100、独立生成100は 5,998,857,137／全頭97。目標差 110,527,777。
+- [一人で二口を順に閉鎖する形](https://github.com/tokotoko7777/ahc-workspace/blob/7e521d3ff40a8022e4185207b70118eb2a125477/problems/ahc008/experiments/20261122/article-capture/terry-one-guard-dual-fallback/RESULT.md)：4マス以下では豚の両色とウサギに対して確実な開始位置を両立できない。6マスは可能だが、既存Map1の14区画を周囲の柵を維持したまま置換できず。
+- [実際のMap1捕獲直前を起点にした診断](https://github.com/tokotoko7777/ahc-workspace/blob/5ab8fd920684f93c167c7a3e111c500592e76d40/problems/ahc008/experiments/20261122/article-capture/terry-map1-passage/RESULT.md)：9マスで捕獲された牛・豚・ウサギ計95頭に対し、他の動物や担当移動を省いて計算しても、25ターン以内に4マス以下の未閉鎖区画の安全位置へ到達する確率が80%以上のものはゼロ。中央値でなく平均は配布28.3%／独立30.0%。大きい捕獲を一律に待つ根拠なし。
+- [完工盤面の幾何比較](https://github.com/tokotoko7777/ahc-workspace/blob/966dcc726e45d87ffe5a35df8218cec80a31d578/problems/ahc008/experiments/20261122/article-capture/terry-passive-opportunity-atlas/RESULT.md) でMap3の豚の弱い偶奇を確認。3マス区画8つの片口を建設時に塞ぐと、静的25ターン到達率の弱い色の下位10%値が14.0%→37.9%。[静的検証](https://github.com/tokotoko7777/ahc-workspace/blob/5ab8fd920684f93c167c7a3e111c500592e76d40/problems/ahc008/experiments/20261122/article-capture/terry-map3-pig-parity-caps/RESULT.md) は通過。しかし動物なし36件で、柵の追加を末尾に回すと配備遅れ中央値+12.5／最大+22、[元の道中に組み込む](https://github.com/tokotoko7777/ahc-workspace/blob/ac05cc1256dd5af1d3d4fd3940209877274ae95b/problems/ahc008/experiments/20261122/article-capture/terry-map3-caps-splice/RESULT.md) 案も +12／+22。上限+10／+20とも超過したため両案不採用。公式採点は実施せず。
