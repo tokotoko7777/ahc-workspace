@@ -1,0 +1,316 @@
+{
+  "practice": {
+    "n": 26,
+    "total": {},
+    "boards": {},
+    "cases": [
+      {
+        "case": "0000.txt",
+        "stats": {},
+        "witness": []
+      },
+      {
+        "case": "0001.txt",
+        "stats": {},
+        "witness": []
+      },
+      {
+        "case": "0003.txt",
+        "stats": {},
+        "witness": []
+      },
+      {
+        "case": "0009.txt",
+        "stats": {},
+        "witness": []
+      },
+      {
+        "case": "0017.txt",
+        "stats": {},
+        "witness": []
+      },
+      {
+        "case": "0023.txt",
+        "stats": {},
+        "witness": []
+      },
+      {
+        "case": "0029.txt",
+        "stats": {},
+        "witness": []
+      },
+      {
+        "case": "0032.txt",
+        "stats": {},
+        "witness": []
+      },
+      {
+        "case": "0033.txt",
+        "stats": {},
+        "witness": []
+      },
+      {
+        "case": "0034.txt",
+        "stats": {},
+        "witness": []
+      },
+      {
+        "case": "0038.txt",
+        "stats": {},
+        "witness": []
+      },
+      {
+        "case": "0040.txt",
+        "stats": {},
+        "witness": []
+      },
+      {
+        "case": "0043.txt",
+        "stats": {},
+        "witness": []
+      },
+      {
+        "case": "0044.txt",
+        "stats": {},
+        "witness": []
+      },
+      {
+        "case": "0050.txt",
+        "stats": {},
+        "witness": []
+      },
+      {
+        "case": "0051.txt",
+        "stats": {},
+        "witness": []
+      },
+      {
+        "case": "0056.txt",
+        "stats": {},
+        "witness": []
+      },
+      {
+        "case": "0061.txt",
+        "stats": {},
+        "witness": []
+      },
+      {
+        "case": "0069.txt",
+        "stats": {},
+        "witness": []
+      },
+      {
+        "case": "0070.txt",
+        "stats": {},
+        "witness": []
+      },
+      {
+        "case": "0072.txt",
+        "stats": {},
+        "witness": []
+      },
+      {
+        "case": "0081.txt",
+        "stats": {},
+        "witness": []
+      },
+      {
+        "case": "0084.txt",
+        "stats": {},
+        "witness": []
+      },
+      {
+        "case": "0088.txt",
+        "stats": {},
+        "witness": []
+      },
+      {
+        "case": "0089.txt",
+        "stats": {},
+        "witness": []
+      },
+      {
+        "case": "0090.txt",
+        "stats": {},
+        "witness": []
+      }
+    ]
+  },
+  "fresh": {
+    "n": 34,
+    "total": {},
+    "boards": {},
+    "cases": [
+      {
+        "case": "0000.txt",
+        "stats": {},
+        "witness": []
+      },
+      {
+        "case": "0001.txt",
+        "stats": {},
+        "witness": []
+      },
+      {
+        "case": "0003.txt",
+        "stats": {},
+        "witness": []
+      },
+      {
+        "case": "0016.txt",
+        "stats": {},
+        "witness": []
+      },
+      {
+        "case": "0019.txt",
+        "stats": {},
+        "witness": []
+      },
+      {
+        "case": "0021.txt",
+        "stats": {},
+        "witness": []
+      },
+      {
+        "case": "0023.txt",
+        "stats": {},
+        "witness": []
+      },
+      {
+        "case": "0026.txt",
+        "stats": {},
+        "witness": []
+      },
+      {
+        "case": "0028.txt",
+        "stats": {},
+        "witness": []
+      },
+      {
+        "case": "0029.txt",
+        "stats": {},
+        "witness": []
+      },
+      {
+        "case": "0030.txt",
+        "stats": {},
+        "witness": []
+      },
+      {
+        "case": "0031.txt",
+        "stats": {},
+        "witness": []
+      },
+      {
+        "case": "0032.txt",
+        "stats": {},
+        "witness": []
+      },
+      {
+        "case": "0033.txt",
+        "stats": {},
+        "witness": []
+      },
+      {
+        "case": "0044.txt",
+        "stats": {},
+        "witness": []
+      },
+      {
+        "case": "0046.txt",
+        "stats": {},
+        "witness": []
+      },
+      {
+        "case": "0049.txt",
+        "stats": {},
+        "witness": []
+      },
+      {
+        "case": "0054.txt",
+        "stats": {},
+        "witness": []
+      },
+      {
+        "case": "0056.txt",
+        "stats": {},
+        "witness": []
+      },
+      {
+        "case": "0057.txt",
+        "stats": {},
+        "witness": []
+      },
+      {
+        "case": "0059.txt",
+        "stats": {},
+        "witness": []
+      },
+      {
+        "case": "0060.txt",
+        "stats": {},
+        "witness": []
+      },
+      {
+        "case": "0065.txt",
+        "stats": {},
+        "witness": []
+      },
+      {
+        "case": "0069.txt",
+        "stats": {},
+        "witness": []
+      },
+      {
+        "case": "0071.txt",
+        "stats": {},
+        "witness": []
+      },
+      {
+        "case": "0076.txt",
+        "stats": {},
+        "witness": []
+      },
+      {
+        "case": "0080.txt",
+        "stats": {},
+        "witness": []
+      },
+      {
+        "case": "0082.txt",
+        "stats": {},
+        "witness": []
+      },
+      {
+        "case": "0090.txt",
+        "stats": {},
+        "witness": []
+      },
+      {
+        "case": "0092.txt",
+        "stats": {},
+        "witness": []
+      },
+      {
+        "case": "0093.txt",
+        "stats": {},
+        "witness": []
+      },
+      {
+        "case": "0096.txt",
+        "stats": {},
+        "witness": []
+      },
+      {
+        "case": "0098.txt",
+        "stats": {},
+        "witness": []
+      },
+      {
+        "case": "0099.txt",
+        "stats": {},
+        "witness": []
+      }
+    ]
+  }
+}
