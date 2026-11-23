@@ -1,0 +1,149 @@
+{
+  "1": {
+    "counts": {
+      "orientations": 1,
+      "geometries": 4
+    },
+    "examples": {}
+  },
+  "2": {
+    "counts": {
+      "orientations": 2,
+      "geometries": 8
+    },
+    "examples": {}
+  },
+  "3": {
+    "counts": {
+      "orientations": 6,
+      "geometries": 28,
+      "stride1_any": 16,
+      "stride1_starts": 16
+    },
+    "examples": {
+      "1": [
+        [
+          [
+            0,
+            0
+          ],
+          [
+            0,
+            1
+          ],
+          [
+            0,
+            2
+          ]
+        ],
+        [
+          -1,
+          0
+        ],
+        [
+          0,
+          -1
+        ],
+        [
+          0,
+          2
+        ],
+        [
+          [
+            -1,
+            -1
+          ]
+        ]
+      ]
+    }
+  },
+  "4": {
+    "counts": {
+      "orientations": 19,
+      "geometries": 100,
+      "stride1_any": 92,
+      "stride1_starts": 140,
+      "stride1_both_parities": 40,
+      "stride2_any": 56,
+      "stride2_starts": 56
+    },
+    "examples": {
+      "1": [
+        [
+          [
+            0,
+            0
+          ],
+          [
+            0,
+            1
+          ],
+          [
+            0,
+            2
+          ],
+          [
+            0,
+            3
+          ]
+        ],
+        [
+          -1,
+          0
+        ],
+        [
+          0,
+          -1
+        ],
+        [
+          0,
+          2
+        ],
+        [
+          [
+            -1,
+            -1
+          ]
+        ]
+      ],
+      "2": [
+        [
+          [
+            0,
+            0
+          ],
+          [
+            0,
+            1
+          ],
+          [
+            0,
+            2
+          ],
+          [
+            0,
+            3
+          ]
+        ],
+        [
+          -1,
+          0
+        ],
+        [
+          0,
+          -1
+        ],
+        [
+          0,
+          3
+        ],
+        [
+          [
+            -1,
+            -1
+          ]
+        ]
+      ]
+    }
+  }
+}
