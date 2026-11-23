@@ -1,0 +1,4 @@
+# Frozen hybrid14 dry schedule rejected
+No-pet literal simulation (no model, solver or official scoring). On the same 36 independent starts stock passed 36/36; hybrid passed 21/36 (M5 6/18, M6 15/18). Median actual handoff delay among matched valid pairs +34, maximum +46 (gates <=12 and <=20). Descriptive M5 valid pairs +20 median/+32 max; M6 +35/+46.
+
+First trial stock completed all X on t122 and handed off t135; hybrid had an accepted schedule but one outstanding wall at t160. Among assigned failures nine M5 ran out with one unfinished wall; three M5 finished all X at t156/t160/t160 but failed handoff by t160. Three M6 trials stopped on schedule setup; this frozen output does not distinguish missing-ownership validation from no feasible splice (or constructor init), and no extra runs were made. All simulated accepted commands were legal and no queued outstanding stance became unreachable. No retune or live/score claim. Static geometry PASS remains separate.
