@@ -1496,3 +1496,10 @@ S字でも犬・猫を含め4マスに合法に隔離できた。各S字系列�
 - 最多の作業者がいる連結領域から動物が消えると、その仮想試行で元の追い込みは以後ずっと待機する。壁・連結領域・人ごとの到達可能な動物数が変わらないため、仮想試行の得点をその場で計算して打ち切る。実際の方針や動物のモデルは変えない。
 - [同じ試行数での対応比較](https://github.com/tokotoko7777/ahc-workspace/blob/79c20f92769c4dbc154bd04c97867db4d0f51046/problems/ahc008/experiments/20261122/article-capture/terry-virtual-chase-absorb/FIXED_RESULT.md): 配布100／別生成100の全行動・得点・判断が一致。CPU −2.86%／−4.23%。
 - [通常2670msの比較](https://github.com/tokotoko7777/ahc-workspace/blob/79c20f92769c4dbc154bd04c97867db4d0f51046/problems/ahc008/experiments/20261122/article-capture/terry-virtual-chase-absorb/NATIVE_RESULT.md): 両方の100で全行動と得点が一致、完了試行670→698／1001→1102。配布100は **6,152,805,559点・全頭100件**、別生成100は5,998,857,137点・全頭97件。高速版を研究の基準に採用し点数記録は据え置き。mainへのマージや本番提出はなし。
+
+### AHC008: 全頭捕獲を維持しながら小さい囲い・省ける設営柵を検証（2026-11-23 JST）
+
+- [Map1の9→3マス](https://github.com/tokotoko7777/ahc-workspace/blob/25420f4bd41033e3a5ae061b365e7961b764db49/problems/ahc008/experiments/20261122/article-capture/terry-map1-remote-cap/RESULT.md): 配布100のMap1で形まで一致した大きい囲いは128回・153頭。配布／別生成のMap1全44ケースを完全再現し、4ターン前の情報だけで先回りを選んだ。元の捕獲を保ったのは各1件、各+4マス。役割の競合と元の捕獲を失う案があり、実戦評価せず見送り。
+- [終盤の設営以外の追加柵](https://github.com/tokotoko7777/ahc-workspace/blob/a145d9ddeefced51cea0b4b93b52b8199a99069f/problems/ahc008/experiments/20261122/article-capture/terry-terminal-nonx-bound/RESULT.md): 旧100で全頭捕獲した99件の設営柵と最終位置を固定。後から追加柵を理想的に外せると仮定しても1人あたり平均+0.14マスで、実戦で柵を外せるという意味ではない。
+- [省いた柵の場所を外側の足場にする案](https://github.com/tokotoko7777/ahc-workspace/blob/0fa80b7f38ae725aff04be0b23f19032659bde55/problems/ahc008/experiments/20261122/article-capture/terry-flank-valve/RESULT.md)は旧100で対象798局面、内側に柵を置ける321局面のうち既存の担当を守って届く場面は0。[設営済み各区画の状態](https://github.com/tokotoko7777/ahc-workspace/blob/d58dd5740bd57927dc08cd0e0b1ab4e1d978a622/problems/ahc008/experiments/20261122/article-capture/terry-x-lifecycle/RESULT.md)も確認し、設営柵25,808枚すべてで設置直前に両口または片口が全て開いた罠が少なくとも一つ関連していた。「既に全て役目を終えた」という条件で省ける柵は0。
+- 次は、終盤の大きい囲いの閉鎖を小さい囲いに置き換えられる局面と、設営時の情報だけで柵1枚を保留する条件を別々に検証。ベストは公式配布100の **6,152,805,559点・全頭捕獲100件**、作業ブランチは `codex/ahc008-article-capture`。本番順位と同条件ではない。
