@@ -1,0 +1,2 @@
+# Original full-BFS scout: timing no-go
+Exact all 36×16 fixture metrics and 11 choices, coordinate/motion involutions pass. Full scout wall min/median/max 0.125859/0.187230/0.251608 s, sum 6.552611 s. CPU 0.125795/0.185281/0.251468 s, total 6.540488 s. Both streams have 18 observations <=0.18 and 18 in (0.18,0.30], none >0.30. Median exceeds frozen <=0.18; no native/official or reduction in fixture scope. Separate radius-3 plan is distinct exact engineering, not admission relaxation.
