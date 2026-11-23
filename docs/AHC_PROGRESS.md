@@ -1503,3 +1503,9 @@ S字でも犬・猫を含め4マスに合法に隔離できた。各S字系列�
 - [終盤の設営以外の追加柵](https://github.com/tokotoko7777/ahc-workspace/blob/a145d9ddeefced51cea0b4b93b52b8199a99069f/problems/ahc008/experiments/20261122/article-capture/terry-terminal-nonx-bound/RESULT.md): 旧100で全頭捕獲した99件の設営柵と最終位置を固定。後から追加柵を理想的に外せると仮定しても1人あたり平均+0.14マスで、実戦で柵を外せるという意味ではない。
 - [省いた柵の場所を外側の足場にする案](https://github.com/tokotoko7777/ahc-workspace/blob/0fa80b7f38ae725aff04be0b23f19032659bde55/problems/ahc008/experiments/20261122/article-capture/terry-flank-valve/RESULT.md)は旧100で対象798局面、内側に柵を置ける321局面のうち既存の担当を守って届く場面は0。[設営済み各区画の状態](https://github.com/tokotoko7777/ahc-workspace/blob/d58dd5740bd57927dc08cd0e0b1ab4e1d978a622/problems/ahc008/experiments/20261122/article-capture/terry-x-lifecycle/RESULT.md)も確認し、設営柵25,808枚すべてで設置直前に両口または片口が全て開いた罠が少なくとも一つ関連していた。「既に全て役目を終えた」という条件で省ける柵は0。
 - 次は、終盤の大きい囲いの閉鎖を小さい囲いに置き換えられる局面と、設営時の情報だけで柵1枚を保留する条件を別々に検証。ベストは公式配布100の **6,152,805,559点・全頭捕獲100件**、作業ブランチは `codex/ahc008-article-capture`。本番順位と同条件ではない。
+
+### AHC008: 柵1枚の省略を実戦の判断で追試（2026-11-23 JST）
+
+- [固定命令での省略](https://github.com/tokotoko7777/ahc-workspace/blob/fa6309c96728afc1f2592ce298629fb5b811647c/problems/ahc008/experiments/20261122/article-capture/terry-x-exact-replay/RESULT.md): 旧100は公式ジャッジで元の応答30,000行を完全再現。設営1枚を省いた82件はすべて後の固定命令で動物上または隣に柵を置こうとして失敗。省略後に判断し直す実装の評価ではない。
+- [実際の応答で毎ターン判断し直す比較](https://github.com/tokotoko7777/ahc-workspace/blob/724ed75c703648f0263a9f07f2f37e0df2a8e3fb/problems/ahc008/experiments/20261122/article-capture/terry-x-once-live/RESULT.md): 公式配布100の全200実行が合法・独立採点一致、設営を省いた81件のうち43件は全頭捕獲かつ1人あたり+1マス以上。全体の全頭は100→98件、得点は6,152,805,559→6,070,247,621、共通全頭98件の合計は−274.95マスのため不採用。別seedは未生成。候補の最大実測は2.7992秒。
+- [終盤の大きい囲い19件](https://github.com/tokotoko7777/ahc-workspace/blob/7cd23e2da514d56ed547b69701888fd5a46f5835/problems/ahc008/experiments/20261122/article-capture/terry-late-small-body/RESULT.md): 保存済みの実際の行動を再現し、同ターン・2手・3手前からの準備を比較したが、同じ動物を隔離できる合法な4マス以下の置換は0。フォローは係数変更でなく、設営をいったん保留し、必要時に戻せる条件を調べる。基準版とベストは据え置き。
