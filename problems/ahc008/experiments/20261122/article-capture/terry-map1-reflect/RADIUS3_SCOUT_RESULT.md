@@ -1,0 +1,2 @@
+# Exact radius3 readiness scout rejected by timing
+All 2,000×900 masked reach labels match original BFS (1,064 blocked origins, 1,164 edges, 772 isolated origins). Coordinate/action invariance, 36×16 paired readiness metrics and original 11 decisions all match. Full scout wall min/median/max 0.120465/0.186895/0.240585s; CPU 0.120404/0.1868915/0.236829s. Frozen wall median threshold ≤0.180s fails, peak ≤0.300s passes. No native compilation, official tester, model, or retuning. Original rejection artifacts remain untouched.
