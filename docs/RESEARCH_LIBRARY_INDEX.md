@@ -114,3 +114,9 @@
 | やりたいこと | 部品・由来 | 例・検証 |
 | --- | --- | --- |
 | 同じ候補セルの組合せを切り替えて連結成分の面積・独立した重み合計を求める | [`optional-grid-components.hpp`](../library/optional-grid-components.hpp) · AHC008のライブラリ振り返りから独立した案（進捗ブランチ内） | [仕様・再現](OPTIONAL_GRID_COMPONENTS_PROPOSAL.md) / [使用例](../examples/optional_grid_components_usage.cpp) / [テスト](../tests/optional_grid_components_test.cpp) |
+
+## 追加提案：終点固定の最短路
+
+| やりたいこと | 部品・由来 | 例・検証 |
+| --- | --- | --- |
+| 指定する辺を全最短路が通るか、多数の問い合わせで判定する | [`shortest-mandatory-arc.hpp`](../library/shortest-mandatory-arc.hpp) · AHC008から着想した独立提案 | [仕様](SHORTEST_MANDATORY_ARC_PROPOSAL.md) / [例](../examples/shortest_mandatory_arc_usage.cpp) / [テスト](../tests/shortest_mandatory_arc_test.cpp) |

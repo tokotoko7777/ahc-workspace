@@ -639,6 +639,11 @@ vector<int> path = shortest.path_to(goal);
 
 到達不能な頂点の距離は `-1`、経路は空になります。
 
+## Shortest Mandatory Arc（研究提案）
+
+終点固定の無重み有向グラフで、始点からの全最短路が指定辺IDを通るかを事前計算します。
+[仕様・使用例・差分テスト](SHORTEST_MANDATORY_ARC_PROPOSAL.md) を参照してください。
+
 ## All-Pairs BFS
 
 ヘッダ: [`all-pairs-bfs.hpp`](../library/all-pairs-bfs.hpp)
