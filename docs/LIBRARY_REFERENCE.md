@@ -770,6 +770,11 @@ while (!queue.empty()) {
 キーは `uint64_t` です。負数、小数、取り出したキーより小さいキーを後から
 追加する用途には使えません。その場合は通常の `priority_queue` を使います。
 
+## Mutable Grid Enter Mask（研究提案）
+
+壁のスナップショットが更新される四近傍格子で、変わった進入先の周りだけ方向ビットを更新します。
+[仕様・使用例・差分テスト](MUTABLE_GRID_ENTER_MASK_PROPOSAL.md) を参照してください。
+
 ## Grid BFS
 
 ヘッダ: [`grid-bfs.hpp`](../library/grid-bfs.hpp)

@@ -120,3 +120,9 @@
 | やりたいこと | 部品・由来 | 例・検証 |
 | --- | --- | --- |
 | 指定する辺を全最短路が通るか、多数の問い合わせで判定する | [`shortest-mandatory-arc.hpp`](../library/shortest-mandatory-arc.hpp) · AHC008から着想した独立提案 | [仕様](SHORTEST_MANDATORY_ARC_PROPOSAL.md) / [例](../examples/shortest_mandatory_arc_usage.cpp) / [テスト](../tests/shortest_mandatory_arc_test.cpp) |
+
+## 追加提案：壁の更新と進入方向
+
+| やりたいこと | 部品・由来 | 例・検証 |
+| --- | --- | --- |
+| 観測した壁の変化から四近傍の進入方向を差分更新する | [`mutable-grid-enter-mask.hpp`](../library/mutable-grid-enter-mask.hpp) · AHC008から着想した独立提案 | [仕様](MUTABLE_GRID_ENTER_MASK_PROPOSAL.md) / [例](../examples/mutable_grid_enter_mask_usage.cpp) / [テスト](../tests/mutable_grid_enter_mask_test.cpp) |
