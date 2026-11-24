@@ -132,3 +132,9 @@
 | やりたいこと | 部品・由来 | 例・検証 |
 | --- | --- | --- |
 | 固定した辺集合で、元の追加順を保ったまま残余流を扱う | [`ordered-csr-max-flow.hpp`](../library/ordered-csr-max-flow.hpp) · AHC008から着想した独立提案 | [仕様](ORDERED_CSR_MAX_FLOW_PROPOSAL.md) / [例](../examples/ordered_csr_max_flow_usage.cpp) / [テスト](../tests/ordered_csr_max_flow_test.cpp) |
+
+## この進捗ブランチにある追加提案
+
+| やりたいこと | 部品・由来 | 例・検証 |
+| --- | --- | --- |
+| 同じ壁配置で、多数の始点から目的地グループへの距離を何度も求める | [`grid-target-distance.hpp`](../library/grid-target-distance.hpp) · AHC008 | [仕様と適用箇所](GRID_TARGET_DISTANCE_PROPOSAL.md) / [例](../examples/grid_target_distance_usage.cpp) / [テスト](../tests/grid_target_distance_test.cpp) |
