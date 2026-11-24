@@ -126,3 +126,9 @@
 | やりたいこと | 部品・由来 | 例・検証 |
 | --- | --- | --- |
 | 観測した壁の変化から四近傍の進入方向を差分更新する | [`mutable-grid-enter-mask.hpp`](../library/mutable-grid-enter-mask.hpp) · AHC008から着想した独立提案 | [仕様](MUTABLE_GRID_ENTER_MASK_PROPOSAL.md) / [例](../examples/mutable_grid_enter_mask_usage.cpp) / [テスト](../tests/mutable_grid_enter_mask_test.cpp) |
+
+## 追加提案：辺の順序を保つ固定グラフ最大流
+
+| やりたいこと | 部品・由来 | 例・検証 |
+| --- | --- | --- |
+| 固定した辺集合で、元の追加順を保ったまま残余流を扱う | [`ordered-csr-max-flow.hpp`](../library/ordered-csr-max-flow.hpp) · AHC008から着想した独立提案 | [仕様](ORDERED_CSR_MAX_FLOW_PROPOSAL.md) / [例](../examples/ordered_csr_max_flow_usage.cpp) / [テスト](../tests/ordered_csr_max_flow_test.cpp) |

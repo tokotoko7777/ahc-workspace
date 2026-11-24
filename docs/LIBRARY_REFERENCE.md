@@ -975,6 +975,14 @@ long long maximum = flow.flow(0, 3);
 最大流を流した後、`min_cut(source)` が `true` の頂点と `false` の頂点の
 間に最小カットがあります。`get_edge(index)` で元の容量と実際の流量も読めます。
 
+## Ordered CSR Max Flow（研究提案）
+
+ヘッダ: [`ordered-csr-max-flow.hpp`](../library/ordered-csr-max-flow.hpp)
+
+辺を追加してから `freeze()` し、頂点内の辺の追加順を保った連続配列で最大流を求めます。
+凍結後は辺を追加できないため、既存の `MaxFlow` の置換ではありません。
+[仕様・使用例・検証](ORDERED_CSR_MAX_FLOW_PROPOSAL.md) を参照してください。
+
 ## Min-Cost Flow
 
 ヘッダ: [`min-cost-flow.hpp`](../library/min-cost-flow.hpp)
