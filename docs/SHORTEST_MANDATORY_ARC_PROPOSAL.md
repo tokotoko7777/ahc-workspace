@@ -6,7 +6,7 @@
 
 削除する辺が一つだけなら、辺を除外して逆向きBFSを一度行う O(V+E) の方法が簡単です。この部品は、同じ終点で多数の辺削除候補を照会する場合向けです。頂点集合の「どれか」を全最短路が通るかは別問題です。例えば分岐の2頂点を集合とすると、どちらも単独では必須でなくても、最短路は必ずどちらかを通ります。その場合は最短路DAGから集合全体を除外し、到達可能性を確認します。
 
-[使用例](./tmp/shortest_arc_examples/shortest_mandatory_arc_usage.cpp) が独立した利用例です。小さな有向グラフの全列挙とランダム多重グラフを、対象辺を1本ずつ削除して逆向きBFSする独立実装と照合しています。実ソルバへの組み込み・実測速度比較は行っていません。
+[使用例](../examples/shortest_mandatory_arc_usage.cpp) が独立した利用例です。小さな有向グラフの全列挙とランダム多重グラフを、対象辺を1本ずつ削除して逆向きBFSする独立実装と照合しています。実ソルバへの組み込み・実測速度比較は行っていません。
 
 ```sh
 g++ -std=gnu++23 -O2 -Wall -Wextra -Werror -pedantic-errors -fsanitize=undefined -I library tests/shortest_mandatory_arc_test.cpp -o /tmp/shortest_arc_check
