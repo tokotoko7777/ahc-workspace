@@ -138,3 +138,4 @@
 | やりたいこと | 部品・由来 | 例・検証 |
 | --- | --- | --- |
 | 同じ壁配置で、多数の始点から目的地グループへの距離を何度も求める | [`grid-target-distance.hpp`](../library/grid-target-distance.hpp) · AHC008 | [仕様と適用箇所](GRID_TARGET_DISTANCE_PROPOSAL.md) / [例](../examples/grid_target_distance_usage.cpp) / [テスト](../tests/grid_target_distance_test.cpp) |
+| 一人で行う作業と複数人が同時に必要な作業を一緒に割り当てる | [`grouped-mask-packing.hpp`](../library/grouped-mask-packing.hpp) · AHC008 | [仕様と適用箇所](GROUPED_MASK_PACKING_PROPOSAL.md) / [例](../examples/grouped_mask_packing_usage.cpp) / [テスト](../tests/grouped_mask_packing_test.cpp) |
