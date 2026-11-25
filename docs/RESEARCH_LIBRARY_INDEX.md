@@ -14,6 +14,7 @@
 
 | やりたいこと | 部品・由来 | 例・検証 |
 | --- | --- | --- |
+| 危険点に到達せず、外してよい壁から始点領域を最大にする | [`max-safe-opening.hpp`](https://github.com/tokotoko7777/ahc-workspace/blob/ee27536f3fa145988bb9bd6cce3a7d9d9c92a651/library/max-safe-opening.hpp)（AHC008） | [使い方・証明・テスト](https://github.com/tokotoko7777/ahc-workspace/blob/ee27536f3fa145988bb9bd6cce3a7d9d9c92a651/docs/proposals/MAX_SAFE_OPENING.md)。静的な終局診断 |
 | 既採用辺で縮約した後、辺フィルタごとに最小ボトルネックを求める | [`kruskal-bottleneck.hpp`](https://github.com/tokotoko7777/ahc-workspace/blob/2793a9a782184c4b77376fab17482d24b353d6bd/library/kruskal-bottleneck.hpp) · AHC007 | [例](https://github.com/tokotoko7777/ahc-workspace/blob/2793a9a782184c4b77376fab17482d24b353d6bd/examples/kruskal_bottleneck_usage.cpp) / [テスト](https://github.com/tokotoko7777/ahc-workspace/blob/2793a9a782184c4b77376fab17482d24b353d6bd/tests/kruskal_bottleneck_test.cpp) |
 | 同じ格子で距離と最初の一歩だけを何度も求める | [`flat-grid-first-step-bfs.hpp`](https://github.com/tokotoko7777/ahc-workspace/blob/af41b4e70a89fef3c0389c689aa09dc633fffa16/library/flat-grid-first-step-bfs.hpp) · AHC008 | [テスト](https://github.com/tokotoko7777/ahc-workspace/blob/af41b4e70a89fef3c0389c689aa09dc633fffa16/tests/flat_grid_first_step_bfs_test.cpp) |
 | 最大次数2のグラフの成分を作業領域を再利用して数える | [`degree-two-components.hpp`](https://github.com/tokotoko7777/ahc-workspace/blob/8e99892f7dc12317ba365750a15a2a7c072b3731/library/degree-two-components.hpp) · AHC010 | [テスト](https://github.com/tokotoko7777/ahc-workspace/blob/8e99892f7dc12317ba365750a15a2a7c072b3731/tests/degree_two_components_test.cpp) |
