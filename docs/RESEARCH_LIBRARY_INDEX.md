@@ -1,6 +1,6 @@
 # AHC研究ライブラリ: 用途別索引
 
-「何をしたいか」からC++部品を探す索引です。[進捗](AHC_PROGRESS.md)と[利用時の不便メモ](LIBRARY_FEEDBACK.md)で言及された公開部品63点を、ヘッダと検証先を版固定で掲載しています。AHC番号は用途の由来で、本番採用・順位・別問題での性能を示すものではありません。
+「何をしたいか」からC++部品を探す索引です。[進捗](AHC_PROGRESS.md)と[利用時の不便メモ](LIBRARY_FEEDBACK.md)で言及された公開部品を、ヘッダと検証先を版固定で掲載しています。AHC番号は用途の由来で、本番採用・順位・別問題での性能を示すものではありません。
 
 ## 取得と出典の残し方
 
@@ -132,6 +132,10 @@
 | やりたいこと | 部品・由来 | 例・検証 |
 | --- | --- | --- |
 | 固定した辺集合で、元の追加順を保ったまま残余流を扱う | [`ordered-csr-max-flow.hpp`](../library/ordered-csr-max-flow.hpp) · AHC008から着想した独立提案 | [仕様](ORDERED_CSR_MAX_FLOW_PROPOSAL.md) / [例](../examples/ordered_csr_max_flow_usage.cpp) / [テスト](../tests/ordered_csr_max_flow_test.cpp) |
+
+## 追加提案：固定容量で完全一致する結果を再利用
+
+同じ計算を繰り返し、入力の完全一致を確認して結果を再利用したいときは [bounded-exact-memo.hpp](https://github.com/tokotoko7777/ahc-workspace/blob/36e4a82f6878943a9a6e15453e7b8371949f5ec0/library/bounded-exact-memo.hpp)。[AHC008での利用例と注意点](https://github.com/tokotoko7777/ahc-workspace/blob/36e4a82f6878943a9a6e15453e7b8371949f5ec0/docs/proposals/BOUNDED_EXACT_MEMO.md) / [衝突を含むテスト](https://github.com/tokotoko7777/ahc-workspace/blob/36e4a82f6878943a9a6e15453e7b8371949f5ec0/tests/bounded-exact-memo-test.cpp)。AHC008の既定ソルバーは変更しない。
 
 ## この進捗ブランチにある追加提案
 
