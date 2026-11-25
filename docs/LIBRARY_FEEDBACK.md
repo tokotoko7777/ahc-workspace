@@ -6,6 +6,7 @@
 
 | 問題番号 | 使った部品 | やりたかったこと・困った点 | 実際の回避策 | 改善案・対応状況 |
 |---|---|---|---|---|
+| AHC008 | [bounded-exact-memo.hpp](https://github.com/tokotoko7777/ahc-workspace/blob/36e4a82f6878943a9a6e15453e7b8371949f5ec0/library/bounded-exact-memo.hpp) | 終盤の追い込みで全動物の座標を含むキーはほとんど再利用できず、ハッシュ値だけで等価性を判定することもできない | 問題固有の到達判定で隔離済みの位置を除外し、汎用手続きでキー本体を一致確認 | 公式配布100件の固定仕事量で命中7→933/2,893、全実操作と仮想得点合計一致。[説明とテスト](https://github.com/tokotoko7777/ahc-workspace/blob/36e4a82f6878943a9a6e15453e7b8371949f5ec0/docs/proposals/BOUNDED_EXACT_MEMO.md)。通常時間枠では点数が分かれ、既定解は据え置き。 |
 | AHC001 | `axis-aligned-rectangle.hpp` | 既存の状態は軸・方向で引く `q[4]`。名前付き座標の型へ置換するか、近傍探索中に繰り返し変換が必要だった | 座標アクセス関数を渡し、既存状態をコピー・変換せず接続 | 既存部品は変更せず、汎用の座標取得インターフェースにした |
 | AHC001 | 未提供 → [`coordinate-face-slide.hpp`](https://github.com/tokotoko7777/ahc-workspace/blob/fe7273b40cc8cc8671283ace5d30b6aaf6ceec1a/library/coordinate-face-slide.hpp) | 接触する複数の辺を一緒に移動させる成分作成・合法な座標区間を既存部品だけでは表せなかった | 非重複を壊さない区間を先に計算し、二乗の成分構築は終盤の一括処理に限定 | 問題別ブランチに利用例と愚直比較 800 レイアウトのテストを追加。共有境界の近傍自体は未調整集合で伸びず、既定解には未採用 |
 | AHC001 | [`max-flow.hpp`](https://github.com/tokotoko7777/ahc-workspace/blob/54f9862b1def3e9129385a3acf84a6693d409a12/library/max-flow.hpp) | 二値の面移動にかかる単項・二項の期待損失を、最小カットの容量と定数項に自力で変換する必要があった | [`binary-submodular-energy.hpp`](https://github.com/tokotoko7777/ahc-workspace/blob/54f9862b1def3e9129385a3acf84a6693d409a12/library/binary-submodular-energy.hpp) を追加。直接 include と新部品経由を併用できるよう `max-flow.hpp` に `#pragma once` | 1,400 件の全割当との突き合わせを追加。AHC001 では実験対象。 |
