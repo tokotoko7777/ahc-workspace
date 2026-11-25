@@ -145,3 +145,4 @@
 | やりたいこと | 部品・由来 | 例・検証 |
 | --- | --- | --- |
 | 到達できる対象を変えず、少数の壁候補を取りやめて始点をつなぐ | [`preserve-reachability.hpp`](../library/preserve-reachability.hpp) · AHC008終盤 | [仕様・適用箇所](proposals/PRESERVE_REACHABILITY.md) / [例](../examples/preserve_reachability_usage.cpp) / [テスト](../tests/preserve_reachability_test.cpp) |
+| 同じターンに柵の担当と移動を全部組み直し、全員の広い空間を保つ | [`joint-separator-step.hpp`](../library/joint-separator-step.hpp) · AHC008終盤の診断 | [仕様・適用箇所](proposals/ONE_TURN_SEPARATOR.md) / [例](../examples/joint-separator-step.cpp) / [テスト](../tests/joint-separator-step.cpp) |
