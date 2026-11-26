@@ -6,6 +6,7 @@
 
 | 問題番号 | 使った部品 | やりたかったこと・困った点 | 実際の回避策 | 改善案・対応状況 |
 |---|---|---|---|---|
+| AHC008 | 未提供 | 合法な1〜2枚の追加壁で対象を分離し、全員の接続・共有面積・捕獲区画サイズを同時に確認したい。既存のBFSだけでは追加壁候補の列挙を別に作る必要があった | 到達経路上にだけ分岐し、1枚解の非最小な2枚拡張も補う | [頂点カット列挙案と小規模全数検証](proposals/BOUNDED_CUT_ENUMERATION.md)。事後診断に利用、オンライン用の性能は未評価 |
 | AHC008 | 未提供 → [max-safe-opening.hpp](https://github.com/tokotoko7777/ahc-workspace/blob/ee27536f3fa145988bb9bd6cce3a7d9d9c92a651/library/max-safe-opening.hpp) | 最終盤面の全頭捕獲を崩さず、多数の柵から任意の部分集合を省いたときの共有床を求めたい。帯を一つだけ試すと候補を取りこぼす | 動物成分の境界を保持する2回の塗りつぶしで厳密に計算 | [例と全数比較テスト](https://github.com/tokotoko7777/ahc-workspace/blob/ee27536f3fa145988bb9bd6cce3a7d9d9c92a651/docs/proposals/MAX_SAFE_OPENING.md)。診断のみ、オンライン方針では未採用 |
 | AHC008 | [bounded-exact-memo.hpp](https://github.com/tokotoko7777/ahc-workspace/blob/36e4a82f6878943a9a6e15453e7b8371949f5ec0/library/bounded-exact-memo.hpp) | 終盤の追い込みで全動物の座標を含むキーはほとんど再利用できず、ハッシュ値だけで等価性を判定することもできない | 問題固有の到達判定で隔離済みの位置を除外し、汎用手続きでキー本体を一致確認 | 公式配布100件の固定仕事量で命中7→933/2,893、全実操作と仮想得点合計一致。[説明とテスト](https://github.com/tokotoko7777/ahc-workspace/blob/36e4a82f6878943a9a6e15453e7b8371949f5ec0/docs/proposals/BOUNDED_EXACT_MEMO.md)。通常時間枠では点数が分かれ、既定解は据え置き。 |
 | AHC001 | `axis-aligned-rectangle.hpp` | 既存の状態は軸・方向で引く `q[4]`。名前付き座標の型へ置換するか、近傍探索中に繰り返し変換が必要だった | 座標アクセス関数を渡し、既存状態をコピー・変換せず接続 | 既存部品は変更せず、汎用の座標取得インターフェースにした |
