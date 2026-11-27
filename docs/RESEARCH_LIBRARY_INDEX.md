@@ -160,3 +160,9 @@
 | やりたいこと | 部品・由来 | 例・検証 |
 | --- | --- | --- |
 | 最短方向へ動く相手の目的地候補を、観測のたびに更新する | [`hidden-destination-filter.hpp`](../library/hidden-destination-filter.hpp) · AHC008の猫 | [仕様・短い使用例・適用箇所](proposals/HIDDEN_TARGET_DIRECTION_FILTER.md) / [小グラフ全列挙テスト](../tests/hidden_destination_filter_test.cpp) |
+
+## 追加提案：広げられない区画で必須の柵
+
+| やりたいこと | 部品・由来 | 例・検証 |
+| --- | --- | --- |
+| 保護区画を変えず、同時に置いた柵のうち省けるものを求める | [`protected-component-gates.hpp`](../library/protected-component-gates.hpp) · AHC008 | [考え方・適用箇所](proposals/PROTECTED_COMPONENT_GATES.md) / [例](../examples/protected_component_gates_usage.cpp) / [全列挙テスト](../tests/protected_component_gates_test.cpp) |
