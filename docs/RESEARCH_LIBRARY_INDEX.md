@@ -14,6 +14,7 @@
 
 | やりたいこと | 部品・由来 | 例・検証 |
 | --- | --- | --- |
+| 局所的に柵を変えても外側の最短距離が同じか確認する | [`boundary-transit.hpp`](../library/boundary-transit.hpp)（AHC008） | [証明・実問題での使用](proposals/BOUNDARY_TRANSIT.md) / [小さな例](../examples/boundary_transit_usage.cpp) / [BFS照合](../tests/test_boundary_transit.cpp) |
 | 小さい連結領域の中に目的地がないことを確認する | [`bounded-component-probe.hpp`](../library/bounded-component-probe.hpp)（AHC008） | [使い方・実問題での計測](proposals/BOUNDED_COMPONENT_PROBE.md) / [全探索との照合](../tests/test_bounded_component_probe.cpp) |
 | 一部の目的地までの短い距離だけを求める | [`target-limited-bfs.hpp`](../library/target-limited-bfs.hpp)（AHC008） | [使い方・実問題での計測](proposals/TARGET_LIMITED_BFS.md) / [全探索との照合](../tests/target_limited_bfs_test.cpp) |
 | 壁が途中で閉じる日程で、干渉を避けて最終位置に着く確率を求める | [`fixed-walk-schedule.hpp`](../library/fixed-walk-schedule.hpp)（AHC008） | [使い方と中盤診断](proposals/FIXED_WALK_SCHEDULE.md) / [全列挙](../tests/fixed_walk_schedule_test.cpp) |
