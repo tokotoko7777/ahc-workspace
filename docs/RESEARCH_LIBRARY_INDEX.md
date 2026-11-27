@@ -178,3 +178,7 @@
 | やりたいこと | 部品・由来 | 例・検証 |
 | --- | --- | --- |
 | Dinic で流量に加え、最小カットの始点側も必要 | [`MaxFlow::flow_and_min_cut`](../library/max-flow.hpp) · AHC008 終盤の追い込み | [仕様と計測](proposals/FLOW_AND_MIN_CUT.md) / [例](../examples/flow_and_min_cut_usage.cpp) / [全列挙とのテスト](../tests/flow_and_min_cut_test.cpp) |
+
+## 追加提案：最後の到着を早める少人数の割当
+
+[二段階の割当ヘッダー](../library/small-bottleneck-assignment.hpp)（AHC008の複数柵を担当する人の配置）。[仕様・適用箇所](proposals/SMALL_BOTTLENECK_ASSIGNMENT.md) / [例](../examples/small_bottleneck_assignment_usage.cpp) / [全列挙テスト](../tests/small_bottleneck_assignment_test.cpp)。
