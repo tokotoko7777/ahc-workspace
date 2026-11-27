@@ -166,3 +166,9 @@
 | やりたいこと | 部品・由来 | 例・検証 |
 | --- | --- | --- |
 | 保護区画を変えず、同時に置いた柵のうち省けるものを求める | [`protected-component-gates.hpp`](../library/protected-component-gates.hpp) · AHC008 | [考え方・適用箇所](proposals/PROTECTED_COMPONENT_GATES.md) / [例](../examples/protected_component_gates_usage.cpp) / [全列挙テスト](../tests/protected_component_gates_test.cpp) |
+
+## 追加提案：指定歩数で到達できる終点
+
+| やりたいこと | 部品・由来 | 例・検証 |
+| --- | --- | --- |
+| 高々ではなく、ちょうど1歩または2歩後にあり得る頂点を列挙する | [`exact-step-frontier.hpp`](../library/exact-step-frontier.hpp) · AHC008の捕獲安全確認 | [使い方・適用箇所](proposals/EXACT_STEP_FRONTIER.md) / [例](../examples/exact_step_frontier_usage.cpp) / [テスト](../tests/exact_step_frontier_test.cpp) |
