@@ -154,3 +154,9 @@
 | --- | --- | --- |
 | 到達できる対象を変えず、少数の壁候補を取りやめて始点をつなぐ | [`preserve-reachability.hpp`](../library/preserve-reachability.hpp) · AHC008終盤 | [仕様・適用箇所](proposals/PRESERVE_REACHABILITY.md) / [例](../examples/preserve_reachability_usage.cpp) / [テスト](../tests/preserve_reachability_test.cpp) |
 | 同じターンに柵の担当と移動を全部組み直し、全員の広い空間を保つ | [`joint-separator-step.hpp`](../library/joint-separator-step.hpp) · AHC008終盤の診断 | [仕様・適用箇所](proposals/ONE_TURN_SEPARATOR.md) / [例](../examples/joint-separator-step.cpp) / [テスト](../tests/joint-separator-step.cpp) |
+
+## 追加提案：観測方向から見えない目的地を絞る
+
+| やりたいこと | 部品・由来 | 例・検証 |
+| --- | --- | --- |
+| 最短方向へ動く相手の目的地候補を、観測のたびに更新する | [`hidden-destination-filter.hpp`](../library/hidden-destination-filter.hpp) · AHC008の猫 | [仕様・短い使用例・適用箇所](proposals/HIDDEN_TARGET_DIRECTION_FILTER.md) / [小グラフ全列挙テスト](../tests/hidden_destination_filter_test.cpp) |
