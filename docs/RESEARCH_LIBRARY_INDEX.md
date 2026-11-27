@@ -14,6 +14,7 @@
 
 | やりたいこと | 部品・由来 | 例・検証 |
 | --- | --- | --- |
+| 時間で壁が変わる中で、指定地点に寄って元の作業へ戻れるか調べる | [`time-layer-joins.hpp`](../library/time-layer-joins.hpp)（AHC008） | [使い方と実盤面の照合](proposals/TIME_LAYER_JOINS.md) / [小例](../examples/time_layer_joins_usage.cpp) / [全列挙テスト](../tests/test_time_layer_joins.cpp) |
 | 頂点ごとに削除した場合の始点側の広さと人・動物を知る | [`rooted-vertex-cut.hpp`](../library/rooted-vertex-cut.hpp)（AHC008） | [使い方と実問題](proposals/ROOTED_VERTEX_CUT.md) / [例](../examples/rooted_vertex_cut_usage.cpp) / [愚直BFS比較](../tests/test_rooted_vertex_cut.cpp) |
 | 局所的に柵を変えても外側の最短距離が同じか確認する | [`boundary-transit.hpp`](../library/boundary-transit.hpp)（AHC008） | [証明・実問題での使用](proposals/BOUNDARY_TRANSIT.md) / [小さな例](../examples/boundary_transit_usage.cpp) / [BFS照合](../tests/test_boundary_transit.cpp) |
 | 小さい連結領域の中に目的地がないことを確認する | [`bounded-component-probe.hpp`](../library/bounded-component-probe.hpp)（AHC008） | [使い方・実問題での計測](proposals/BOUNDED_COMPONENT_PROBE.md) / [全探索との照合](../tests/test_bounded_component_probe.cpp) |
