@@ -1,6 +1,7 @@
 #include <algorithm>
 #include <cassert>
 #include <limits>
+#include <stdexcept>
 #include <utility>
 #include <vector>
 // Pre-contest public source (created with generative AI):
@@ -71,10 +72,15 @@ struct MaxFlow {
 
   Capacity flow(int source, int sink,
                 Capacity limit = std::numeric_limits<Capacity>::max()) {
+    return flow_impl(source, sink, limit, false);
+  }
+
+ private:
+  Capacity flow_impl(int source, int sink, Capacity limit, bool short_layers) {
     assert(0 <= source && source < n && 0 <= sink && sink < n);
     assert(source != sink && limit >= Capacity{});
     Capacity result{};
-    while (result < limit && build_level_graph(source, sink)) {
+    while (result < limit && build_level_graph(source, sink, short_layers)) {
       std::fill(next_edge.begin(), next_edge.end(), 0);
       while (result < limit) {
         const Capacity pushed =
@@ -84,6 +90,24 @@ struct MaxFlow {
       }
     }
     return result;
+  }
+
+ public:
+  // Complete an uncapped maximum flow and obtain the canonical source side.
+  // The failed last level BFS already discovered all residual-reachable nodes.
+  // If the numeric cap is hit, explicitly distinguish equality from overflow.
+  // On overflow, the graph retains flow up to the numeric cap.
+  std::pair<Capacity, std::vector<char>> flow_and_min_cut(
+      int source, int sink, bool short_layers = true) {
+    const Capacity pushed =
+        flow_impl(source, sink, std::numeric_limits<Capacity>::max(), short_layers);
+    if (pushed == std::numeric_limits<Capacity>::max() &&
+        build_level_graph(source, sink)) {
+      throw std::overflow_error("MaxFlow capacity type cannot hold resulting flow");
+    }
+    std::vector<char> side(n);
+    for (int v = 0; v < n; ++v) side[v] = level[v] != -1;
+    return {pushed, std::move(side)};
   }
 
   // 現在の残余グラフでsourceから到達できる頂点。最大流後は最小カットになる。
@@ -106,7 +130,7 @@ struct MaxFlow {
   }
 
  private:
-  bool build_level_graph(int source, int sink) {
+  bool build_level_graph(int source, int sink, bool short_layers=false) {
     std::fill(level.begin(), level.end(), -1);
     std::vector<int> queue;
     queue.reserve(n);
@@ -117,6 +141,9 @@ struct MaxFlow {
       for (const Edge& edge : graph[vertex]) {
         if (edge.capacity == Capacity{} || level[edge.to] != -1) continue;
         level[edge.to] = level[vertex] + 1;
+        // Every node one layer before the sink is already discovered;
+        // no shortest augmenting path needs a different node in this layer.
+        if (short_layers && edge.to == sink) return true;
         queue.push_back(edge.to);
       }
     }

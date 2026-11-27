@@ -172,3 +172,9 @@
 | やりたいこと | 部品・由来 | 例・検証 |
 | --- | --- | --- |
 | 高々ではなく、ちょうど1歩または2歩後にあり得る頂点を列挙する | [`exact-step-frontier.hpp`](../library/exact-step-frontier.hpp) · AHC008の捕獲安全確認 | [使い方・適用箇所](proposals/EXACT_STEP_FRONTIER.md) / [例](../examples/exact_step_frontier_usage.cpp) / [テスト](../tests/exact_step_frontier_test.cpp) |
+
+## 追加提案：最大流と最小カットをまとめて求める
+
+| やりたいこと | 部品・由来 | 例・検証 |
+| --- | --- | --- |
+| Dinic で流量に加え、最小カットの始点側も必要 | [`MaxFlow::flow_and_min_cut`](../library/max-flow.hpp) · AHC008 終盤の追い込み | [仕様と計測](proposals/FLOW_AND_MIN_CUT.md) / [例](../examples/flow_and_min_cut_usage.cpp) / [全列挙とのテスト](../tests/flow_and_min_cut_test.cpp) |
