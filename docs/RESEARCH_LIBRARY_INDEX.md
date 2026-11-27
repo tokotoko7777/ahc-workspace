@@ -182,3 +182,7 @@
 ## 追加提案：最後の到着を早める少人数の割当
 
 [二段階の割当ヘッダー](../library/small-bottleneck-assignment.hpp)（AHC008の複数柵を担当する人の配置）。[仕様・適用箇所](proposals/SMALL_BOTTLENECK_ASSIGNMENT.md) / [例](../examples/small_bottleneck_assignment_usage.cpp) / [全列挙テスト](../tests/small_bottleneck_assignment_test.cpp)。
+
+## 追加提案：制約を足したカットを少額の余裕で試す
+
+[予算付き残余カット](../library/bounded-residual-cut.hpp) / [小さい予算で連続照会する配列版](../library/tiny-budget-residual-cut.hpp)（AHC008終盤、担当が重なる柵の差し替え）。[仕様・短い例・全列挙検証・計測](proposals/BOUNDED_RESIDUAL_CUT.md)。
