@@ -14,6 +14,7 @@
 
 | やりたいこと | 部品・由来 | 例・検証 |
 | --- | --- | --- |
+| 固定幅の盤面で、距離を出さず連結成分だけを素早く求める | [`grid-row-flood.hpp`](../library/grid-row-flood.hpp)（AHC008、提案） | [使用例と密度別の計測](proposals/ROW_PACKED_FLOOD.md) / [独立BFS照合](../tests/grid_row_flood_test.cpp) |
 | 同じ目的地にちょうど k 歩で着けるか、始点と歩数を変えて多数確認する | [`exact-walk-target-index.hpp`](../library/exact-walk-target-index.hpp)（AHC008） | [使い分け・証明](proposals/EXACT_WALK_TARGET_INDEX.md) / [例](../examples/exact_walk_target_index_usage.cpp) / [層 DP 照合](../tests/exact_walk_target_index_test.cpp) |
 | 時間で壁が変わる中で、指定地点に寄って元の作業へ戻れるか調べる | [`time-layer-joins.hpp`](../library/time-layer-joins.hpp)（AHC008） | [使い方と実盤面の照合](proposals/TIME_LAYER_JOINS.md) / [小例](../examples/time_layer_joins_usage.cpp) / [全列挙テスト](../tests/test_time_layer_joins.cpp) |
 | 頂点ごとに削除した場合の始点側の広さと人・動物を知る | [`rooted-vertex-cut.hpp`](../library/rooted-vertex-cut.hpp)（AHC008） | [使い方と実問題](proposals/ROOTED_VERTEX_CUT.md) / [例](../examples/rooted_vertex_cut_usage.cpp) / [愚直BFS比較](../tests/test_rooted_vertex_cut.cpp) |
